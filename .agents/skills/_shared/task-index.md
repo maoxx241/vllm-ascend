@@ -1,0 +1,17 @@
+# Task Index (L0)
+
+This task index maps natural-language goals to deterministic task chains.
+
+| Task type | Subtasks | Read order | Skill chain |
+| --- | --- | --- | --- |
+| Single-node deployment | normalize intent -> choose profile -> render package -> start -> validate | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) -> [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `E2 deployment-assistant` |
+| Environment bootstrap | inspect shell env -> install deps -> sanity checks -> summarize fixes | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) | `A1 env-bootstrap` |
+| Feature tuning request | normalize feature aliases -> map to CLI/env vars -> conflict check | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | `E2 deployment-assistant` |
+| Ambiguous phrase | return <=3 candidates -> ask single clarification -> continue | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | `E2 deployment-assistant` |
+
+## Default Profiles
+
+- Primary: `qwen3-32b-w8a8`
+- Backup: `qwen3-next-80b-a3b-instruct-w8a8`
+
+Back to [INDEX.md](INDEX.md).

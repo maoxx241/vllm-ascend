@@ -1,0 +1,27 @@
+# vLLM-Ascend Shared Knowledge Index (L0)
+
+This index is optimized for weak-reasoning models. Always resolve user language into:
+1. intent
+2. canonical features
+3. execution playbook
+
+## Fast Route
+
+| User intent | First read | Then read | Recommended skill |
+| --- | --- | --- | --- |
+| "帮我部署模型" / deployment | [task-index.md](task-index.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
+| "先装环境" / bootstrap env | [task-index.md](task-index.md) | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) | `vllm-ascend-env-bootstrap` |
+| "开图/开并行/量化" | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
+| Runtime error / startup fail | [error-index.md](error-index.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
+
+## Weak Model Guardrails
+
+- Only make one decision per step.
+- If the phrase is ambiguous, return at most 3 candidates and ask one clarification.
+- Prefer canonical features defined in the dictionary, never invent feature names.
+
+## Related L0 Indexes
+
+- [error-index.md](error-index.md)
+- [task-index.md](task-index.md)
+- [code-knowledge-map.md](code-knowledge-map.md)
