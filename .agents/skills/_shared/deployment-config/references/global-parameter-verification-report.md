@@ -12,7 +12,7 @@ freshness: "fresh"
 
 - Coverage ratio: **1.0**
 - Evidence completeness ratio: **1.0**
-- Conflict count: **52**
+- Conflict count: **224**
 - High-risk validated count: **52**
 - Official refs: **1195**
 - External refs: **337**
@@ -22,55 +22,55 @@ freshness: "fresh"
 
 ## Unresolved items (first 50)
 
-- `vllm.arg.disable_log_requests:upstream_delta`
-- `vllm.arg.logits_processor_pattern:upstream_delta`
-- `vllm.env.vllm_sleep_when_idle:upstream_delta`
-- `vllm_ascend.arg.decode_servers_urls:needs_manual_review`
-- `vllm_ascend.arg.decoder_hosts:needs_manual_review`
-- `vllm_ascend.arg.decoder_ports:needs_manual_review`
-- `vllm_ascend.arg.dp_address:needs_manual_review`
-- `vllm_ascend.arg.dp_hosts:needs_manual_review`
-- `vllm_ascend.arg.dp_ports:needs_manual_review`
-- `vllm_ascend.arg.dp_rank_start:needs_manual_review`
-- `vllm_ascend.arg.dp_rpc_port:needs_manual_review`
-- `vllm_ascend.arg.dp_size:needs_manual_review`
-- `vllm_ascend.arg.dp_size_local:needs_manual_review`
-- `vllm_ascend.arg.encode_servers_urls:needs_manual_review`
-- `vllm_ascend.arg.encoder_dispatch_mode:needs_manual_review`
-- `vllm_ascend.arg.host:needs_manual_review`
-- `vllm_ascend.arg.max_retries:needs_manual_review`
-- `vllm_ascend.arg.max_waiting_retries:needs_manual_review`
-- `vllm_ascend.arg.model_weight_gib:needs_manual_review`
-- `vllm_ascend.arg.node_size:needs_manual_review`
-- `vllm_ascend.arg.port:needs_manual_review`
-- `vllm_ascend.arg.prefill_servers_urls:needs_manual_review`
-- `vllm_ascend.arg.prefiller_hosts:needs_manual_review`
-- `vllm_ascend.arg.prefiller_ports:needs_manual_review`
-- `vllm_ascend.arg.proc_per_node:needs_manual_review`
-- `vllm_ascend.arg.retry_delay:needs_manual_review`
-- `vllm_ascend.arg.sleep_mode_level:needs_manual_review`
-- `vllm_ascend.arg.temperature:needs_manual_review`
-- `vllm_ascend.arg.tp_size:needs_manual_review`
-- `vllm_ascend.arg.vllm_start_port:needs_manual_review`
-- `vllm_ascend.arg.waiting_retry_interval:needs_manual_review`
-- `vllm_ascend.env.ascend_custom_opp_path:upstream_delta`
-- `vllm_ascend.env.ascend_enable_use_fabric_mem:upstream_delta`
-- `vllm_ascend.env.ascend_rt_visible_devices:upstream_delta`
-- `vllm_ascend.env.ascend_transfer_timeout:upstream_delta`
-- `vllm_ascend.env.expert_map_record:upstream_delta`
-- `vllm_ascend.env.hccl_deterministic:upstream_delta`
-- `vllm_ascend.env.hccl_intra_pcie_enable:upstream_delta`
-- `vllm_ascend.env.hccl_intra_roce_enable:upstream_delta`
-- `vllm_ascend.env.hccl_op_expansion_mode:upstream_delta`
-- `vllm_ascend.env.hccl_rdma_retry_cnt:upstream_delta`
-- `vllm_ascend.env.hccl_rdma_timeout:upstream_delta`
-- `vllm_ascend.env.lccl_deterministic:upstream_delta`
-- `vllm_ascend.env.master_addr:upstream_delta`
-- `vllm_ascend.env.master_port:upstream_delta`
-- `vllm_ascend.env.mooncake_config_path:upstream_delta`
-- `vllm_ascend.env.openai_api_key:upstream_delta`
-- `vllm_ascend.env.pytorch_npu_alloc_conf:upstream_delta`
-- `vllm_ascend.env.rank:upstream_delta`
-- `vllm_ascend.env.triton_all_blocks_parallel:upstream_delta`
+- `vllm.arg.additional_config:needs_manual_review`
+- `vllm.arg.aggregate_engine_logging:needs_manual_review`
+- `vllm.arg.all2all_backend:needs_manual_review`
+- `vllm.arg.allow_deprecated_quantization:needs_manual_review`
+- `vllm.arg.allowed_local_media_path:needs_manual_review`
+- `vllm.arg.allowed_media_domains:needs_manual_review`
+- `vllm.arg.api_server_count:needs_manual_review`
+- `vllm.arg.async_scheduling:needs_manual_review`
+- `vllm.arg.attention_backend:needs_manual_review`
+- `vllm.arg.attention_config:needs_manual_review`
+- `vllm.arg.block_size:needs_manual_review`
+- `vllm.arg.calculate_kv_scales:needs_manual_review`
+- `vllm.arg.code_revision:needs_manual_review`
+- `vllm.arg.collect_detailed_traces:needs_manual_review`
+- `vllm.arg.compilation_config:needs_manual_review`
+- `vllm.arg.config:needs_manual_review`
+- `vllm.arg.config_format:needs_manual_review`
+- `vllm.arg.convert:needs_manual_review`
+- `vllm.arg.cp_kv_cache_interleave_size:needs_manual_review`
+- `vllm.arg.cpu_offload_gb:needs_manual_review`
+- `vllm.arg.cudagraph_capture_sizes:needs_manual_review`
+- `vllm.arg.cudagraph_metrics:needs_manual_review`
+- `vllm.arg.data_parallel_address:needs_manual_review`
+- `vllm.arg.data_parallel_backend:needs_manual_review`
+- `vllm.arg.data_parallel_external_lb:needs_manual_review`
+- `vllm.arg.data_parallel_hybrid_lb:needs_manual_review`
+- `vllm.arg.data_parallel_rank:needs_manual_review`
+- `vllm.arg.data_parallel_rpc_port:needs_manual_review`
+- `vllm.arg.data_parallel_size:needs_manual_review`
+- `vllm.arg.data_parallel_size_local:needs_manual_review`
+- `vllm.arg.data_parallel_start_rank:needs_manual_review`
+- `vllm.arg.dbo_decode_token_threshold:needs_manual_review`
+- `vllm.arg.dbo_prefill_token_threshold:needs_manual_review`
+- `vllm.arg.dcp_kv_cache_interleave_size:needs_manual_review`
+- `vllm.arg.decode_context_parallel_size:needs_manual_review`
+- `vllm.arg.default_mm_loras:needs_manual_review`
+- `vllm.arg.disable_cascade_attn:needs_manual_review`
+- `vllm.arg.disable_chunked_mm_input:needs_manual_review`
+- `vllm.arg.disable_custom_all_reduce:needs_manual_review`
+- `vllm.arg.disable_hybrid_kv_cache_manager:needs_manual_review`
+- `vllm.arg.disable_log_requests:needs_manual_review`
+- `vllm.arg.disable_log_stats:needs_manual_review`
+- `vllm.arg.disable_nccl_for_dp_synchronization:needs_manual_review`
+- `vllm.arg.disable_sliding_window:needs_manual_review`
+- `vllm.arg.distributed_executor_backend:needs_manual_review`
+- `vllm.arg.download_dir:needs_manual_review`
+- `vllm.arg.dtype:needs_manual_review`
+- `vllm.arg.ec_transfer_config:needs_manual_review`
+- `vllm.arg.enable_chunked_prefill:needs_manual_review`
+- `vllm.arg.enable_dbo:needs_manual_review`
 
 Back to [INDEX](../../INDEX.md).

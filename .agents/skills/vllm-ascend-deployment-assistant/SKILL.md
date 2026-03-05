@@ -12,14 +12,19 @@ Convert natural-language deployment requests into deterministic deployment artif
 ## Read Order
 
 1. `../_shared/INDEX.md`
-2. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
-3. `../_shared/deployment-config/references/global-parameter-feature-map.md`
-4. `../_shared/deployment-config/references/global-parameter-verification-report.md`
-5. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
-6. `../_shared/deployment-config/procedures/deployment-playbook.md`
-7. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
-8. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
-9. `references/output-schema.md`
+2. `../_shared/ai-foundation/INDEX.md`
+3. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
+4. `../_shared/ai-foundation/indexes/topic-index.json`
+5. `../_shared/ai-foundation/indexes/term-alias-index.json`
+6. `../_shared/ai-foundation/indexes/view-index.json`
+7. `../_shared/ai-foundation/indexes/rule-index.json`
+8. `../_shared/deployment-config/references/global-parameter-feature-map.md`
+9. `../_shared/deployment-config/references/global-parameter-verification-report.md`
+10. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
+11. `../_shared/deployment-config/procedures/deployment-playbook.md`
+12. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
+13. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
+14. `references/output-schema.md`
 
 ## Weak-Reasoning Mode (Mandatory)
 

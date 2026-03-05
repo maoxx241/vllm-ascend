@@ -1,0 +1,24 @@
+{
+  "topic_id": "model.qwen3-next-80b-a3b-instruct-w8a8",
+  "canonical_term": "qwen3-next-80b-a3b-instruct-w8a8",
+  "architecture": {
+    "family": "qwen3_next",
+    "is_moe": true,
+    "has_moe_layers": true,
+    "num_experts": 80
+  },
+  "quantization_profile": {
+    "fixed_weight_format": "w8a8",
+    "supported_variants": [
+      "w8a8"
+    ]
+  },
+  "feature_min_npu_count": {
+    "data_parallel": 8,
+    "context_parallel": 8
+  },
+  "evidence_refs": [
+    ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+    "docs/source/tutorials/models/Qwen3-Next.md"
+  ]
+}

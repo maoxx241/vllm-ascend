@@ -89,8 +89,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "json_object",
         "accepted_values": [
@@ -203,8 +203,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -314,8 +314,8 @@
         "跨卡通信超时"
       ],
       "recommendation": "TP 变更后同步检查 max_model_len 与通信环境变量。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -434,8 +434,8 @@
         "推理速度低于预期"
       ],
       "recommendation": "优先使用官方教程中的已验证量化工件与并行参数组合。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -550,8 +550,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -649,8 +649,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -770,8 +770,8 @@
         "健康检查 5xx"
       ],
       "recommendation": "固定 host/port 并配套探活。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -891,8 +891,8 @@
         "OOM"
       ],
       "recommendation": "按 TTFT/TPOT/吞吐三指标联合调参。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -997,8 +997,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1098,8 +1098,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1219,8 +1219,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum_numeric",
         "accepted_values": [
@@ -1331,8 +1331,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1430,8 +1430,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1529,8 +1529,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1661,8 +1661,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "json_object",
         "accepted_values": [
@@ -1773,8 +1773,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1875,8 +1875,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -1976,8 +1976,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2097,8 +2097,8 @@
         "时延反而变高"
       ],
       "recommendation": "优先在高并发长上下文场景启用并做 A/B。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2197,8 +2197,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -2308,8 +2308,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "list_numeric",
         "accepted_values": [
@@ -2421,8 +2421,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2541,8 +2541,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2645,8 +2645,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -2753,8 +2753,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2857,8 +2857,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -2977,8 +2977,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -3100,8 +3100,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -3226,8 +3226,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -3359,8 +3359,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric_or_auto",
         "accepted_values": [
@@ -3487,8 +3487,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -3587,8 +3587,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -3686,8 +3686,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -3793,8 +3793,8 @@
         "时延反而变高"
       ],
       "recommendation": "优先在高并发长上下文场景启用并做 A/B。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -3919,8 +3919,8 @@
         "时延反而变高"
       ],
       "recommendation": "优先在高并发长上下文场景启用并做 A/B。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4031,8 +4031,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4131,8 +4131,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4228,8 +4228,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4324,8 +4324,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4427,8 +4427,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4518,8 +4518,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.68,
-      "status": "upstream_delta",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -4623,8 +4623,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -4729,8 +4729,8 @@
         "请求分发不均衡"
       ],
       "recommendation": "固定 DP 地址和端口后再迭代性能参数。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -4829,8 +4829,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -4946,8 +4946,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5044,8 +5044,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5169,8 +5169,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -5281,8 +5281,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5398,8 +5398,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5499,8 +5499,8 @@
         "OOM"
       ],
       "recommendation": "按 TTFT/TPOT/吞吐三指标联合调参。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5607,8 +5607,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -5737,8 +5737,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -5837,8 +5837,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -5936,8 +5936,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6037,8 +6037,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -6137,8 +6137,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6255,8 +6255,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -6357,8 +6357,8 @@
         "追踪上报失败"
       ],
       "recommendation": "按需开启细粒度 tracing，避免全量常开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6458,8 +6458,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6577,8 +6577,8 @@
         "缓存策略与分块预填充冲突"
       ],
       "recommendation": "结合业务前缀分布评估收益，保留回退开关。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -6685,8 +6685,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6793,8 +6793,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -6909,8 +6909,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -7016,8 +7016,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -7148,8 +7148,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -7259,8 +7259,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "json_object",
         "accepted_values": [
@@ -7365,8 +7365,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -7472,8 +7472,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -7580,8 +7580,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -7704,8 +7704,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric_ratio",
         "accepted_values": [
@@ -7828,8 +7828,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -7926,8 +7926,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8042,8 +8042,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8140,8 +8140,8 @@
         "TLS 握手失败"
       ],
       "recommendation": "生产默认开启鉴权并最小化 CORS 白名单。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8238,8 +8238,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8336,8 +8336,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8434,8 +8434,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8532,8 +8532,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8636,8 +8636,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -8746,8 +8746,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8845,8 +8845,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -8946,8 +8946,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9042,8 +9042,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9140,8 +9140,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9237,8 +9237,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9340,8 +9340,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9462,8 +9462,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9575,8 +9575,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9691,8 +9691,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9788,8 +9788,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.68,
-      "status": "upstream_delta",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9889,8 +9889,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -9990,8 +9990,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10093,8 +10093,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10201,8 +10201,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10302,8 +10302,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10399,8 +10399,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10500,8 +10500,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10597,8 +10597,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10703,8 +10703,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10809,8 +10809,8 @@
         "健康检查 5xx"
       ],
       "recommendation": "固定 host/port 并配套探活。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -10919,8 +10919,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11032,8 +11032,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -11131,8 +11131,8 @@
         "关键问题难定位"
       ],
       "recommendation": "问题排查阶段提升日志级别，稳定后回落。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11229,8 +11229,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11340,8 +11340,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11451,8 +11451,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11579,8 +11579,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric_or_auto",
         "accepted_values": [
@@ -11702,8 +11702,8 @@
         "OOM"
       ],
       "recommendation": "按 TTFT/TPOT/吞吐三指标联合调参。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -11807,8 +11807,8 @@
         "P/D 节点路由异常"
       ],
       "recommendation": "先验证连接器与地址，再调并行参数。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -11926,8 +11926,8 @@
         "OOM"
       ],
       "recommendation": "按 TTFT/TPOT/吞吐三指标联合调参。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -12021,8 +12021,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12121,8 +12121,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12218,8 +12218,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12317,8 +12317,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12414,8 +12414,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12518,8 +12518,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12616,8 +12616,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12715,8 +12715,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12813,8 +12813,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -12933,8 +12933,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13034,8 +13034,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13143,8 +13143,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13252,8 +13252,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13357,8 +13357,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13454,8 +13454,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13551,8 +13551,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13651,8 +13651,8 @@
         "健康检查 5xx"
       ],
       "recommendation": "固定 host/port 并配套探活。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13747,8 +13747,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13845,8 +13845,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -13952,8 +13952,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -14054,8 +14054,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14177,8 +14177,8 @@
         "时延反而变高"
       ],
       "recommendation": "优先在高并发长上下文场景启用并做 A/B。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14285,8 +14285,8 @@
         "缓存策略与分块预填充冲突"
       ],
       "recommendation": "结合业务前缀分布评估收益，保留回退开关。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -14400,8 +14400,8 @@
         "追踪上报失败"
       ],
       "recommendation": "按需开启细粒度 tracing，避免全量常开。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14498,8 +14498,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14636,8 +14636,8 @@
         "推理速度低于预期"
       ],
       "recommendation": "优先使用官方教程中的已验证量化工件与并行参数组合。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -14761,8 +14761,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14862,8 +14862,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -14963,8 +14963,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15061,8 +15061,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15181,8 +15181,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15279,8 +15279,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15378,8 +15378,8 @@
         "OOM"
       ],
       "recommendation": "按 TTFT/TPOT/吞吐三指标联合调参。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15473,8 +15473,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -15592,8 +15592,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15708,8 +15708,8 @@
         "健康检查 5xx"
       ],
       "recommendation": "固定 host/port 并配套探活。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15805,8 +15805,8 @@
         "追踪上报失败"
       ],
       "recommendation": "按需开启细粒度 tracing，避免全量常开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -15901,8 +15901,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16002,8 +16002,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16108,8 +16108,8 @@
         "输出异常"
       ],
       "recommendation": "先离线验证 LoRA 工件，再接入在线服务。",
-      "confidence": 0.91,
-      "status": "aligned",
+      "confidence": 0.79,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16233,8 +16233,8 @@
         "吞吐波动"
       ],
       "recommendation": "先用小 token 数验证，再逐步增加并发。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "json_object",
         "accepted_values": [
@@ -16341,8 +16341,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16439,8 +16439,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16546,8 +16546,8 @@
         "缓存不足导致吞吐下降"
       ],
       "recommendation": "先保守设置，再渐进放大。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -16672,8 +16672,8 @@
         "跨卡通信超时"
       ],
       "recommendation": "TP 变更后同步检查 max_model_len 与通信环境变量。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -16786,8 +16786,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16887,8 +16887,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -16984,8 +16984,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17109,8 +17109,8 @@
         "TLS 握手失败"
       ],
       "recommendation": "生产默认开启鉴权并最小化 CORS 白名单。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17206,8 +17206,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17307,8 +17307,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17408,8 +17408,8 @@
         "处理时延过高"
       ],
       "recommendation": "先限制每请求多模态资源，再放开。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17507,8 +17507,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17608,8 +17608,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -17706,8 +17706,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.88,
-      "status": "aligned",
+      "confidence": 0.76,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -39720,8 +39720,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -39832,8 +39832,8 @@
         "专家路由异常"
       ],
       "recommendation": "仅在 MoE profile 启用，并配合 TP/DP 校验。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -40145,8 +40145,8 @@
         "服务启动后首轮请求异常"
       ],
       "recommendation": "先小流量验证 FULL_DECODE_ONLY，再放量。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_toggle",
         "accepted_values": [
@@ -40369,8 +40369,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -40472,8 +40472,8 @@
         "健康检查 5xx"
       ],
       "recommendation": "固定 host/port 并配套探活。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -40775,8 +40775,8 @@
         "返回格式异常"
       ],
       "recommendation": "固定模型版本并记录依赖。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "free_form",
         "accepted_values": [
@@ -40975,8 +40975,8 @@
         "行为与预期不符"
       ],
       "recommendation": "先查证代码与文档证据再启用。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "numeric",
         "accepted_values": [
@@ -41767,8 +41767,8 @@
         "推理速度低于预期"
       ],
       "recommendation": "优先使用官方教程中的已验证量化工件与并行参数组合。",
-      "confidence": 0.98,
-      "status": "aligned",
+      "confidence": 0.86,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "enum",
         "accepted_values": [
@@ -42336,8 +42336,8 @@
         "TLS 握手失败"
       ],
       "recommendation": "生产默认开启鉴权并最小化 CORS 白名单。",
-      "confidence": 0.95,
-      "status": "aligned",
+      "confidence": 0.83,
+      "status": "needs_manual_review",
       "value_semantics": {
         "value_shape": "binary_or_auto",
         "accepted_values": [
@@ -48140,8 +48140,8 @@
         "usage_hint": "承载扩展配置，如 weight_prefetch_config 等。",
         "value_shape": "json_object",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1211"
         ],
@@ -48182,8 +48182,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1232"
         ],
@@ -48216,8 +48216,8 @@
         "usage_hint": "按张量维度切分模型以扩展单模型可用算力。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:875"
         ],
@@ -48256,8 +48256,8 @@
         "usage_hint": "选择量化实现和权重加载路径，直接影响吞吐、显存和精度。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:671"
         ],
@@ -48303,8 +48303,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:658"
         ],
@@ -48345,8 +48345,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:661"
         ],
@@ -48377,8 +48377,8 @@
         "usage_hint": "控制服务监听、路由和 API 暴露。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/entrypoints/openai/cli_args.py:293"
         ],
@@ -48424,8 +48424,8 @@
         "usage_hint": "调度和批处理参数调优，目标提升吞吐。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1152"
         ],
@@ -48466,8 +48466,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:759"
         ],
@@ -48498,8 +48498,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1207"
         ],
@@ -48532,8 +48532,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "enum_numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:924"
         ],
@@ -48574,8 +48574,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:947"
         ],
@@ -48607,8 +48607,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:665"
         ],
@@ -48640,8 +48640,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1071"
         ],
@@ -48674,8 +48674,8 @@
         "usage_hint": "控制图编译细节（如 cudagraph_mode），决定 eager/graph 行为。",
         "value_shape": "json_object",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1204"
         ],
@@ -48726,8 +48726,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/entrypoints/openai/cli_args.py:301"
         ],
@@ -48758,8 +48758,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:697"
         ],
@@ -48790,8 +48790,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:649"
         ],
@@ -48823,8 +48823,8 @@
         "usage_hint": "将长上下文处理拆分到多个并行单元，降低单卡压力。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:810"
         ],
@@ -48877,8 +48877,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:946"
         ],
@@ -48911,8 +48911,8 @@
         "usage_hint": "控制 eager/graph 执行策略，通常优化吞吐与时延抖动。",
         "value_shape": "list_numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1165"
         ],
@@ -48956,8 +48956,8 @@
         "usage_hint": "控制 eager/graph 执行策略，通常优化吞吐与时延抖动。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1082"
         ],
@@ -48998,8 +48998,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:841"
         ],
@@ -49045,8 +49045,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:853"
         ],
@@ -49082,8 +49082,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:865"
         ],
@@ -49119,8 +49119,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:860"
         ],
@@ -49156,8 +49156,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:822"
         ],
@@ -49199,8 +49199,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:847"
         ],
@@ -49246,8 +49246,8 @@
         "usage_hint": "设置 DP 副本数，影响吞吐扩展与地址配置要求。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:819"
         ],
@@ -49293,8 +49293,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "numeric_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:835"
         ],
@@ -49345,8 +49345,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:829"
         ],
@@ -49400,8 +49400,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:883"
         ],
@@ -49435,8 +49435,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:887"
         ],
@@ -49468,8 +49468,8 @@
         "usage_hint": "将长上下文处理拆分到多个并行单元，降低单卡压力。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:806"
         ],
@@ -49511,8 +49511,8 @@
         "usage_hint": "将长上下文处理拆分到多个并行单元，降低单卡压力。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:801"
         ],
@@ -49559,8 +49559,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1046"
         ],
@@ -49601,8 +49601,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:685"
         ],
@@ -49633,8 +49633,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1142"
         ],
@@ -49665,8 +49665,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:909"
         ],
@@ -49699,8 +49699,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1148"
         ],
@@ -49731,8 +49731,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.68,
-        "status": "upstream_delta",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:2087"
         ],
@@ -49763,8 +49763,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1226"
         ],
@@ -49800,8 +49800,8 @@
         "usage_hint": "通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:891"
         ],
@@ -49837,8 +49837,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:682"
         ],
@@ -49869,8 +49869,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:785"
         ],
@@ -49911,8 +49911,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:740"
         ],
@@ -49943,8 +49943,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:655"
         ],
@@ -49992,8 +49992,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1201"
         ],
@@ -50026,8 +50026,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1135"
         ],
@@ -50068,8 +50068,8 @@
         "usage_hint": "调度和批处理参数调优，目标提升吞吐。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:878"
         ],
@@ -50102,8 +50102,8 @@
         "usage_hint": "MoE 专家并行，提升大规模专家模型吞吐。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:895"
         ],
@@ -50141,8 +50141,8 @@
         "usage_hint": "开启 MoE 专家并行，仅对 MoE 模型有效。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:870"
         ],
@@ -50188,8 +50188,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1179"
         ],
@@ -50220,8 +50220,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1086"
         ],
@@ -50252,8 +50252,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:2081"
         ],
@@ -50284,8 +50284,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1094"
         ],
@@ -50316,8 +50316,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1027"
         ],
@@ -50363,8 +50363,8 @@
         "usage_hint": "控制 profiling 和 tracing 输出。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1090"
         ],
@@ -50395,8 +50395,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:981"
         ],
@@ -50427,8 +50427,8 @@
         "usage_hint": "启用前缀缓存，加速重复前缀请求的 prefill 阶段。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:936"
         ],
@@ -50474,8 +50474,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:691"
         ],
@@ -50508,8 +50508,8 @@
         "usage_hint": "MoE 专家并行，提升大规模专家模型吞吐。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:676"
         ],
@@ -50548,8 +50548,8 @@
         "usage_hint": "开启 sleep 模式以降低空闲资源占用。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:719"
         ],
@@ -50590,8 +50590,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1038"
         ],
@@ -50634,8 +50634,8 @@
         "usage_hint": "控制 eager/graph 执行策略，通常优化吞吐与时延抖动。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:675"
         ],
@@ -50688,8 +50688,8 @@
         "usage_hint": "MoE 专家并行，提升大规模专家模型吞吐。",
         "value_shape": "json_object",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:896"
         ],
@@ -50725,8 +50725,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:897"
         ],
@@ -50757,8 +50757,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1043"
         ],
@@ -50799,8 +50799,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:713"
         ],
@@ -50838,8 +50838,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "numeric_ratio",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:925"
         ],
@@ -50885,8 +50885,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/entrypoints/openai/cli_args.py:286"
         ],
@@ -50932,8 +50932,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:657"
         ],
@@ -50964,8 +50964,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:708"
         ],
@@ -51006,8 +51006,8 @@
         "usage_hint": "控制 API 鉴权和 TLS 安全边界。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:700"
         ],
@@ -51038,8 +51038,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:747"
         ],
@@ -51070,8 +51070,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1010"
         ],
@@ -51102,8 +51102,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:729"
         ],
@@ -51134,8 +51134,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1210"
         ],
@@ -51169,8 +51169,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:932"
         ],
@@ -51203,8 +51203,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:928"
         ],
@@ -51238,8 +51238,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1075"
         ],
@@ -51273,8 +51273,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1078"
         ],
@@ -51305,8 +51305,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1200"
         ],
@@ -51337,8 +51337,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:968"
         ],
@@ -51369,8 +51369,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:965"
         ],
@@ -51403,8 +51403,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:950"
         ],
@@ -51437,8 +51437,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1197"
         ],
@@ -51479,8 +51479,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:978"
         ],
@@ -51521,8 +51521,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:739"
         ],
@@ -51563,8 +51563,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.68,
-        "status": "upstream_delta",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:710"
         ],
@@ -51595,8 +51595,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:726"
         ],
@@ -51627,8 +51627,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:681"
         ],
@@ -51661,8 +51661,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1126"
         ],
@@ -51694,8 +51694,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1034"
         ],
@@ -51738,8 +51738,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:959"
         ],
@@ -51770,8 +51770,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:953"
         ],
@@ -51802,8 +51802,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:962"
         ],
@@ -51834,8 +51834,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:956"
         ],
@@ -51866,8 +51866,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:794"
         ],
@@ -51903,8 +51903,8 @@
         "usage_hint": "控制服务监听、路由和 API 暴露。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:795"
         ],
@@ -51940,8 +51940,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1042"
         ],
@@ -51984,8 +51984,8 @@
         "usage_hint": "控制 eager/graph 执行策略，通常优化吞吐与时延抖动。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1168"
         ],
@@ -52026,8 +52026,8 @@
         "usage_hint": "控制日志和调试可观测性。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:680"
         ],
@@ -52060,8 +52060,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1122"
         ],
@@ -52092,8 +52092,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1033"
         ],
@@ -52134,8 +52134,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1032"
         ],
@@ -52179,8 +52179,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "numeric_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:669"
         ],
@@ -52226,8 +52226,8 @@
         "usage_hint": "调度和批处理参数调优，目标提升吞吐。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1105"
         ],
@@ -52270,8 +52270,8 @@
         "usage_hint": "预填充与解码分离部署，优化资源利用和吞吐扩展。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1119"
         ],
@@ -52302,8 +52302,8 @@
         "usage_hint": "调度和批处理参数调优，目标提升吞吐。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1112"
         ],
@@ -52344,8 +52344,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:902"
         ],
@@ -52376,8 +52376,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:984"
         ],
@@ -52408,8 +52408,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1006"
         ],
@@ -52440,8 +52440,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1000"
         ],
@@ -52472,8 +52472,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1003"
         ],
@@ -52504,8 +52504,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:990"
         ],
@@ -52541,8 +52541,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:993"
         ],
@@ -52573,8 +52573,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:987"
         ],
@@ -52605,8 +52605,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:996"
         ],
@@ -52637,8 +52637,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:647"
         ],
@@ -52679,8 +52679,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:722"
         ],
@@ -52711,8 +52711,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:744"
         ],
@@ -52748,8 +52748,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:796"
         ],
@@ -52785,8 +52785,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:797"
         ],
@@ -52822,8 +52822,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:933"
         ],
@@ -52854,8 +52854,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1218"
         ],
@@ -52888,8 +52888,8 @@
         "usage_hint": "控制服务监听、路由和 API 暴露。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1061"
         ],
@@ -52920,8 +52920,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:723"
         ],
@@ -52952,8 +52952,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:716"
         ],
@@ -52984,8 +52984,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:789"
         ],
@@ -53021,8 +53021,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:709"
         ],
@@ -53054,8 +53054,8 @@
         "usage_hint": "将长上下文处理拆分到多个并行单元，降低单卡压力。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:814"
         ],
@@ -53101,8 +53101,8 @@
         "usage_hint": "复用公共前缀缓存，降低 prefill 计算成本。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:943"
         ],
@@ -53143,8 +53143,8 @@
         "usage_hint": "控制 profiling 和 tracing 输出。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1217"
         ],
@@ -53180,8 +53180,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:749"
         ],
@@ -53214,8 +53214,8 @@
         "usage_hint": "指定量化后端/方法（如 ascend），影响权重加载和算子路径。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:670"
         ],
@@ -53271,8 +53271,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:906"
         ],
@@ -53303,8 +53303,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:769"
         ],
@@ -53335,8 +53335,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:774"
         ],
@@ -53368,8 +53368,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:664"
         ],
@@ -53400,8 +53400,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:648"
         ],
@@ -53447,8 +53447,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:741"
         ],
@@ -53479,8 +53479,8 @@
         "usage_hint": "调度和批处理参数调优，目标提升吞吐。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1145"
         ],
@@ -53511,8 +53511,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1132"
         ],
@@ -53543,8 +53543,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:656"
         ],
@@ -53586,8 +53586,8 @@
         "usage_hint": "控制服务监听、路由和 API 暴露。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:694"
         ],
@@ -53623,8 +53623,8 @@
         "usage_hint": "控制 profiling 和 tracing 输出。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1057"
         ],
@@ -53655,8 +53655,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1013"
         ],
@@ -53687,8 +53687,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:688"
         ],
@@ -53719,8 +53719,8 @@
         "usage_hint": "开启 LoRA 适配器加载与路由。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.91,
-        "status": "aligned",
+        "confidence": 0.79,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1047"
         ],
@@ -53761,8 +53761,8 @@
         "usage_hint": "配置投机解码策略（如 mtp），用于降低解码延迟。",
         "value_shape": "json_object",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1194"
         ],
@@ -53808,8 +53808,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1155"
         ],
@@ -53840,8 +53840,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1214"
         ],
@@ -53874,8 +53874,8 @@
         "usage_hint": "控制 KV/权重/中间缓存占用，平衡容量与性能。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:931"
         ],
@@ -53913,8 +53913,8 @@
         "usage_hint": "设置 TP 并行度，直接影响通信拓扑与单模型吞吐。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:798"
         ],
@@ -53960,8 +53960,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:650"
         ],
@@ -54002,8 +54002,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:651"
         ],
@@ -54035,8 +54035,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:666"
         ],
@@ -54067,8 +54067,8 @@
         "usage_hint": "控制 API 鉴权和 TLS 安全边界。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:652"
         ],
@@ -54114,8 +54114,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:879"
         ],
@@ -54146,8 +54146,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:748"
         ],
@@ -54178,8 +54178,8 @@
         "usage_hint": "控制多模态输入处理和缓存策略。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1017"
         ],
@@ -54210,8 +54210,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:1221"
         ],
@@ -54242,8 +54242,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:913"
         ],
@@ -54274,8 +54274,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.88,
-        "status": "aligned",
+        "confidence": 0.76,
+        "status": "needs_manual_review",
         "definition_ref": [
           "vllm/engine/arg_utils.py:914"
         ],
@@ -61183,8 +61183,8 @@
         "usage_hint": "开启 MoE 专家并行，仅对 MoE 模型有效。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:89",
           "examples/offline_external_launcher.py:122",
@@ -61230,8 +61230,8 @@
         "usage_hint": "开启 sleep 模式以降低空闲资源占用。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_external_launcher.py:125",
           "examples/offline_weight_load.py:134"
@@ -61324,8 +61324,8 @@
         "usage_hint": "控制 eager/graph 执行策略，通常优化吞吐与时延抖动。",
         "value_shape": "binary_toggle",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:87",
           "examples/offline_external_launcher.py:120",
@@ -61413,8 +61413,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:85",
           "examples/offline_external_launcher.py:118",
@@ -61447,8 +61447,8 @@
         "usage_hint": "控制服务监听、路由和 API 暴露。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:86",
           "examples/offline_external_launcher.py:119",
@@ -61537,8 +61537,8 @@
         "usage_hint": "控制模型、分词器和版本选择。",
         "value_shape": "free_form",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:75",
           "examples/offline_external_launcher.py:108",
@@ -61604,8 +61604,8 @@
         "usage_hint": "通用运行时控制项，需要结合上下文确认语义。",
         "value_shape": "numeric",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:84",
           "examples/offline_external_launcher.py:116",
@@ -61858,8 +61858,8 @@
         "usage_hint": "指定量化后端/方法（如 ascend），影响权重加载和算子路径。",
         "value_shape": "enum",
         "value_semantics_completion": "done",
-        "confidence": 0.98,
-        "status": "aligned",
+        "confidence": 0.86,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:92"
         ],
@@ -62049,8 +62049,8 @@
         "usage_hint": "控制 API 鉴权和 TLS 安全边界。",
         "value_shape": "binary_or_auto",
         "value_semantics_completion": "done",
-        "confidence": 0.95,
-        "status": "aligned",
+        "confidence": 0.83,
+        "status": "needs_manual_review",
         "definition_ref": [
           "examples/offline_data_parallel.py:88",
           "examples/offline_external_launcher.py:121",
@@ -64262,7 +64262,7 @@
       "with_web_refs": 474,
       "ratio": 1.0
     },
-    "conflict_count": 52,
+    "conflict_count": 224,
     "high_risk_validated_count": 52,
     "source_tier_stats": {
       "official_ref_count": 1195,
@@ -64276,8 +64276,171 @@
       "ratio": 1.0
     },
     "unresolved_items": [
-      "vllm.arg.disable_log_requests:upstream_delta",
-      "vllm.arg.logits_processor_pattern:upstream_delta",
+      "vllm.arg.additional_config:needs_manual_review",
+      "vllm.arg.aggregate_engine_logging:needs_manual_review",
+      "vllm.arg.all2all_backend:needs_manual_review",
+      "vllm.arg.allow_deprecated_quantization:needs_manual_review",
+      "vllm.arg.allowed_local_media_path:needs_manual_review",
+      "vllm.arg.allowed_media_domains:needs_manual_review",
+      "vllm.arg.api_server_count:needs_manual_review",
+      "vllm.arg.async_scheduling:needs_manual_review",
+      "vllm.arg.attention_backend:needs_manual_review",
+      "vllm.arg.attention_config:needs_manual_review",
+      "vllm.arg.block_size:needs_manual_review",
+      "vllm.arg.calculate_kv_scales:needs_manual_review",
+      "vllm.arg.code_revision:needs_manual_review",
+      "vllm.arg.collect_detailed_traces:needs_manual_review",
+      "vllm.arg.compilation_config:needs_manual_review",
+      "vllm.arg.config:needs_manual_review",
+      "vllm.arg.config_format:needs_manual_review",
+      "vllm.arg.convert:needs_manual_review",
+      "vllm.arg.cp_kv_cache_interleave_size:needs_manual_review",
+      "vllm.arg.cpu_offload_gb:needs_manual_review",
+      "vllm.arg.cudagraph_capture_sizes:needs_manual_review",
+      "vllm.arg.cudagraph_metrics:needs_manual_review",
+      "vllm.arg.data_parallel_address:needs_manual_review",
+      "vllm.arg.data_parallel_backend:needs_manual_review",
+      "vllm.arg.data_parallel_external_lb:needs_manual_review",
+      "vllm.arg.data_parallel_hybrid_lb:needs_manual_review",
+      "vllm.arg.data_parallel_rank:needs_manual_review",
+      "vllm.arg.data_parallel_rpc_port:needs_manual_review",
+      "vllm.arg.data_parallel_size:needs_manual_review",
+      "vllm.arg.data_parallel_size_local:needs_manual_review",
+      "vllm.arg.data_parallel_start_rank:needs_manual_review",
+      "vllm.arg.dbo_decode_token_threshold:needs_manual_review",
+      "vllm.arg.dbo_prefill_token_threshold:needs_manual_review",
+      "vllm.arg.dcp_kv_cache_interleave_size:needs_manual_review",
+      "vllm.arg.decode_context_parallel_size:needs_manual_review",
+      "vllm.arg.default_mm_loras:needs_manual_review",
+      "vllm.arg.disable_cascade_attn:needs_manual_review",
+      "vllm.arg.disable_chunked_mm_input:needs_manual_review",
+      "vllm.arg.disable_custom_all_reduce:needs_manual_review",
+      "vllm.arg.disable_hybrid_kv_cache_manager:needs_manual_review",
+      "vllm.arg.disable_log_requests:needs_manual_review",
+      "vllm.arg.disable_log_stats:needs_manual_review",
+      "vllm.arg.disable_nccl_for_dp_synchronization:needs_manual_review",
+      "vllm.arg.disable_sliding_window:needs_manual_review",
+      "vllm.arg.distributed_executor_backend:needs_manual_review",
+      "vllm.arg.download_dir:needs_manual_review",
+      "vllm.arg.dtype:needs_manual_review",
+      "vllm.arg.ec_transfer_config:needs_manual_review",
+      "vllm.arg.enable_chunked_prefill:needs_manual_review",
+      "vllm.arg.enable_dbo:needs_manual_review",
+      "vllm.arg.enable_eplb:needs_manual_review",
+      "vllm.arg.enable_expert_parallel:needs_manual_review",
+      "vllm.arg.enable_flashinfer_autotune:needs_manual_review",
+      "vllm.arg.enable_layerwise_nvtx_tracing:needs_manual_review",
+      "vllm.arg.enable_log_requests:needs_manual_review",
+      "vllm.arg.enable_logging_iteration_details:needs_manual_review",
+      "vllm.arg.enable_lora:needs_manual_review",
+      "vllm.arg.enable_mfu_metrics:needs_manual_review",
+      "vllm.arg.enable_mm_embeds:needs_manual_review",
+      "vllm.arg.enable_prefix_caching:needs_manual_review",
+      "vllm.arg.enable_prompt_embeds:needs_manual_review",
+      "vllm.arg.enable_return_routed_experts:needs_manual_review",
+      "vllm.arg.enable_sleep_mode:needs_manual_review",
+      "vllm.arg.enable_tower_connector_lora:needs_manual_review",
+      "vllm.arg.enforce_eager:needs_manual_review",
+      "vllm.arg.eplb_config:needs_manual_review",
+      "vllm.arg.expert_placement_strategy:needs_manual_review",
+      "vllm.arg.fully_sharded_loras:needs_manual_review",
+      "vllm.arg.generation_config:needs_manual_review",
+      "vllm.arg.gpu_memory_utilization:needs_manual_review",
+      "vllm.arg.headless:needs_manual_review",
+      "vllm.arg.hf_config_path:needs_manual_review",
+      "vllm.arg.hf_overrides:needs_manual_review",
+      "vllm.arg.hf_token:needs_manual_review",
+      "vllm.arg.ignore_patterns:needs_manual_review",
+      "vllm.arg.interleave_mm_strings:needs_manual_review",
+      "vllm.arg.io_processor_plugin:needs_manual_review",
+      "vllm.arg.kernel_config:needs_manual_review",
+      "vllm.arg.kv_cache_dtype:needs_manual_review",
+      "vllm.arg.kv_cache_memory_bytes:needs_manual_review",
+      "vllm.arg.kv_cache_metrics:needs_manual_review",
+      "vllm.arg.kv_cache_metrics_sample:needs_manual_review",
+      "vllm.arg.kv_events_config:needs_manual_review",
+      "vllm.arg.kv_offloading_backend:needs_manual_review",
+      "vllm.arg.kv_offloading_size:needs_manual_review",
+      "vllm.arg.kv_sharing_fast_prefill:needs_manual_review",
+      "vllm.arg.kv_transfer_config:needs_manual_review",
+      "vllm.arg.limit_mm_per_prompt:needs_manual_review",
+      "vllm.arg.load_format:needs_manual_review",
+      "vllm.arg.logits_processor_pattern:needs_manual_review",
+      "vllm.arg.logits_processors:needs_manual_review",
+      "vllm.arg.logprobs_mode:needs_manual_review",
+      "vllm.arg.long_prefill_token_threshold:needs_manual_review",
+      "vllm.arg.lora_dtype:needs_manual_review",
+      "vllm.arg.mamba_block_size:needs_manual_review",
+      "vllm.arg.mamba_cache_dtype:needs_manual_review",
+      "vllm.arg.mamba_cache_mode:needs_manual_review",
+      "vllm.arg.mamba_ssm_cache_dtype:needs_manual_review",
+      "vllm.arg.master_addr:needs_manual_review",
+      "vllm.arg.master_port:needs_manual_review",
+      "vllm.arg.max_cpu_loras:needs_manual_review",
+      "vllm.arg.max_cudagraph_capture_size:needs_manual_review",
+      "vllm.arg.max_logprobs:needs_manual_review",
+      "vllm.arg.max_long_partial_prefills:needs_manual_review",
+      "vllm.arg.max_lora_rank:needs_manual_review",
+      "vllm.arg.max_loras:needs_manual_review",
+      "vllm.arg.max_model_len:needs_manual_review",
+      "vllm.arg.max_num_batched_tokens:needs_manual_review",
+      "vllm.arg.max_num_partial_prefills:needs_manual_review",
+      "vllm.arg.max_num_seqs:needs_manual_review",
+      "vllm.arg.max_parallel_loading_workers:needs_manual_review",
+      "vllm.arg.media_io_kwargs:needs_manual_review",
+      "vllm.arg.mm_encoder_attn_backend:needs_manual_review",
+      "vllm.arg.mm_encoder_only:needs_manual_review",
+      "vllm.arg.mm_encoder_tp_mode:needs_manual_review",
+      "vllm.arg.mm_processor_cache_gb:needs_manual_review",
+      "vllm.arg.mm_processor_cache_type:needs_manual_review",
+      "vllm.arg.mm_processor_kwargs:needs_manual_review",
+      "vllm.arg.mm_shm_cache_max_object_size_mb:needs_manual_review",
+      "vllm.arg.model:needs_manual_review",
+      "vllm.arg.model_impl:needs_manual_review",
+      "vllm.arg.model_loader_extra_config:needs_manual_review",
+      "vllm.arg.nnodes:needs_manual_review",
+      "vllm.arg.node_rank:needs_manual_review",
+      "vllm.arg.num_gpu_blocks_override:needs_manual_review",
+      "vllm.arg.optimization_level:needs_manual_review",
+      "vllm.arg.otlp_traces_endpoint:needs_manual_review",
+      "vllm.arg.override_attention_dtype:needs_manual_review",
+      "vllm.arg.override_generation_config:needs_manual_review",
+      "vllm.arg.pipeline_parallel_size:needs_manual_review",
+      "vllm.arg.pooler_config:needs_manual_review",
+      "vllm.arg.prefill_context_parallel_size:needs_manual_review",
+      "vllm.arg.prefix_caching_hash_algo:needs_manual_review",
+      "vllm.arg.profiler_config:needs_manual_review",
+      "vllm.arg.pt_load_map_location:needs_manual_review",
+      "vllm.arg.quantization:needs_manual_review",
+      "vllm.arg.ray_workers_use_nsight:needs_manual_review",
+      "vllm.arg.reasoning_parser:needs_manual_review",
+      "vllm.arg.reasoning_parser_plugin:needs_manual_review",
+      "vllm.arg.revision:needs_manual_review",
+      "vllm.arg.runner:needs_manual_review",
+      "vllm.arg.safetensors_load_strategy:needs_manual_review",
+      "vllm.arg.scheduler_cls:needs_manual_review",
+      "vllm.arg.scheduling_policy:needs_manual_review",
+      "vllm.arg.seed:needs_manual_review",
+      "vllm.arg.served_model_name:needs_manual_review",
+      "vllm.arg.show_hidden_metrics_for_version:needs_manual_review",
+      "vllm.arg.skip_mm_profiling:needs_manual_review",
+      "vllm.arg.skip_tokenizer_init:needs_manual_review",
+      "vllm.arg.specialize_active_lora:needs_manual_review",
+      "vllm.arg.speculative_config:needs_manual_review",
+      "vllm.arg.stream_interval:needs_manual_review",
+      "vllm.arg.structured_outputs_config:needs_manual_review",
+      "vllm.arg.swap_space:needs_manual_review",
+      "vllm.arg.tensor_parallel_size:needs_manual_review",
+      "vllm.arg.tokenizer:needs_manual_review",
+      "vllm.arg.tokenizer_mode:needs_manual_review",
+      "vllm.arg.tokenizer_revision:needs_manual_review",
+      "vllm.arg.trust_remote_code:needs_manual_review",
+      "vllm.arg.ubatch_size:needs_manual_review",
+      "vllm.arg.use_tqdm_on_load:needs_manual_review",
+      "vllm.arg.video_pruning_rate:needs_manual_review",
+      "vllm.arg.weight_transfer_config:needs_manual_review",
+      "vllm.arg.worker_cls:needs_manual_review",
+      "vllm.arg.worker_extension_cls:needs_manual_review",
       "vllm.env.vllm_sleep_when_idle:upstream_delta",
       "vllm_ascend.arg.decode_servers_urls:needs_manual_review",
       "vllm_ascend.arg.decoder_hosts:needs_manual_review",
@@ -64289,22 +64452,31 @@
       "vllm_ascend.arg.dp_rpc_port:needs_manual_review",
       "vllm_ascend.arg.dp_size:needs_manual_review",
       "vllm_ascend.arg.dp_size_local:needs_manual_review",
+      "vllm_ascend.arg.enable_expert_parallel:needs_manual_review",
+      "vllm_ascend.arg.enable_sleep_mode:needs_manual_review",
       "vllm_ascend.arg.encode_servers_urls:needs_manual_review",
       "vllm_ascend.arg.encoder_dispatch_mode:needs_manual_review",
+      "vllm_ascend.arg.enforce_eager:needs_manual_review",
       "vllm_ascend.arg.host:needs_manual_review",
+      "vllm_ascend.arg.master_addr:needs_manual_review",
+      "vllm_ascend.arg.master_port:needs_manual_review",
       "vllm_ascend.arg.max_retries:needs_manual_review",
       "vllm_ascend.arg.max_waiting_retries:needs_manual_review",
+      "vllm_ascend.arg.model:needs_manual_review",
       "vllm_ascend.arg.model_weight_gib:needs_manual_review",
+      "vllm_ascend.arg.node_rank:needs_manual_review",
       "vllm_ascend.arg.node_size:needs_manual_review",
       "vllm_ascend.arg.port:needs_manual_review",
       "vllm_ascend.arg.prefill_servers_urls:needs_manual_review",
       "vllm_ascend.arg.prefiller_hosts:needs_manual_review",
       "vllm_ascend.arg.prefiller_ports:needs_manual_review",
       "vllm_ascend.arg.proc_per_node:needs_manual_review",
+      "vllm_ascend.arg.quantization:needs_manual_review",
       "vllm_ascend.arg.retry_delay:needs_manual_review",
       "vllm_ascend.arg.sleep_mode_level:needs_manual_review",
       "vllm_ascend.arg.temperature:needs_manual_review",
       "vllm_ascend.arg.tp_size:needs_manual_review",
+      "vllm_ascend.arg.trust_remote_code:needs_manual_review",
       "vllm_ascend.arg.vllm_start_port:needs_manual_review",
       "vllm_ascend.arg.waiting_retry_interval:needs_manual_review",
       "vllm_ascend.env.ascend_custom_opp_path:upstream_delta",

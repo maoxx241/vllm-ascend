@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from build_topic_centered_kb import build_topic_centered_kb
+
 
 FLAG_PATTERN = re.compile(r"^--[a-z0-9][a-z0-9\-]*$")
 FLAG_IN_TEXT_PATTERN = re.compile(r"(?<![A-Za-z0-9_])(--[a-z0-9][a-z0-9\-]*)(?![A-Za-z0-9_])")
@@ -3137,6 +3139,8 @@ def main() -> int:
         validation_report=validation_report,
     )
 
+    topic_centered_summary = build_topic_centered_kb(ascend_root=ascend_root)
+
     summary = {
         "vllm_arg_count": len(vllm_arg_entries),
         "vllm_env_count": len(vllm_env_entries),
@@ -3148,6 +3152,8 @@ def main() -> int:
         "entries_with_external_refs": validation_report["source_tier_stats"]["entries_with_external_refs"],
         "value_semantics_done": validation_report["value_semantics_progress"]["done"],
         "value_semantics_ratio": validation_report["value_semantics_progress"]["ratio"],
+        "topic_centered_total_topics": topic_centered_summary["total_topics"],
+        "topic_centered_rule_count": topic_centered_summary["rule_count"],
         "generated_at": now,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))

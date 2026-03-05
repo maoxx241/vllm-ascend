@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 FEATURES: List[Dict[str, List[str] | str]] = [
@@ -96,6 +97,58 @@ PARALLEL_FEATURES = {
     "context_parallel",
 }
 
+_ALIAS_INDEX_CACHE: Dict[str, object] | None = None
+
+
+def _load_alias_index() -> Dict[str, object]:
+    global _ALIAS_INDEX_CACHE
+    if _ALIAS_INDEX_CACHE is not None:
+        return _ALIAS_INDEX_CACHE
+
+    alias_path = (
+        Path(__file__).resolve().parents[2]
+        / "_shared"
+        / "ai-foundation"
+        / "indexes"
+        / "term-alias-index.json"
+    )
+    if not alias_path.exists():
+        _ALIAS_INDEX_CACHE = {}
+        return _ALIAS_INDEX_CACHE
+
+    try:
+        payload = json.loads(alias_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        payload = {}
+
+    if not isinstance(payload, dict):
+        payload = {}
+    _ALIAS_INDEX_CACHE = payload
+    return payload
+
+
+def _resolve_feature_aliases() -> Dict[str, List[str]]:
+    payload = _load_alias_index()
+    feature_aliases = payload.get("feature_aliases", {}) if isinstance(payload, dict) else {}
+    if isinstance(feature_aliases, dict) and feature_aliases:
+        normalized: Dict[str, List[str]] = {}
+        for key, values in feature_aliases.items():
+            if isinstance(key, str) and isinstance(values, list):
+                normalized[key] = [str(v) for v in values if isinstance(v, str)]
+        if normalized:
+            return normalized
+
+    # Fallback to in-script aliases when generated index is unavailable.
+    fallback: Dict[str, List[str]] = {}
+    for entry in FEATURES:
+        canonical = str(entry["canonical_feature"])
+        fallback[canonical] = (
+            list(entry["zh_aliases"])
+            + list(entry["en_aliases"])
+            + list(entry["slang_aliases"])
+        )
+    return fallback
+
 
 def _contains(text: str, text_lower: str, alias: str) -> bool:
     alias_norm = alias.strip()
@@ -124,13 +177,7 @@ def _detect_intent(text: str, text_lower: str, default_intent: str) -> str:
 def _detect_features(text: str, text_lower: str) -> Tuple[List[str], Dict[str, str]]:
     detected: List[str] = []
     matched_alias: Dict[str, str] = {}
-    for entry in FEATURES:
-        canonical = str(entry["canonical_feature"])
-        aliases = (
-            list(entry["zh_aliases"])
-            + list(entry["en_aliases"])
-            + list(entry["slang_aliases"])
-        )
+    for canonical, aliases in _resolve_feature_aliases().items():
         for alias in aliases:
             if _contains(text, text_lower, alias):
                 detected.append(canonical)
@@ -152,7 +199,7 @@ def normalize_input(text: str, default_intent: str = "deploy_model") -> Dict[str
     lowered = raw.lower()
 
     intent = _detect_intent(raw, lowered, default_intent)
-    features, _ = _detect_features(raw, lowered)
+    features, matched_alias = _detect_features(raw, lowered)
 
     missing_slots: List[str] = []
     clarification_question = ""
@@ -183,9 +230,14 @@ def normalize_input(text: str, default_intent: str = "deploy_model") -> Dict[str
         if missing_slots:
             confidence = max(0.45, confidence - 0.25)
 
+    matched_topics = [f"feature.{item}" for item in features]
+    matched_terms = [{"canonical_feature": key, "matched_alias": value} for key, value in matched_alias.items()]
+
     result = {
         "intent": intent,
         "features": features,
+        "matched_topics": matched_topics,
+        "matched_terms": matched_terms,
         "confidence": round(confidence, 2),
         "missing_slots": missing_slots,
         "clarification_question": clarification_question,

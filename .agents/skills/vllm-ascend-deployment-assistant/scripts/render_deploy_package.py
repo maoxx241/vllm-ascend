@@ -13,6 +13,7 @@ from normalize_terms import normalize_input
 
 STATUS_ALIGNED = "aligned"
 KB_MIN_CONFIDENCE = 0.65
+AI_FOUNDATION_ROOT = Path(__file__).resolve().parents[2] / "_shared" / "ai-foundation"
 
 PROFILES: Dict[str, Dict[str, object]] = {
     "qwen3-32b-w8a8": {
@@ -49,61 +50,6 @@ SUPPORTED_FEATURES = {
     "speculative_decode",
     "sleep_mode",
     "weight_prefetch",
-}
-
-MODEL_KNOWLEDGE: Dict[str, Dict[str, Any]] = {
-    "qwen3-32b-w8a8": {
-        "architecture": {
-            "family": "qwen3_dense",
-            "is_moe": False,
-            "has_moe_layers": False,
-            "num_experts": 0,
-        },
-        "quantization_profile": {
-            "fixed_weight_format": "w8a8",
-            "supported_variants": ["w8a8"],
-        },
-        "feature_constraints": {
-            "int4_quantization": {
-                "level": "hard_block",
-                "reason": "Profile is fixed to W8A8 weights; no validated INT4/W4A4 artifact in this profile.",
-            },
-        },
-        "feature_min_npu_count": {
-            "data_parallel": 8,
-            "context_parallel": 8,
-        },
-        "evidence_refs": [
-            ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
-            "docs/source/tutorials/models/Qwen3-Dense.md",
-        ],
-    },
-    "qwen3-next-80b-a3b-instruct-w8a8": {
-        "architecture": {
-            "family": "qwen3_next",
-            "is_moe": True,
-            "has_moe_layers": True,
-            "num_experts": 80,
-        },
-        "quantization_profile": {
-            "fixed_weight_format": "w8a8",
-            "supported_variants": ["w8a8"],
-        },
-        "feature_constraints": {
-            "int4_quantization": {
-                "level": "hard_block",
-                "reason": "No validated INT4 deployment path in this demo package.",
-            },
-        },
-        "feature_min_npu_count": {
-            "data_parallel": 8,
-            "context_parallel": 8,
-        },
-        "evidence_refs": [
-            ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
-            "docs/source/tutorials/models/Qwen3-Next.md",
-        ],
-    },
 }
 
 FEATURE_TO_KB_ITEMS: Dict[str, List[str]] = {
@@ -150,6 +96,43 @@ def _write_file(path: Path, content: str) -> None:
     path.chmod(0o755)
 
 
+def _load_json(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _load_model_profiles() -> Dict[str, Dict[str, Any]]:
+    profiles_dir = AI_FOUNDATION_ROOT / "model-profiles"
+    if not profiles_dir.exists():
+        return {}
+
+    profiles: Dict[str, Dict[str, Any]] = {}
+    for file_path in sorted(profiles_dir.glob("*.json")):
+        payload = _load_json(file_path)
+        if payload:
+            profiles[file_path.stem] = payload
+    return profiles
+
+
+def _load_rule_index() -> List[Dict[str, Any]]:
+    payload = _load_json(AI_FOUNDATION_ROOT / "indexes" / "rule-index.json")
+    rows = payload.get("rules", [])
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def _load_topic_index() -> Dict[str, Any]:
+    payload = _load_json(AI_FOUNDATION_ROOT / "indexes" / "topic-index.json")
+    rows = payload.get("topics", [])
+    if not isinstance(rows, list):
+        rows = []
+    return {"topics": [row for row in rows if isinstance(row, dict)]}
+
+
 def _load_global_kb_entries() -> Dict[str, List[Dict[str, Any]]]:
     kb_path = (
         Path(__file__).resolve().parents[2]
@@ -180,6 +163,7 @@ def _load_global_kb_entries() -> Dict[str, List[Dict[str, Any]]]:
 def _build_evidence_block(
     features: List[str],
     kb_index: Dict[str, List[Dict[str, Any]]],
+    topic_index: Dict[str, Any],
 ) -> Tuple[List[Dict[str, Any]], List[str]]:
     evidence_block: List[Dict[str, Any]] = []
     conflict_alerts: List[str] = []
@@ -193,8 +177,19 @@ def _build_evidence_block(
             if isinstance(primary, str):
                 feature_index.setdefault(primary, []).append(row)
 
+    topic_name_candidates: Dict[str, List[str]] = {}
+    for row in topic_index.get("topics", []):
+        primary = row.get("primary_feature")
+        name = row.get("canonical_term")
+        topic_kind = row.get("topic_kind")
+        if topic_kind != "parameter":
+            continue
+        if isinstance(primary, str) and isinstance(name, str):
+            topic_name_candidates.setdefault(primary, []).append(name)
+
     for feature in features:
         candidates = FEATURE_TO_KB_ITEMS.get(feature, [])
+        candidates = _dedupe(candidates + topic_name_candidates.get(feature, [])[:8])
         picked: List[Dict[str, Any]] = []
 
         for name in candidates:
@@ -249,11 +244,13 @@ def _apply_model_knowledge_compatibility(
     model_profile: str,
     requested_features: List[str],
     npu_count: int,
-) -> Tuple[List[str], List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
-    knowledge = MODEL_KNOWLEDGE.get(model_profile, {})
+) -> Tuple[List[str], List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    model_profiles = _load_model_profiles()
+    knowledge = model_profiles.get(model_profile, {})
+    rule_rows = _load_rule_index()
+
     architecture = knowledge.get("architecture", {})
     quant_profile = knowledge.get("quantization_profile", {})
-    feature_constraints = knowledge.get("feature_constraints", {})
     min_npu_map = knowledge.get("feature_min_npu_count", {})
     evidence_refs = knowledge.get("evidence_refs", [])
 
@@ -264,6 +261,7 @@ def _apply_model_knowledge_compatibility(
     blocked: List[Dict[str, Any]] = []
     downgraded: List[Dict[str, Any]] = []
     reasonability_checks: List[Dict[str, Any]] = []
+    rule_hits: List[Dict[str, Any]] = []
 
     for feature in requested_features:
         # Generic inference from architecture knowledge.
@@ -317,18 +315,43 @@ def _apply_model_knowledge_compatibility(
             )
             continue
 
-        # Explicit profile constraints.
-        if feature in feature_constraints:
-            rule = feature_constraints[feature]
-            reason = str(rule.get("reason", "Blocked by profile constraint."))
-            level = str(rule.get("level", "hard_block"))
+        matched_rules = []
+        for rule in rule_rows:
+            if not isinstance(rule, dict):
+                continue
+            rule_profile = str(rule.get("profile", "*"))
+            if rule_profile not in {"*", model_profile}:
+                continue
+            conditions = [str(item) for item in rule.get("conditions", []) if isinstance(item, str)]
+            if feature not in conditions:
+                continue
+            if not all(cond in requested_features for cond in conditions):
+                continue
+            matched_rules.append(rule)
+
+        hard_blocks = [row for row in matched_rules if str(row.get("level")) == "hard_block"]
+        warnings = [row for row in matched_rules if str(row.get("level")) == "warning"]
+        recommends = [row for row in matched_rules if str(row.get("level")) == "recommended"]
+
+        if hard_blocks:
+            rule = hard_blocks[0]
+            reason = str(rule.get("reason", "Blocked by profile/rule constraint."))
             blocked.append(
                 {
                     "feature": feature,
                     "reason": reason,
-                    "level": level,
-                    "source": "model_profile_constraint",
-                    "evidence_refs": evidence_refs,
+                    "level": "hard_block",
+                    "source": "rule_index",
+                    "rule_id": rule.get("rule_id"),
+                    "evidence_refs": rule.get("evidence_refs", []) or evidence_refs,
+                }
+            )
+            rule_hits.append(
+                {
+                    "feature": feature,
+                    "rule_id": rule.get("rule_id"),
+                    "level": "hard_block",
+                    "reason": reason,
                 }
             )
             reasonability_checks.append(
@@ -336,7 +359,7 @@ def _apply_model_knowledge_compatibility(
                     "feature": feature,
                     "result": "blocked",
                     "why": reason,
-                    "inferred_from": "feature_constraints",
+                    "inferred_from": "rule_index",
                 }
             )
             continue
@@ -367,6 +390,38 @@ def _apply_model_knowledge_compatibility(
             )
             continue
 
+        if warnings:
+            warning = warnings[0]
+            reason = str(warning.get("reason", "Rule marked as warning."))
+            rule_hits.append(
+                {
+                    "feature": feature,
+                    "rule_id": warning.get("rule_id"),
+                    "level": "warning",
+                    "reason": reason,
+                    "fallback_actions": warning.get("fallback_actions", []),
+                }
+            )
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "warning",
+                    "why": reason,
+                    "inferred_from": "rule_index",
+                }
+            )
+
+        if recommends:
+            rec = recommends[0]
+            rule_hits.append(
+                {
+                    "feature": feature,
+                    "rule_id": rec.get("rule_id"),
+                    "level": "recommended",
+                    "reason": rec.get("reason"),
+                }
+            )
+
         allowed.append(feature)
         reasonability_checks.append(
             {
@@ -377,7 +432,7 @@ def _apply_model_knowledge_compatibility(
             }
         )
 
-    return allowed, blocked, downgraded, reasonability_checks
+    return allowed, blocked, downgraded, reasonability_checks, rule_hits
 
 
 def _build_command_parts(
@@ -496,17 +551,24 @@ def render_package(
 
     normalized_features = list(normalization["features"])
     requested_features = _dedupe(features_input + normalized_features)
-    applied_features, blocked_features, downgraded_features, reasonability_checks = (
+    (
+        applied_features,
+        blocked_features,
+        downgraded_features,
+        reasonability_checks,
+        rule_hits,
+    ) = (
         _apply_model_knowledge_compatibility(
             model_profile=model_profile,
             requested_features=requested_features,
             npu_count=npu_count,
         )
     )
-    model_knowledge = MODEL_KNOWLEDGE.get(model_profile, {})
+    model_knowledge = _load_model_profiles().get(model_profile, {})
 
     kb_index = _load_global_kb_entries()
-    evidence_block, conflict_alerts = _build_evidence_block(requested_features, kb_index)
+    topic_index = _load_topic_index()
+    evidence_block, conflict_alerts = _build_evidence_block(requested_features, kb_index, topic_index)
 
     model_path = model_path_override or str(profile["model"])
     served_model_name = str(profile["served_model_name"])
@@ -614,6 +676,15 @@ def render_package(
             f"Downgraded feature '{downgraded['feature']}': {downgraded['reason']} "
             f"Fallback: {downgraded['fallback']}"
         )
+    for hit in rule_hits:
+        if str(hit.get("level")) != "warning":
+            continue
+        fallback_actions = hit.get("fallback_actions", [])
+        fallback = "; ".join(str(item) for item in fallback_actions[:2]) if isinstance(fallback_actions, list) else ""
+        risks.append(
+            f"Warning rule for feature '{hit.get('feature')}': {hit.get('reason')}"
+            + (f" Fallback: {fallback}" if fallback else "")
+        )
     if normalization["missing_slots"]:
         risks.append(
             "Input is ambiguous; ask one clarification before production execution: "
@@ -638,6 +709,7 @@ def render_package(
                 "blocked_features": blocked_features,
                 "downgraded_features": downgraded_features,
                 "reasonability_checks": reasonability_checks,
+                "rule_hits": rule_hits,
             },
             "evidence_block": evidence_block,
             "conflict_alerts": conflict_alerts,

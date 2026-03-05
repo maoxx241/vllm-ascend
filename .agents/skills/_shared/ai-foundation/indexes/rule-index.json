@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-03-05T23:40:10.397127+00:00",
+  "rules": [
+    {
+      "rule_id": "recommended.quant_graph_tp",
+      "profile": "*",
+      "conditions": [
+        "quantization",
+        "graph_mode",
+        "tensor_parallel"
+      ],
+      "level": "recommended",
+      "reason": "量化+图模式+TP 是常见高吞吐组合。",
+      "evidence_refs": [
+        "docs/source/tutorials/models/Qwen3-Dense.md",
+        "https://docs.vllm.ai/en/stable/configuration/serve_args/"
+      ],
+      "fallback_actions": [
+        "先只启用 quantization+TP，稳定后再加 graph_mode"
+      ]
+    },
+    {
+      "rule_id": "warning.weight_prefetch_memory",
+      "profile": "*",
+      "conditions": [
+        "weight_prefetch",
+        "memory_tuning"
+      ],
+      "level": "warning",
+      "reason": "权重预取提升吞吐但会增加内存压力。",
+      "evidence_refs": [
+        "docs/source/tutorials/models/Qwen3-Dense.md",
+        "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html"
+      ],
+      "fallback_actions": [
+        "降低 max_model_len 或 gpu_memory_utilization"
+      ]
+    },
+    {
+      "rule_id": "warning.pd_requires_connector",
+      "profile": "*",
+      "conditions": [
+        "prefill_decode_disaggregation"
+      ],
+      "level": "warning",
+      "reason": "PD 分离依赖连接器、地址和节点角色配置。",
+      "evidence_refs": [
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
+        "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/kv_pool.html"
+      ],
+      "fallback_actions": [
+        "先用单机模板验证，再切换到分离架构"
+      ]
+    },
+    {
+      "rule_id": "hard_block.qwen3_32b_w8a8_int4",
+      "profile": "qwen3-32b-w8a8",
+      "conditions": [
+        "int4_quantization"
+      ],
+      "level": "hard_block",
+      "reason": "qwen3-32b-w8a8 profile 不提供已验证 int4 工件与路径。",
+      "evidence_refs": [
+        ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+        "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html"
+      ],
+      "fallback_actions": [
+        "保持 W8A8，或切换到可用 int4 profile"
+      ]
+    },
+    {
+      "rule_id": "hard_block.qwen3_32b_w8a8_ep",
+      "profile": "qwen3-32b-w8a8",
+      "conditions": [
+        "expert_parallel"
+      ],
+      "level": "hard_block",
+      "reason": "qwen3-32b-w8a8 是 Dense 模型，不适用 EP。",
+      "evidence_refs": [
+        ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+        "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/suppoted_features.html"
+      ],
+      "fallback_actions": [
+        "改用 TP/DP 组合调优"
+      ]
+    },
+    {
+      "rule_id": "hard_block.qwen3_32b_w8a8_int4",
+      "profile": "qwen3-32b-w8a8",
+      "conditions": [
+        "int4_quantization"
+      ],
+      "level": "hard_block",
+      "reason": "qwen3-32b-w8a8 profile 为固定 W8A8 工件，不支持 INT4/W4A4。",
+      "evidence_refs": [
+        ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+        "docs/source/tutorials/models/Qwen3-Dense.md"
+      ],
+      "fallback_actions": [
+        "保持 W8A8 或切换到已验证 INT4 模型 profile"
+      ]
+    },
+    {
+      "rule_id": "hard_block.qwen3_32b_w8a8_ep",
+      "profile": "qwen3-32b-w8a8",
+      "conditions": [
+        "expert_parallel"
+      ],
+      "level": "hard_block",
+      "reason": "qwen3-32b-w8a8 是 Dense 模型，无 MoE 层，不适用 EP。",
+      "evidence_refs": [
+        ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+        "docs/source/tutorials/models/Qwen3-Dense.md"
+      ],
+      "fallback_actions": [
+        "改用 TP/DP/图模式/weight_prefetch 进行吞吐优化"
+      ]
+    }
+  ]
+}

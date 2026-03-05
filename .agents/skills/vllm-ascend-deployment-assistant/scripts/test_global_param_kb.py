@@ -51,6 +51,12 @@ def main() -> int:
     asc_args_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_inventory.json"
     asc_env_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_env_inventory.json"
     asc_args_freq_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_frequency.json"
+    ai_root = shared_root / "ai-foundation"
+    ai_topic_index_path = ai_root / "indexes" / "topic-index.json"
+    ai_alias_index_path = ai_root / "indexes" / "term-alias-index.json"
+    ai_view_index_path = ai_root / "indexes" / "view-index.json"
+    ai_rule_index_path = ai_root / "indexes" / "rule-index.json"
+    ai_build_report_path = ai_root / "indexes" / "build-report.json"
 
     for path in [
         kb_path,
@@ -66,6 +72,11 @@ def main() -> int:
         asc_args_path,
         asc_env_path,
         asc_args_freq_path,
+        ai_topic_index_path,
+        ai_alias_index_path,
+        ai_view_index_path,
+        ai_rule_index_path,
+        ai_build_report_path,
     ]:
         assert path.exists(), f"Missing generated artifact: {path}"
 
@@ -80,6 +91,11 @@ def main() -> int:
     legacy_pairings = _load(legacy_pairings_path)
     legacy_scan_files = _load(legacy_scan_files_path)
     asc_args_freq = _load(asc_args_freq_path)
+    ai_topic_index = _load(ai_topic_index_path)
+    ai_alias_index = _load(ai_alias_index_path)
+    ai_view_index = _load(ai_view_index_path)
+    ai_rule_index = _load(ai_rule_index_path)
+    ai_build_report = _load(ai_build_report_path)
 
     assert kb["baseline"]["mode"] == "dual"
     assert len(entries) >= 350, f"Expected broad coverage, got {len(entries)}"
@@ -144,6 +160,13 @@ def main() -> int:
     assert isinstance(asc_args_freq, dict) and asc_args_freq, "vllm_ascend_args_frequency should be non-empty"
     assert asc_args_freq.get("--quantization", 0) > 0
     assert value_semantics_progress["done"] == report["value_semantics_progress"]["done"]
+    assert ai_build_report["coverage_from_global_kb"]["ratio"] == 1.0
+    assert ai_build_report["coverage_from_global_kb"]["actual"] == len(entries)
+    assert ai_build_report["model_profile_count"] >= 2
+    assert ai_topic_index["total_topics"] >= len(entries)
+    assert "graph_mode" in ai_alias_index.get("feature_aliases", {})
+    assert any(row.get("query_intent") == "deploy" for row in ai_view_index.get("routes", []))
+    assert any(row.get("rule_id") == "hard_block.qwen3_32b_w8a8_ep" for row in ai_rule_index.get("rules", []))
 
     # Dataset snapshot interface exists for Skill consumption
     for key in ["vllm_args", "vllm_envs", "vllm_ascend_args", "vllm_ascend_envs"]:
