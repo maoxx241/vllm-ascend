@@ -1,146 +1,568 @@
 {
-  "ASCEND_HOME_PATH": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+  "ASCEND_CUSTOM_OPP_PATH": {
+    "name": "ASCEND_CUSTOM_OPP_PATH",
+    "definition_ref": [
+      "vllm_ascend/platform.py:471",
+      "vllm_ascend/platform.py:473"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "ASCEND_ENABLE_USE_FABRIC_MEM": {
+    "name": "ASCEND_ENABLE_USE_FABRIC_MEM",
+    "definition_ref": [
+      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39",
+      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:74"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "ASCEND_HOME_PATH": {
+    "name": "ASCEND_HOME_PATH",
+    "definition_ref": [
+      "vllm_ascend/envs.py:58",
+      "vllm_ascend/worker/worker.py:166"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "ASCEND_RT_VISIBLE_DEVICES": {
+    "name": "ASCEND_RT_VISIBLE_DEVICES",
+    "definition_ref": [
+      "vllm_ascend/cpu_binding.py:17"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "ASCEND_TRANSFER_TIMEOUT": {
+    "name": "ASCEND_TRANSFER_TIMEOUT",
+    "definition_ref": [
+      "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097",
+      "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809",
+      "vllm_ascend/distributed/kv_transfer/utils/utils.py:52"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "CMAKE_BUILD_TYPE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "CMAKE_BUILD_TYPE",
+    "definition_ref": [
+      "vllm_ascend/envs.py:37"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "COMPILE_CUSTOM_KERNELS": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "COMPILE_CUSTOM_KERNELS",
+    "definition_ref": [
+      "vllm_ascend/envs.py:43"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "CXX_COMPILER": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "CXX_COMPILER",
+    "definition_ref": [
+      "vllm_ascend/envs.py:46"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "C_COMPILER": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "C_COMPILER",
+    "definition_ref": [
+      "vllm_ascend/envs.py:49"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "DYNAMIC_EPLB": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "DYNAMIC_EPLB",
+    "definition_ref": [
+      "vllm_ascend/ascend_config.py:429",
+      "vllm_ascend/envs.py:105",
+      "vllm_ascend/patch/platform/__init__.py:23"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "false",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "EXPERT_MAP_RECORD": {
+    "name": "EXPERT_MAP_RECORD",
+    "definition_ref": [
+      "vllm_ascend/ascend_config.py:430",
+      "vllm_ascend/patch/platform/__init__.py:23"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_DETERMINISTIC": {
+    "name": "HCCL_DETERMINISTIC",
+    "definition_ref": [
+      "vllm_ascend/batch_invariant.py:85"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_INTRA_PCIE_ENABLE": {
+    "name": "HCCL_INTRA_PCIE_ENABLE",
+    "definition_ref": [
+      "vllm_ascend/utils.py:959"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_INTRA_ROCE_ENABLE": {
+    "name": "HCCL_INTRA_ROCE_ENABLE",
+    "definition_ref": [
+      "vllm_ascend/utils.py:959"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_OP_EXPANSION_MODE": {
+    "name": "HCCL_OP_EXPANSION_MODE",
+    "definition_ref": [
+      "vllm_ascend/utils.py:499"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_RDMA_RETRY_CNT": {
+    "name": "HCCL_RDMA_RETRY_CNT",
+    "definition_ref": [
+      "vllm_ascend/distributed/kv_transfer/utils/utils.py:56"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "HCCL_RDMA_TIMEOUT": {
+    "name": "HCCL_RDMA_TIMEOUT",
+    "definition_ref": [
+      "vllm_ascend/distributed/kv_transfer/utils/utils.py:55"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "HCCL_SO_PATH": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "HCCL_SO_PATH",
+    "definition_ref": [
+      "vllm_ascend/envs.py:61"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "LCCL_DETERMINISTIC": {
+    "name": "LCCL_DETERMINISTIC",
+    "definition_ref": [
+      "vllm_ascend/batch_invariant.py:86"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "LOCAL_RANK": {
+    "name": "LOCAL_RANK",
+    "definition_ref": [
+      "examples/offline_external_launcher.py:176",
+      "examples/offline_weight_load.py:177"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "MASTER_ADDR": {
+    "name": "MASTER_ADDR",
+    "definition_ref": [
+      "examples/offline_external_launcher.py:173",
+      "examples/offline_weight_load.py:174"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "MASTER_PORT": {
+    "name": "MASTER_PORT",
+    "definition_ref": [
+      "examples/offline_external_launcher.py:174",
+      "examples/offline_weight_load.py:175"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "MAX_JOBS": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "MAX_JOBS",
+    "definition_ref": [
+      "vllm_ascend/envs.py:34"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "MOONCAKE_CONFIG_PATH": {
+    "name": "MOONCAKE_CONFIG_PATH",
+    "definition_ref": [
+      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:125"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "MSMONITOR_USE_DAEMON": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "MSMONITOR_USE_DAEMON",
+    "definition_ref": [
+      "vllm_ascend/envs.py:91"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
+  },
+  "OPENAI_API_KEY": {
+    "name": "OPENAI_API_KEY",
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:650"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "PYTORCH_NPU_ALLOC_CONF": {
+    "name": "PYTORCH_NPU_ALLOC_CONF",
+    "definition_ref": [
+      "vllm_ascend/platform.py:423",
+      "vllm_ascend/platform.py:435"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "RANK": {
+    "name": "RANK",
+    "definition_ref": [
+      "examples/offline_external_launcher.py:175",
+      "examples/offline_weight_load.py:176"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "SOC_VERSION": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "SOC_VERSION",
+    "definition_ref": [
+      "vllm_ascend/envs.py:53"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "TRITON_ALL_BLOCKS_PARALLEL": {
+    "name": "TRITON_ALL_BLOCKS_PARALLEL",
+    "definition_ref": [
+      "vllm_ascend/ops/rotary_embedding.py:497"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VERBOSE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VERBOSE",
+    "definition_ref": [
+      "vllm_ascend/envs.py:55"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_BALANCE_SCHEDULING": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_BALANCE_SCHEDULING",
+    "definition_ref": [
+      "vllm_ascend/envs.py:115"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL",
+    "definition_ref": [
+      "vllm_ascend/envs.py:103"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_ASCEND_ENABLE_FLASHCOMM": {
+    "name": "VLLM_ASCEND_ENABLE_FLASHCOMM",
+    "definition_ref": [
+      "vllm_ascend/utils.py:765"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_FLASHCOMM1": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_FLASHCOMM1",
+    "definition_ref": [
+      "vllm_ascend/envs.py:74"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_FUSED_MC2": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_FUSED_MC2",
+    "definition_ref": [
+      "vllm_ascend/envs.py:113"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE",
+    "definition_ref": [
+      "vllm_ascend/batch_invariant.py:82",
+      "vllm_ascend/envs.py:71"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_MLAPO": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_MLAPO",
+    "definition_ref": [
+      "vllm_ascend/envs.py:96"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_NZ": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_NZ",
+    "definition_ref": [
+      "vllm_ascend/batch_invariant.py:80",
+      "vllm_ascend/envs.py:101"
     ],
-    "kind": "vllm_ascend_env"
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_ENABLE_PREFETCH_MLP": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
+    "definition_ref": [
+      "vllm_ascend/ascend_config.py:150",
+      "vllm_ascend/envs.py:81"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
+    "definition_ref": [
+      "vllm_ascend/envs.py:79"
     ],
-    "kind": "vllm_ascend_env"
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK",
+    "definition_ref": [
+      "vllm_ascend/envs.py:117",
+      "vllm_ascend/envs.py:118"
     ],
-    "kind": "vllm_ascend_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE",
+    "definition_ref": [
+      "vllm_ascend/ascend_config.py:153",
+      "vllm_ascend/envs.py:87",
+      "vllm_ascend/envs.py:88"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
+    "definition_ref": [
+      "vllm_ascend/ascend_config.py:152",
+      "vllm_ascend/envs.py:83",
+      "vllm_ascend/envs.py:84"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DISABLE_SHARED_EXPERTS_STREAM": {
+    "name": "VLLM_DISABLE_SHARED_EXPERTS_STREAM",
+    "definition_ref": [
+      "vllm_ascend/platform.py:31"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DP_MASTER_IP": {
+    "name": "VLLM_DP_MASTER_IP",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:123"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DP_MASTER_PORT": {
+    "name": "VLLM_DP_MASTER_PORT",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:124"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DP_RANK": {
+    "name": "VLLM_DP_RANK",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:120"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DP_RANK_LOCAL": {
+    "name": "VLLM_DP_RANK_LOCAL",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:121"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_DP_SIZE": {
+    "name": "VLLM_DP_SIZE",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:122"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_USE_MODELSCOPE": {
+    "name": "VLLM_USE_MODELSCOPE",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:67",
+      "examples/offline_external_launcher.py:76",
+      "examples/offline_weight_load.py:77"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_VERSION": {
-    "sources": [
-      "vllm_ascend/envs.py:env_variables"
+    "name": "VLLM_VERSION",
+    "definition_ref": [
+      "vllm_ascend/envs.py:68"
     ],
-    "kind": "vllm_ascend_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "VLLM_WORKER_MULTIPROC_METHOD": {
+    "name": "VLLM_WORKER_MULTIPROC_METHOD",
+    "definition_ref": [
+      "examples/offline_data_parallel.py:68",
+      "examples/offline_external_launcher.py:77",
+      "examples/offline_weight_load.py:78"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
+  },
+  "WORLD_SIZE": {
+    "name": "WORLD_SIZE",
+    "definition_ref": [
+      "examples/offline_external_launcher.py:177",
+      "examples/offline_weight_load.py:178"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   }
 }

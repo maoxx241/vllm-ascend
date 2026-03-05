@@ -6,6 +6,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
+from build_global_param_kb import main as build_main
 from normalize_terms import normalize_input
 from render_deploy_package import SUPPORTED_FEATURES, render_package
 
@@ -28,6 +29,8 @@ FEATURE_PHRASES = {
 
 
 def main() -> int:
+    build_main()
+
     missing = []
     for feature, phrase in FEATURE_PHRASES.items():
         parsed = normalize_input(phrase)
@@ -60,6 +63,9 @@ def main() -> int:
                 allowed = set(plan["compatibility"]["allowed_features"])
                 assert feature in blocked or feature in allowed, (
                     f"Feature {feature} must be either allowed or blocked for profile {profile}."
+                )
+                assert isinstance(plan["evidence_block"], list) and plan["evidence_block"], (
+                    f"Feature {feature} should include evidence block for profile {profile}."
                 )
 
         qwen3_dense_block = render_package(

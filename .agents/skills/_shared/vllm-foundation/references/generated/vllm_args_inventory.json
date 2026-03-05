@@ -1,1448 +1,2497 @@
 {
   "--additional-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--additional-config",
+    "aliases": [
+      "--additional-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1211"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "additional_config",
+    "source": "code"
   },
   "--aggregate-engine-logging": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--aggregate-engine-logging",
+    "aliases": [
+      "--aggregate-engine-logging"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1232"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Log aggregate rather than per-engine statistics when using data parallelism.",
+    "dest": "aggregate_engine_logging",
+    "source": "code"
   },
   "--all2all-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--all2all-backend",
+    "aliases": [
+      "--all2all-backend"
     ],
-    "kind": "vllm_arg"
-  },
-  "--allow-credentials": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:875"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "all2all_backend",
+    "source": "code"
   },
   "--allow-deprecated-quantization": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--allow-deprecated-quantization",
+    "aliases": [
+      "--allow-deprecated-quantization"
     ],
-    "kind": "vllm_arg"
-  },
-  "--allowed-headers": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:671"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "allow_deprecated_quantization",
+    "source": "code"
   },
   "--allowed-local-media-path": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--allowed-local-media-path",
+    "aliases": [
+      "--allowed-local-media-path"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:658"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "allowed_local_media_path",
+    "source": "code"
   },
   "--allowed-media-domains": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--allowed-media-domains",
+    "aliases": [
+      "--allowed-media-domains"
     ],
-    "kind": "vllm_arg"
-  },
-  "--allowed-methods": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:661"
     ],
-    "kind": "vllm_arg"
-  },
-  "--allowed-origins": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--api-key": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "allowed_media_domains",
+    "source": "code"
   },
   "--api-server-count": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py"
+    "name": "--api-server-count",
+    "aliases": [
+      "--api-server-count",
+      "-asc"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/entrypoints/openai/cli_args.py:293"
+    ],
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "How many API server processes to run. Defaults to data_parallel_size if not specified.",
+    "dest": "api_server_count",
+    "source": "code"
   },
   "--async-scheduling": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--async-scheduling",
+    "aliases": [
+      "--async-scheduling"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1152"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "async_scheduling",
+    "source": "code"
   },
   "--attention-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--attention-backend",
+    "aliases": [
+      "--attention-backend"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:759"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "attention_backend",
+    "source": "code"
   },
   "--attention-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--attention-config",
+    "aliases": [
+      "--attention-config",
+      "-ac"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1207"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "attention_config",
+    "source": "code"
   },
   "--block-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--block-size",
+    "aliases": [
+      "--block-size"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:924"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "block_size",
+    "source": "code"
   },
   "--calculate-kv-scales": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--calculate-kv-scales",
+    "aliases": [
+      "--calculate-kv-scales"
     ],
-    "kind": "vllm_arg"
-  },
-  "--chat-template": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:947"
     ],
-    "kind": "vllm_arg"
-  },
-  "--chat-template-content-format": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "calculate_kv_scales",
+    "source": "code"
   },
   "--code-revision": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--code-revision",
+    "aliases": [
+      "--code-revision"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:665"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "code_revision",
+    "source": "code"
   },
   "--collect-detailed-traces": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--collect-detailed-traces",
+    "aliases": [
+      "--collect-detailed-traces"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1071"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "collect_detailed_traces",
+    "source": "code"
   },
   "--compilation-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--compilation-config",
+    "aliases": [
+      "--compilation-config",
+      "-cc"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1204"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "compilation_config",
+    "source": "code"
   },
   "--config": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py"
+    "name": "--config",
+    "aliases": [
+      "--config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/entrypoints/openai/cli_args.py:301"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Read CLI options from a config file. Must be a YAML with the following options: https://docs.vllm.ai/en/latest/configuration/serve_args.html",
+    "dest": "config",
+    "source": "code"
   },
   "--config-format": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--config-format",
+    "aliases": [
+      "--config-format"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:697"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "config_format",
+    "source": "code"
   },
   "--convert": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--convert",
+    "aliases": [
+      "--convert"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:649"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "convert",
+    "source": "code"
   },
   "--cp-kv-cache-interleave-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--cp-kv-cache-interleave-size",
+    "aliases": [
+      "--cp-kv-cache-interleave-size"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:810"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "cp_kv_cache_interleave_size",
+    "source": "code"
   },
   "--cpu-offload-gb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--cpu-offload-gb",
+    "aliases": [
+      "--cpu-offload-gb"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:946"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "cpu_offload_gb",
+    "source": "code"
   },
   "--cudagraph-capture-sizes": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--cudagraph-capture-sizes",
+    "aliases": [
+      "--cudagraph-capture-sizes"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1165"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "cudagraph_capture_sizes",
+    "source": "code"
   },
   "--cudagraph-metrics": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--cudagraph-metrics",
+    "aliases": [
+      "--cudagraph-metrics"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1082"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "cudagraph_metrics",
+    "source": "code"
   },
   "--data-parallel-address": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-address",
+    "aliases": [
+      "--data-parallel-address",
+      "-dpa"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:841"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Address of data parallel cluster head-node.",
+    "dest": "data_parallel_address",
+    "source": "code"
   },
   "--data-parallel-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-backend",
+    "aliases": [
+      "--data-parallel-backend",
+      "-dpb"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:853"
+    ],
+    "default": "mp",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Backend for data parallel, either \"mp\" or \"ray\".",
+    "dest": "data_parallel_backend",
+    "source": "code"
   },
   "--data-parallel-external-lb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-external-lb",
+    "aliases": [
+      "--data-parallel-external-lb",
+      "-dpe"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:865"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "data_parallel_external_lb",
+    "source": "code"
   },
   "--data-parallel-hybrid-lb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-hybrid-lb",
+    "aliases": [
+      "--data-parallel-hybrid-lb",
+      "-dph"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:860"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "data_parallel_hybrid_lb",
+    "source": "code"
   },
   "--data-parallel-rank": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-rank",
+    "aliases": [
+      "--data-parallel-rank",
+      "-dpn"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:822"
+    ],
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Data parallel rank of this instance. When set, enables external load balancer mode.",
+    "dest": "data_parallel_rank",
+    "source": "code"
   },
   "--data-parallel-rpc-port": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-rpc-port",
+    "aliases": [
+      "--data-parallel-rpc-port",
+      "-dpp"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:847"
+    ],
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Port for data parallel RPC communication.",
+    "dest": "data_parallel_rpc_port",
+    "source": "code"
   },
   "--data-parallel-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-size",
+    "aliases": [
+      "--data-parallel-size",
+      "-dp"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:819"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "data_parallel_size",
+    "source": "code"
   },
   "--data-parallel-size-local": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-size-local",
+    "aliases": [
+      "--data-parallel-size-local",
+      "-dpl"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:835"
+    ],
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Number of data parallel replicas to run on this node.",
+    "dest": "data_parallel_size_local",
+    "source": "code"
   },
   "--data-parallel-start-rank": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--data-parallel-start-rank",
+    "aliases": [
+      "--data-parallel-start-rank",
+      "-dpr"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:829"
+    ],
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Starting data parallel rank for secondary nodes.",
+    "dest": "data_parallel_start_rank",
+    "source": "code"
   },
   "--dbo-decode-token-threshold": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--dbo-decode-token-threshold",
+    "aliases": [
+      "--dbo-decode-token-threshold"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:883"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dbo_decode_token_threshold",
+    "source": "code"
   },
   "--dbo-prefill-token-threshold": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--dbo-prefill-token-threshold",
+    "aliases": [
+      "--dbo-prefill-token-threshold"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:887"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dbo_prefill_token_threshold",
+    "source": "code"
   },
   "--dcp-kv-cache-interleave-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--dcp-kv-cache-interleave-size",
+    "aliases": [
+      "--dcp-kv-cache-interleave-size"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:806"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dcp_kv_cache_interleave_size",
+    "source": "code"
   },
   "--decode-context-parallel-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--decode-context-parallel-size",
+    "aliases": [
+      "--decode-context-parallel-size",
+      "-dcp"
     ],
-    "kind": "vllm_arg"
-  },
-  "--default-chat-template-kwargs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:801"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "decode_context_parallel_size",
+    "source": "code"
   },
   "--default-mm-loras": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--default-mm-loras",
+    "aliases": [
+      "--default-mm-loras"
     ],
-    "kind": "vllm_arg"
-  },
-  "--disable-access-log-for-endpoints": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1046"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "default_mm_loras",
+    "source": "code"
   },
   "--disable-cascade-attn": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-cascade-attn",
+    "aliases": [
+      "--disable-cascade-attn"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:685"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_cascade_attn",
+    "source": "code"
   },
   "--disable-chunked-mm-input": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-chunked-mm-input",
+    "aliases": [
+      "--disable-chunked-mm-input"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1142"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_chunked_mm_input",
+    "source": "code"
   },
   "--disable-custom-all-reduce": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-custom-all-reduce",
+    "aliases": [
+      "--disable-custom-all-reduce"
     ],
-    "kind": "vllm_arg"
-  },
-  "--disable-fastapi-docs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:909"
     ],
-    "kind": "vllm_arg"
-  },
-  "--disable-frontend-multiprocessing": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_custom_all_reduce",
+    "source": "code"
   },
   "--disable-hybrid-kv-cache-manager": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-hybrid-kv-cache-manager",
+    "aliases": [
+      "--disable-hybrid-kv-cache-manager"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1148"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_hybrid_kv_cache_manager",
+    "source": "code"
   },
   "--disable-log-requests": {
-    "sources": [
-      "vllm/engine/arg_utils.py"
+    "name": "--disable-log-requests",
+    "aliases": [
+      "--disable-log-requests"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:2087"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "[DEPRECATED] Disable logging requests.",
+    "dest": "disable_log_requests",
+    "source": "code"
   },
   "--disable-log-stats": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-log-stats",
+    "aliases": [
+      "--disable-log-stats"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1226"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Disable logging statistics.",
+    "dest": "disable_log_stats",
+    "source": "code"
   },
   "--disable-nccl-for-dp-synchronization": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-nccl-for-dp-synchronization",
+    "aliases": [
+      "--disable-nccl-for-dp-synchronization"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:891"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_nccl_for_dp_synchronization",
+    "source": "code"
   },
   "--disable-sliding-window": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--disable-sliding-window",
+    "aliases": [
+      "--disable-sliding-window"
     ],
-    "kind": "vllm_arg"
-  },
-  "--disable-uvicorn-access-log": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:682"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "disable_sliding_window",
+    "source": "code"
   },
   "--distributed-executor-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--distributed-executor-backend",
+    "aliases": [
+      "--distributed-executor-backend"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:785"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "distributed_executor_backend",
+    "source": "code"
   },
   "--download-dir": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--download-dir",
+    "aliases": [
+      "--download-dir"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:740"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "download_dir",
+    "source": "code"
   },
   "--dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--dtype",
+    "aliases": [
+      "--dtype"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:655"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dtype",
+    "source": "code"
   },
   "--ec-transfer-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--ec-transfer-config",
+    "aliases": [
+      "--ec-transfer-config"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-auto-tool-choice": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1201"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "ec_transfer_config",
+    "source": "code"
   },
   "--enable-chunked-prefill": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-chunked-prefill",
+    "aliases": [
+      "--enable-chunked-prefill"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1135"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_chunked_prefill",
+    "source": "code"
   },
   "--enable-dbo": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-dbo",
+    "aliases": [
+      "--enable-dbo"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:878"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_dbo",
+    "source": "code"
   },
   "--enable-eplb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-eplb",
+    "aliases": [
+      "--enable-eplb"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:895"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_eplb",
+    "source": "code"
   },
   "--enable-expert-parallel": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-expert-parallel",
+    "aliases": [
+      "--enable-expert-parallel",
+      "-ep"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:870"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_expert_parallel",
+    "source": "code"
   },
   "--enable-flashinfer-autotune": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-flashinfer-autotune",
+    "aliases": [
+      "--enable-flashinfer-autotune"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-force-include-usage": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1179"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_flashinfer_autotune",
+    "source": "code"
   },
   "--enable-layerwise-nvtx-tracing": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-layerwise-nvtx-tracing",
+    "aliases": [
+      "--enable-layerwise-nvtx-tracing"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-log-deltas": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1086"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-log-outputs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_layerwise_nvtx_tracing",
+    "source": "code"
   },
   "--enable-log-requests": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:AsyncEngineArgs"
+    "name": "--enable-log-requests",
+    "aliases": [
+      "--enable-log-requests"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:2081"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enable logging requests.",
+    "dest": "enable_log_requests",
+    "source": "code"
   },
   "--enable-logging-iteration-details": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-logging-iteration-details",
+    "aliases": [
+      "--enable-logging-iteration-details"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1094"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_logging_iteration_details",
+    "source": "code"
   },
   "--enable-lora": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-lora",
+    "aliases": [
+      "--enable-lora"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1027"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "If True, enable handling of LoRA adapters.",
+    "dest": "enable_lora",
+    "source": "code"
   },
   "--enable-mfu-metrics": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-mfu-metrics",
+    "aliases": [
+      "--enable-mfu-metrics"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1090"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_mfu_metrics",
+    "source": "code"
   },
   "--enable-mm-embeds": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-mm-embeds",
+    "aliases": [
+      "--enable-mm-embeds"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-mm-processor-stats": {
-    "sources": [
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:981"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-offline-docs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_mm_embeds",
+    "source": "code"
   },
   "--enable-prefix-caching": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-prefix-caching",
+    "aliases": [
+      "--enable-prefix-caching"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:936"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_prefix_caching",
+    "source": "code"
   },
   "--enable-prompt-embeds": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-prompt-embeds",
+    "aliases": [
+      "--enable-prompt-embeds"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-prompt-tokens-details": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:691"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-request-id-headers": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_prompt_embeds",
+    "source": "code"
   },
   "--enable-return-routed-experts": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-return-routed-experts",
+    "aliases": [
+      "--enable-return-routed-experts"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-server-load-tracking": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:676"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_return_routed_experts",
+    "source": "code"
   },
   "--enable-sleep-mode": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-sleep-mode",
+    "aliases": [
+      "--enable-sleep-mode"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-ssl-refresh": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:719"
     ],
-    "kind": "vllm_arg"
-  },
-  "--enable-tokenizer-info-endpoint": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_sleep_mode",
+    "source": "code"
   },
   "--enable-tower-connector-lora": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enable-tower-connector-lora",
+    "aliases": [
+      "--enable-tower-connector-lora"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1038"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enable_tower_connector_lora",
+    "source": "code"
   },
   "--enforce-eager": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--enforce-eager",
+    "aliases": [
+      "--enforce-eager"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:675"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "enforce_eager",
+    "source": "code"
   },
   "--eplb-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--eplb-config",
+    "aliases": [
+      "--eplb-config"
     ],
-    "kind": "vllm_arg"
-  },
-  "--exclude-tools-when-tool-choice-none": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:896"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "eplb_config",
+    "source": "code"
   },
   "--expert-placement-strategy": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--expert-placement-strategy",
+    "aliases": [
+      "--expert-placement-strategy"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:897"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "expert_placement_strategy",
+    "source": "code"
   },
   "--fully-sharded-loras": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--fully-sharded-loras",
+    "aliases": [
+      "--fully-sharded-loras"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1043"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "fully_sharded_loras",
+    "source": "code"
   },
   "--generation-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--generation-config",
+    "aliases": [
+      "--generation-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:713"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "generation_config",
+    "source": "code"
   },
   "--gpu-memory-utilization": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--gpu-memory-utilization",
+    "aliases": [
+      "--gpu-memory-utilization"
     ],
-    "kind": "vllm_arg"
-  },
-  "--h11-max-header-count": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:925"
     ],
-    "kind": "vllm_arg"
-  },
-  "--h11-max-incomplete-event-size": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "gpu_memory_utilization",
+    "source": "code"
   },
   "--headless": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py"
+    "name": "--headless",
+    "aliases": [
+      "--headless"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/entrypoints/openai/cli_args.py:286"
+    ],
+    "default": false,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Run in headless mode. See multi-node data parallel documentation for more details.",
+    "dest": "headless",
+    "source": "code"
   },
   "--hf-config-path": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--hf-config-path",
+    "aliases": [
+      "--hf-config-path"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:657"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "hf_config_path",
+    "source": "code"
   },
   "--hf-overrides": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--hf-overrides",
+    "aliases": [
+      "--hf-overrides"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:708"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "hf_overrides",
+    "source": "code"
   },
   "--hf-token": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--hf-token",
+    "aliases": [
+      "--hf-token"
     ],
-    "kind": "vllm_arg"
-  },
-  "--host": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:700"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "hf_token",
+    "source": "code"
   },
   "--ignore-patterns": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--ignore-patterns",
+    "aliases": [
+      "--ignore-patterns"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:747"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "ignore_patterns",
+    "source": "code"
   },
   "--interleave-mm-strings": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--interleave-mm-strings",
+    "aliases": [
+      "--interleave-mm-strings"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1010"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "interleave_mm_strings",
+    "source": "code"
   },
   "--io-processor-plugin": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--io-processor-plugin",
+    "aliases": [
+      "--io-processor-plugin"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:729"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "io_processor_plugin",
+    "source": "code"
   },
   "--kernel-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kernel-config",
+    "aliases": [
+      "--kernel-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1210"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kernel_config",
+    "source": "code"
   },
   "--kv-cache-dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-cache-dtype",
+    "aliases": [
+      "--kv-cache-dtype"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:932"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_cache_dtype",
+    "source": "code"
   },
   "--kv-cache-memory-bytes": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-cache-memory-bytes",
+    "aliases": [
+      "--kv-cache-memory-bytes"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:928"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_cache_memory_bytes",
+    "source": "code"
   },
   "--kv-cache-metrics": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-cache-metrics",
+    "aliases": [
+      "--kv-cache-metrics"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1075"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_cache_metrics",
+    "source": "code"
   },
   "--kv-cache-metrics-sample": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-cache-metrics-sample",
+    "aliases": [
+      "--kv-cache-metrics-sample"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1078"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_cache_metrics_sample",
+    "source": "code"
   },
   "--kv-events-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-events-config",
+    "aliases": [
+      "--kv-events-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1200"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_events_config",
+    "source": "code"
   },
   "--kv-offloading-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-offloading-backend",
+    "aliases": [
+      "--kv-offloading-backend"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:968"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_offloading_backend",
+    "source": "code"
   },
   "--kv-offloading-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-offloading-size",
+    "aliases": [
+      "--kv-offloading-size"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:965"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_offloading_size",
+    "source": "code"
   },
   "--kv-sharing-fast-prefill": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-sharing-fast-prefill",
+    "aliases": [
+      "--kv-sharing-fast-prefill"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:950"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_sharing_fast_prefill",
+    "source": "code"
   },
   "--kv-transfer-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--kv-transfer-config",
+    "aliases": [
+      "--kv-transfer-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1197"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "kv_transfer_config",
+    "source": "code"
   },
   "--limit-mm-per-prompt": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--limit-mm-per-prompt",
+    "aliases": [
+      "--limit-mm-per-prompt"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:978"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "limit_mm_per_prompt",
+    "source": "code"
   },
   "--load-format": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--load-format",
+    "aliases": [
+      "--load-format"
     ],
-    "kind": "vllm_arg"
-  },
-  "--log-config-file": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:739"
     ],
-    "kind": "vllm_arg"
-  },
-  "--log-error-stack": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "load_format",
+    "source": "code"
   },
   "--logits-processor-pattern": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--logits-processor-pattern",
+    "aliases": [
+      "--logits-processor-pattern"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:710"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "logits_processor_pattern",
+    "source": "code"
   },
   "--logits-processors": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--logits-processors",
+    "aliases": [
+      "--logits-processors"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:726"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "logits_processors",
+    "source": "code"
   },
   "--logprobs-mode": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--logprobs-mode",
+    "aliases": [
+      "--logprobs-mode"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:681"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "logprobs_mode",
+    "source": "code"
   },
   "--long-prefill-token-threshold": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--long-prefill-token-threshold",
+    "aliases": [
+      "--long-prefill-token-threshold"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1126"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "long_prefill_token_threshold",
+    "source": "code"
   },
   "--lora-dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--lora-dtype",
+    "aliases": [
+      "--lora-dtype"
     ],
-    "kind": "vllm_arg"
-  },
-  "--lora-modules": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1034"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "lora_dtype",
+    "source": "code"
   },
   "--mamba-block-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mamba-block-size",
+    "aliases": [
+      "--mamba-block-size"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:959"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mamba_block_size",
+    "source": "code"
   },
   "--mamba-cache-dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mamba-cache-dtype",
+    "aliases": [
+      "--mamba-cache-dtype"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:953"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mamba_cache_dtype",
+    "source": "code"
   },
   "--mamba-cache-mode": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mamba-cache-mode",
+    "aliases": [
+      "--mamba-cache-mode"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:962"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mamba_cache_mode",
+    "source": "code"
   },
   "--mamba-ssm-cache-dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mamba-ssm-cache-dtype",
+    "aliases": [
+      "--mamba-ssm-cache-dtype"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:956"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mamba_ssm_cache_dtype",
+    "source": "code"
   },
   "--master-addr": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--master-addr",
+    "aliases": [
+      "--master-addr"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:794"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "master_addr",
+    "source": "code"
   },
   "--master-port": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--master-port",
+    "aliases": [
+      "--master-port"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:795"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "master_port",
+    "source": "code"
   },
   "--max-cpu-loras": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-cpu-loras",
+    "aliases": [
+      "--max-cpu-loras"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1042"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_cpu_loras",
+    "source": "code"
   },
   "--max-cudagraph-capture-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-cudagraph-capture-size",
+    "aliases": [
+      "--max-cudagraph-capture-size"
     ],
-    "kind": "vllm_arg"
-  },
-  "--max-log-len": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1168"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_cudagraph_capture_size",
+    "source": "code"
   },
   "--max-logprobs": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-logprobs",
+    "aliases": [
+      "--max-logprobs"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:680"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_logprobs",
+    "source": "code"
   },
   "--max-long-partial-prefills": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-long-partial-prefills",
+    "aliases": [
+      "--max-long-partial-prefills"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1122"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_long_partial_prefills",
+    "source": "code"
   },
   "--max-lora-rank": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-lora-rank",
+    "aliases": [
+      "--max-lora-rank"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1033"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_lora_rank",
+    "source": "code"
   },
   "--max-loras": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-loras",
+    "aliases": [
+      "--max-loras"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1032"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_loras",
+    "source": "code"
   },
   "--max-model-len": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-model-len",
+    "aliases": [
+      "--max-model-len"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:669"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_model_len",
+    "source": "code"
   },
   "--max-num-batched-tokens": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-num-batched-tokens",
+    "aliases": [
+      "--max-num-batched-tokens"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1105"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_num_batched_tokens",
+    "source": "code"
   },
   "--max-num-partial-prefills": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-num-partial-prefills",
+    "aliases": [
+      "--max-num-partial-prefills"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1119"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_num_partial_prefills",
+    "source": "code"
   },
   "--max-num-seqs": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-num-seqs",
+    "aliases": [
+      "--max-num-seqs"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1112"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_num_seqs",
+    "source": "code"
   },
   "--max-parallel-loading-workers": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--max-parallel-loading-workers",
+    "aliases": [
+      "--max-parallel-loading-workers"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:902"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "max_parallel_loading_workers",
+    "source": "code"
   },
   "--media-io-kwargs": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--media-io-kwargs",
+    "aliases": [
+      "--media-io-kwargs"
     ],
-    "kind": "vllm_arg"
-  },
-  "--middleware": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:984"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "media_io_kwargs",
+    "source": "code"
   },
   "--mm-encoder-attn-backend": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-encoder-attn-backend",
+    "aliases": [
+      "--mm-encoder-attn-backend"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1006"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_encoder_attn_backend",
+    "source": "code"
   },
   "--mm-encoder-only": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-encoder-only",
+    "aliases": [
+      "--mm-encoder-only"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1000"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_encoder_only",
+    "source": "code"
   },
   "--mm-encoder-tp-mode": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-encoder-tp-mode",
+    "aliases": [
+      "--mm-encoder-tp-mode"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1003"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_encoder_tp_mode",
+    "source": "code"
   },
   "--mm-processor-cache-gb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-processor-cache-gb",
+    "aliases": [
+      "--mm-processor-cache-gb"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:990"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_processor_cache_gb",
+    "source": "code"
   },
   "--mm-processor-cache-type": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-processor-cache-type",
+    "aliases": [
+      "--mm-processor-cache-type"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:993"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_processor_cache_type",
+    "source": "code"
   },
   "--mm-processor-kwargs": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-processor-kwargs",
+    "aliases": [
+      "--mm-processor-kwargs"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:987"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_processor_kwargs",
+    "source": "code"
   },
   "--mm-shm-cache-max-object-size-mb": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--mm-shm-cache-max-object-size-mb",
+    "aliases": [
+      "--mm-shm-cache-max-object-size-mb"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:996"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "mm_shm_cache_max_object_size_mb",
+    "source": "code"
   },
   "--model": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--model",
+    "aliases": [
+      "--model"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:647"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "model",
+    "source": "code"
   },
   "--model-impl": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--model-impl",
+    "aliases": [
+      "--model-impl"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:722"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "model_impl",
+    "source": "code"
   },
   "--model-loader-extra-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--model-loader-extra-config",
+    "aliases": [
+      "--model-loader-extra-config"
     ],
-    "kind": "vllm_arg"
-  },
-  "--model-weights": {
-    "sources": [
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:744"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "model_loader_extra_config",
+    "source": "code"
   },
   "--nnodes": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--nnodes",
+    "aliases": [
+      "--nnodes",
+      "-n"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:796"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "nnodes",
+    "source": "code"
   },
   "--node-rank": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--node-rank",
+    "aliases": [
+      "--node-rank",
+      "-r"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:797"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "node_rank",
+    "source": "code"
   },
   "--num-gpu-blocks-override": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--num-gpu-blocks-override",
+    "aliases": [
+      "--num-gpu-blocks-override"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:933"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "num_gpu_blocks_override",
+    "source": "code"
   },
   "--optimization-level": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--optimization-level",
+    "aliases": [
+      "--optimization-level"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1218"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "optimization_level",
+    "source": "code"
   },
   "--otlp-traces-endpoint": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--otlp-traces-endpoint",
+    "aliases": [
+      "--otlp-traces-endpoint"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1061"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "otlp_traces_endpoint",
+    "source": "code"
   },
   "--override-attention-dtype": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--override-attention-dtype",
+    "aliases": [
+      "--override-attention-dtype"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:723"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "override_attention_dtype",
+    "source": "code"
   },
   "--override-generation-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--override-generation-config",
+    "aliases": [
+      "--override-generation-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:716"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "override_generation_config",
+    "source": "code"
   },
   "--pipeline-parallel-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--pipeline-parallel-size",
+    "aliases": [
+      "--pipeline-parallel-size",
+      "-pp"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:789"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "pipeline_parallel_size",
+    "source": "code"
   },
   "--pooler-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--pooler-config",
+    "aliases": [
+      "--pooler-config"
     ],
-    "kind": "vllm_arg"
-  },
-  "--port": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:709"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "pooler_config",
+    "source": "code"
   },
   "--prefill-context-parallel-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--prefill-context-parallel-size",
+    "aliases": [
+      "--prefill-context-parallel-size",
+      "-pcp"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:814"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefill_context_parallel_size",
+    "source": "code"
   },
   "--prefix-caching-hash-algo": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--prefix-caching-hash-algo",
+    "aliases": [
+      "--prefix-caching-hash-algo"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:943"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefix_caching_hash_algo",
+    "source": "code"
   },
   "--profiler-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--profiler-config",
+    "aliases": [
+      "--profiler-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1217"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "profiler_config",
+    "source": "code"
   },
   "--pt-load-map-location": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--pt-load-map-location",
+    "aliases": [
+      "--pt-load-map-location"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:749"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "pt_load_map_location",
+    "source": "code"
   },
   "--quantization": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--quantization",
+    "aliases": [
+      "--quantization",
+      "-q"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:670"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "quantization",
+    "source": "code"
   },
   "--ray-workers-use-nsight": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--ray-workers-use-nsight",
+    "aliases": [
+      "--ray-workers-use-nsight"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:906"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "ray_workers_use_nsight",
+    "source": "code"
   },
   "--reasoning-parser": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--reasoning-parser",
+    "aliases": [
+      "--reasoning-parser"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:769"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "reasoning_parser",
+    "source": "code"
   },
   "--reasoning-parser-plugin": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--reasoning-parser-plugin",
+    "aliases": [
+      "--reasoning-parser-plugin"
     ],
-    "kind": "vllm_arg"
-  },
-  "--response-role": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:774"
     ],
-    "kind": "vllm_arg"
-  },
-  "--return-tokens-as-token-ids": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "reasoning_parser_plugin",
+    "source": "code"
   },
   "--revision": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--revision",
+    "aliases": [
+      "--revision"
     ],
-    "kind": "vllm_arg"
-  },
-  "--root-path": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:664"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "revision",
+    "source": "code"
   },
   "--runner": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--runner",
+    "aliases": [
+      "--runner"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:648"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "runner",
+    "source": "code"
   },
   "--safetensors-load-strategy": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--safetensors-load-strategy",
+    "aliases": [
+      "--safetensors-load-strategy"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:741"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "safetensors_load_strategy",
+    "source": "code"
   },
   "--scheduler-cls": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--scheduler-cls",
+    "aliases": [
+      "--scheduler-cls"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1145"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "scheduler_cls",
+    "source": "code"
   },
   "--scheduling-policy": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--scheduling-policy",
+    "aliases": [
+      "--scheduling-policy"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1132"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "scheduling_policy",
+    "source": "code"
   },
   "--seed": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--seed",
+    "aliases": [
+      "--seed"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:656"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "seed",
+    "source": "code"
   },
   "--served-model-name": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--served-model-name",
+    "aliases": [
+      "--served-model-name"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:694"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "served_model_name",
+    "source": "code"
   },
   "--show-hidden-metrics-for-version": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--show-hidden-metrics-for-version",
+    "aliases": [
+      "--show-hidden-metrics-for-version"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1057"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "show_hidden_metrics_for_version",
+    "source": "code"
   },
   "--skip-mm-profiling": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--skip-mm-profiling",
+    "aliases": [
+      "--skip-mm-profiling"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1013"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "skip_mm_profiling",
+    "source": "code"
   },
   "--skip-tokenizer-init": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--skip-tokenizer-init",
+    "aliases": [
+      "--skip-tokenizer-init"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:688"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "skip_tokenizer_init",
+    "source": "code"
   },
   "--specialize-active-lora": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--specialize-active-lora",
+    "aliases": [
+      "--specialize-active-lora"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1047"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "specialize_active_lora",
+    "source": "code"
   },
   "--speculative-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--speculative-config",
+    "aliases": [
+      "--speculative-config"
     ],
-    "kind": "vllm_arg"
-  },
-  "--ssl-ca-certs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1194"
     ],
-    "kind": "vllm_arg"
-  },
-  "--ssl-cert-reqs": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--ssl-certfile": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--ssl-ciphers": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--ssl-keyfile": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "speculative_config",
+    "source": "code"
   },
   "--stream-interval": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--stream-interval",
+    "aliases": [
+      "--stream-interval"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1155"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "stream_interval",
+    "source": "code"
   },
   "--structured-outputs-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--structured-outputs-config",
+    "aliases": [
+      "--structured-outputs-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1214"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "structured_outputs_config",
+    "source": "code"
   },
   "--swap-space": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--swap-space",
+    "aliases": [
+      "--swap-space"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:931"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "swap_space",
+    "source": "code"
   },
   "--tensor-parallel-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--tensor-parallel-size",
+    "aliases": [
+      "--tensor-parallel-size",
+      "-tp"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:798"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "tensor_parallel_size",
+    "source": "code"
   },
   "--tokenizer": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--tokenizer",
+    "aliases": [
+      "--tokenizer"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:650"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "tokenizer",
+    "source": "code"
   },
   "--tokenizer-mode": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--tokenizer-mode",
+    "aliases": [
+      "--tokenizer-mode"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:651"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "tokenizer_mode",
+    "source": "code"
   },
   "--tokenizer-revision": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--tokenizer-revision",
+    "aliases": [
+      "--tokenizer-revision"
     ],
-    "kind": "vllm_arg"
-  },
-  "--tokens-only": {
-    "sources": [
-      "vllm/engine/arg_utils.py:EngineArgs",
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:666"
     ],
-    "kind": "vllm_arg"
-  },
-  "--tool-call-parser": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--tool-parser-plugin": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
-  },
-  "--tool-server": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
-    ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "tokenizer_revision",
+    "source": "code"
   },
   "--trust-remote-code": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--trust-remote-code",
+    "aliases": [
+      "--trust-remote-code"
     ],
-    "kind": "vllm_arg"
-  },
-  "--trust-request-chat-template": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:652"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "trust_remote_code",
+    "source": "code"
   },
   "--ubatch-size": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--ubatch-size",
+    "aliases": [
+      "--ubatch-size"
     ],
-    "kind": "vllm_arg"
-  },
-  "--uds": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:879"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "ubatch_size",
+    "source": "code"
   },
   "--use-tqdm-on-load": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--use-tqdm-on-load",
+    "aliases": [
+      "--use-tqdm-on-load"
     ],
-    "kind": "vllm_arg"
-  },
-  "--uvicorn-log-level": {
-    "sources": [
-      "vllm/entrypoints/openai/cli_args.py:FrontendArgs"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:748"
     ],
-    "kind": "vllm_arg"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "use_tqdm_on_load",
+    "source": "code"
   },
   "--video-pruning-rate": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--video-pruning-rate",
+    "aliases": [
+      "--video-pruning-rate"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1017"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "video_pruning_rate",
+    "source": "code"
   },
   "--weight-transfer-config": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--weight-transfer-config",
+    "aliases": [
+      "--weight-transfer-config"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:1221"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "weight_transfer_config",
+    "source": "code"
   },
   "--worker-cls": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--worker-cls",
+    "aliases": [
+      "--worker-cls"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:913"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "worker_cls",
+    "source": "code"
   },
   "--worker-extension-cls": {
-    "sources": [
-      "vllm/engine/arg_utils.py",
-      "vllm/engine/arg_utils.py:EngineArgs"
+    "name": "--worker-extension-cls",
+    "aliases": [
+      "--worker-extension-cls"
     ],
-    "kind": "vllm_arg"
+    "definition_ref": [
+      "vllm/engine/arg_utils.py:914"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "worker_extension_cls",
+    "source": "code"
   }
 }

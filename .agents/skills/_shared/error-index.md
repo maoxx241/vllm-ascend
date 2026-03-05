@@ -10,6 +10,7 @@ Use this file to map frequent deployment failures to a deterministic first actio
 | `HCCL` / `NPU init` failures | NPU env variables missing | Re-load shell env and verify cards | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) |
 | `OOM` / memory errors | Over-sized model or config | Lower `max-model-len`/batch, disable heavy features | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) |
 | `unknown arg` / 参数不识别 | CLI parameter typo or stale docs | Resolve param from global map before retry | [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) |
+| `upstream_delta` / `needs_manual_review` | Local code and upstream info diverged | Keep recommendation but show evidence and fallback | [verification report](deployment-config/references/global-parameter-verification-report.md) |
 | `/v1/models` non-200 | Service not ready or crashed | Check server log + health probe flow | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) |
 | Spec decode crash | Unsupported model/backend path | Disable speculative decode and retry | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) |
 | `qwen3-32b-w8a8 + int4` | Unsupported feature-profile combo | Block request and suggest W4A4 artifact/profile switch | [unsupported cases](troubleshooting/procedures/unsupported-feature-cases.md) |

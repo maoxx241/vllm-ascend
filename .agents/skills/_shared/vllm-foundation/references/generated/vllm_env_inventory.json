@@ -1,1527 +1,2182 @@
 {
   "CMAKE_BUILD_TYPE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "CMAKE_BUILD_TYPE",
+    "definition_ref": [
+      "vllm/envs.py:501"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "CUDA_HOME": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "CUDA_HOME",
+    "definition_ref": [
+      "vllm/envs.py:553"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "CUDA_VISIBLE_DEVICES": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "CUDA_VISIBLE_DEVICES",
+    "definition_ref": [
+      "vllm/envs.py:603"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "K_SCALE_CONSTANT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "K_SCALE_CONSTANT",
+    "definition_ref": [
+      "vllm/envs.py:998"
     ],
-    "kind": "vllm_env"
+    "default": "200",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "LD_LIBRARY_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "LD_LIBRARY_PATH",
+    "definition_ref": [
+      "vllm/envs.py:559"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "LOCAL_RANK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "LOCAL_RANK",
+    "definition_ref": [
+      "vllm/envs.py:601"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "MAX_JOBS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "MAX_JOBS",
+    "definition_ref": [
+      "vllm/envs.py:477"
     ],
-    "kind": "vllm_env"
-  },
-  "NOTE": {
-    "sources": [
-      "vllm/envs.py:type_checking"
-    ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "NO_COLOR": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "NO_COLOR",
+    "definition_ref": [
+      "vllm/envs.py:654"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "NVCC_THREADS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "NVCC_THREADS",
+    "definition_ref": [
+      "vllm/envs.py:481"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "Q_SCALE_CONSTANT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "Q_SCALE_CONSTANT",
+    "definition_ref": [
+      "vllm/envs.py:996"
     ],
-    "kind": "vllm_env"
+    "default": "200",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "S3_ACCESS_KEY_ID": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "S3_ACCESS_KEY_ID",
+    "definition_ref": [
+      "vllm/envs.py:621"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "S3_ENDPOINT_URL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "S3_ENDPOINT_URL",
+    "definition_ref": [
+      "vllm/envs.py:623"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "S3_SECRET_ACCESS_KEY": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "S3_SECRET_ACCESS_KEY",
+    "definition_ref": [
+      "vllm/envs.py:622"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VERBOSE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VERBOSE",
+    "definition_ref": [
+      "vllm/envs.py:505"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE",
+    "definition_ref": [
+      "vllm/envs.py:1386"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ALLOW_INSECURE_SERIALIZATION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ALLOW_INSECURE_SERIALIZATION",
+    "definition_ref": [
+      "vllm/envs.py:1224"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ALLOW_LONG_MAX_MODEL_LEN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ALLOW_LONG_MAX_MODEL_LEN",
+    "definition_ref": [
+      "vllm/envs.py:819"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ALLOW_RUNTIME_LORA_UPDATING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ALLOW_RUNTIME_LORA_UPDATING",
+    "definition_ref": [
+      "vllm/envs.py:861"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ALLREDUCE_USE_SYMM_MEM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ALLREDUCE_USE_SYMM_MEM",
+    "definition_ref": [
+      "vllm/envs.py:1406"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_API_KEY": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_API_KEY",
+    "definition_ref": [
+      "vllm/envs.py:614"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASSETS_CACHE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ASSETS_CACHE",
+    "definition_ref": [
+      "vllm/envs.py:716"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ASSETS_CACHE_MODEL_CLEAN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ASSETS_CACHE_MODEL_CLEAN",
+    "definition_ref": [
+      "vllm/envs.py:724"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_AUDIO_FETCH_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_AUDIO_FETCH_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:737"
     ],
-    "kind": "vllm_env"
+    "default": "10",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER",
+    "definition_ref": [
+      "vllm/envs.py:1171"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CACHE_ROOT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CACHE_ROOT",
+    "definition_ref": [
+      "vllm/envs.py:520"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CI_USE_S3": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_CI_USE_S3",
+    "definition_ref": [
+      "vllm/envs.py:1081"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_COMPILE_CACHE_SAVE_FORMAT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_COMPILE_CACHE_SAVE_FORMAT",
+    "definition_ref": [
+      "vllm/envs.py:1518"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_COMPUTE_NANS_IN_LOGITS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_COMPUTE_NANS_IN_LOGITS",
+    "definition_ref": [
+      "vllm/envs.py:1311"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CONFIGURE_LOGGING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CONFIGURE_LOGGING",
+    "definition_ref": [
+      "vllm/envs.py:640"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CONFIG_ROOT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CONFIG_ROOT",
+    "definition_ref": [
+      "vllm/envs.py:511"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CPU_KVCACHE_SPACE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CPU_KVCACHE_SPACE",
+    "definition_ref": [
+      "vllm/envs.py:674"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CPU_NUM_OF_RESERVED_CPU": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CPU_NUM_OF_RESERVED_CPU",
+    "definition_ref": [
+      "vllm/envs.py:682"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CPU_OMP_THREADS_BIND": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CPU_OMP_THREADS_BIND",
+    "definition_ref": [
+      "vllm/envs.py:679"
     ],
-    "kind": "vllm_env"
+    "default": "auto",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CPU_SGL_KERNEL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CPU_SGL_KERNEL",
+    "definition_ref": [
+      "vllm/envs.py:688"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CUDART_SO_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CUDART_SO_PATH",
+    "definition_ref": [
+      "vllm/envs.py:1038"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_CUSTOM_SCOPES_FOR_PROFILING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_CUSTOM_SCOPES_FOR_PROFILING",
+    "definition_ref": [
+      "vllm/envs.py:1435"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DBO_COMM_SMS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DBO_COMM_SMS",
+    "definition_ref": [
+      "vllm/envs.py:1472"
     ],
-    "kind": "vllm_env"
+    "default": "20",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEBUG_DUMP_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEBUG_DUMP_PATH",
+    "definition_ref": [
+      "vllm/envs.py:578"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEBUG_LOG_API_SERVER_RESPONSE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEBUG_LOG_API_SERVER_RESPONSE",
+    "definition_ref": [
+      "vllm/envs.py:616"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEBUG_MFU_METRICS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEBUG_MFU_METRICS",
+    "definition_ref": [
+      "vllm/envs.py:1532"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEBUG_WORKSPACE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEBUG_WORKSPACE",
+    "definition_ref": [
+      "vllm/envs.py:1500"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEEPEPLL_NVFP4_DISPATCH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEEPEPLL_NVFP4_DISPATCH",
+    "definition_ref": [
+      "vllm/envs.py:1107"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEEPEP_BUFFER_SIZE_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEEPEP_BUFFER_SIZE_MB",
+    "definition_ref": [
+      "vllm/envs.py:1456"
     ],
-    "kind": "vllm_env"
+    "default": "1024",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE",
+    "definition_ref": [
+      "vllm/envs.py:1462"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL",
+    "definition_ref": [
+      "vllm/envs.py:1467"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DEEP_GEMM_WARMUP": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DEEP_GEMM_WARMUP",
+    "definition_ref": [
+      "vllm/envs.py:1156"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DISABLED_KERNELS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DISABLED_KERNELS",
+    "definition_ref": [
+      "vllm/envs.py:876"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DISABLE_COMPILE_CACHE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DISABLE_COMPILE_CACHE",
+    "definition_ref": [
+      "vllm/envs.py:1008"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DISABLE_LOG_LOGO": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DISABLE_LOG_LOGO",
+    "definition_ref": [
+      "vllm/envs.py:1536"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DISABLE_PYNCCL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DISABLE_PYNCCL",
+    "definition_ref": [
+      "vllm/envs.py:880"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DISABLE_SHARED_EXPERTS_STREAM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DISABLE_SHARED_EXPERTS_STREAM",
+    "definition_ref": [
+      "vllm/envs.py:1502"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DOCKER_BUILD_CONTEXT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DOCKER_BUILD_CONTEXT",
+    "definition_ref": [
+      "vllm/envs.py:494"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DO_NOT_TRACK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DO_NOT_TRACK",
+    "definition_ref": [
+      "vllm/envs.py:629"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DP_MASTER_IP": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DP_MASTER_IP",
+    "definition_ref": [
+      "vllm/envs.py:1049"
     ],
-    "kind": "vllm_env"
+    "default": "127.0.0.1",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DP_MASTER_PORT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DP_MASTER_PORT",
+    "definition_ref": [
+      "vllm/envs.py:1051"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DP_RANK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DP_RANK",
+    "definition_ref": [
+      "vllm/envs.py:1040"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DP_RANK_LOCAL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DP_RANK_LOCAL",
+    "definition_ref": [
+      "vllm/envs.py:1043"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_DP_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_DP_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:1047"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_CUDAGRAPH_GC": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_CUDAGRAPH_GC",
+    "definition_ref": [
+      "vllm/envs.py:1370"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING",
+    "definition_ref": [
+      "vllm/envs.py:807"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING",
+    "definition_ref": [
+      "vllm/envs.py:1481"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE",
+    "definition_ref": [
+      "vllm/envs.py:1476"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_MOE_DP_CHUNK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_MOE_DP_CHUNK",
+    "definition_ref": [
+      "vllm/envs.py:1058"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_RESPONSES_API_STORE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_RESPONSES_API_STORE",
+    "definition_ref": [
+      "vllm/envs.py:1398"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENABLE_V1_MULTIPROCESSING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENABLE_V1_MULTIPROCESSING",
+    "definition_ref": [
+      "vllm/envs.py:1002"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENGINE_ITERATION_TIMEOUT_S": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENGINE_ITERATION_TIMEOUT_S",
+    "definition_ref": [
+      "vllm/envs.py:605"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ENGINE_READY_TIMEOUT_S": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ENGINE_READY_TIMEOUT_S",
+    "definition_ref": [
+      "vllm/envs.py:610"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS",
+    "definition_ref": [
+      "vllm/envs.py:1295"
     ],
-    "kind": "vllm_env"
+    "default": "300",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB",
+    "definition_ref": [
+      "vllm/envs.py:1268"
     ],
-    "kind": "vllm_env"
+    "default": "{}",
+    "type": "json",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FLASHINFER_MOE_BACKEND": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_FLASHINFER_MOE_BACKEND",
+    "definition_ref": [
+      "vllm/envs.py:1246"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:1252"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FLOAT32_MATMUL_PRECISION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_FLOAT32_MATMUL_PRECISION",
+    "definition_ref": [
+      "vllm/envs.py:469"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "float",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FORCE_AOT_LOAD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_FORCE_AOT_LOAD",
+    "definition_ref": [
+      "vllm/envs.py:591"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_FUSED_MOE_CHUNK_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_FUSED_MOE_CHUNK_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:801"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_GC_DEBUG": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_GC_DEBUG",
+    "definition_ref": [
+      "vllm/envs.py:1497"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS",
+    "definition_ref": [
+      "vllm/envs.py:1425"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS",
+    "definition_ref": [
+      "vllm/envs.py:1419"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_HAS_FLASHINFER_CUBIN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_HAS_FLASHINFER_CUBIN",
+    "definition_ref": [
+      "vllm/envs.py:1347"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_HOST_IP": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_HOST_IP",
+    "definition_ref": [
+      "vllm/envs.py:530"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_HTTP_TIMEOUT_KEEP_ALIVE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_HTTP_TIMEOUT_KEEP_ALIVE",
+    "definition_ref": [
+      "vllm/envs.py:836"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_IMAGE_FETCH_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_IMAGE_FETCH_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:729"
     ],
-    "kind": "vllm_env"
+    "default": "5",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_KEEP_ALIVE_ON_ENGINE_DEATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_KEEP_ALIVE_ON_ENGINE_DEATH",
+    "definition_ref": [
+      "vllm/envs.py:812"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_KV_CACHE_LAYOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_KV_CACHE_LAYOUT",
+    "definition_ref": [
+      "vllm/envs.py:1305"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES",
+    "definition_ref": [
+      "vllm/envs.py:1444"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOGGING_COLOR": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOGGING_COLOR",
+    "definition_ref": [
+      "vllm/envs.py:652"
     ],
-    "kind": "vllm_env"
+    "default": "auto",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOGGING_CONFIG_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOGGING_CONFIG_PATH",
+    "definition_ref": [
+      "vllm/envs.py:643"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOGGING_LEVEL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOGGING_LEVEL",
+    "definition_ref": [
+      "vllm/envs.py:645"
     ],
-    "kind": "vllm_env"
+    "default": "INFO",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOGGING_PREFIX": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOGGING_PREFIX",
+    "definition_ref": [
+      "vllm/envs.py:649"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOGGING_STREAM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOGGING_STREAM",
+    "definition_ref": [
+      "vllm/envs.py:647"
     ],
-    "kind": "vllm_env"
+    "default": "ext://sys.stdout",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOG_BATCHSIZE_INTERVAL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOG_BATCHSIZE_INTERVAL",
+    "definition_ref": [
+      "vllm/envs.py:1005"
     ],
-    "kind": "vllm_env"
+    "default": "-1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOG_MODEL_INSPECTION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOG_MODEL_INSPECTION",
+    "definition_ref": [
+      "vllm/envs.py:1528"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOG_STATS_INTERVAL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOG_STATS_INTERVAL",
+    "definition_ref": [
+      "vllm/envs.py:657"
     ],
-    "kind": "vllm_env"
+    "default": "10.",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LOOPBACK_IP": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LOOPBACK_IP",
+    "definition_ref": [
+      "vllm/envs.py:1374"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LORA_DISABLE_PDL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LORA_DISABLE_PDL",
+    "definition_ref": [
+      "vllm/envs.py:1539"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LORA_RESOLVER_CACHE_DIR": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LORA_RESOLVER_CACHE_DIR",
+    "definition_ref": [
+      "vllm/envs.py:848"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_LORA_RESOLVER_HF_REPO_LIST": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_LORA_RESOLVER_HF_REPO_LIST",
+    "definition_ref": [
+      "vllm/envs.py:855"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "list",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MAIN_CUDA_VERSION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MAIN_CUDA_VERSION",
+    "definition_ref": [
+      "vllm/envs.py:465"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MARLIN_INPUT_DTYPE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MARLIN_INPUT_DTYPE",
+    "definition_ref": [
+      "vllm/envs.py:1101"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MARLIN_USE_ATOMIC_ADD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MARLIN_USE_ATOMIC_ADD",
+    "definition_ref": [
+      "vllm/envs.py:1092"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MAX_AUDIO_CLIP_FILESIZE_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MAX_AUDIO_CLIP_FILESIZE_MB",
+    "definition_ref": [
+      "vllm/envs.py:754"
     ],
-    "kind": "vllm_env"
+    "default": "25",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE",
+    "definition_ref": [
+      "vllm/envs.py:1259"
     ],
-    "kind": "vllm_env"
+    "default": "163840",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MEDIA_CONNECTOR": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MEDIA_CONNECTOR",
+    "definition_ref": [
+      "vllm/envs.py:775"
     ],
-    "kind": "vllm_env"
+    "default": "http",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MEDIA_LOADING_THREAD_COUNT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MEDIA_LOADING_THREAD_COUNT",
+    "definition_ref": [
+      "vllm/envs.py:748"
     ],
-    "kind": "vllm_env"
+    "default": "8",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MEDIA_URL_ALLOW_REDIRECTS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MEDIA_URL_ALLOW_REDIRECTS",
+    "definition_ref": [
+      "vllm/envs.py:742"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MLA_DISABLE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MLA_DISABLE",
+    "definition_ref": [
+      "vllm/envs.py:1024"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MM_HASHER_ALGORITHM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MM_HASHER_ALGORITHM",
+    "definition_ref": [
+      "vllm/envs.py:781"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MODEL_REDIRECT_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MODEL_REDIRECT_PATH",
+    "definition_ref": [
+      "vllm/envs.py:1088"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MOE_DP_CHUNK_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MOE_DP_CHUNK_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:1057"
     ],
-    "kind": "vllm_env"
+    "default": "256",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MOE_ROUTING_SIMULATION_STRATEGY": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_MOE_ROUTING_SIMULATION_STRATEGY",
+    "definition_ref": [
+      "vllm/envs.py:1277"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MOE_USE_DEEP_GEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MOE_USE_DEEP_GEMM",
+    "definition_ref": [
+      "vllm/envs.py:1134"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:1342"
     ],
-    "kind": "vllm_env"
+    "default": "480",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MOONCAKE_BOOTSTRAP_PORT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MOONCAKE_BOOTSTRAP_PORT",
+    "definition_ref": [
+      "vllm/envs.py:1236"
     ],
-    "kind": "vllm_env"
+    "default": "8998",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MORIIO_CONNECTOR_READ_MODE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MORIIO_CONNECTOR_READ_MODE",
+    "definition_ref": [
+      "vllm/envs.py:1328"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MORIIO_NUM_WORKERS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MORIIO_NUM_WORKERS",
+    "definition_ref": [
+      "vllm/envs.py:1340"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MORIIO_POST_BATCH_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MORIIO_POST_BATCH_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:1336"
     ],
-    "kind": "vllm_env"
+    "default": "-1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MORIIO_QP_PER_TRANSFER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MORIIO_QP_PER_TRANSFER",
+    "definition_ref": [
+      "vllm/envs.py:1332"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MQ_MAX_CHUNK_BYTES_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MQ_MAX_CHUNK_BYTES_MB",
+    "definition_ref": [
+      "vllm/envs.py:1290"
     ],
-    "kind": "vllm_env"
+    "default": "16",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MSGPACK_ZERO_COPY_THRESHOLD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MSGPACK_ZERO_COPY_THRESHOLD",
+    "definition_ref": [
+      "vllm/envs.py:1218"
     ],
-    "kind": "vllm_env"
+    "default": "256",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_MXFP4_USE_MARLIN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_MXFP4_USE_MARLIN",
+    "definition_ref": [
+      "vllm/envs.py:1097"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NCCL_INCLUDE_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NCCL_INCLUDE_PATH",
+    "definition_ref": [
+      "vllm/envs.py:1489"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NCCL_SO_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NCCL_SO_PATH",
+    "definition_ref": [
+      "vllm/envs.py:556"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NIXL_ABORT_REQUEST_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NIXL_ABORT_REQUEST_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:1324"
     ],
-    "kind": "vllm_env"
+    "default": "480",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NIXL_SIDE_CHANNEL_HOST": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NIXL_SIDE_CHANNEL_HOST",
+    "definition_ref": [
+      "vllm/envs.py:1228"
     ],
-    "kind": "vllm_env"
+    "default": "localhost",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NIXL_SIDE_CHANNEL_PORT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NIXL_SIDE_CHANNEL_PORT",
+    "definition_ref": [
+      "vllm/envs.py:1232"
     ],
-    "kind": "vllm_env"
+    "default": "5600",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NO_USAGE_STATS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NO_USAGE_STATS",
+    "definition_ref": [
+      "vllm/envs.py:628"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NVFP4_GEMM_BACKEND": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NVFP4_GEMM_BACKEND",
+    "definition_ref": [
+      "vllm/envs.py:1356"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_NVTX_SCOPES_FOR_PROFILING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_NVTX_SCOPES_FOR_PROFILING",
+    "definition_ref": [
+      "vllm/envs.py:1439"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME",
+    "definition_ref": [
+      "vllm/envs.py:1451"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_PATTERN_MATCH_DEBUG": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_PATTERN_MATCH_DEBUG",
+    "definition_ref": [
+      "vllm/envs.py:573"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_PLUGINS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_PLUGINS",
+    "definition_ref": [
+      "vllm/envs.py:842"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_PORT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_PORT",
+    "definition_ref": [
+      "vllm/envs.py:535"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_PP_LAYER_PARTITION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_PP_LAYER_PARTITION",
+    "definition_ref": [
+      "vllm/envs.py:671"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_PROCESS_NAME_PREFIX": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_PROCESS_NAME_PREFIX",
+    "definition_ref": [
+      "vllm/envs.py:1378"
     ],
-    "kind": "vllm_env"
+    "default": "VLLM",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RANDOMIZE_DP_DUMMY_INPUTS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RANDOMIZE_DP_DUMMY_INPUTS",
+    "definition_ref": [
+      "vllm/envs.py:1062"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RAY_BUNDLE_INDICES": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RAY_BUNDLE_INDICES",
+    "definition_ref": [
+      "vllm/envs.py:1035"
     ],
-    "kind": "vllm_env"
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RAY_DP_PACK_STRATEGY": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RAY_DP_PACK_STRATEGY",
+    "definition_ref": [
+      "vllm/envs.py:1077"
     ],
-    "kind": "vllm_env"
+    "default": "strict",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RAY_PER_WORKER_GPUS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RAY_PER_WORKER_GPUS",
+    "definition_ref": [
+      "vllm/envs.py:1029"
     ],
-    "kind": "vllm_env"
+    "default": "1.0",
+    "type": "float",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RINGBUFFER_WARNING_INTERVAL": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RINGBUFFER_WARNING_INTERVAL",
+    "definition_ref": [
+      "vllm/envs.py:548"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_CUSTOM_PAGED_ATTN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_CUSTOM_PAGED_ATTN",
+    "definition_ref": [
+      "vllm/envs.py:963"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_FP8_MFMA_PAGE_ATTN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_FP8_MFMA_PAGE_ATTN",
+    "definition_ref": [
+      "vllm/envs.py:1402"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_FP8_PADDING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_FP8_PADDING",
+    "definition_ref": [
+      "vllm/envs.py:959"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_MOE_PADDING": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_MOE_PADDING",
+    "definition_ref": [
+      "vllm/envs.py:961"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16",
+    "definition_ref": [
+      "vllm/envs.py:982"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB",
+    "definition_ref": [
+      "vllm/envs.py:992"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_QUICK_REDUCE_QUANTIZATION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_QUICK_REDUCE_QUANTIZATION",
+    "definition_ref": [
+      "vllm/envs.py:973"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT",
+    "definition_ref": [
+      "vllm/envs.py:967"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:561"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER",
+    "definition_ref": [
+      "vllm/envs.py:885"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_FP4BMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_FP4BMM",
+    "definition_ref": [
+      "vllm/envs.py:935"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_FP4_ASM_GEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_FP4_ASM_GEMM",
+    "definition_ref": [
+      "vllm/envs.py:920"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_FP8BMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_FP8BMM",
+    "definition_ref": [
+      "vllm/envs.py:930"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS",
+    "definition_ref": [
+      "vllm/envs.py:945"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_LINEAR": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_LINEAR",
+    "definition_ref": [
+      "vllm/envs.py:896"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_MHA": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_MHA",
+    "definition_ref": [
+      "vllm/envs.py:915"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_MLA": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_MLA",
+    "definition_ref": [
+      "vllm/envs.py:910"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_MOE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_MOE",
+    "definition_ref": [
+      "vllm/envs.py:901"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_PAGED_ATTN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_PAGED_ATTN",
+    "definition_ref": [
+      "vllm/envs.py:890"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_RMSNORM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_RMSNORM",
+    "definition_ref": [
+      "vllm/envs.py:905"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_TRITON_GEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_TRITON_GEMM",
+    "definition_ref": [
+      "vllm/envs.py:951"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_TRITON_ROPE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_TRITON_ROPE",
+    "definition_ref": [
+      "vllm/envs.py:925"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION",
+    "definition_ref": [
+      "vllm/envs.py:939"
     ],
-    "kind": "vllm_env"
+    "default": "False",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_ROCM_USE_SKINNY_GEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_ROCM_USE_SKINNY_GEMM",
+    "definition_ref": [
+      "vllm/envs.py:955"
     ],
-    "kind": "vllm_env"
+    "default": "True",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RPC_BASE_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RPC_BASE_PATH",
+    "definition_ref": [
+      "vllm/envs.py:538"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_RPC_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_RPC_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:834"
     ],
-    "kind": "vllm_env"
+    "default": "10000",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_SERVER_DEV_MODE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_SERVER_DEV_MODE",
+    "definition_ref": [
+      "vllm/envs.py:1012"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD",
+    "definition_ref": [
+      "vllm/envs.py:1509"
     ],
-    "kind": "vllm_env"
+    "default": 256,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_SKIP_P2P_CHECK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_SKIP_P2P_CHECK",
+    "definition_ref": [
+      "vllm/envs.py:871"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX",
+    "definition_ref": [
+      "vllm/envs.py:489"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_SLEEP_WHEN_IDLE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_SLEEP_WHEN_IDLE",
+    "definition_ref": [
+      "vllm/envs.py:1286"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TARGET_DEVICE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TARGET_DEVICE",
+    "definition_ref": [
+      "vllm/envs.py:463"
     ],
-    "kind": "vllm_env"
+    "default": "cuda",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TEST_FORCE_FP8_MARLIN": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_TEST_FORCE_FP8_MARLIN",
+    "definition_ref": [
+      "vllm/envs.py:825"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TEST_FORCE_LOAD_FORMAT": {
-    "sources": [
-      "vllm/envs.py:environment_variables"
+    "name": "VLLM_TEST_FORCE_LOAD_FORMAT",
+    "definition_ref": [
+      "vllm/envs.py:829"
     ],
-    "kind": "vllm_env"
+    "default": "dummy",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY",
+    "definition_ref": [
+      "vllm/envs.py:1431"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS",
+    "definition_ref": [
+      "vllm/envs.py:1281"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TPU_BUCKET_PADDING_GAP": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TPU_BUCKET_PADDING_GAP",
+    "definition_ref": [
+      "vllm/envs.py:1119"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TPU_MOST_MODEL_LEN": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TPU_MOST_MODEL_LEN",
+    "definition_ref": [
+      "vllm/envs.py:1124"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TPU_USING_PATHWAYS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TPU_USING_PATHWAYS",
+    "definition_ref": [
+      "vllm/envs.py:1128"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TRACE_FUNCTION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TRACE_FUNCTION",
+    "definition_ref": [
+      "vllm/envs.py:663"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_TUNED_CONFIG_FOLDER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_TUNED_CONFIG_FOLDER",
+    "definition_ref": [
+      "vllm/envs.py:1414"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USAGE_SOURCE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USAGE_SOURCE",
+    "definition_ref": [
+      "vllm/envs.py:635"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USAGE_STATS_SERVER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USAGE_STATS_SERVER",
+    "definition_ref": [
+      "vllm/envs.py:625"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_AOT_COMPILE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_AOT_COMPILE",
+    "definition_ref": [
+      "vllm/envs.py:582"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_BYTECODE_HOOK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_BYTECODE_HOOK",
+    "definition_ref": [
+      "vllm/envs.py:585"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_DEEP_GEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_DEEP_GEMM",
+    "definition_ref": [
+      "vllm/envs.py:1132"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_DEEP_GEMM_E8M0": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_DEEP_GEMM_E8M0",
+    "definition_ref": [
+      "vllm/envs.py:1138"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES",
+    "definition_ref": [
+      "vllm/envs.py:1142"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT",
+    "definition_ref": [
+      "vllm/envs.py:1410"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FBGEMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FBGEMM",
+    "definition_ref": [
+      "vllm/envs.py:1491"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_FP16": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_FP16",
+    "definition_ref": [
+      "vllm/envs.py:1175"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_FP4": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_FP4",
+    "definition_ref": [
+      "vllm/envs.py:1183"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_FP8": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_FP8",
+    "definition_ref": [
+      "vllm/envs.py:1179"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_INT4": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_INT4",
+    "definition_ref": [
+      "vllm/envs.py:1187"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_MXFP4_BF16": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_MXFP4_BF16",
+    "definition_ref": [
+      "vllm/envs.py:1204"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8",
+    "definition_ref": [
+      "vllm/envs.py:1192"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS",
+    "definition_ref": [
+      "vllm/envs.py:1199"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FLASHINFER_SAMPLER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FLASHINFER_SAMPLER",
+    "definition_ref": [
+      "vllm/envs.py:665"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_FUSED_MOE_GROUPED_TOPK": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_FUSED_MOE_GROUPED_TOPK",
+    "definition_ref": [
+      "vllm/envs.py:1166"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_MEGA_AOT_ARTIFACT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_MEGA_AOT_ARTIFACT",
+    "definition_ref": [
+      "vllm/envs.py:595"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_MODELSCOPE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_MODELSCOPE",
+    "definition_ref": [
+      "vllm/envs.py:543"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_NCCL_SYMM_MEM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_NCCL_SYMM_MEM",
+    "definition_ref": [
+      "vllm/envs.py:1485"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_NVFP4_CT_EMULATIONS": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_NVFP4_CT_EMULATIONS",
+    "definition_ref": [
+      "vllm/envs.py:1317"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_PRECOMPILED": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_PRECOMPILED",
+    "definition_ref": [
+      "vllm/envs.py:483"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE",
+    "definition_ref": [
+      "vllm/envs.py:696"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM",
+    "definition_ref": [
+      "vllm/envs.py:701"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_RAY_WRAPPED_PP_COMM": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_RAY_WRAPPED_PP_COMM",
+    "definition_ref": [
+      "vllm/envs.py:707"
     ],
-    "kind": "vllm_env"
+    "default": "1",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_STANDALONE_COMPILE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_STANDALONE_COMPILE",
+    "definition_ref": [
+      "vllm/envs.py:567"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_TRITON_AWQ": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_TRITON_AWQ",
+    "definition_ref": [
+      "vllm/envs.py:859"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_USE_V2_MODEL_RUNNER": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_USE_V2_MODEL_RUNNER",
+    "definition_ref": [
+      "vllm/envs.py:1522"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_V1_OUTPUT_PROC_CHUNK_SIZE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_V1_OUTPUT_PROC_CHUNK_SIZE",
+    "definition_ref": [
+      "vllm/envs.py:1020"
     ],
-    "kind": "vllm_env"
+    "default": "128",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_V1_USE_OUTLINES_CACHE": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_V1_USE_OUTLINES_CACHE",
+    "definition_ref": [
+      "vllm/envs.py:1113"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_VIDEO_FETCH_TIMEOUT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_VIDEO_FETCH_TIMEOUT",
+    "definition_ref": [
+      "vllm/envs.py:732"
     ],
-    "kind": "vllm_env"
+    "default": "30",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_VIDEO_LOADER_BACKEND": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_VIDEO_LOADER_BACKEND",
+    "definition_ref": [
+      "vllm/envs.py:765"
     ],
-    "kind": "vllm_env"
+    "default": "opencv",
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_WORKER_MULTIPROC_METHOD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_WORKER_MULTIPROC_METHOD",
+    "definition_ref": [
+      "vllm/envs.py:712"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_XGRAMMAR_CACHE_MB": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_XGRAMMAR_CACHE_MB",
+    "definition_ref": [
+      "vllm/envs.py:1210"
     ],
-    "kind": "vllm_env"
+    "default": "512",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_XLA_CACHE_PATH": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_XLA_CACHE_PATH",
+    "definition_ref": [
+      "vllm/envs.py:789"
     ],
-    "kind": "vllm_env"
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_XLA_CHECK_RECOMPILATION": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_XLA_CHECK_RECOMPILATION",
+    "definition_ref": [
+      "vllm/envs.py:796"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "VLLM_XLA_USE_SPMD": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "VLLM_XLA_USE_SPMD",
+    "definition_ref": [
+      "vllm/envs.py:800"
     ],
-    "kind": "vllm_env"
+    "default": "0",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   },
   "V_SCALE_CONSTANT": {
-    "sources": [
-      "vllm/envs.py:environment_variables",
-      "vllm/envs.py:type_checking"
+    "name": "V_SCALE_CONSTANT",
+    "definition_ref": [
+      "vllm/envs.py:1000"
     ],
-    "kind": "vllm_env"
+    "default": "100",
+    "type": "int",
+    "valid_values": [],
+    "source": "code"
   }
 }

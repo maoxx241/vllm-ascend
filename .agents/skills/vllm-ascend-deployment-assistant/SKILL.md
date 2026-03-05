@@ -14,11 +14,12 @@ Convert natural-language deployment requests into deterministic deployment artif
 1. `../_shared/INDEX.md`
 2. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
 3. `../_shared/deployment-config/references/global-parameter-feature-map.md`
-4. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
-5. `../_shared/deployment-config/procedures/deployment-playbook.md`
-6. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
-7. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
-8. `references/output-schema.md`
+4. `../_shared/deployment-config/references/global-parameter-verification-report.md`
+5. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
+6. `../_shared/deployment-config/procedures/deployment-playbook.md`
+7. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
+8. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
+9. `references/output-schema.md`
 
 ## Weak-Reasoning Mode (Mandatory)
 
@@ -78,12 +79,14 @@ Supported model profiles:
 
 ## Required Final Output Format
 
-Always use these four sections in this order:
+Always use these six sections in this order:
 
 1. 参数表
 2. 命令块
 3. 验证块
 4. 风险块
+5. 证据块
+6. 冲突告警块
 
 Template details are in `references/output-schema.md`.
 
@@ -92,3 +95,4 @@ Template details are in `references/output-schema.md`.
 - Do not edit business code while deploying.
 - Do not execute destructive git operations.
 - If a feature is not applicable, mark it clearly with reason.
+- For low-confidence/upstream-delta evidence, keep recommendation but emit explicit warning.

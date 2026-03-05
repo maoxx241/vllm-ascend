@@ -1,2597 +1,613 @@
 {
-  "--20250429": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Dense.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--additional-config": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/user_guide/configuration/additional_config.md",
-      "docs/source/user_guide/feature_guide/Fine_grained_TP.md",
-      "docs/source/user_guide/feature_guide/eplb_swift_balancer.md",
-      "docs/source/user_guide/feature_guide/graph_mode.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/layer_sharding.md",
-      "docs/source/user_guide/feature_guide/npugraph_ex.md",
-      "docs/source/user_guide/feature_guide/weight_prefetch.md",
-      "docs/source/user_guide/release_notes.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 91
-  },
-  "--address": {
-    "sources": [
-      "docs/source/tutorials/features/ray.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--allowed-local-media-path": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
-  },
-  "--api-key": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--api-server-count": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--api-url": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--async-scheduling": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/release_notes.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 45
-  },
-  "--audio-path1": {
-    "sources": [
-      "examples/offline_inference_audio_language.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--audio-path2": {
-    "sources": [
-      "examples/offline_inference_audio_language.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--backend": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 7
-  },
-  "--block-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 13
-  },
-  "--bs": {
-    "sources": [
-      "examples/offline_inference_npu_long_seq.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--chat-template": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--chat-template-content-format": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen-VL-Dense.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--compilation-config": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/sequence_parallelism.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/release_notes.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 73
-  },
-  "--compress-process-num": {
-    "sources": [
-      "examples/save_sharded_state_310.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--cp-kv-cache-interleave-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/user_guide/feature_guide/context_parallel.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 7
-  },
-  "--data": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--data-parallel-address": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 66
-  },
-  "--data-parallel-rank": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py",
-      "examples/external_online_dp/run_dp_template.sh"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 21
-  },
-  "--data-parallel-rpc-port": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 65
-  },
-  "--data-parallel-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/Fine_grained_TP.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 116
-  },
-  "--data-parallel-size-local": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 62
-  },
-  "--data-parallel-start-rank": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 31
-  },
-  "--dataset-args": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--dataset-name": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 23
-  },
-  "--datasets": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
-  },
-  "--dcp": {
-    "sources": [
-      "examples/offline_inference_npu_long_seq.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--debug": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--decode-context-parallel-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/user_guide/feature_guide/context_parallel.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 14
-  },
   "--decode-servers-urls": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/disaggregated_encoder/disagg_epd_proxy.py",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
+    "name": "--decode-servers-urls",
+    "aliases": [
+      "--decode-servers-urls"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:711"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated decode URLs (\"http://d1:8005,http://d2:8006\")",
+    "dest": "decode_servers_urls",
+    "source": "code"
   },
   "--decoder-hosts": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--decoder-hosts",
+    "aliases": [
+      "--decoder-hosts"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 15
-  },
-  "--decoder-hosts-num": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:264",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:512"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
+    "default": [
+      "localhost"
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "decoder_hosts",
+    "source": "code"
   },
   "--decoder-ports": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--decoder-ports",
+    "aliases": [
+      "--decoder-ports"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 16
-  },
-  "--decoder-ports-inc": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:265",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:513"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--depth": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md"
+    "default": [
+      8002
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--device": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 329
-  },
-  "--disable-log-request": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--disable-log-stats": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--distributed-executor-backend": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "decoder_ports",
+    "source": "code"
   },
   "--dp-address": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py"
+    "name": "--dp-address",
+    "aliases": [
+      "--dp-address"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:14"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "IP address for data parallel master node.",
+    "dest": "dp_address",
+    "source": "code"
   },
   "--dp-hosts": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py"
+    "name": "--dp-hosts",
+    "aliases": [
+      "--dp-hosts"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:185"
+    ],
+    "default": [
+      "localhost"
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dp_hosts",
+    "source": "code"
   },
   "--dp-ports": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py"
+    "name": "--dp-ports",
+    "aliases": [
+      "--dp-ports"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:186"
+    ],
+    "default": [
+      8001
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dp_ports",
+    "source": "code"
   },
   "--dp-rank-start": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py"
+    "name": "--dp-rank-start",
+    "aliases": [
+      "--dp-rank-start"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:13"
+    ],
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Starting rank for data parallel.",
+    "dest": "dp_rank_start",
+    "source": "code"
   },
   "--dp-rpc-port": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py"
+    "name": "--dp-rpc-port",
+    "aliases": [
+      "--dp-rpc-port"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:15"
+    ],
+    "default": 12345,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Port for data parallel master node.",
+    "dest": "dp_rpc_port",
+    "source": "code"
   },
   "--dp-size": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py",
-      "examples/offline_data_parallel.py"
+    "name": "--dp-size",
+    "aliases": [
+      "--dp-size"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 23
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:10",
+      "examples/offline_data_parallel.py:81"
+    ],
+    "default": 2,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Data parallel size",
+    "dest": "dp_size",
+    "source": "code"
   },
   "--dp-size-local": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py"
+    "name": "--dp-size-local",
+    "aliases": [
+      "--dp-size-local"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
-  },
-  "--dtype": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md"
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:12"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 7
-  },
-  "--ec-transfer-config": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--enable-chunked-prefill": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
-  },
-  "--enable-compress": {
-    "sources": [
-      "examples/save_sharded_state_310.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
+    "default": -1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Local data parallel size.",
+    "dest": "dp_size_local",
+    "source": "code"
   },
   "--enable-expert-parallel": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md",
-      "docs/source/user_guide/feature_guide/Fine_grained_TP.md",
-      "docs/source/user_guide/feature_guide/eplb_swift_balancer.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
+    "name": "--enable-expert-parallel",
+    "aliases": [
+      "--enable-expert-parallel"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 135
-  },
-  "--enable-lora": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/lora.md"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:89",
+      "examples/offline_external_launcher.py:122",
+      "examples/offline_weight_load.py:131"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--enable-prefix-caching": {
-    "sources": [
-      "docs/source/tutorials/models/GLM5.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--enable-request-id-headers": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enable expert parallel, used in MOE models.",
+    "dest": "enable_expert_parallel",
+    "source": "code"
   },
   "--enable-sleep-mode": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/sleep_mode.md",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--enable-sleep-mode",
+    "aliases": [
+      "--enable-sleep-mode"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/offline_external_launcher.py:125",
+      "examples/offline_weight_load.py:134"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enable sleep mode for the engine.",
+    "dest": "enable_sleep_mode",
+    "source": "code"
   },
   "--encode-servers-urls": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/disaggregated_encoder/disagg_epd_proxy.py",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
+    "name": "--encode-servers-urls",
+    "aliases": [
+      "--encode-servers-urls"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:700"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated encode URLs (\"http://e1:8001,http://e2:8001\")",
+    "dest": "encode_servers_urls",
+    "source": "code"
   },
   "--encoder-dispatch-mode": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_epd_proxy.py"
+    "name": "--encoder-dispatch-mode",
+    "aliases": [
+      "--encoder-dispatch-mode"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--endpoint": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh"
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:717"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 6
+    "default": "single",
+    "type": "string",
+    "valid_values": [
+      "single",
+      "fanout"
+    ],
+    "help_text": "Encoder dispatch mode: single (one request) or fanout (per-MM-item)",
+    "dest": "encoder_dispatch_mode",
+    "source": "code"
   },
   "--enforce-eager": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/graph_mode.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
+    "name": "--enforce-eager",
+    "aliases": [
+      "--enforce-eager"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 58
-  },
-  "--engine": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:87",
+      "examples/offline_external_launcher.py:120",
+      "examples/offline_weight_load.py:129"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--engine-base-url": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--eval-batch-size": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--eval-type": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--extra-index-url": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen-VL-Dense.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--generation-config": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--gpu-memory-utilization": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/release_notes.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 158
-  },
-  "--head": {
-    "sources": [
-      "docs/source/tutorials/features/ray.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--header": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--headless": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 22
-  },
-  "--hf-overrides": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enforce eager mode execution.",
+    "dest": "enforce_eager",
+    "source": "code"
   },
   "--host": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/disaggregated_encoder/disagg_epd_proxy.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
+    "name": "--host",
+    "aliases": [
+      "--host"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 136
-  },
-  "--ignore-eos": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:698",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:261",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:509",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:184"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--init": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/models/GLM5.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--kv-transfer-config": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/context_parallel.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 73
-  },
-  "--limit": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--limit-mm-per-prompt": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--load-format": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/user_guide/feature_guide/netloader.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--location": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--lora-modules": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/lora.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
+    "default": "localhost",
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "host",
+    "source": "code"
   },
   "--master-addr": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--master-addr",
+    "aliases": [
+      "--master-addr"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 11
+    "definition_ref": [
+      "examples/offline_data_parallel.py:85",
+      "examples/offline_external_launcher.py:118",
+      "examples/offline_weight_load.py:127"
+    ],
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Master node IP address",
+    "dest": "master_addr",
+    "source": "code"
   },
   "--master-port": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--master-port",
+    "aliases": [
+      "--master-port"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 11
-  },
-  "--max": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/kv_pool.md"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:86",
+      "examples/offline_external_launcher.py:119",
+      "examples/offline_weight_load.py:128"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 7
-  },
-  "--max-concurrency": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--max-model-len": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 156
-  },
-  "--max-num-batched-tokens": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 161
-  },
-  "--max-num-seqs": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/weight_prefetch.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 132
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Master node port",
+    "dest": "master_port",
+    "source": "code"
   },
   "--max-retries": {
-    "sources": [
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py"
+    "name": "--max-retries",
+    "aliases": [
+      "--max-retries"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:266",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:514",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:187"
+    ],
+    "default": 3,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Maximum number of retries for HTTP requests",
+    "dest": "max_retries",
+    "source": "code"
   },
   "--max-waiting-retries": {
-    "sources": [
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--max-waiting-retries",
+    "aliases": [
+      "--max-waiting-retries"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--metric-percentiles": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:518"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--mm-processor-cache-gb": {
-    "sources": [
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--mode": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
+    "default": 3,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Maximum number of retries for waiting nodes to be started",
+    "dest": "max_waiting_retries",
+    "source": "code"
   },
   "--model": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/layer_sharding.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py",
-      "examples/save_sharded_state_310.py",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
+    "name": "--model",
+    "aliases": [
+      "--model"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 59
-  },
-  "--model-loader-extra-config": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/netloader.md"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:75",
+      "examples/offline_external_launcher.py:108",
+      "examples/offline_weight_load.py:117"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
+    "default": "Qwen/Qwen3-0.6B",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Model name or path",
+    "dest": "model",
+    "source": "code"
   },
   "--model-weight-gib": {
-    "sources": [
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--model-weight-gib",
+    "aliases": [
+      "--model-weight-gib"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--models": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
+    "definition_ref": [
+      "examples/offline_external_launcher.py:129",
+      "examples/offline_weight_load.py:138"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
-  },
-  "--name": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 34
-  },
-  "--net": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 26
-  },
-  "--network": {
-    "sources": [
-      "docs/source/tutorials/models/PaddleOCR-VL.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--nnodes": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--no-enable-chunked-prefill": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--no-enable-prefix-caching": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 108
-  },
-  "--node-ip-address": {
-    "sources": [
-      "docs/source/tutorials/features/ray.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
+    "default": null,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Model weight memory usage in GiB (e.g., 1.0 for 0.5B model).",
+    "dest": "model_weight_gib",
+    "source": "code"
   },
   "--node-rank": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--node-rank",
+    "aliases": [
+      "--node-rank"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 11
+    "definition_ref": [
+      "examples/offline_data_parallel.py:84",
+      "examples/offline_external_launcher.py:116",
+      "examples/offline_weight_load.py:125"
+    ],
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Rank of the current node",
+    "dest": "node_rank",
+    "source": "code"
   },
   "--node-size": {
-    "sources": [
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--node-size",
+    "aliases": [
+      "--node-size"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 9
-  },
-  "--num-prompts": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:83",
+      "examples/offline_external_launcher.py:115",
+      "examples/offline_weight_load.py:124"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 20
-  },
-  "--output": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "examples/save_sharded_state_310.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--output-dir": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--pcp": {
-    "sources": [
-      "examples/offline_inference_npu_long_seq.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--percentile-metrics": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--pipeline-parallel-size": {
-    "sources": [
-      "docs/source/tutorials/features/ray.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--pod": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Total number of nodes",
+    "dest": "node_size",
+    "source": "code"
   },
   "--port": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/disaggregated_encoder/disagg_epd_proxy.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
+    "name": "--port",
+    "aliases": [
+      "--port"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 181
-  },
-  "--prefill-context-parallel-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/user_guide/feature_guide/context_parallel.md",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml"
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:699",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:260",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:508",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:183"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 11
+    "default": 8000,
+    "type": "int",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "port",
+    "source": "code"
   },
   "--prefill-servers-urls": {
-    "sources": [
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/disaggregated_encoder/disagg_epd_proxy.py",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml"
+    "name": "--prefill-servers-urls",
+    "aliases": [
+      "--prefill-servers-urls"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:705"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated prefill URLs (\"http://p1:8003,http://p2:8004\") to enable E->P->D, set \"disable\" or \"none\" to enable E->PD",
+    "dest": "prefill_servers_urls",
+    "source": "code"
   },
   "--prefiller-hosts": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--prefiller-hosts",
+    "aliases": [
+      "--prefiller-hosts"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 15
-  },
-  "--prefiller-hosts-num": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:262",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:510"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--prefiller-port": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md"
+    "default": [
+      "localhost"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefiller_hosts",
+    "source": "code"
   },
   "--prefiller-ports": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--prefiller-ports",
+    "aliases": [
+      "--prefiller-ports"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 13
-  },
-  "--prefiller-ports-inc": {
-    "sources": [
-      "docs/source/user_guide/feature_guide/large_scale_ep.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:263",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:511"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--prefix-repetition-num-prefixes": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md"
+    "default": [
+      8001
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--prefix-repetition-output-len": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--prefix-repetition-prefix-len": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--prefix-repetition-suffix-len": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--privileged": {
-    "sources": [
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefiller_ports",
+    "source": "code"
   },
   "--proc-per-node": {
-    "sources": [
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--proc-per-node",
+    "aliases": [
+      "--proc-per-node"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 8
-  },
-  "--profiler-config": {
-    "sources": [
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/release_notes.md"
+    "definition_ref": [
+      "examples/offline_external_launcher.py:117",
+      "examples/offline_weight_load.py:126"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Number of processes per node",
+    "dest": "proc_per_node",
+    "source": "code"
   },
   "--quantization": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/offline_data_parallel.py",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml"
+    "name": "--quantization",
+    "aliases": [
+      "--quantization"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 104
-  },
-  "--random-input": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md"
+    "definition_ref": [
+      "examples/offline_data_parallel.py:92"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
-  },
-  "--random-input-len": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--random-output-len": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--reasoning-parser": {
-    "sources": [
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 15
-  },
-  "--recursive": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/models/GLM5.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--request-rate": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
-  },
-  "--result-dir": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Use quantization models",
+    "dest": "quantization",
+    "source": "code"
   },
   "--retry-delay": {
-    "sources": [
-      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py",
-      "examples/external_online_dp/dp_load_balance_proxy_server.py"
+    "name": "--retry-delay",
+    "aliases": [
+      "--retry-delay"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--rm": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:267",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:515",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:188"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 33
-  },
-  "--runner": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 3
-  },
-  "--save-result": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-Embedding.md",
-      "docs/source/tutorials/models/Qwen3-VL-Reranker.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 18
-  },
-  "--seed": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/disaggregated_encoder/disagg_1e1pd_example.sh",
-      "examples/external_online_dp/run_dp_template.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 104
-  },
-  "--served-model-name": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 81
-  },
-  "--shm-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-32B-W4A4.md",
-      "docs/source/tutorials/models/Qwen3-8B-W4A8.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 34
+    "default": 0.001,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Base delay (seconds) for exponential backoff retries",
+    "dest": "retry_delay",
+    "source": "code"
   },
   "--sleep-mode-level": {
-    "sources": [
-      "examples/offline_external_launcher.py"
+    "name": "--sleep-mode-level",
+    "aliases": [
+      "--sleep-mode-level"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--source": {
-    "sources": [
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md"
+    "definition_ref": [
+      "examples/offline_external_launcher.py:135"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--speculative-config": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml"
+    "default": 1,
+    "type": "int",
+    "valid_values": [
+      "1",
+      "2"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 73
-  },
-  "--summarizer": {
-    "sources": [
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--swap-space": {
-    "sources": [
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--task": {
-    "sources": [
-      "docs/source/user_guide/release_notes.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
-  },
-  "--tasks": {
-    "sources": [
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 4
+    "help_text": "Sleep mode level: 1 or 2. This example of level 2 is only supported for dense model.",
+    "dest": "sleep_mode_level",
+    "source": "code"
   },
   "--temperature": {
-    "sources": [
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--temperature",
+    "aliases": [
+      "--temperature"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 2
-  },
-  "--tensor-parallel-size": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/hardwares/310p.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-Next.md",
-      "docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/Fine_grained_TP.md",
-      "docs/source/user_guide/feature_guide/context_parallel.md",
-      "docs/source/user_guide/feature_guide/eplb_swift_balancer.md",
-      "docs/source/user_guide/feature_guide/graph_mode.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/netloader.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/sequence_parallelism.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/run_dp_server.sh",
-      "examples/save_sharded_state_310.py",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct-EPD.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
+    "definition_ref": [
+      "examples/offline_external_launcher.py:126",
+      "examples/offline_weight_load.py:135"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 163
-  },
-  "--tokenizer": {
-    "sources": [
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3_embedding.md",
-      "docs/source/tutorials/models/Qwen3_reranker.md"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 5
-  },
-  "--tokenizer-mode": {
-    "sources": [
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 8
-  },
-  "--tp": {
-    "sources": [
-      "examples/offline_inference_npu_long_seq.py"
-    ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
+    "default": 0.8,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Float that controls the randomness of the sampling.",
+    "dest": "temperature",
+    "source": "code"
   },
   "--tp-size": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/user_guide/feature_guide/external_dp.md",
-      "examples/external_online_dp/launch_online_dp.py",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py"
+    "name": "--tp-size",
+    "aliases": [
+      "--tp-size"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 33
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:11",
+      "examples/offline_data_parallel.py:82",
+      "examples/offline_external_launcher.py:114",
+      "examples/offline_weight_load.py:123"
+    ],
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Tensor parallel size",
+    "dest": "tp_size",
+    "source": "code"
   },
   "--trust-remote-code": {
-    "sources": [
-      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
-      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md",
-      "docs/source/tutorials/features/ray.md",
-      "docs/source/tutorials/features/suffix_speculative_decoding.md",
-      "docs/source/tutorials/models/DeepSeek-R1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "docs/source/tutorials/models/GLM4.x.md",
-      "docs/source/tutorials/models/GLM5.md",
-      "docs/source/tutorials/models/Kimi-K2-Thinking.md",
-      "docs/source/tutorials/models/PaddleOCR-VL.md",
-      "docs/source/tutorials/models/Qwen-VL-Dense.md",
-      "docs/source/tutorials/models/Qwen2.5-7B.md",
-      "docs/source/tutorials/models/Qwen2.5-Omni.md",
-      "docs/source/tutorials/models/Qwen3-235B-A22B.md",
-      "docs/source/tutorials/models/Qwen3-Dense.md",
-      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md",
-      "docs/source/user_guide/deployment_guide/using_volcano_kthena.md",
-      "docs/source/user_guide/feature_guide/dynamic_batch.md",
-      "docs/source/user_guide/feature_guide/kv_pool.md",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md",
-      "docs/source/user_guide/feature_guide/quantization.md",
-      "docs/source/user_guide/feature_guide/speculative_decoding.md",
-      "docs/source/user_guide/feature_guide/ucm_deployment.md",
-      "examples/external_online_dp/run_dp_template.sh",
-      "examples/offline_data_parallel.py",
-      "examples/offline_external_launcher.py",
-      "examples/offline_weight_load.py",
-      "examples/run_dp_server.sh",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-R1-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.1-BF16.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-EP.yaml",
-      "tests/e2e/nightly/multi_node/config/DeepSeek-V3_2-W8A8-cp.yaml",
-      "tests/e2e/nightly/multi_node/config/Kimi-K2-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-A2.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B-Mooncake-Layerwise.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-A22B.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-EPLB.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8-longseq.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-W8A8.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/multi_node/config/Qwen3-VL-235B-disagg-pd.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-R1-W8A8-HBM.yaml",
-      "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/GLM-4.5.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Kimi-K2-Thinking.yaml",
-      "tests/e2e/nightly/single_node/models/configs/MTPX-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-DeepSeek-R1-0528-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-7B-Instruct.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-235B-A22B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-30B-A3B-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-A2.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct-W8A8.yaml",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-Next-80B-A3B-Instruct.yaml"
+    "name": "--trust-remote-code",
+    "aliases": [
+      "--trust-remote-code"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 145
+    "definition_ref": [
+      "examples/offline_data_parallel.py:88",
+      "examples/offline_external_launcher.py:121",
+      "examples/offline_weight_load.py:130"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Trust remote code.",
+    "dest": "trust_remote_code",
+    "source": "code"
   },
   "--vllm-start-port": {
-    "sources": [
-      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md",
-      "docs/source/tutorials/models/DeepSeek-V3.1.md",
-      "docs/source/tutorials/models/DeepSeek-V3.2.md",
-      "examples/external_online_dp/launch_online_dp.py"
+    "name": "--vllm-start-port",
+    "aliases": [
+      "--vllm-start-port"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 14
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:16"
+    ],
+    "default": 9000,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Starting port for the engine.",
+    "dest": "vllm_start_port",
+    "source": "code"
   },
   "--waiting-retry-interval": {
-    "sources": [
-      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py"
+    "name": "--waiting-retry-interval",
+    "aliases": [
+      "--waiting-retry-interval"
     ],
-    "kind": "vllm_ascend_arg",
-    "freq": 1
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:521"
+    ],
+    "default": 10,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Check interval (seconds) for waiting nodes to be started",
+    "dest": "waiting_retry_interval",
+    "source": "code"
   }
 }

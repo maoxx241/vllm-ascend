@@ -7,9 +7,12 @@ import argparse
 import json
 import shlex
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from normalize_terms import normalize_input
+
+STATUS_ALIGNED = "aligned"
+KB_MIN_CONFIDENCE = 0.65
 
 PROFILES: Dict[str, Dict[str, object]] = {
     "qwen3-32b-w8a8": {
@@ -64,6 +67,26 @@ PROFILE_BLOCKED_FEATURES: Dict[str, Dict[str, str]] = {
     },
 }
 
+FEATURE_TO_KB_ITEMS: Dict[str, List[str]] = {
+    "quantization": ["--quantization", "--model", "--dtype"],
+    "int4_quantization": ["--quantization", "--model"],
+    "graph_mode": ["--compilation-config", "--enforce-eager"],
+    "tensor_parallel": ["--tensor-parallel-size"],
+    "data_parallel": ["--data-parallel-size", "--data-parallel-address", "--data-parallel-rpc-port"],
+    "expert_parallel": ["--enable-expert-parallel"],
+    "prefill_decode_disaggregation": ["--kv-transfer-config", "--ec-transfer-config"],
+    "prefix_cache": ["--enable-prefix-caching", "--prefix-caching-hash-algo"],
+    "context_parallel": [
+        "--prefill-context-parallel-size",
+        "--decode-context-parallel-size",
+        "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL",
+    ],
+    "lora": ["--enable-lora", "--lora-modules"],
+    "speculative_decode": ["--speculative-config"],
+    "sleep_mode": ["--enable-sleep-mode", "VLLM_SLEEP_WHEN_IDLE"],
+    "weight_prefetch": ["--additional-config", "VLLM_ASCEND_ENABLE_PREFETCH_MLP"],
+}
+
 
 def _dedupe(seq: List[str]) -> List[str]:
     seen = set()
@@ -86,6 +109,101 @@ def _parse_feature_list(raw: str | None) -> List[str]:
 def _write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
     path.chmod(0o755)
+
+
+def _load_global_kb_entries() -> Dict[str, List[Dict[str, Any]]]:
+    kb_path = (
+        Path(__file__).resolve().parents[2]
+        / "_shared"
+        / "deployment-config"
+        / "references"
+        / "generated"
+        / "global_parameter_kb.json"
+    )
+    if not kb_path.exists():
+        return {}
+
+    try:
+        payload = json.loads(kb_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+    entries = payload.get("entries", [])
+    index: Dict[str, List[Dict[str, Any]]] = {}
+    for entry in entries:
+        name = entry.get("name")
+        if not isinstance(name, str):
+            continue
+        index.setdefault(name, []).append(entry)
+    return index
+
+
+def _build_evidence_block(
+    features: List[str],
+    kb_index: Dict[str, List[Dict[str, Any]]],
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    evidence_block: List[Dict[str, Any]] = []
+    conflict_alerts: List[str] = []
+    seen_alerts = set()
+
+    # Build reverse index by feature for fallback when name mapping misses.
+    feature_index: Dict[str, List[Dict[str, Any]]] = {}
+    for rows in kb_index.values():
+        for row in rows:
+            primary = row.get("primary_feature")
+            if isinstance(primary, str):
+                feature_index.setdefault(primary, []).append(row)
+
+    for feature in features:
+        candidates = FEATURE_TO_KB_ITEMS.get(feature, [])
+        picked: List[Dict[str, Any]] = []
+
+        for name in candidates:
+            rows = kb_index.get(name, [])
+            if not rows:
+                continue
+            rows = sorted(rows, key=lambda item: float(item.get("confidence", 0)), reverse=True)
+            picked.append(rows[0])
+
+        if not picked:
+            fallback = sorted(
+                feature_index.get(feature, []),
+                key=lambda item: float(item.get("confidence", 0)),
+                reverse=True,
+            )
+            picked = fallback[:3]
+
+        items: List[Dict[str, Any]] = []
+        for row in picked[:4]:
+            status = str(row.get("status", "needs_manual_review"))
+            confidence = float(row.get("confidence", 0))
+            web_refs = row.get("web_refs", [])
+            if isinstance(web_refs, list):
+                web_refs = web_refs[:2]
+            else:
+                web_refs = []
+
+            item = {
+                "name": row.get("name"),
+                "status": status,
+                "confidence": confidence,
+                "definition_ref": row.get("definition_ref", [])[:2],
+                "web_refs": web_refs,
+            }
+            items.append(item)
+
+            if status != STATUS_ALIGNED or confidence < KB_MIN_CONFIDENCE:
+                alert = (
+                    f"[{feature}] {row.get('name')} evidence is {status}, confidence={confidence:.2f}. "
+                    "Keep recommendation but treat as risk."
+                )
+                if alert not in seen_alerts:
+                    seen_alerts.add(alert)
+                    conflict_alerts.append(alert)
+
+        evidence_block.append({"feature": feature, "items": items})
+
+    return evidence_block, conflict_alerts
 
 
 def _apply_profile_compatibility(
@@ -235,6 +353,9 @@ def render_package(
         model_profile, requested_features
     )
 
+    kb_index = _load_global_kb_entries()
+    evidence_block, conflict_alerts = _build_evidence_block(requested_features, kb_index)
+
     model_path = model_path_override or str(profile["model"])
     served_model_name = str(profile["served_model_name"])
     tp_size = int(profile["tensor_parallel_size"])
@@ -342,6 +463,7 @@ def render_package(
             "Input is ambiguous; ask one clarification before production execution: "
             + str(normalization["clarification_question"])
         )
+    risks.extend(conflict_alerts)
 
     result = {
         "deployment_plan": {
@@ -358,6 +480,8 @@ def render_package(
                 "allowed_features": applied_features,
                 "blocked_features": blocked_features,
             },
+            "evidence_block": evidence_block,
+            "conflict_alerts": conflict_alerts,
             "normalization_confidence": normalization["confidence"],
             "missing_slots": normalization["missing_slots"],
             "clarification_question": normalization["clarification_question"],
@@ -379,6 +503,8 @@ def render_package(
             "Adjust feature set or port and rerender package.",
             "Restart with new start.sh and rerun validate.sh.",
         ],
+        "evidence_block": evidence_block,
+        "conflict_alerts": conflict_alerts,
     }
 
     plan_path = output_dir / "deployment_plan.json"

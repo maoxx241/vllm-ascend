@@ -6,6 +6,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 
+from build_global_param_kb import main as build_main
 from render_deploy_package import render_package
 
 
@@ -14,6 +15,8 @@ def _read(path: Path) -> str:
 
 
 def main() -> int:
+    build_main()
+
     with tempfile.TemporaryDirectory(prefix="deploy_pkg_test_") as td:
         base = Path(td)
 
@@ -50,6 +53,14 @@ def main() -> int:
         assert plan["model_profile"] == "qwen3-32b-w8a8"
         assert "compatibility" in plan
         assert plan["compatibility"]["blocked_features"] == []
+        assert isinstance(plan["evidence_block"], list) and plan["evidence_block"], "evidence_block should exist"
+        assert isinstance(plan["conflict_alerts"], list), "conflict_alerts should exist"
+        assert any(section["feature"] == "graph_mode" for section in plan["evidence_block"])
+        for section in plan["evidence_block"]:
+            for item in section["items"]:
+                assert "confidence" in item
+                assert "status" in item
+                assert "definition_ref" in item
 
         backup = render_package(
             output_dir=base / "backup",
@@ -86,6 +97,7 @@ def main() -> int:
         assert "expert_parallel" in blocked_features
         assert any("Blocked feature 'int4_quantization'" in risk for risk in blocked_plan["risks"])
         assert any("Blocked feature 'expert_parallel'" in risk for risk in blocked_plan["risks"])
+        assert isinstance(blocked_plan["conflict_alerts"], list)
 
         blocked_start_text = _read(Path(blocked_case["generated_commands"]["start_script"]))
         assert "--enable-expert-parallel" not in blocked_start_text
@@ -138,6 +150,7 @@ def main() -> int:
         assert "--enable-sleep-mode" in all_start_text
         assert "--speculative-config" in all_start_text
         assert "weight_prefetch_config" in all_start_text
+        assert all_features["deployment_plan"]["evidence_block"], "All-features case should include evidence block"
 
     print("PASS: render package tests")
     return 0

@@ -2,668 +2,491 @@
 knowledge_id: deployment-config.global-parameter-feature-map
 domain: deployment-config
 knowledge_type: reference
-summary: Global semantic map for vLLM and vLLM-Ascend args/envs with usage and combination hints.
-applicable_vllm_versions: [">=0.15.0", "<0.17.0"]
-applicable_cann_versions: [">=8.0.0"]
+summary: High-confidence parameter/env semantic map with code evidence and web verification.
 last_verified: "2026-03-05"
-watch_files:
-  - "../vllm-foundation/references/vllm-inputs-and-envs-global.md"
-  - "../vllm-ascend-core/references/vllm-ascend-inputs-and-envs-global.md"
-depends_on:
-  - "../../INDEX.md"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---
 
-# Global Parameter Feature Map
+# Global Parameter Feature Map (High Confidence)
 
-This document gives a global view for weak-model execution: every discovered parameter/env is mapped to feature semantics, usage intent, and common combinations.
+Generated at: `2026-03-05`
 
-## Coverage
-
-- vLLM args: **214**
-- vLLM envs: **219**
-- vLLM-Ascend args (observed): **159**
-- vLLM-Ascend envs: **24**
-
-## Feature tags
-
-`quantization`, `graph_mode`, `tensor_parallel`, `data_parallel`, `expert_parallel`, `context_parallel`, `prefill_decode_disaggregation`, `prefix_cache`, `lora`, `speculative_decode`, `weight_prefetch`, `sleep_mode`, `throughput_tuning`, `memory_tuning`, `network_serving`, `security_auth`, `multimodal`, `logging_debug`, `profiling_observability`, `model_selection`, `general_runtime`.
-
-## vLLM Serve Args -> Semantics
-
-| Parameter | Primary feature | Secondary features | Usage | Common combinations |
-| --- | --- | --- | --- | --- |
-| `--additional-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--aggregate-engine-logging` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--all2all-backend` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--tensor-parallel-size`, `--data-parallel-size`, `--distributed-executor-backend` |
-| `--allow-credentials` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--allow-deprecated-quantization` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `--allowed-headers` | `network_serving` | `security_auth` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--allowed-local-media-path` | `network_serving` | `multimodal` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--allowed-media-domains` | `network_serving` | `multimodal` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--allowed-methods` | `network_serving` | `security_auth` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--allowed-origins` | `network_serving` | `security_auth` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--api-key` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--ssl-certfile`, `--allowed-origins` |
-| `--api-server-count` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--data-parallel-rpc-port` |
-| `--async-scheduling` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--max-num-batched-tokens` |
-| `--attention-backend` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--attention-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--block-size` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len` |
-| `--calculate-kv-scales` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--chat-template` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--backend`, `--dataset-name` |
-| `--chat-template-content-format` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name`, `--device` |
-| `--code-revision` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--collect-detailed-traces` | `logging_debug` | `profiling_observability` | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--compilation-config` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--enforce-eager`, `--max-num-batched-tokens` |
-| `--config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--config-format` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--convert` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--cp-kv-cache-interleave-size` | `context_parallel` | `memory_tuning` | Splits long-context KV processing across ranks. | `--decode-context-parallel-size`, `--prefill-context-parallel-size` |
-| `--cpu-offload-gb` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--cudagraph-capture-sizes` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `--cudagraph-metrics` | `graph_mode` | `profiling_observability` | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `--data-parallel-address` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-rpc-port`, `--data-parallel-size` |
-| `--data-parallel-backend` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--data-parallel-external-lb` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--data-parallel-hybrid-lb` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--data-parallel-rank` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-rpc-port` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-size` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--data-parallel-size-local` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-start-rank` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-address`, `--data-parallel-rpc-port`, `--data-parallel-size` |
-| `--dbo-decode-token-threshold` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--dbo-prefill-token-threshold` | `prefill_decode_disaggregation` | `throughput_tuning` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--dcp-kv-cache-interleave-size` | `context_parallel` | `memory_tuning` | Splits long-context KV processing across ranks. | `--prefill-context-parallel-size`, `--decode-context-parallel-size`, `--max-model-len` |
-| `--decode-context-parallel-size` | `context_parallel` | - | Splits long-context KV processing across ranks. | `--prefill-context-parallel-size` |
-| `--default-chat-template-kwargs` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--default-mm-loras` | `lora` | `multimodal` | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--disable-access-log-for-endpoints` | `network_serving` | `logging_debug` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--disable-cascade-attn` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--disable-chunked-mm-input` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--disable-custom-all-reduce` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--disable-fastapi-docs` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--disable-frontend-multiprocessing` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--disable-hybrid-kv-cache-manager` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--disable-log-requests` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--disable-log-stats` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--max-log-len`, `--log-config-file` |
-| `--disable-nccl-for-dp-synchronization` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--disable-sliding-window` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--disable-uvicorn-access-log` | `network_serving` | `logging_debug` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--distributed-executor-backend` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--download-dir` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--dtype` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--ec-transfer-config` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--decode-servers-urls` |
-| `--enable-auto-tool-choice` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--enable-chunked-prefill` | `prefill_decode_disaggregation` | `throughput_tuning` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--enable-dbo` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--enable-eplb` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `--enable-expert-parallel` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--tensor-parallel-size`, `--data-parallel-size` |
-| `--enable-flashinfer-autotune` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--enable-force-include-usage` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--enable-layerwise-nvtx-tracing` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--enable-log-deltas` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--enable-log-outputs` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--enable-log-requests` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--enable-logging-iteration-details` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--enable-lora` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--lora-modules` |
-| `--enable-mfu-metrics` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--profiler-config`, `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--enable-mm-embeds` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--enable-mm-processor-stats` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--enable-offline-docs` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--enable-prefix-caching` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--enable-prompt-embeds` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--enable-prompt-tokens-details` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--enable-request-id-headers` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--backend`, `--dataset-name` |
-| `--enable-return-routed-experts` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `--enable-server-load-tracking` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--enable-sleep-mode` | `sleep_mode` | - | Enables idle-time memory/power saving mode. | `--gpu-memory-utilization`, `--max-model-len` |
-| `--enable-ssl-refresh` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--enable-tokenizer-info-endpoint` | `network_serving` | `model_selection` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--enable-tower-connector-lora` | `prefill_decode_disaggregation` | `lora` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--enforce-eager` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--max-num-batched-tokens` |
-| `--eplb-config` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `--exclude-tools-when-tool-choice-none` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--expert-placement-strategy` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `--fully-sharded-loras` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--generation-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-args` |
-| `--gpu-memory-utilization` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--max-model-len` |
-| `--h11-max-header-count` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--h11-max-incomplete-event-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--headless` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--hf-config-path` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--hf-overrides` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--hf-token` | `security_auth` | `model_selection` | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--host` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--port` |
-| `--ignore-patterns` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--interleave-mm-strings` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--io-processor-plugin` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--kernel-config` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `--kv-cache-dtype` | `memory_tuning` | `model_selection` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--kv-cache-memory-bytes` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--kv-cache-metrics` | `memory_tuning` | `profiling_observability` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--kv-cache-metrics-sample` | `memory_tuning` | `profiling_observability` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--kv-events-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--kv-offloading-backend` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--kv-offloading-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--kv-sharing-fast-prefill` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--kv-transfer-config` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--data-parallel-size`, `--data-parallel-address` |
-| `--limit-mm-per-prompt` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--allowed-local-media-path` |
-| `--load-format` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--log-config-file` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len` |
-| `--log-error-stack` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--logits-processor-pattern` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--logits-processors` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--logprobs-mode` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--long-prefill-token-threshold` | `prefill_decode_disaggregation` | `memory_tuning` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--lora-dtype` | `lora` | `model_selection` | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--lora-modules` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora` |
-| `--mamba-block-size` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--mamba-cache-dtype` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--mamba-cache-mode` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--mamba-ssm-cache-dtype` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--master-addr` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--master-port` |
-| `--master-port` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--master-addr` |
-| `--max-cpu-loras` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--max-cudagraph-capture-size` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `--max-log-len` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--log-config-file` |
-| `--max-logprobs` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--max-long-partial-prefills` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--max-lora-rank` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--max-loras` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules` |
-| `--max-model-len` | `memory_tuning` | `model_selection` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--block-size` |
-| `--max-num-batched-tokens` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-seqs` |
-| `--max-num-partial-prefills` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--max-num-seqs` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens` |
-| `--max-parallel-loading-workers` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--media-io-kwargs` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--middleware` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--mm-encoder-attn-backend` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--mm-encoder-only` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--mm-encoder-tp-mode` | `tensor_parallel` | `multimodal` | Splits model tensors across NPUs/GPUs for scale-out inference. | `--tensor-parallel-size`, `--data-parallel-size`, `--distributed-executor-backend` |
-| `--mm-processor-cache-gb` | `memory_tuning` | `multimodal` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--mm-processor-cache-type` | `memory_tuning` | `multimodal` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--mm-processor-kwargs` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--mm-shm-cache-max-object-size-mb` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--model` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--tokenizer`, `--revision`, `--trust-remote-code` |
-| `--model-impl` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--model-loader-extra-config` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--model-weights` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--nnodes` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--node-rank` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--num-gpu-blocks-override` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--optimization-level` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `--otlp-traces-endpoint` | `network_serving` | `logging_debug`, `profiling_observability` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--override-attention-dtype` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--override-generation-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--pipeline-parallel-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--address`, `--device` |
-| `--pooler-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--port` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--served-model-name` |
-| `--prefill-context-parallel-size` | `context_parallel` | `prefill_decode_disaggregation` | Splits long-context KV processing across ranks. | `--decode-context-parallel-size`, `--cp-kv-cache-interleave-size` |
-| `--prefix-caching-hash-algo` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--max-model-len` |
-| `--profiler-config` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--pt-load-map-location` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--quantization` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `--ray-workers-use-nsight` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--reasoning-parser` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--additional-config` |
-| `--reasoning-parser-plugin` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--response-role` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--return-tokens-as-token-ids` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--revision` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--trust-remote-code` |
-| `--root-path` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--runner` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--safetensors-load-strategy` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--scheduler-cls` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--scheduling-policy` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--seed` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--served-model-name` | `network_serving` | `model_selection` | Controls API host/port/endpoints and serving interface. | `--port` |
-| `--show-hidden-metrics-for-version` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--profiler-config`, `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--skip-mm-profiling` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--skip-tokenizer-init` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--specialize-active-lora` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `--speculative-config` | `speculative_decode` | - | Enables draft/speculative decoding acceleration path. | `--max-num-batched-tokens`, `--async-scheduling` |
-| `--ssl-ca-certs` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--ssl-cert-reqs` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--ssl-certfile` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--allowed-origins` |
-| `--ssl-ciphers` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--ssl-keyfile` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--stream-interval` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--structured-outputs-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--swap-space` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--tensor-parallel-size` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--data-parallel-size`, `--distributed-executor-backend` |
-| `--tokenizer` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model` |
-| `--tokenizer-mode` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--tokenizer-revision` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--tokens-only` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--tool-call-parser` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--tool-parser-plugin` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--tool-server` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--trust-remote-code` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--trust-request-chat-template` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--ubatch-size` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--uds` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--use-tqdm-on-load` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--uvicorn-log-level` | `network_serving` | `logging_debug` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--video-pruning-rate` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `--weight-transfer-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--worker-cls` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--worker-extension-cls` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-
-## vLLM Env Vars -> Semantics
-
-| Variable | Primary feature | Secondary features | Usage | Common combinations |
-| --- | --- | --- | --- | --- |
-| `CMAKE_BUILD_TYPE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `CUDA_HOME` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `CUDA_VISIBLE_DEVICES` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `K_SCALE_CONSTANT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `LD_LIBRARY_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `LOCAL_RANK` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `MAX_JOBS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `NOTE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `NO_COLOR` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `NVCC_THREADS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `Q_SCALE_CONSTANT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `S3_ACCESS_KEY_ID` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `S3_ENDPOINT_URL` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `S3_SECRET_ACCESS_KEY` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VERBOSE` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `VLLM_ALLOW_INSECURE_SERIALIZATION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ALLOW_LONG_MAX_MODEL_LEN` | `memory_tuning` | `model_selection` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `VLLM_ALLOW_RUNTIME_LORA_UPDATING` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `VLLM_ALLREDUCE_USE_SYMM_MEM` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_API_KEY` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `VLLM_ASSETS_CACHE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ASSETS_CACHE_MODEL_CLEAN` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_AUDIO_FETCH_TIMEOUT` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER` | `quantization` | `multimodal` | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_CACHE_ROOT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CI_USE_S3` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_COMPILE_CACHE_SAVE_FORMAT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_COMPUTE_NANS_IN_LOGITS` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_CONFIGURE_LOGGING` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_CONFIG_ROOT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CPU_KVCACHE_SPACE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CPU_NUM_OF_RESERVED_CPU` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CPU_OMP_THREADS_BIND` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CPU_SGL_KERNEL` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CUDART_SO_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_CUSTOM_SCOPES_FOR_PROFILING` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DBO_COMM_SMS` | `throughput_tuning` | `multimodal` | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `VLLM_DEBUG_DUMP_PATH` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_DEBUG_LOG_API_SERVER_RESPONSE` | `network_serving` | `logging_debug` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_DEBUG_MFU_METRICS` | `logging_debug` | `profiling_observability` | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_DEBUG_WORKSPACE` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_DEEPEPLL_NVFP4_DISPATCH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DEEPEP_BUFFER_SIZE_MB` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DEEP_GEMM_WARMUP` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_DISABLED_KERNELS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DISABLE_COMPILE_CACHE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DISABLE_LOG_LOGO` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_DISABLE_PYNCCL` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DOCKER_BUILD_CONTEXT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DO_NOT_TRACK` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_DP_MASTER_IP` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_DP_MASTER_PORT` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_DP_RANK` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_DP_RANK_LOCAL` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_DP_SIZE` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_ENABLE_CUDAGRAPH_GC` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ENABLE_MOE_DP_CHUNK` | `data_parallel` | `expert_parallel` | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_ENABLE_RESPONSES_API_STORE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ENABLE_V1_MULTIPROCESSING` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ENGINE_ITERATION_TIMEOUT_S` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ENGINE_READY_TIMEOUT_S` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_FLASHINFER_MOE_BACKEND` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_FLOAT32_MATMUL_PRECISION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_FORCE_AOT_LOAD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_FUSED_MOE_CHUNK_SIZE` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_GC_DEBUG` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_HAS_FLASHINFER_CUBIN` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_HOST_IP` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_HTTP_TIMEOUT_KEEP_ALIVE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_IMAGE_FETCH_TIMEOUT` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_KEEP_ALIVE_ON_ENGINE_DEATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_KV_CACHE_LAYOUT` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_LOGGING_COLOR` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOGGING_CONFIG_PATH` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOGGING_LEVEL` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOGGING_PREFIX` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOGGING_STREAM` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOG_BATCHSIZE_INTERVAL` | `throughput_tuning` | `logging_debug` | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `VLLM_LOG_MODEL_INSPECTION` | `logging_debug` | `model_selection` | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOG_STATS_INTERVAL` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_LOOPBACK_IP` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_LORA_DISABLE_PDL` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `VLLM_LORA_RESOLVER_CACHE_DIR` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `VLLM_LORA_RESOLVER_HF_REPO_LIST` | `lora` | `model_selection` | Enables adapter loading and runtime LoRA routing. | `--enable-lora`, `--lora-modules`, `--max-loras` |
-| `VLLM_MAIN_CUDA_VERSION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MARLIN_INPUT_DTYPE` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_MARLIN_USE_ATOMIC_ADD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MAX_AUDIO_CLIP_FILESIZE_MB` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_MEDIA_CONNECTOR` | `prefill_decode_disaggregation` | `multimodal` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `VLLM_MEDIA_LOADING_THREAD_COUNT` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_MEDIA_URL_ALLOW_REDIRECTS` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_MLA_DISABLE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MM_HASHER_ALGORITHM` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_MODEL_REDIRECT_PATH` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_MOE_DP_CHUNK_SIZE` | `data_parallel` | `expert_parallel` | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_MOE_ROUTING_SIMULATION_STRATEGY` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_MOE_USE_DEEP_GEMM` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MOONCAKE_BOOTSTRAP_PORT` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_MORIIO_CONNECTOR_READ_MODE` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `VLLM_MORIIO_NUM_WORKERS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MORIIO_POST_BATCH_SIZE` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `VLLM_MORIIO_QP_PER_TRANSFER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MQ_MAX_CHUNK_BYTES_MB` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MSGPACK_ZERO_COPY_THRESHOLD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_MXFP4_USE_MARLIN` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_NCCL_INCLUDE_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_NCCL_SO_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_NIXL_ABORT_REQUEST_TIMEOUT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_NIXL_SIDE_CHANNEL_HOST` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_NIXL_SIDE_CHANNEL_PORT` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_NO_USAGE_STATS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_NVFP4_GEMM_BACKEND` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_NVTX_SCOPES_FOR_PROFILING` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_PATTERN_MATCH_DEBUG` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_PLUGINS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_PORT` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_PP_LAYER_PARTITION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_PROCESS_NAME_PREFIX` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_RANDOMIZE_DP_DUMMY_INPUTS` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_RAY_BUNDLE_INDICES` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_RAY_DP_PACK_STRATEGY` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `VLLM_RAY_PER_WORKER_GPUS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_RINGBUFFER_WARNING_INTERVAL` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_CUSTOM_PAGED_ATTN` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_FP8_MFMA_PAGE_ATTN` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_ROCM_FP8_PADDING` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_ROCM_MOE_PADDING` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_QUICK_REDUCE_QUANTIZATION` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_FP4BMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_FP4_ASM_GEMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_FP8BMM` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_LINEAR` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_MHA` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_MLA` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_MOE` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_ROCM_USE_AITER_PAGED_ATTN` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_RMSNORM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_TRITON_GEMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_TRITON_ROPE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ROCM_USE_SKINNY_GEMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_RPC_BASE_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_RPC_TIMEOUT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_SERVER_DEV_MODE` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_SKIP_P2P_CHECK` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_SLEEP_WHEN_IDLE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TARGET_DEVICE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TEST_FORCE_FP8_MARLIN` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_TEST_FORCE_LOAD_FORMAT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TPU_BUCKET_PADDING_GAP` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TPU_MOST_MODEL_LEN` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_TPU_USING_PATHWAYS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_TRACE_FUNCTION` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_TUNED_CONFIG_FOLDER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USAGE_SOURCE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USAGE_STATS_SERVER` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `VLLM_USE_AOT_COMPILE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_BYTECODE_HOOK` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_DEEP_GEMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_DEEP_GEMM_E8M0` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_FBGEMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_FLASHINFER_MOE_FP16` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_FP4` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_FP8` | `quantization` | `expert_parallel` | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_INT4` | `quantization` | `expert_parallel` | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_BF16` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8` | `quantization` | `expert_parallel` | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS` | `quantization` | `expert_parallel` | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_USE_FLASHINFER_SAMPLER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_FUSED_MOE_GROUPED_TOPK` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `VLLM_USE_MEGA_AOT_ARTIFACT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_MODELSCOPE` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_USE_NCCL_SYMM_MEM` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_USE_NVFP4_CT_EMULATIONS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_PRECOMPILED` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_RAY_WRAPPED_PP_COMM` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_STANDALONE_COMPILE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_USE_TRITON_AWQ` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `VLLM_USE_V2_MODEL_RUNNER` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `VLLM_V1_OUTPUT_PROC_CHUNK_SIZE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_V1_USE_OUTLINES_CACHE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_VIDEO_FETCH_TIMEOUT` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_VIDEO_LOADER_BACKEND` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--limit-mm-per-prompt`, `--mm-processor-cache-gb`, `--allowed-local-media-path` |
-| `VLLM_WORKER_MULTIPROC_METHOD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_XGRAMMAR_CACHE_MB` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_XLA_CACHE_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_XLA_CHECK_RECOMPILATION` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--enforce-eager`, `--max-num-batched-tokens` |
-| `VLLM_XLA_USE_SPMD` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `V_SCALE_CONSTANT` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-
-## vLLM-Ascend Args -> Semantics
-
-| Parameter | Primary feature | Secondary features | Usage | Common combinations |
-| --- | --- | --- | --- | --- |
-| `--20250429` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--additional-config` |
-| `--additional-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--address` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device` |
-| `--allowed-local-media-path` | `network_serving` | `multimodal` | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--api-key` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--ssl-certfile`, `--allowed-origins` |
-| `--api-server-count` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--data-parallel-rpc-port` |
-| `--api-url` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--async-scheduling` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--max-num-batched-tokens` |
-| `--audio-path1` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--audio-path2` |
-| `--audio-path2` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--audio-path1` |
-| `--backend` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--block-size` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len` |
-| `--bs` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dcp`, `--pcp` |
-| `--chat-template` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--backend`, `--dataset-name` |
-| `--chat-template-content-format` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name`, `--device` |
-| `--compilation-config` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--enforce-eager`, `--max-num-batched-tokens` |
-| `--compress-process-num` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--enable-compress`, `--output` |
-| `--cp-kv-cache-interleave-size` | `context_parallel` | `memory_tuning` | Splits long-context KV processing across ranks. | `--decode-context-parallel-size`, `--prefill-context-parallel-size` |
-| `--data` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--engine` |
-| `--data-parallel-address` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-rpc-port`, `--data-parallel-size` |
-| `--data-parallel-rank` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-rpc-port` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-size` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--data-parallel-size-local` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size` |
-| `--data-parallel-start-rank` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-address`, `--data-parallel-rpc-port`, `--data-parallel-size` |
-| `--dataset-args` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--dataset-name` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--random-input`, `--result-dir` |
-| `--datasets` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--dcp` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--bs`, `--pcp` |
-| `--debug` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--decode-context-parallel-size` | `context_parallel` | - | Splits long-context KV processing across ranks. | `--prefill-context-parallel-size` |
-| `--decode-servers-urls` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--decoder-hosts` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--decoder-hosts-num` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--decoder-ports` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--decoder-hosts`, `--host`, `--port` |
-| `--decoder-ports-inc` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--depth` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--device` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--name`, `--rm`, `--shm-size` |
-| `--disable-log-request` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `--disable-log-stats` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--max-log-len`, `--log-config-file` |
-| `--distributed-executor-backend` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `--dp-address` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--dp-rank-start`, `--dp-rpc-port`, `--dp-size` |
-| `--dp-hosts` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--data-parallel-rank`, `--dp-ports` |
-| `--dp-ports` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--data-parallel-rank`, `--dp-hosts` |
-| `--dp-rank-start` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--dp-address`, `--dp-rpc-port`, `--dp-size` |
-| `--dp-rpc-port` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--dp-address`, `--dp-rank-start`, `--dp-size` |
-| `--dp-size` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--dp-address`, `--dp-rank-start` |
-| `--dp-size-local` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--dp-address`, `--dp-rank-start`, `--dp-rpc-port` |
-| `--dtype` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--ec-transfer-config` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--decode-servers-urls` |
-| `--enable-chunked-prefill` | `prefill_decode_disaggregation` | `throughput_tuning` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--enable-compress` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--compress-process-num`, `--output` |
-| `--enable-expert-parallel` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--tensor-parallel-size`, `--data-parallel-size` |
-| `--enable-lora` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--lora-modules` |
-| `--enable-prefix-caching` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--enable-request-id-headers` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--backend`, `--dataset-name` |
-| `--enable-sleep-mode` | `sleep_mode` | - | Enables idle-time memory/power saving mode. | `--gpu-memory-utilization`, `--max-model-len` |
-| `--encode-servers-urls` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--decode-servers-urls`, `--host`, `--port` |
-| `--encoder-dispatch-mode` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--endpoint` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--enforce-eager` | `graph_mode` | - | Controls graph/eager execution and compile behavior. | `--compilation-config`, `--max-num-batched-tokens` |
-| `--engine` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data` |
-| `--engine-base-url` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--port`, `--served-model-name` |
-| `--eval-batch-size` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--eval-type` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-args` |
-| `--extra-index-url` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--chat-template-content-format`, `--dataset-name` |
-| `--generation-config` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-args` |
-| `--gpu-memory-utilization` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--max-model-len` |
-| `--head` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--address`, `--device` |
-| `--header` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data`, `--engine` |
-| `--headless` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--hf-overrides` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--host` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--port` |
-| `--ignore-eos` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--init` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device` |
-| `--kv-transfer-config` | `prefill_decode_disaggregation` | - | Separates prefill/decode services or connectors. | `--data-parallel-size`, `--data-parallel-address` |
-| `--limit` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-args` |
-| `--limit-mm-per-prompt` | `multimodal` | - | Controls multimodal I/O paths and media preprocessing. | `--allowed-local-media-path` |
-| `--load-format` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--location` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data`, `--engine` |
-| `--lora-modules` | `lora` | - | Enables adapter loading and runtime LoRA routing. | `--enable-lora` |
-| `--master-addr` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--master-port` |
-| `--master-port` | `data_parallel` | `network_serving` | Replicates workers for throughput and multi-node serving. | `--master-addr` |
-| `--max` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--max-concurrency` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--max-model-len` | `memory_tuning` | `model_selection` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--block-size` |
-| `--max-num-batched-tokens` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-seqs` |
-| `--max-num-seqs` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens` |
-| `--max-retries` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--retry-delay` |
-| `--max-waiting-retries` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--metric-percentiles` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--profiler-config`, `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--mm-processor-cache-gb` | `memory_tuning` | `multimodal` | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--mode` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--datasets` |
-| `--model` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--tokenizer`, `--revision`, `--trust-remote-code` |
-| `--model-loader-extra-config` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--model-weight-gib` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--models` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--name` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device`, `--rm`, `--shm-size` |
-| `--net` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device`, `--name`, `--rm` |
-| `--network` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device` |
-| `--nnodes` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--no-enable-chunked-prefill` | `prefill_decode_disaggregation` | `throughput_tuning` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--no-enable-prefix-caching` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--node-ip-address` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--address`, `--device` |
-| `--node-rank` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--node-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--num-prompts` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--output` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--compress-process-num` |
-| `--output-dir` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data`, `--engine` |
-| `--pcp` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--bs`, `--dcp` |
-| `--percentile-metrics` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--profiler-config`, `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--pipeline-parallel-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--address`, `--device` |
-| `--pod` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data`, `--engine` |
-| `--port` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--host`, `--served-model-name` |
-| `--prefill-context-parallel-size` | `context_parallel` | `prefill_decode_disaggregation` | Splits long-context KV processing across ranks. | `--decode-context-parallel-size`, `--cp-kv-cache-interleave-size` |
-| `--prefill-servers-urls` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--decode-servers-urls` |
-| `--prefiller-hosts` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--decoder-hosts` |
-| `--prefiller-hosts-num` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--prefiller-port` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--decoder-hosts` |
-| `--prefiller-ports` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--decoder-hosts` |
-| `--prefiller-ports-inc` | `prefill_decode_disaggregation` | `network_serving` | Separates prefill/decode services or connectors. | `--kv-transfer-config`, `--data-parallel-size`, `--data-parallel-address` |
-| `--prefix-repetition-num-prefixes` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--prefix-repetition-output-len` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--prefix-repetition-prefix-len` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--prefix-repetition-suffix-len` | `prefix_cache` | - | Reuses shared prompt prefixes to reduce prefill cost. | `--enable-prefix-caching`, `--prefix-caching-hash-algo`, `--max-model-len` |
-| `--privileged` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device` |
-| `--proc-per-node` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--profiler-config` | `profiling_observability` | - | Controls profiling, traces, and metrics visibility. | `--collect-detailed-traces`, `--otlp-traces-endpoint` |
-| `--quantization` | `quantization` | - | Controls model precision and quantized weight loading path. | `--model`, `--dtype`, `--tensor-parallel-size` |
-| `--random-input` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name`, `--result-dir` |
-| `--random-input-len` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--random-output-len` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name` |
-| `--reasoning-parser` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--additional-config` |
-| `--recursive` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device` |
-| `--request-rate` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `--result-dir` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name`, `--random-input` |
-| `--retry-delay` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--max-retries` |
-| `--rm` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device`, `--name`, `--shm-size` |
-| `--runner` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--save-result` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--dataset-name`, `--random-input` |
-| `--seed` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--served-model-name` | `network_serving` | `model_selection` | Controls API host/port/endpoints and serving interface. | `--port` |
-| `--shm-size` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--device`, `--name`, `--rm` |
-| `--sleep-mode-level` | `sleep_mode` | - | Enables idle-time memory/power saving mode. | `--enable-sleep-mode` |
-| `--source` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--data`, `--engine` |
-| `--speculative-config` | `speculative_decode` | - | Enables draft/speculative decoding acceleration path. | `--max-num-batched-tokens`, `--async-scheduling` |
-| `--summarizer` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--datasets`, `--device` |
-| `--swap-space` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `--task` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--tasks` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--temperature` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `--tensor-parallel-size` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--data-parallel-size`, `--distributed-executor-backend` |
-| `--tokenizer` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model` |
-| `--tokenizer-mode` | `model_selection` | - | Selects model/tokenizer/artifact and runner mode. | `--model`, `--tokenizer`, `--revision` |
-| `--tp` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--tensor-parallel-size`, `--data-parallel-size`, `--distributed-executor-backend` |
-| `--tp-size` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--tensor-parallel-size`, `--data-parallel-size`, `--distributed-executor-backend` |
-| `--trust-remote-code` | `security_auth` | - | Controls authentication, TLS, and request trust boundaries. | `--api-key`, `--ssl-certfile`, `--allowed-origins` |
-| `--vllm-start-port` | `network_serving` | - | Controls API host/port/endpoints and serving interface. | `--dp-rpc-port` |
-| `--waiting-retry-interval` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-
-## vLLM-Ascend Env Vars -> Semantics
-
-| Variable | Primary feature | Secondary features | Usage | Common combinations |
-| --- | --- | --- | --- | --- |
-| `ASCEND_HOME_PATH` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `CMAKE_BUILD_TYPE` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `COMPILE_CUSTOM_KERNELS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `CXX_COMPILER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `C_COMPILER` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `DYNAMIC_EPLB` | `expert_parallel` | - | Enables MoE expert routing parallelism; only valid on MoE models. | `--enable-expert-parallel`, `--tensor-parallel-size`, `--data-parallel-size` |
-| `HCCL_SO_PATH` | `data_parallel` | - | Replicates workers for throughput and multi-node serving. | `--data-parallel-size`, `--data-parallel-address`, `--data-parallel-rpc-port` |
-| `MAX_JOBS` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `MSMONITOR_USE_DAEMON` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `SOC_VERSION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VERBOSE` | `logging_debug` | - | Controls logs, debug verbosity, and troubleshooting signal. | `--disable-log-stats`, `--max-log-len`, `--log-config-file` |
-| `VLLM_ASCEND_BALANCE_SCHEDULING` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL` | `context_parallel` | - | Splits long-context KV processing across ranks. | `--prefill-context-parallel-size`, `--decode-context-parallel-size`, `--max-model-len` |
-| `VLLM_ASCEND_ENABLE_FLASHCOMM1` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `VLLM_ASCEND_ENABLE_FUSED_MC2` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE` | `tensor_parallel` | - | Splits model tensors across NPUs/GPUs for scale-out inference. | `--tensor-parallel-size`, `--data-parallel-size`, `--distributed-executor-backend` |
-| `VLLM_ASCEND_ENABLE_MLAPO` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ASCEND_ENABLE_NZ` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
-| `VLLM_ASCEND_ENABLE_PREFETCH_MLP` | `weight_prefetch` | - | Warms model weight blocks before decode to reduce stalls. | `--additional-config`, `--max-num-batched-tokens`, `--gpu-memory-utilization` |
-| `VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE` | `throughput_tuning` | - | Tunes scheduler and batching for higher throughput. | `--async-scheduling`, `--max-num-batched-tokens`, `--max-num-seqs` |
-| `VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK` | `memory_tuning` | - | Bounds memory pressure and sequence length behavior. | `--gpu-memory-utilization`, `--max-model-len`, `--block-size` |
-| `VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE` | `weight_prefetch` | - | Warms model weight blocks before decode to reduce stalls. | `--additional-config`, `--max-num-batched-tokens`, `--gpu-memory-utilization` |
-| `VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE` | `weight_prefetch` | - | Warms model weight blocks before decode to reduce stalls. | `--additional-config`, `--max-num-batched-tokens`, `--gpu-memory-utilization` |
-| `VLLM_VERSION` | `general_runtime` | - | General runtime behavior; review source and profile defaults. | `--model`, `--device`, `--dtype` |
+| Name | Primary feature | Status | Confidence | Definition ref | Web refs |
+| --- | --- | --- | --- | --- | --- |
+| `--additional-config` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1211 | 5 |
+| `--aggregate-engine-logging` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1232 | 3 |
+| `--all2all-backend` | `tensor_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:875 | 4 |
+| `--allow-deprecated-quantization` | `quantization` | `aligned` | `0.91` | vllm/engine/arg_utils.py:671 | 6 |
+| `--allowed-local-media-path` | `multimodal` | `aligned` | `0.95` | vllm/engine/arg_utils.py:658 | 5 |
+| `--allowed-media-domains` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:661 | 3 |
+| `--api-server-count` | `network_serving` | `aligned` | `0.95` | vllm/entrypoints/openai/cli_args.py:293 | 6 |
+| `--async-scheduling` | `throughput_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1152 | 5 |
+| `--attention-backend` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:759 | 3 |
+| `--attention-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1207 | 3 |
+| `--block-size` | `memory_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:924 | 5 |
+| `--calculate-kv-scales` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:947 | 3 |
+| `--code-revision` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:665 | 3 |
+| `--collect-detailed-traces` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1071 | 3 |
+| `--compilation-config` | `graph_mode` | `aligned` | `0.98` | vllm/engine/arg_utils.py:1204 | 7 |
+| `--config` | `general_runtime` | `aligned` | `0.88` | vllm/entrypoints/openai/cli_args.py:301 | 3 |
+| `--config-format` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:697 | 3 |
+| `--convert` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:649 | 3 |
+| `--cp-kv-cache-interleave-size` | `context_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:810 | 7 |
+| `--cpu-offload-gb` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:946 | 3 |
+| `--cudagraph-capture-sizes` | `graph_mode` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1165 | 5 |
+| `--cudagraph-metrics` | `graph_mode` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1082 | 5 |
+| `--data-parallel-address` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:841 | 6 |
+| `--data-parallel-backend` | `data_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:853 | 4 |
+| `--data-parallel-external-lb` | `data_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:865 | 4 |
+| `--data-parallel-hybrid-lb` | `data_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:860 | 4 |
+| `--data-parallel-rank` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:822 | 5 |
+| `--data-parallel-rpc-port` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:847 | 6 |
+| `--data-parallel-size` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:819 | 6 |
+| `--data-parallel-size-local` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:835 | 7 |
+| `--data-parallel-start-rank` | `data_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:829 | 7 |
+| `--dbo-decode-token-threshold` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:883 | 3 |
+| `--dbo-prefill-token-threshold` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:887 | 3 |
+| `--dcp-kv-cache-interleave-size` | `context_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:806 | 5 |
+| `--decode-context-parallel-size` | `context_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:801 | 6 |
+| `--default-mm-loras` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1046 | 5 |
+| `--disable-cascade-attn` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:685 | 3 |
+| `--disable-chunked-mm-input` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1142 | 3 |
+| `--disable-custom-all-reduce` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:909 | 3 |
+| `--disable-hybrid-kv-cache-manager` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1148 | 3 |
+| `--disable-log-requests` | `logging_debug` | `upstream_delta` | `0.68` | vllm/engine/arg_utils.py:2087 | 3 |
+| `--disable-log-stats` | `logging_debug` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1226 | 4 |
+| `--disable-nccl-for-dp-synchronization` | `data_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:891 | 4 |
+| `--disable-sliding-window` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:682 | 3 |
+| `--distributed-executor-backend` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:785 | 5 |
+| `--download-dir` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:740 | 3 |
+| `--dtype` | `model_selection` | `aligned` | `0.95` | vllm/engine/arg_utils.py:655 | 6 |
+| `--ec-transfer-config` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1201 | 3 |
+| `--enable-chunked-prefill` | `prefill_decode_disaggregation` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1135 | 5 |
+| `--enable-dbo` | `throughput_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:878 | 3 |
+| `--enable-eplb` | `expert_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:895 | 4 |
+| `--enable-expert-parallel` | `expert_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:870 | 6 |
+| `--enable-flashinfer-autotune` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1179 | 3 |
+| `--enable-layerwise-nvtx-tracing` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1086 | 3 |
+| `--enable-log-requests` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:2081 | 3 |
+| `--enable-logging-iteration-details` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1094 | 3 |
+| `--enable-lora` | `lora` | `aligned` | `0.98` | vllm/engine/arg_utils.py:1027 | 6 |
+| `--enable-mfu-metrics` | `profiling_observability` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1090 | 3 |
+| `--enable-mm-embeds` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:981 | 3 |
+| `--enable-prefix-caching` | `prefix_cache` | `aligned` | `0.98` | vllm/engine/arg_utils.py:936 | 6 |
+| `--enable-prompt-embeds` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:691 | 3 |
+| `--enable-return-routed-experts` | `expert_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:676 | 4 |
+| `--enable-sleep-mode` | `expert_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:719 | 5 |
+| `--enable-tower-connector-lora` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1038 | 5 |
+| `--enforce-eager` | `graph_mode` | `aligned` | `0.98` | vllm/engine/arg_utils.py:675 | 7 |
+| `--eplb-config` | `expert_parallel` | `aligned` | `0.91` | vllm/engine/arg_utils.py:896 | 4 |
+| `--expert-placement-strategy` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:897 | 3 |
+| `--fully-sharded-loras` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1043 | 5 |
+| `--generation-config` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:713 | 4 |
+| `--gpu-memory-utilization` | `memory_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:925 | 6 |
+| `--headless` | `general_runtime` | `aligned` | `0.95` | vllm/entrypoints/openai/cli_args.py:286 | 6 |
+| `--hf-config-path` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:657 | 3 |
+| `--hf-overrides` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:708 | 5 |
+| `--hf-token` | `security_auth` | `aligned` | `0.88` | vllm/engine/arg_utils.py:700 | 3 |
+| `--ignore-patterns` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:747 | 3 |
+| `--interleave-mm-strings` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1010 | 3 |
+| `--io-processor-plugin` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:729 | 3 |
+| `--kernel-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1210 | 3 |
+| `--kv-cache-dtype` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:932 | 3 |
+| `--kv-cache-memory-bytes` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:928 | 3 |
+| `--kv-cache-metrics` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1075 | 3 |
+| `--kv-cache-metrics-sample` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1078 | 3 |
+| `--kv-events-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1200 | 3 |
+| `--kv-offloading-backend` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:968 | 3 |
+| `--kv-offloading-size` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:965 | 3 |
+| `--kv-sharing-fast-prefill` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:950 | 3 |
+| `--kv-transfer-config` | `prefill_decode_disaggregation` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1197 | 5 |
+| `--limit-mm-per-prompt` | `multimodal` | `aligned` | `0.95` | vllm/engine/arg_utils.py:978 | 5 |
+| `--load-format` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:739 | 5 |
+| `--logits-processor-pattern` | `logging_debug` | `upstream_delta` | `0.68` | vllm/engine/arg_utils.py:710 | 3 |
+| `--logits-processors` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:726 | 3 |
+| `--logprobs-mode` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:681 | 3 |
+| `--long-prefill-token-threshold` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1126 | 3 |
+| `--lora-dtype` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1034 | 5 |
+| `--mamba-block-size` | `memory_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:959 | 3 |
+| `--mamba-cache-dtype` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:953 | 3 |
+| `--mamba-cache-mode` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:962 | 3 |
+| `--mamba-ssm-cache-dtype` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:956 | 3 |
+| `--master-addr` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:794 | 4 |
+| `--master-port` | `network_serving` | `aligned` | `0.95` | vllm/engine/arg_utils.py:795 | 4 |
+| `--max-cpu-loras` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1042 | 5 |
+| `--max-cudagraph-capture-size` | `graph_mode` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1168 | 5 |
+| `--max-logprobs` | `logging_debug` | `aligned` | `0.88` | vllm/engine/arg_utils.py:680 | 3 |
+| `--max-long-partial-prefills` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1122 | 3 |
+| `--max-lora-rank` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1033 | 5 |
+| `--max-loras` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1032 | 5 |
+| `--max-model-len` | `memory_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:669 | 6 |
+| `--max-num-batched-tokens` | `throughput_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1105 | 5 |
+| `--max-num-partial-prefills` | `prefill_decode_disaggregation` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1119 | 3 |
+| `--max-num-seqs` | `throughput_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1112 | 5 |
+| `--max-parallel-loading-workers` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:902 | 3 |
+| `--media-io-kwargs` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:984 | 3 |
+| `--mm-encoder-attn-backend` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1006 | 3 |
+| `--mm-encoder-only` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1000 | 3 |
+| `--mm-encoder-tp-mode` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1003 | 3 |
+| `--mm-processor-cache-gb` | `multimodal` | `aligned` | `0.95` | vllm/engine/arg_utils.py:990 | 4 |
+| `--mm-processor-cache-type` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:993 | 3 |
+| `--mm-processor-kwargs` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:987 | 3 |
+| `--mm-shm-cache-max-object-size-mb` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:996 | 3 |
+| `--model` | `model_selection` | `aligned` | `0.95` | vllm/engine/arg_utils.py:647 | 5 |
+| `--model-impl` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:722 | 3 |
+| `--model-loader-extra-config` | `model_selection` | `aligned` | `0.95` | vllm/engine/arg_utils.py:744 | 4 |
+| `--nnodes` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:796 | 4 |
+| `--node-rank` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:797 | 4 |
+| `--num-gpu-blocks-override` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:933 | 3 |
+| `--optimization-level` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1218 | 3 |
+| `--otlp-traces-endpoint` | `network_serving` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1061 | 3 |
+| `--override-attention-dtype` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:723 | 3 |
+| `--override-generation-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:716 | 3 |
+| `--pipeline-parallel-size` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:789 | 4 |
+| `--pooler-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:709 | 3 |
+| `--prefill-context-parallel-size` | `context_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:814 | 6 |
+| `--prefix-caching-hash-algo` | `prefix_cache` | `aligned` | `0.91` | vllm/engine/arg_utils.py:943 | 5 |
+| `--profiler-config` | `profiling_observability` | `aligned` | `0.95` | vllm/engine/arg_utils.py:1217 | 4 |
+| `--pt-load-map-location` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:749 | 3 |
+| `--quantization` | `quantization` | `aligned` | `0.98` | vllm/engine/arg_utils.py:670 | 8 |
+| `--ray-workers-use-nsight` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:906 | 3 |
+| `--reasoning-parser` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:769 | 3 |
+| `--reasoning-parser-plugin` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:774 | 3 |
+| `--revision` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:664 | 3 |
+| `--runner` | `model_selection` | `aligned` | `0.95` | vllm/engine/arg_utils.py:648 | 6 |
+| `--safetensors-load-strategy` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:741 | 3 |
+| `--scheduler-cls` | `throughput_tuning` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1145 | 3 |
+| `--scheduling-policy` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1132 | 3 |
+| `--seed` | `general_runtime` | `aligned` | `0.95` | vllm/engine/arg_utils.py:656 | 5 |
+| `--served-model-name` | `network_serving` | `aligned` | `0.95` | vllm/engine/arg_utils.py:694 | 4 |
+| `--show-hidden-metrics-for-version` | `profiling_observability` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1057 | 3 |
+| `--skip-mm-profiling` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1013 | 3 |
+| `--skip-tokenizer-init` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:688 | 3 |
+| `--specialize-active-lora` | `lora` | `aligned` | `0.91` | vllm/engine/arg_utils.py:1047 | 5 |
+| `--speculative-config` | `speculative_decode` | `aligned` | `0.98` | vllm/engine/arg_utils.py:1194 | 6 |
+| `--stream-interval` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1155 | 3 |
+| `--structured-outputs-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1214 | 3 |
+| `--swap-space` | `memory_tuning` | `aligned` | `0.95` | vllm/engine/arg_utils.py:931 | 4 |
+| `--tensor-parallel-size` | `tensor_parallel` | `aligned` | `0.98` | vllm/engine/arg_utils.py:798 | 6 |
+| `--tokenizer` | `model_selection` | `aligned` | `0.95` | vllm/engine/arg_utils.py:650 | 5 |
+| `--tokenizer-mode` | `model_selection` | `aligned` | `0.88` | vllm/engine/arg_utils.py:651 | 3 |
+| `--tokenizer-revision` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:666 | 3 |
+| `--trust-remote-code` | `security_auth` | `aligned` | `0.95` | vllm/engine/arg_utils.py:652 | 6 |
+| `--ubatch-size` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:879 | 3 |
+| `--use-tqdm-on-load` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:748 | 3 |
+| `--video-pruning-rate` | `multimodal` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1017 | 3 |
+| `--weight-transfer-config` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:1221 | 3 |
+| `--worker-cls` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:913 | 3 |
+| `--worker-extension-cls` | `general_runtime` | `aligned` | `0.88` | vllm/engine/arg_utils.py:914 | 3 |
+| `CMAKE_BUILD_TYPE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:501 | 2 |
+| `CUDA_HOME` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:553 | 2 |
+| `CUDA_VISIBLE_DEVICES` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:603 | 2 |
+| `K_SCALE_CONSTANT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:998 | 2 |
+| `LD_LIBRARY_PATH` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:559 | 2 |
+| `LOCAL_RANK` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:601 | 2 |
+| `MAX_JOBS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:477 | 2 |
+| `NO_COLOR` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:654 | 2 |
+| `NVCC_THREADS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:481 | 2 |
+| `Q_SCALE_CONSTANT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:996 | 2 |
+| `S3_ACCESS_KEY_ID` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:621 | 2 |
+| `S3_ENDPOINT_URL` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:623 | 2 |
+| `S3_SECRET_ACCESS_KEY` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:622 | 2 |
+| `VERBOSE` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:505 | 2 |
+| `VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE` | `memory_tuning` | `aligned` | `0.91` | vllm/envs.py:1386 | 2 |
+| `VLLM_ALLOW_INSECURE_SERIALIZATION` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1224 | 2 |
+| `VLLM_ALLOW_LONG_MAX_MODEL_LEN` | `memory_tuning` | `aligned` | `0.98` | vllm/envs.py:819 | 3 |
+| `VLLM_ALLOW_RUNTIME_LORA_UPDATING` | `lora` | `aligned` | `0.91` | vllm/envs.py:861 | 4 |
+| `VLLM_ALLREDUCE_USE_SYMM_MEM` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:1406 | 2 |
+| `VLLM_API_KEY` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:614 | 2 |
+| `VLLM_ASSETS_CACHE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:716 | 2 |
+| `VLLM_ASSETS_CACHE_MODEL_CLEAN` | `model_selection` | `aligned` | `0.91` | vllm/envs.py:724 | 2 |
+| `VLLM_AUDIO_FETCH_TIMEOUT` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:737 | 2 |
+| `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER` | `quantization` | `aligned` | `0.91` | vllm/envs.py:1171 | 5 |
+| `VLLM_CACHE_ROOT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:520 | 2 |
+| `VLLM_CI_USE_S3` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1081 | 2 |
+| `VLLM_COMPILE_CACHE_SAVE_FORMAT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1518 | 2 |
+| `VLLM_COMPUTE_NANS_IN_LOGITS` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1311 | 2 |
+| `VLLM_CONFIGURE_LOGGING` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:640 | 2 |
+| `VLLM_CONFIG_ROOT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:511 | 2 |
+| `VLLM_CPU_KVCACHE_SPACE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:674 | 2 |
+| `VLLM_CPU_NUM_OF_RESERVED_CPU` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:682 | 2 |
+| `VLLM_CPU_OMP_THREADS_BIND` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:679 | 2 |
+| `VLLM_CPU_SGL_KERNEL` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:688 | 2 |
+| `VLLM_CUDART_SO_PATH` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1038 | 2 |
+| `VLLM_CUSTOM_SCOPES_FOR_PROFILING` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1435 | 2 |
+| `VLLM_DBO_COMM_SMS` | `throughput_tuning` | `aligned` | `0.91` | vllm/envs.py:1472 | 2 |
+| `VLLM_DEBUG_DUMP_PATH` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:578 | 2 |
+| `VLLM_DEBUG_LOG_API_SERVER_RESPONSE` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:616 | 2 |
+| `VLLM_DEBUG_MFU_METRICS` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1532 | 2 |
+| `VLLM_DEBUG_WORKSPACE` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1500 | 2 |
+| `VLLM_DEEPEPLL_NVFP4_DISPATCH` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1107 | 3 |
+| `VLLM_DEEPEP_BUFFER_SIZE_MB` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1456 | 3 |
+| `VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1462 | 3 |
+| `VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1467 | 3 |
+| `VLLM_DEEP_GEMM_WARMUP` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1156 | 3 |
+| `VLLM_DISABLED_KERNELS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:876 | 2 |
+| `VLLM_DISABLE_COMPILE_CACHE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1008 | 2 |
+| `VLLM_DISABLE_LOG_LOGO` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1536 | 2 |
+| `VLLM_DISABLE_PYNCCL` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:880 | 2 |
+| `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1502 | 2 |
+| `VLLM_DOCKER_BUILD_CONTEXT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:494 | 2 |
+| `VLLM_DO_NOT_TRACK` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:629 | 2 |
+| `VLLM_DP_MASTER_IP` | `data_parallel` | `aligned` | `0.98` | vllm/envs.py:1049 | 4 |
+| `VLLM_DP_MASTER_PORT` | `data_parallel` | `aligned` | `0.98` | vllm/envs.py:1051 | 4 |
+| `VLLM_DP_RANK` | `data_parallel` | `aligned` | `0.98` | vllm/envs.py:1040 | 4 |
+| `VLLM_DP_RANK_LOCAL` | `data_parallel` | `aligned` | `0.98` | vllm/envs.py:1043 | 4 |
+| `VLLM_DP_SIZE` | `data_parallel` | `aligned` | `0.98` | vllm/envs.py:1047 | 4 |
+| `VLLM_ENABLE_CUDAGRAPH_GC` | `graph_mode` | `aligned` | `0.91` | vllm/envs.py:1370 | 4 |
+| `VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:807 | 3 |
+| `VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1481 | 2 |
+| `VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1476 | 2 |
+| `VLLM_ENABLE_MOE_DP_CHUNK` | `data_parallel` | `aligned` | `0.91` | vllm/envs.py:1058 | 3 |
+| `VLLM_ENABLE_RESPONSES_API_STORE` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:1398 | 2 |
+| `VLLM_ENABLE_V1_MULTIPROCESSING` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1002 | 2 |
+| `VLLM_ENGINE_ITERATION_TIMEOUT_S` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:605 | 2 |
+| `VLLM_ENGINE_READY_TIMEOUT_S` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:610 | 2 |
+| `VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS` | `model_selection` | `aligned` | `0.98` | vllm/envs.py:1295 | 3 |
+| `VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1268 | 2 |
+| `VLLM_FLASHINFER_MOE_BACKEND` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1246 | 3 |
+| `VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1252 | 2 |
+| `VLLM_FLOAT32_MATMUL_PRECISION` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:469 | 2 |
+| `VLLM_FORCE_AOT_LOAD` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:591 | 2 |
+| `VLLM_FUSED_MOE_CHUNK_SIZE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:801 | 3 |
+| `VLLM_GC_DEBUG` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1497 | 2 |
+| `VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1425 | 2 |
+| `VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1419 | 2 |
+| `VLLM_HAS_FLASHINFER_CUBIN` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1347 | 2 |
+| `VLLM_HOST_IP` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:530 | 2 |
+| `VLLM_HTTP_TIMEOUT_KEEP_ALIVE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:836 | 3 |
+| `VLLM_IMAGE_FETCH_TIMEOUT` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:729 | 2 |
+| `VLLM_KEEP_ALIVE_ON_ENGINE_DEATH` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:812 | 3 |
+| `VLLM_KV_CACHE_LAYOUT` | `memory_tuning` | `aligned` | `0.91` | vllm/envs.py:1305 | 2 |
+| `VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1444 | 2 |
+| `VLLM_LOGGING_COLOR` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:652 | 2 |
+| `VLLM_LOGGING_CONFIG_PATH` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:643 | 2 |
+| `VLLM_LOGGING_LEVEL` | `logging_debug` | `aligned` | `0.98` | vllm/envs.py:645 | 3 |
+| `VLLM_LOGGING_PREFIX` | `prefix_cache` | `aligned` | `0.91` | vllm/envs.py:649 | 4 |
+| `VLLM_LOGGING_STREAM` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:647 | 2 |
+| `VLLM_LOG_BATCHSIZE_INTERVAL` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1005 | 2 |
+| `VLLM_LOG_MODEL_INSPECTION` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1528 | 2 |
+| `VLLM_LOG_STATS_INTERVAL` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:657 | 2 |
+| `VLLM_LOOPBACK_IP` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1374 | 2 |
+| `VLLM_LORA_DISABLE_PDL` | `lora` | `aligned` | `0.91` | vllm/envs.py:1539 | 4 |
+| `VLLM_LORA_RESOLVER_CACHE_DIR` | `lora` | `aligned` | `0.91` | vllm/envs.py:848 | 4 |
+| `VLLM_LORA_RESOLVER_HF_REPO_LIST` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:855 | 3 |
+| `VLLM_MAIN_CUDA_VERSION` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:465 | 2 |
+| `VLLM_MARLIN_INPUT_DTYPE` | `model_selection` | `aligned` | `0.91` | vllm/envs.py:1101 | 2 |
+| `VLLM_MARLIN_USE_ATOMIC_ADD` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1092 | 2 |
+| `VLLM_MAX_AUDIO_CLIP_FILESIZE_MB` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:754 | 2 |
+| `VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1259 | 3 |
+| `VLLM_MEDIA_CONNECTOR` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:775 | 2 |
+| `VLLM_MEDIA_LOADING_THREAD_COUNT` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:748 | 2 |
+| `VLLM_MEDIA_URL_ALLOW_REDIRECTS` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:742 | 2 |
+| `VLLM_MLA_DISABLE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1024 | 2 |
+| `VLLM_MM_HASHER_ALGORITHM` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:781 | 2 |
+| `VLLM_MODEL_REDIRECT_PATH` | `model_selection` | `aligned` | `0.91` | vllm/envs.py:1088 | 2 |
+| `VLLM_MOE_DP_CHUNK_SIZE` | `data_parallel` | `aligned` | `0.91` | vllm/envs.py:1057 | 3 |
+| `VLLM_MOE_ROUTING_SIMULATION_STRATEGY` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1277 | 3 |
+| `VLLM_MOE_USE_DEEP_GEMM` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1134 | 3 |
+| `VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1342 | 2 |
+| `VLLM_MOONCAKE_BOOTSTRAP_PORT` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:1236 | 2 |
+| `VLLM_MORIIO_CONNECTOR_READ_MODE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1328 | 2 |
+| `VLLM_MORIIO_NUM_WORKERS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1340 | 2 |
+| `VLLM_MORIIO_POST_BATCH_SIZE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1336 | 2 |
+| `VLLM_MORIIO_QP_PER_TRANSFER` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1332 | 2 |
+| `VLLM_MQ_MAX_CHUNK_BYTES_MB` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1290 | 2 |
+| `VLLM_MSGPACK_ZERO_COPY_THRESHOLD` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1218 | 2 |
+| `VLLM_MXFP4_USE_MARLIN` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1097 | 2 |
+| `VLLM_NCCL_INCLUDE_PATH` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1489 | 2 |
+| `VLLM_NCCL_SO_PATH` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:556 | 2 |
+| `VLLM_NIXL_ABORT_REQUEST_TIMEOUT` | `general_runtime` | `aligned` | `0.98` | vllm/envs.py:1324 | 3 |
+| `VLLM_NIXL_SIDE_CHANNEL_HOST` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:1228 | 2 |
+| `VLLM_NIXL_SIDE_CHANNEL_PORT` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:1232 | 2 |
+| `VLLM_NO_USAGE_STATS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:628 | 2 |
+| `VLLM_NVFP4_GEMM_BACKEND` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:1356 | 2 |
+| `VLLM_NVTX_SCOPES_FOR_PROFILING` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1439 | 2 |
+| `VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1451 | 2 |
+| `VLLM_PATTERN_MATCH_DEBUG` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:573 | 2 |
+| `VLLM_PLUGINS` | `general_runtime` | `aligned` | `0.98` | vllm/envs.py:842 | 4 |
+| `VLLM_PORT` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:535 | 2 |
+| `VLLM_PP_LAYER_PARTITION` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:671 | 2 |
+| `VLLM_PROCESS_NAME_PREFIX` | `prefix_cache` | `aligned` | `0.91` | vllm/envs.py:1378 | 4 |
+| `VLLM_RANDOMIZE_DP_DUMMY_INPUTS` | `data_parallel` | `aligned` | `0.91` | vllm/envs.py:1062 | 3 |
+| `VLLM_RAY_BUNDLE_INDICES` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1035 | 2 |
+| `VLLM_RAY_DP_PACK_STRATEGY` | `data_parallel` | `aligned` | `0.91` | vllm/envs.py:1077 | 3 |
+| `VLLM_RAY_PER_WORKER_GPUS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1029 | 2 |
+| `VLLM_RINGBUFFER_WARNING_INTERVAL` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:548 | 2 |
+| `VLLM_ROCM_CUSTOM_PAGED_ATTN` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:963 | 2 |
+| `VLLM_ROCM_FP8_MFMA_PAGE_ATTN` | `quantization` | `aligned` | `0.91` | vllm/envs.py:1402 | 5 |
+| `VLLM_ROCM_FP8_PADDING` | `quantization` | `aligned` | `0.91` | vllm/envs.py:959 | 5 |
+| `VLLM_ROCM_MOE_PADDING` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:961 | 3 |
+| `VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:982 | 2 |
+| `VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:992 | 2 |
+| `VLLM_ROCM_QUICK_REDUCE_QUANTIZATION` | `quantization` | `aligned` | `0.91` | vllm/envs.py:973 | 5 |
+| `VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT` | `memory_tuning` | `aligned` | `0.91` | vllm/envs.py:967 | 2 |
+| `VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:561 | 3 |
+| `VLLM_ROCM_USE_AITER` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:885 | 2 |
+| `VLLM_ROCM_USE_AITER_FP4BMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:935 | 2 |
+| `VLLM_ROCM_USE_AITER_FP4_ASM_GEMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:920 | 2 |
+| `VLLM_ROCM_USE_AITER_FP8BMM` | `quantization` | `aligned` | `0.91` | vllm/envs.py:930 | 5 |
+| `VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:945 | 2 |
+| `VLLM_ROCM_USE_AITER_LINEAR` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:896 | 2 |
+| `VLLM_ROCM_USE_AITER_MHA` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:915 | 2 |
+| `VLLM_ROCM_USE_AITER_MLA` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:910 | 2 |
+| `VLLM_ROCM_USE_AITER_MOE` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:901 | 3 |
+| `VLLM_ROCM_USE_AITER_PAGED_ATTN` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:890 | 2 |
+| `VLLM_ROCM_USE_AITER_RMSNORM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:905 | 2 |
+| `VLLM_ROCM_USE_AITER_TRITON_GEMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:951 | 2 |
+| `VLLM_ROCM_USE_AITER_TRITON_ROPE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:925 | 2 |
+| `VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:939 | 2 |
+| `VLLM_ROCM_USE_SKINNY_GEMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:955 | 2 |
+| `VLLM_RPC_BASE_PATH` | `network_serving` | `aligned` | `0.91` | vllm/envs.py:538 | 2 |
+| `VLLM_RPC_TIMEOUT` | `network_serving` | `aligned` | `0.98` | vllm/envs.py:834 | 3 |
+| `VLLM_SERVER_DEV_MODE` | `general_runtime` | `aligned` | `0.98` | vllm/envs.py:1012 | 3 |
+| `VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1509 | 2 |
+| `VLLM_SKIP_P2P_CHECK` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:871 | 2 |
+| `VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:489 | 2 |
+| `VLLM_SLEEP_WHEN_IDLE` | `expert_parallel` | `upstream_delta` | `0.78` | vllm/envs.py:1286 | 4 |
+| `VLLM_TARGET_DEVICE` | `general_runtime` | `aligned` | `0.98` | vllm/envs.py:463 | 5 |
+| `VLLM_TEST_FORCE_FP8_MARLIN` | `quantization` | `aligned` | `0.91` | vllm/envs.py:825 | 5 |
+| `VLLM_TEST_FORCE_LOAD_FORMAT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:829 | 2 |
+| `VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:1431 | 2 |
+| `VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1281 | 2 |
+| `VLLM_TPU_BUCKET_PADDING_GAP` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1119 | 2 |
+| `VLLM_TPU_MOST_MODEL_LEN` | `model_selection` | `aligned` | `0.91` | vllm/envs.py:1124 | 2 |
+| `VLLM_TPU_USING_PATHWAYS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1128 | 2 |
+| `VLLM_TRACE_FUNCTION` | `logging_debug` | `aligned` | `0.91` | vllm/envs.py:663 | 2 |
+| `VLLM_TUNED_CONFIG_FOLDER` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1414 | 2 |
+| `VLLM_USAGE_SOURCE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:635 | 2 |
+| `VLLM_USAGE_STATS_SERVER` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:625 | 2 |
+| `VLLM_USE_AOT_COMPILE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:582 | 2 |
+| `VLLM_USE_BYTECODE_HOOK` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:585 | 2 |
+| `VLLM_USE_DEEP_GEMM` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1132 | 3 |
+| `VLLM_USE_DEEP_GEMM_E8M0` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1138 | 3 |
+| `VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1142 | 3 |
+| `VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1410 | 2 |
+| `VLLM_USE_FBGEMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1491 | 2 |
+| `VLLM_USE_FLASHINFER_MOE_FP16` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1175 | 3 |
+| `VLLM_USE_FLASHINFER_MOE_FP4` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1183 | 3 |
+| `VLLM_USE_FLASHINFER_MOE_FP8` | `quantization` | `aligned` | `0.91` | vllm/envs.py:1179 | 5 |
+| `VLLM_USE_FLASHINFER_MOE_INT4` | `int4_quantization` | `aligned` | `0.91` | vllm/envs.py:1187 | 2 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_BF16` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1204 | 3 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8` | `quantization` | `aligned` | `0.91` | vllm/envs.py:1192 | 5 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS` | `quantization` | `aligned` | `0.91` | vllm/envs.py:1199 | 5 |
+| `VLLM_USE_FLASHINFER_SAMPLER` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:665 | 2 |
+| `VLLM_USE_FUSED_MOE_GROUPED_TOPK` | `expert_parallel` | `aligned` | `0.91` | vllm/envs.py:1166 | 3 |
+| `VLLM_USE_MEGA_AOT_ARTIFACT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:595 | 2 |
+| `VLLM_USE_MODELSCOPE` | `model_selection` | `aligned` | `0.98` | vllm/envs.py:543 | 4 |
+| `VLLM_USE_NCCL_SYMM_MEM` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:1485 | 2 |
+| `VLLM_USE_NVFP4_CT_EMULATIONS` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1317 | 2 |
+| `VLLM_USE_PRECOMPILED` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:483 | 2 |
+| `VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:696 | 2 |
+| `VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:701 | 2 |
+| `VLLM_USE_RAY_WRAPPED_PP_COMM` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:707 | 2 |
+| `VLLM_USE_STANDALONE_COMPILE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:567 | 2 |
+| `VLLM_USE_TRITON_AWQ` | `quantization` | `aligned` | `0.91` | vllm/envs.py:859 | 5 |
+| `VLLM_USE_V2_MODEL_RUNNER` | `model_selection` | `aligned` | `0.91` | vllm/envs.py:1522 | 2 |
+| `VLLM_V1_OUTPUT_PROC_CHUNK_SIZE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1020 | 2 |
+| `VLLM_V1_USE_OUTLINES_CACHE` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1113 | 2 |
+| `VLLM_VIDEO_FETCH_TIMEOUT` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:732 | 2 |
+| `VLLM_VIDEO_LOADER_BACKEND` | `multimodal` | `aligned` | `0.91` | vllm/envs.py:765 | 2 |
+| `VLLM_WORKER_MULTIPROC_METHOD` | `general_runtime` | `aligned` | `0.98` | vllm/envs.py:712 | 4 |
+| `VLLM_XGRAMMAR_CACHE_MB` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1210 | 2 |
+| `VLLM_XLA_CACHE_PATH` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:789 | 2 |
+| `VLLM_XLA_CHECK_RECOMPILATION` | `graph_mode` | `aligned` | `0.91` | vllm/envs.py:796 | 4 |
+| `VLLM_XLA_USE_SPMD` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:800 | 2 |
+| `V_SCALE_CONSTANT` | `general_runtime` | `aligned` | `0.91` | vllm/envs.py:1000 | 2 |
+| `--decode-servers-urls` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.76` | examples/disaggregated_encoder/disagg_epd_proxy.py:711 | 2 |
+| `--decoder-hosts` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.83` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:264 | 5 |
+| `--decoder-ports` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.83` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:265 | 5 |
+| `--dp-address` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:14 | 4 |
+| `--dp-hosts` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/dp_load_balance_proxy_server.py:185 | 4 |
+| `--dp-ports` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/dp_load_balance_proxy_server.py:186 | 4 |
+| `--dp-rank-start` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:13 | 4 |
+| `--dp-rpc-port` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:15 | 4 |
+| `--dp-size` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:10 | 4 |
+| `--dp-size-local` | `data_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:12 | 4 |
+| `--enable-expert-parallel` | `expert_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:89 | 5 |
+| `--enable-sleep-mode` | `expert_parallel` | `aligned` | `0.98` | examples/offline_external_launcher.py:125 | 4 |
+| `--encode-servers-urls` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_encoder/disagg_epd_proxy.py:700 | 2 |
+| `--encoder-dispatch-mode` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_encoder/disagg_epd_proxy.py:717 | 2 |
+| `--enforce-eager` | `graph_mode` | `aligned` | `0.98` | examples/offline_data_parallel.py:87 | 6 |
+| `--host` | `network_serving` | `needs_manual_review` | `0.83` | examples/disaggregated_encoder/disagg_epd_proxy.py:698 | 4 |
+| `--master-addr` | `general_runtime` | `aligned` | `0.95` | examples/offline_data_parallel.py:85 | 3 |
+| `--master-port` | `network_serving` | `aligned` | `0.95` | examples/offline_data_parallel.py:86 | 3 |
+| `--max-retries` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:266 | 2 |
+| `--max-waiting-retries` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:518 | 2 |
+| `--model` | `model_selection` | `aligned` | `0.95` | examples/offline_data_parallel.py:75 | 4 |
+| `--model-weight-gib` | `model_selection` | `needs_manual_review` | `0.76` | examples/offline_external_launcher.py:129 | 2 |
+| `--node-rank` | `general_runtime` | `aligned` | `0.95` | examples/offline_data_parallel.py:84 | 3 |
+| `--node-size` | `general_runtime` | `needs_manual_review` | `0.76` | examples/offline_data_parallel.py:83 | 2 |
+| `--port` | `network_serving` | `needs_manual_review` | `0.83` | examples/disaggregated_encoder/disagg_epd_proxy.py:699 | 4 |
+| `--prefill-servers-urls` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.76` | examples/disaggregated_encoder/disagg_epd_proxy.py:705 | 2 |
+| `--prefiller-hosts` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.83` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:262 | 5 |
+| `--prefiller-ports` | `prefill_decode_disaggregation` | `needs_manual_review` | `0.83` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:263 | 5 |
+| `--proc-per-node` | `general_runtime` | `needs_manual_review` | `0.76` | examples/offline_external_launcher.py:117 | 2 |
+| `--quantization` | `quantization` | `aligned` | `0.98` | examples/offline_data_parallel.py:92 | 8 |
+| `--retry-delay` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:267 | 2 |
+| `--sleep-mode-level` | `expert_parallel` | `needs_manual_review` | `0.79` | examples/offline_external_launcher.py:135 | 3 |
+| `--temperature` | `general_runtime` | `needs_manual_review` | `0.76` | examples/offline_external_launcher.py:126 | 2 |
+| `--tp-size` | `tensor_parallel` | `needs_manual_review` | `0.86` | examples/external_online_dp/launch_online_dp.py:11 | 4 |
+| `--trust-remote-code` | `security_auth` | `aligned` | `0.95` | examples/offline_data_parallel.py:88 | 5 |
+| `--vllm-start-port` | `network_serving` | `needs_manual_review` | `0.83` | examples/external_online_dp/launch_online_dp.py:16 | 3 |
+| `--waiting-retry-interval` | `general_runtime` | `needs_manual_review` | `0.76` | examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:521 | 2 |
+| `ASCEND_CUSTOM_OPP_PATH` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/platform.py:471 | 3 |
+| `ASCEND_ENABLE_USE_FABRIC_MEM` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39 | 4 |
+| `ASCEND_HOME_PATH` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:58 | 3 |
+| `ASCEND_RT_VISIBLE_DEVICES` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/cpu_binding.py:17 | 4 |
+| `ASCEND_TRANSFER_TIMEOUT` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097 | 4 |
+| `CMAKE_BUILD_TYPE` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:37 | 3 |
+| `COMPILE_CUSTOM_KERNELS` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:43 | 3 |
+| `CXX_COMPILER` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:46 | 3 |
+| `C_COMPILER` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:49 | 3 |
+| `DYNAMIC_EPLB` | `expert_parallel` | `aligned` | `0.91` | vllm_ascend/ascend_config.py:429 | 4 |
+| `EXPERT_MAP_RECORD` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/ascend_config.py:430 | 3 |
+| `HCCL_DETERMINISTIC` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/batch_invariant.py:85 | 4 |
+| `HCCL_INTRA_PCIE_ENABLE` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/utils.py:959 | 5 |
+| `HCCL_INTRA_ROCE_ENABLE` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/utils.py:959 | 5 |
+| `HCCL_OP_EXPANSION_MODE` | `general_runtime` | `upstream_delta` | `0.75` | vllm_ascend/utils.py:499 | 5 |
+| `HCCL_RDMA_RETRY_CNT` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/distributed/kv_transfer/utils/utils.py:56 | 3 |
+| `HCCL_RDMA_TIMEOUT` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/distributed/kv_transfer/utils/utils.py:55 | 3 |
+| `HCCL_SO_PATH` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:61 | 3 |
+| `LCCL_DETERMINISTIC` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/batch_invariant.py:86 | 3 |
+| `LOCAL_RANK` | `general_runtime` | `aligned` | `0.88` | examples/offline_external_launcher.py:176 | 3 |
+| `MASTER_ADDR` | `general_runtime` | `upstream_delta` | `0.68` | examples/offline_external_launcher.py:173 | 3 |
+| `MASTER_PORT` | `network_serving` | `upstream_delta` | `0.68` | examples/offline_external_launcher.py:174 | 3 |
+| `MAX_JOBS` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:34 | 3 |
+| `MOONCAKE_CONFIG_PATH` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:125 | 3 |
+| `MSMONITOR_USE_DAEMON` | `profiling_observability` | `aligned` | `0.88` | vllm_ascend/envs.py:91 | 3 |
+| `OPENAI_API_KEY` | `network_serving` | `upstream_delta` | `0.68` | examples/disaggregated_encoder/disagg_epd_proxy.py:650 | 3 |
+| `PYTORCH_NPU_ALLOC_CONF` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/platform.py:423 | 3 |
+| `RANK` | `general_runtime` | `upstream_delta` | `0.68` | examples/offline_external_launcher.py:175 | 3 |
+| `SOC_VERSION` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/envs.py:53 | 3 |
+| `TRITON_ALL_BLOCKS_PARALLEL` | `general_runtime` | `upstream_delta` | `0.68` | vllm_ascend/ops/rotary_embedding.py:497 | 3 |
+| `VERBOSE` | `logging_debug` | `aligned` | `0.88` | vllm_ascend/envs.py:55 | 3 |
+| `VLLM_ASCEND_BALANCE_SCHEDULING` | `throughput_tuning` | `aligned` | `0.95` | vllm_ascend/envs.py:115 | 4 |
+| `VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL` | `context_parallel` | `aligned` | `0.98` | vllm_ascend/envs.py:103 | 6 |
+| `VLLM_ASCEND_ENABLE_FLASHCOMM` | `throughput_tuning` | `upstream_delta` | `0.75` | vllm_ascend/utils.py:765 | 4 |
+| `VLLM_ASCEND_ENABLE_FLASHCOMM1` | `throughput_tuning` | `aligned` | `0.95` | vllm_ascend/envs.py:74 | 4 |
+| `VLLM_ASCEND_ENABLE_FUSED_MC2` | `general_runtime` | `aligned` | `0.95` | vllm_ascend/envs.py:113 | 4 |
+| `VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE` | `tensor_parallel` | `aligned` | `0.98` | vllm_ascend/batch_invariant.py:82 | 5 |
+| `VLLM_ASCEND_ENABLE_MLAPO` | `general_runtime` | `aligned` | `0.95` | vllm_ascend/envs.py:96 | 5 |
+| `VLLM_ASCEND_ENABLE_NZ` | `general_runtime` | `aligned` | `0.95` | vllm_ascend/batch_invariant.py:80 | 5 |
+| `VLLM_ASCEND_ENABLE_PREFETCH_MLP` | `weight_prefetch` | `aligned` | `0.98` | vllm_ascend/ascend_config.py:150 | 7 |
+| `VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE` | `throughput_tuning` | `aligned` | `0.95` | vllm_ascend/envs.py:79 | 4 |
+| `VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK` | `memory_tuning` | `aligned` | `0.88` | vllm_ascend/envs.py:117 | 3 |
+| `VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE` | `weight_prefetch` | `aligned` | `0.98` | vllm_ascend/ascend_config.py:153 | 5 |
+| `VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE` | `weight_prefetch` | `aligned` | `0.98` | vllm_ascend/ascend_config.py:152 | 5 |
+| `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | `general_runtime` | `aligned` | `0.88` | vllm_ascend/platform.py:31 | 3 |
+| `VLLM_DP_MASTER_IP` | `data_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:123 | 5 |
+| `VLLM_DP_MASTER_PORT` | `data_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:124 | 5 |
+| `VLLM_DP_RANK` | `data_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:120 | 5 |
+| `VLLM_DP_RANK_LOCAL` | `data_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:121 | 5 |
+| `VLLM_DP_SIZE` | `data_parallel` | `aligned` | `0.98` | examples/offline_data_parallel.py:122 | 5 |
+| `VLLM_USE_MODELSCOPE` | `model_selection` | `aligned` | `0.95` | examples/offline_data_parallel.py:67 | 5 |
+| `VLLM_VERSION` | `general_runtime` | `aligned` | `0.95` | vllm_ascend/envs.py:68 | 6 |
+| `VLLM_WORKER_MULTIPROC_METHOD` | `general_runtime` | `aligned` | `0.95` | examples/offline_data_parallel.py:68 | 5 |
+| `WORLD_SIZE` | `general_runtime` | `upstream_delta` | `0.68` | examples/offline_external_launcher.py:177 | 3 |
 
 Back to [INDEX](../../INDEX.md).

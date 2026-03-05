@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
-"""Comprehensive tests for global parameter/env knowledge base generation."""
+"""Comprehensive tests for high-confidence global parameter/env knowledge base."""
 
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 
 from build_global_param_kb import main as build_main
 
+ALLOWED_STATUS = {"aligned", "upstream_delta", "needs_manual_review"}
+HIGH_RISK = {
+    "quantization",
+    "int4_quantization",
+    "graph_mode",
+    "tensor_parallel",
+    "data_parallel",
+    "expert_parallel",
+    "context_parallel",
+    "prefill_decode_disaggregation",
+    "lora",
+    "speculative_decode",
+    "sleep_mode",
+    "weight_prefetch",
+    "prefix_cache",
+}
 
-LOWER_FLAG_PATTERN = re.compile(r"^--[a-z0-9][a-z0-9\-]*$")
 
-
-def _load_json(path: Path) -> dict:
+def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
-
-
-def _contains_pair(pairings: list[dict], left: str, right: str) -> bool:
-    for row in pairings:
-        l = row.get("left")
-        r = row.get("right")
-        if {l, r} == {left, right}:
-            return True
-    return False
 
 
 def main() -> int:
@@ -31,115 +35,128 @@ def main() -> int:
 
     repo_root = Path(__file__).resolve().parents[4]
     shared_root = repo_root / ".agents" / "skills" / "_shared"
+    deploy_root = shared_root / "deployment-config" / "references" / "generated"
 
-    vllm_env_json = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_env_inventory.json"
-    vllm_args_json = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_args_inventory.json"
-    asc_env_json = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_env_inventory.json"
-    asc_args_json = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_inventory.json"
+    kb_path = deploy_root / "global_parameter_kb.json"
+    feature_summary_path = deploy_root / "global_feature_summary.json"
+    combo_rules_path = deploy_root / "global_combo_rules.json"
+    report_path = deploy_root / "global_validation_report.json"
+    upstream_path = deploy_root / "global_upstream_snapshot.json"
+    legacy_pairings_path = deploy_root / "global_flag_pairings.json"
+    legacy_scan_files_path = deploy_root / "global_scan_files.json"
 
-    deploy_gen_root = shared_root / "deployment-config" / "references" / "generated"
-    global_kb_json = deploy_gen_root / "global_parameter_kb.json"
-    global_summary_json = deploy_gen_root / "global_feature_summary.json"
-    global_pairings_json = deploy_gen_root / "global_flag_pairings.json"
+    vllm_args_path = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_args_inventory.json"
+    vllm_env_path = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_env_inventory.json"
+    asc_args_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_inventory.json"
+    asc_env_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_env_inventory.json"
+    asc_args_freq_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_frequency.json"
 
-    combo_doc = shared_root / "deployment-config" / "references" / "global-parameter-combination-guide.md"
-    feature_map_doc = shared_root / "deployment-config" / "references" / "global-parameter-feature-map.md"
-
-    required_paths = [
-        vllm_env_json,
-        vllm_args_json,
-        asc_env_json,
-        asc_args_json,
-        global_kb_json,
-        global_summary_json,
-        global_pairings_json,
-        combo_doc,
-        feature_map_doc,
-    ]
-    for path in required_paths:
+    for path in [
+        kb_path,
+        feature_summary_path,
+        combo_rules_path,
+        report_path,
+        upstream_path,
+        legacy_pairings_path,
+        legacy_scan_files_path,
+        vllm_args_path,
+        vllm_env_path,
+        asc_args_path,
+        asc_env_path,
+        asc_args_freq_path,
+    ]:
         assert path.exists(), f"Missing generated artifact: {path}"
 
-    vllm_env = _load_json(vllm_env_json)
-    vllm_args = _load_json(vllm_args_json)
-    asc_env = _load_json(asc_env_json)
-    asc_args = _load_json(asc_args_json)
+    kb = _load(kb_path)
+    entries = kb["entries"]
+    datasets = kb["datasets"]
+    combo_rules = kb["combo_rules"]
+    report = kb["validation_report"]
+    summary = _load(feature_summary_path)
+    upstream = _load(upstream_path)
+    legacy_pairings = _load(legacy_pairings_path)
+    legacy_scan_files = _load(legacy_scan_files_path)
+    asc_args_freq = _load(asc_args_freq_path)
 
-    # Coverage guardrails.
-    assert len(vllm_env) >= 180, f"Unexpectedly low vLLM env count: {len(vllm_env)}"
-    assert len(vllm_args) >= 200, f"Unexpectedly low vLLM arg count: {len(vllm_args)}"
-    assert len(asc_env) >= 20, f"Unexpectedly low vLLM-Ascend env count: {len(asc_env)}"
-    assert len(asc_args) >= 120, f"Unexpectedly low vLLM-Ascend arg count: {len(asc_args)}"
+    assert kb["baseline"]["mode"] == "dual"
+    assert len(entries) >= 350, f"Expected broad coverage, got {len(entries)}"
 
-    assert "VLLM_TARGET_DEVICE" in vllm_env, "Expected core vLLM env var"
-    assert "VLLM_ASCEND_ENABLE_NZ" in asc_env, "Expected core vLLM-Ascend env var"
-    assert "--model" in vllm_args, "Expected common serve argument --model"
-    assert "--tensor-parallel-size" in vllm_args, "Expected TP argument in vLLM args"
-    assert "--quantization" in asc_args, "Expected observed ascend argument --quantization"
+    # Schema + evidence checks
+    for entry in entries:
+        assert entry["source"] == "code", f"Non-code entry detected: {entry['id']}"
+        assert entry["kind"] in {"arg", "env"}
+        assert entry["scope"] in {"vllm", "vllm_ascend"}
+        assert entry["status"] in ALLOWED_STATUS
+        assert entry["definition_ref"], f"Missing definition_ref: {entry['id']}"
+        assert isinstance(entry["read_ref"], list)
+        assert isinstance(entry["effect_ref"], list)
+        assert isinstance(entry["web_refs"], list)
+        assert isinstance(entry["confidence"], float)
+        assert 0.0 < entry["confidence"] <= 1.0
 
-    # Cleanliness guardrail: observed args should be normalized lowercase flags.
-    invalid_flags = [flag for flag in asc_args if not LOWER_FLAG_PATTERN.match(flag)]
-    assert not invalid_flags, f"Found noisy/non-CLI flags in observed args: {invalid_flags[:10]}"
+    # High-risk entries should be mostly backed by local docs + official web evidence
+    high_risk_rows = [e for e in entries if e["primary_feature"] in HIGH_RISK]
+    assert high_risk_rows, "Expected high-risk entries"
+    high_risk_dual_evidence = 0
+    for row in high_risk_rows:
+        if row["local_doc_refs"] and any(ref.get("tier") == "official" for ref in row["web_refs"]):
+            high_risk_dual_evidence += 1
+    assert high_risk_dual_evidence / len(high_risk_rows) >= 0.35, (
+        f"High-risk dual-evidence ratio too low: {high_risk_dual_evidence}/{len(high_risk_rows)}"
+    )
 
-    global_kb = _load_json(global_kb_json)
-    datasets = global_kb["datasets"]
-    blocked_cases = global_kb["blocked_cases"]
-    feature_summary = _load_json(global_summary_json)
-    pairings = _load_json(global_pairings_json)
+    # Core entries and blocked demo cases
+    by_name = {e["name"]: e for e in entries}
+    assert by_name["--quantization"]["primary_feature"] == "quantization"
+    assert by_name["--compilation-config"]["primary_feature"] == "graph_mode"
+    assert by_name["--enable-expert-parallel"]["primary_feature"] == "expert_parallel"
+    assert by_name["VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL"]["primary_feature"] == "context_parallel"
 
-    # Semantic mapping checks.
-    assert datasets["vllm_args"]["--quantization"]["primary_feature"] == "quantization"
-    assert datasets["vllm_args"]["--compilation-config"]["primary_feature"] == "graph_mode"
-    assert datasets["vllm_args"]["--enable-expert-parallel"]["primary_feature"] == "expert_parallel"
-    assert datasets["vllm_args"]["--tensor-parallel-size"]["primary_feature"] == "tensor_parallel"
-    assert datasets["vllm_ascend_envs"]["VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL"]["primary_feature"] == "context_parallel"
+    rule_ids = {row["rule_id"] for row in combo_rules}
+    assert "hard_block.qwen3_32b_w8a8_int4" in rule_ids
+    assert "hard_block.qwen3_32b_w8a8_ep" in rule_ids
 
-    # Every entry should carry usage and combination hints for weak-model determinism.
-    for scope_name, scope_data in datasets.items():
-        for name, row in scope_data.items():
-            assert row.get("usage_hint"), f"Missing usage_hint: {scope_name}:{name}"
-            assert row.get("feature_tags"), f"Missing feature_tags: {scope_name}:{name}"
-            assert row.get("primary_feature"), f"Missing primary_feature: {scope_name}:{name}"
-            assert isinstance(row.get("combination_candidates"), list), (
-                f"Missing combination_candidates list: {scope_name}:{name}"
-            )
+    # Coverage and report interfaces
+    assert report["coverage"]["ratio"] == 1.0
+    assert report["coverage"]["expected_entries"] == report["coverage"]["actual_entries"]
+    assert report["evidence_completeness"]["with_definition_ref"] == len(entries)
+    assert report["high_risk_validated_count"] >= 20
+    assert isinstance(report["unresolved_items"], list)
+    stats = report["source_tier_stats"]
+    assert stats["official_ref_count"] >= len(entries)
+    assert stats["external_ref_count"] > 0
+    assert stats["entries_with_external_refs"] > 0
+    assert stats["entries_with_official_refs"] == len(entries)
 
-    # Pairing/co-occurrence evidence should be present.
-    assert len(pairings) >= 50, "Expected rich pairing evidence"
-    assert any(
-        row.get("left") == "--tensor-parallel-size" or row.get("right") == "--tensor-parallel-size"
-        for row in pairings
-    ), "Expected TP involvement in pairings"
-    assert _contains_pair(pairings, "--max-model-len", "--max-num-batched-tokens") or any(
-        row.get("left") == "--quantization" or row.get("right") == "--quantization" for row in pairings
-    ), "Expected either throughput or quantization pairing evidence"
+    # Legacy compatibility artifacts should still be generated
+    assert isinstance(legacy_pairings, list) and legacy_pairings, "global_flag_pairings should be non-empty"
+    assert all({"left", "right", "cooccurrence_files"} <= set(row.keys()) for row in legacy_pairings[:10])
+    assert isinstance(legacy_scan_files, list) and legacy_scan_files, "global_scan_files should be non-empty"
+    assert any(path.startswith("examples/") for path in legacy_scan_files)
+    assert isinstance(asc_args_freq, dict) and asc_args_freq, "vllm_ascend_args_frequency should be non-empty"
+    assert asc_args_freq.get("--quantization", 0) > 0
 
-    # Feature summary must cover core features.
-    for core_feature in [
+    # Dataset snapshot interface exists for Skill consumption
+    for key in ["vllm_args", "vllm_envs", "vllm_ascend_args", "vllm_ascend_envs"]:
+        assert key in datasets
+        assert datasets[key], f"Empty dataset snapshot: {key}"
+
+    # Upstream snapshot should carry url inventory
+    assert "urls" in upstream and "vllm_env" in upstream["urls"]
+
+    # Feature summary should cover key feature families
+    for required in [
         "quantization",
         "graph_mode",
         "tensor_parallel",
         "data_parallel",
         "context_parallel",
-        "throughput_tuning",
+        "security_auth",
         "memory_tuning",
     ]:
-        assert core_feature in feature_summary, f"Missing feature summary for: {core_feature}"
+        assert required in summary, f"Missing feature bucket: {required}"
 
-    # Explicit blocked cases for demonstration error paths.
-    blocked_lookup = {(row["profile"], row["blocked_feature"]): row for row in blocked_cases}
-    assert ("qwen3-32b-w8a8", "int4_quantization") in blocked_lookup
-    assert ("qwen3-32b-w8a8", "expert_parallel") in blocked_lookup
-
-    combo_text = combo_doc.read_text(encoding="utf-8")
-    assert "qwen3-32b-w8a8 + int4_quantization" in combo_text
-    assert "qwen3-32b-w8a8 + expert_parallel" in combo_text
-    assert "Co-occurrence evidence" in combo_text
-
-    feature_map_text = feature_map_doc.read_text(encoding="utf-8")
-    assert "vLLM Serve Args -> Semantics" in feature_map_text
-    assert "vLLM-Ascend Env Vars -> Semantics" in feature_map_text
-
-    print("PASS: global parameter knowledge base generation (comprehensive)")
+    print("PASS: global parameter knowledge base generation (high-confidence)")
     return 0
 
 

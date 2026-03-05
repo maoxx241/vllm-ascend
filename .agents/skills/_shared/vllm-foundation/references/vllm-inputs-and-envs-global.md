@@ -2,476 +2,408 @@
 knowledge_id: vllm-foundation.inputs-and-envs-global
 domain: vllm-foundation
 knowledge_type: reference
-summary: Global inventory of vLLM serve arguments and environment variables.
-applicable_vllm_versions: [">=0.15.0", "<0.17.0"]
-applicable_cann_versions: [">=8.0.0"]
+summary: Code-truth inventory of vLLM deployment arguments and environment variables with evidence refs.
 last_verified: "2026-03-05"
-watch_files:
-  - "../vllm/vllm/envs.py"
-  - "../vllm/vllm/entrypoints/openai/cli_args.py"
-  - "../vllm/vllm/engine/arg_utils.py"
-depends_on:
-  - "../../INDEX.md"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---
 
-# vLLM Global Inputs and Envs
+# vLLM Global Inputs and Envs (Code Truth)
 
-Generated at: `2026-03-05`
+- vLLM args: **165**
+- vLLM env vars: **218**
 
-- vLLM env vars discovered: **219**
-- vLLM serve args discovered: **214**
+## vLLM Serve Args
 
-## vLLM Serve Arguments (inventory)
-
-| Argument | Kind | Source preview |
+| Name | Type | Definition ref |
 | --- | --- | --- |
-| `--additional-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--aggregate-engine-logging` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--all2all-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--allow-credentials` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--allow-deprecated-quantization` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--allowed-headers` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--allowed-local-media-path` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--allowed-media-domains` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--allowed-methods` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--allowed-origins` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--api-key` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--api-server-count` | vllm_arg | vllm/entrypoints/openai/cli_args.py |
-| `--async-scheduling` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--attention-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--attention-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--block-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--calculate-kv-scales` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--chat-template` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--chat-template-content-format` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--code-revision` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--collect-detailed-traces` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--compilation-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--config` | vllm_arg | vllm/entrypoints/openai/cli_args.py |
-| `--config-format` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--convert` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--cp-kv-cache-interleave-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--cpu-offload-gb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--cudagraph-capture-sizes` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--cudagraph-metrics` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-address` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-external-lb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-hybrid-lb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-rank` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-rpc-port` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-size-local` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--data-parallel-start-rank` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--dbo-decode-token-threshold` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--dbo-prefill-token-threshold` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--dcp-kv-cache-interleave-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--decode-context-parallel-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--default-chat-template-kwargs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--default-mm-loras` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-access-log-for-endpoints` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--disable-cascade-attn` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-chunked-mm-input` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-custom-all-reduce` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-fastapi-docs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--disable-frontend-multiprocessing` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--disable-hybrid-kv-cache-manager` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-log-requests` | vllm_arg | vllm/engine/arg_utils.py |
-| `--disable-log-stats` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-nccl-for-dp-synchronization` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-sliding-window` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--disable-uvicorn-access-log` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--distributed-executor-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--download-dir` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--ec-transfer-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-auto-tool-choice` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-chunked-prefill` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-dbo` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-eplb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-expert-parallel` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-flashinfer-autotune` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-force-include-usage` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-layerwise-nvtx-tracing` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-log-deltas` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-log-outputs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-log-requests` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:AsyncEngineArgs |
-| `--enable-logging-iteration-details` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-lora` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-mfu-metrics` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-mm-embeds` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-mm-processor-stats` | vllm_arg | vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-offline-docs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-prefix-caching` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-prompt-embeds` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-prompt-tokens-details` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-request-id-headers` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-return-routed-experts` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-server-load-tracking` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-sleep-mode` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enable-ssl-refresh` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-tokenizer-info-endpoint` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--enable-tower-connector-lora` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--enforce-eager` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--eplb-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--exclude-tools-when-tool-choice-none` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--expert-placement-strategy` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--fully-sharded-loras` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--generation-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--gpu-memory-utilization` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--h11-max-header-count` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--h11-max-incomplete-event-size` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--headless` | vllm_arg | vllm/entrypoints/openai/cli_args.py |
-| `--hf-config-path` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--hf-overrides` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--hf-token` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--host` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ignore-patterns` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--interleave-mm-strings` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--io-processor-plugin` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kernel-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-cache-dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-cache-memory-bytes` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-cache-metrics` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-cache-metrics-sample` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-events-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-offloading-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-offloading-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-sharing-fast-prefill` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--kv-transfer-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--limit-mm-per-prompt` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--load-format` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--log-config-file` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--log-error-stack` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--logits-processor-pattern` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--logits-processors` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--logprobs-mode` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--long-prefill-token-threshold` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--lora-dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--lora-modules` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--mamba-block-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mamba-cache-dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mamba-cache-mode` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mamba-ssm-cache-dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--master-addr` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--master-port` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-cpu-loras` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-cudagraph-capture-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-log-len` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--max-logprobs` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-long-partial-prefills` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-lora-rank` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-loras` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-model-len` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-num-batched-tokens` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-num-partial-prefills` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-num-seqs` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--max-parallel-loading-workers` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--media-io-kwargs` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--middleware` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--mm-encoder-attn-backend` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-encoder-only` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-encoder-tp-mode` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-processor-cache-gb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-processor-cache-type` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-processor-kwargs` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--mm-shm-cache-max-object-size-mb` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--model` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--model-impl` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--model-loader-extra-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--model-weights` | vllm_arg | vllm/engine/arg_utils.py:EngineArgs |
-| `--nnodes` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--node-rank` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--num-gpu-blocks-override` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--optimization-level` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--otlp-traces-endpoint` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--override-attention-dtype` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--override-generation-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--pipeline-parallel-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--pooler-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--port` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--prefill-context-parallel-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--prefix-caching-hash-algo` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--profiler-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--pt-load-map-location` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--quantization` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--ray-workers-use-nsight` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--reasoning-parser` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--reasoning-parser-plugin` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--response-role` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--return-tokens-as-token-ids` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--revision` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--root-path` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--runner` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--safetensors-load-strategy` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--scheduler-cls` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--scheduling-policy` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--seed` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--served-model-name` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--show-hidden-metrics-for-version` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--skip-mm-profiling` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--skip-tokenizer-init` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--specialize-active-lora` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--speculative-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--ssl-ca-certs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ssl-cert-reqs` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ssl-certfile` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ssl-ciphers` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ssl-keyfile` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--stream-interval` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--structured-outputs-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--swap-space` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--tensor-parallel-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--tokenizer` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--tokenizer-mode` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--tokenizer-revision` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--tokens-only` | vllm_arg | vllm/engine/arg_utils.py:EngineArgs, vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--tool-call-parser` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--tool-parser-plugin` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--tool-server` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--trust-remote-code` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--trust-request-chat-template` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--ubatch-size` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--uds` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--use-tqdm-on-load` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--uvicorn-log-level` | vllm_arg | vllm/entrypoints/openai/cli_args.py:FrontendArgs |
-| `--video-pruning-rate` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--weight-transfer-config` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--worker-cls` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
-| `--worker-extension-cls` | vllm_arg | vllm/engine/arg_utils.py, vllm/engine/arg_utils.py:EngineArgs |
+| `--additional-config` | string | vllm/engine/arg_utils.py:1211 |
+| `--aggregate-engine-logging` | bool | vllm/engine/arg_utils.py:1232 |
+| `--all2all-backend` | string | vllm/engine/arg_utils.py:875 |
+| `--allow-deprecated-quantization` | string | vllm/engine/arg_utils.py:671 |
+| `--allowed-local-media-path` | string | vllm/engine/arg_utils.py:658 |
+| `--allowed-media-domains` | string | vllm/engine/arg_utils.py:661 |
+| `--api-server-count` | int | vllm/entrypoints/openai/cli_args.py:293 |
+| `--async-scheduling` | string | vllm/engine/arg_utils.py:1152 |
+| `--attention-backend` | string | vllm/engine/arg_utils.py:759 |
+| `--attention-config` | string | vllm/engine/arg_utils.py:1207 |
+| `--block-size` | string | vllm/engine/arg_utils.py:924 |
+| `--calculate-kv-scales` | string | vllm/engine/arg_utils.py:947 |
+| `--code-revision` | string | vllm/engine/arg_utils.py:665 |
+| `--collect-detailed-traces` | string | vllm/engine/arg_utils.py:1071 |
+| `--compilation-config` | string | vllm/engine/arg_utils.py:1204 |
+| `--config` | string | vllm/entrypoints/openai/cli_args.py:301 |
+| `--config-format` | string | vllm/engine/arg_utils.py:697 |
+| `--convert` | string | vllm/engine/arg_utils.py:649 |
+| `--cp-kv-cache-interleave-size` | string | vllm/engine/arg_utils.py:810 |
+| `--cpu-offload-gb` | string | vllm/engine/arg_utils.py:946 |
+| `--cudagraph-capture-sizes` | string | vllm/engine/arg_utils.py:1165 |
+| `--cudagraph-metrics` | string | vllm/engine/arg_utils.py:1082 |
+| `--data-parallel-address` | string | vllm/engine/arg_utils.py:841 |
+| `--data-parallel-backend` | string | vllm/engine/arg_utils.py:853 |
+| `--data-parallel-external-lb` | string | vllm/engine/arg_utils.py:865 |
+| `--data-parallel-hybrid-lb` | string | vllm/engine/arg_utils.py:860 |
+| `--data-parallel-rank` | int | vllm/engine/arg_utils.py:822 |
+| `--data-parallel-rpc-port` | int | vllm/engine/arg_utils.py:847 |
+| `--data-parallel-size` | string | vllm/engine/arg_utils.py:819 |
+| `--data-parallel-size-local` | int | vllm/engine/arg_utils.py:835 |
+| `--data-parallel-start-rank` | int | vllm/engine/arg_utils.py:829 |
+| `--dbo-decode-token-threshold` | string | vllm/engine/arg_utils.py:883 |
+| `--dbo-prefill-token-threshold` | string | vllm/engine/arg_utils.py:887 |
+| `--dcp-kv-cache-interleave-size` | string | vllm/engine/arg_utils.py:806 |
+| `--decode-context-parallel-size` | string | vllm/engine/arg_utils.py:801 |
+| `--default-mm-loras` | string | vllm/engine/arg_utils.py:1046 |
+| `--disable-cascade-attn` | string | vllm/engine/arg_utils.py:685 |
+| `--disable-chunked-mm-input` | string | vllm/engine/arg_utils.py:1142 |
+| `--disable-custom-all-reduce` | string | vllm/engine/arg_utils.py:909 |
+| `--disable-hybrid-kv-cache-manager` | string | vllm/engine/arg_utils.py:1148 |
+| `--disable-log-requests` | bool | vllm/engine/arg_utils.py:2087 |
+| `--disable-log-stats` | bool | vllm/engine/arg_utils.py:1226 |
+| `--disable-nccl-for-dp-synchronization` | string | vllm/engine/arg_utils.py:891 |
+| `--disable-sliding-window` | string | vllm/engine/arg_utils.py:682 |
+| `--distributed-executor-backend` | string | vllm/engine/arg_utils.py:785 |
+| `--download-dir` | string | vllm/engine/arg_utils.py:740 |
+| `--dtype` | string | vllm/engine/arg_utils.py:655 |
+| `--ec-transfer-config` | string | vllm/engine/arg_utils.py:1201 |
+| `--enable-chunked-prefill` | string | vllm/engine/arg_utils.py:1135 |
+| `--enable-dbo` | string | vllm/engine/arg_utils.py:878 |
+| `--enable-eplb` | string | vllm/engine/arg_utils.py:895 |
+| `--enable-expert-parallel` | string | vllm/engine/arg_utils.py:870 |
+| `--enable-flashinfer-autotune` | string | vllm/engine/arg_utils.py:1179 |
+| `--enable-layerwise-nvtx-tracing` | string | vllm/engine/arg_utils.py:1086 |
+| `--enable-log-requests` | bool | vllm/engine/arg_utils.py:2081 |
+| `--enable-logging-iteration-details` | string | vllm/engine/arg_utils.py:1094 |
+| `--enable-lora` | bool | vllm/engine/arg_utils.py:1027 |
+| `--enable-mfu-metrics` | string | vllm/engine/arg_utils.py:1090 |
+| `--enable-mm-embeds` | string | vllm/engine/arg_utils.py:981 |
+| `--enable-prefix-caching` | string | vllm/engine/arg_utils.py:936 |
+| `--enable-prompt-embeds` | string | vllm/engine/arg_utils.py:691 |
+| `--enable-return-routed-experts` | string | vllm/engine/arg_utils.py:676 |
+| `--enable-sleep-mode` | string | vllm/engine/arg_utils.py:719 |
+| `--enable-tower-connector-lora` | string | vllm/engine/arg_utils.py:1038 |
+| `--enforce-eager` | string | vllm/engine/arg_utils.py:675 |
+| `--eplb-config` | string | vllm/engine/arg_utils.py:896 |
+| `--expert-placement-strategy` | string | vllm/engine/arg_utils.py:897 |
+| `--fully-sharded-loras` | string | vllm/engine/arg_utils.py:1043 |
+| `--generation-config` | string | vllm/engine/arg_utils.py:713 |
+| `--gpu-memory-utilization` | string | vllm/engine/arg_utils.py:925 |
+| `--headless` | bool | vllm/entrypoints/openai/cli_args.py:286 |
+| `--hf-config-path` | string | vllm/engine/arg_utils.py:657 |
+| `--hf-overrides` | string | vllm/engine/arg_utils.py:708 |
+| `--hf-token` | string | vllm/engine/arg_utils.py:700 |
+| `--ignore-patterns` | string | vllm/engine/arg_utils.py:747 |
+| `--interleave-mm-strings` | string | vllm/engine/arg_utils.py:1010 |
+| `--io-processor-plugin` | string | vllm/engine/arg_utils.py:729 |
+| `--kernel-config` | string | vllm/engine/arg_utils.py:1210 |
+| `--kv-cache-dtype` | string | vllm/engine/arg_utils.py:932 |
+| `--kv-cache-memory-bytes` | string | vllm/engine/arg_utils.py:928 |
+| `--kv-cache-metrics` | string | vllm/engine/arg_utils.py:1075 |
+| `--kv-cache-metrics-sample` | string | vllm/engine/arg_utils.py:1078 |
+| `--kv-events-config` | string | vllm/engine/arg_utils.py:1200 |
+| `--kv-offloading-backend` | string | vllm/engine/arg_utils.py:968 |
+| `--kv-offloading-size` | string | vllm/engine/arg_utils.py:965 |
+| `--kv-sharing-fast-prefill` | string | vllm/engine/arg_utils.py:950 |
+| `--kv-transfer-config` | string | vllm/engine/arg_utils.py:1197 |
+| `--limit-mm-per-prompt` | string | vllm/engine/arg_utils.py:978 |
+| `--load-format` | string | vllm/engine/arg_utils.py:739 |
+| `--logits-processor-pattern` | string | vllm/engine/arg_utils.py:710 |
+| `--logits-processors` | string | vllm/engine/arg_utils.py:726 |
+| `--logprobs-mode` | string | vllm/engine/arg_utils.py:681 |
+| `--long-prefill-token-threshold` | string | vllm/engine/arg_utils.py:1126 |
+| `--lora-dtype` | string | vllm/engine/arg_utils.py:1034 |
+| `--mamba-block-size` | string | vllm/engine/arg_utils.py:959 |
+| `--mamba-cache-dtype` | string | vllm/engine/arg_utils.py:953 |
+| `--mamba-cache-mode` | string | vllm/engine/arg_utils.py:962 |
+| `--mamba-ssm-cache-dtype` | string | vllm/engine/arg_utils.py:956 |
+| `--master-addr` | string | vllm/engine/arg_utils.py:794 |
+| `--master-port` | string | vllm/engine/arg_utils.py:795 |
+| `--max-cpu-loras` | string | vllm/engine/arg_utils.py:1042 |
+| `--max-cudagraph-capture-size` | string | vllm/engine/arg_utils.py:1168 |
+| `--max-logprobs` | string | vllm/engine/arg_utils.py:680 |
+| `--max-long-partial-prefills` | string | vllm/engine/arg_utils.py:1122 |
+| `--max-lora-rank` | string | vllm/engine/arg_utils.py:1033 |
+| `--max-loras` | string | vllm/engine/arg_utils.py:1032 |
+| `--max-model-len` | string | vllm/engine/arg_utils.py:669 |
+| `--max-num-batched-tokens` | string | vllm/engine/arg_utils.py:1105 |
+| `--max-num-partial-prefills` | string | vllm/engine/arg_utils.py:1119 |
+| `--max-num-seqs` | string | vllm/engine/arg_utils.py:1112 |
+| `--max-parallel-loading-workers` | string | vllm/engine/arg_utils.py:902 |
+| `--media-io-kwargs` | string | vllm/engine/arg_utils.py:984 |
+| `--mm-encoder-attn-backend` | string | vllm/engine/arg_utils.py:1006 |
+| `--mm-encoder-only` | string | vllm/engine/arg_utils.py:1000 |
+| `--mm-encoder-tp-mode` | string | vllm/engine/arg_utils.py:1003 |
+| `--mm-processor-cache-gb` | string | vllm/engine/arg_utils.py:990 |
+| `--mm-processor-cache-type` | string | vllm/engine/arg_utils.py:993 |
+| `--mm-processor-kwargs` | string | vllm/engine/arg_utils.py:987 |
+| `--mm-shm-cache-max-object-size-mb` | string | vllm/engine/arg_utils.py:996 |
+| `--model` | string | vllm/engine/arg_utils.py:647 |
+| `--model-impl` | string | vllm/engine/arg_utils.py:722 |
+| `--model-loader-extra-config` | string | vllm/engine/arg_utils.py:744 |
+| `--nnodes` | string | vllm/engine/arg_utils.py:796 |
+| `--node-rank` | string | vllm/engine/arg_utils.py:797 |
+| `--num-gpu-blocks-override` | string | vllm/engine/arg_utils.py:933 |
+| `--optimization-level` | string | vllm/engine/arg_utils.py:1218 |
+| `--otlp-traces-endpoint` | string | vllm/engine/arg_utils.py:1061 |
+| `--override-attention-dtype` | string | vllm/engine/arg_utils.py:723 |
+| `--override-generation-config` | string | vllm/engine/arg_utils.py:716 |
+| `--pipeline-parallel-size` | string | vllm/engine/arg_utils.py:789 |
+| `--pooler-config` | string | vllm/engine/arg_utils.py:709 |
+| `--prefill-context-parallel-size` | string | vllm/engine/arg_utils.py:814 |
+| `--prefix-caching-hash-algo` | string | vllm/engine/arg_utils.py:943 |
+| `--profiler-config` | string | vllm/engine/arg_utils.py:1217 |
+| `--pt-load-map-location` | string | vllm/engine/arg_utils.py:749 |
+| `--quantization` | string | vllm/engine/arg_utils.py:670 |
+| `--ray-workers-use-nsight` | string | vllm/engine/arg_utils.py:906 |
+| `--reasoning-parser` | string | vllm/engine/arg_utils.py:769 |
+| `--reasoning-parser-plugin` | string | vllm/engine/arg_utils.py:774 |
+| `--revision` | string | vllm/engine/arg_utils.py:664 |
+| `--runner` | string | vllm/engine/arg_utils.py:648 |
+| `--safetensors-load-strategy` | string | vllm/engine/arg_utils.py:741 |
+| `--scheduler-cls` | string | vllm/engine/arg_utils.py:1145 |
+| `--scheduling-policy` | string | vllm/engine/arg_utils.py:1132 |
+| `--seed` | string | vllm/engine/arg_utils.py:656 |
+| `--served-model-name` | string | vllm/engine/arg_utils.py:694 |
+| `--show-hidden-metrics-for-version` | string | vllm/engine/arg_utils.py:1057 |
+| `--skip-mm-profiling` | string | vllm/engine/arg_utils.py:1013 |
+| `--skip-tokenizer-init` | string | vllm/engine/arg_utils.py:688 |
+| `--specialize-active-lora` | string | vllm/engine/arg_utils.py:1047 |
+| `--speculative-config` | string | vllm/engine/arg_utils.py:1194 |
+| `--stream-interval` | string | vllm/engine/arg_utils.py:1155 |
+| `--structured-outputs-config` | string | vllm/engine/arg_utils.py:1214 |
+| `--swap-space` | string | vllm/engine/arg_utils.py:931 |
+| `--tensor-parallel-size` | string | vllm/engine/arg_utils.py:798 |
+| `--tokenizer` | string | vllm/engine/arg_utils.py:650 |
+| `--tokenizer-mode` | string | vllm/engine/arg_utils.py:651 |
+| `--tokenizer-revision` | string | vllm/engine/arg_utils.py:666 |
+| `--trust-remote-code` | string | vllm/engine/arg_utils.py:652 |
+| `--ubatch-size` | string | vllm/engine/arg_utils.py:879 |
+| `--use-tqdm-on-load` | string | vllm/engine/arg_utils.py:748 |
+| `--video-pruning-rate` | string | vllm/engine/arg_utils.py:1017 |
+| `--weight-transfer-config` | string | vllm/engine/arg_utils.py:1221 |
+| `--worker-cls` | string | vllm/engine/arg_utils.py:913 |
+| `--worker-extension-cls` | string | vllm/engine/arg_utils.py:914 |
 
-## vLLM Environment Variables (inventory)
+## vLLM Env Vars
 
-| Variable | Kind | Source preview |
+| Name | Type | Definition ref |
 | --- | --- | --- |
-| `CMAKE_BUILD_TYPE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `CUDA_HOME` | vllm_env | vllm/envs.py:environment_variables |
-| `CUDA_VISIBLE_DEVICES` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `K_SCALE_CONSTANT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `LD_LIBRARY_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `LOCAL_RANK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `MAX_JOBS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `NOTE` | vllm_env | vllm/envs.py:type_checking |
-| `NO_COLOR` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `NVCC_THREADS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `Q_SCALE_CONSTANT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `S3_ACCESS_KEY_ID` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `S3_ENDPOINT_URL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `S3_SECRET_ACCESS_KEY` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VERBOSE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ALLOW_INSECURE_SERIALIZATION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ALLOW_LONG_MAX_MODEL_LEN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ALLOW_RUNTIME_LORA_UPDATING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ALLREDUCE_USE_SYMM_MEM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_API_KEY` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ASSETS_CACHE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ASSETS_CACHE_MODEL_CLEAN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_AUDIO_FETCH_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CACHE_ROOT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CI_USE_S3` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_COMPILE_CACHE_SAVE_FORMAT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_COMPUTE_NANS_IN_LOGITS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CONFIGURE_LOGGING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CONFIG_ROOT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CPU_KVCACHE_SPACE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CPU_NUM_OF_RESERVED_CPU` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CPU_OMP_THREADS_BIND` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CPU_SGL_KERNEL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CUDART_SO_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_CUSTOM_SCOPES_FOR_PROFILING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DBO_COMM_SMS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEBUG_DUMP_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEBUG_LOG_API_SERVER_RESPONSE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEBUG_MFU_METRICS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEBUG_WORKSPACE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEEPEPLL_NVFP4_DISPATCH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEEPEP_BUFFER_SIZE_MB` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DEEP_GEMM_WARMUP` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DISABLED_KERNELS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DISABLE_COMPILE_CACHE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DISABLE_LOG_LOGO` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DISABLE_PYNCCL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DOCKER_BUILD_CONTEXT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DO_NOT_TRACK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DP_MASTER_IP` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DP_MASTER_PORT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DP_RANK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DP_RANK_LOCAL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_DP_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_CUDAGRAPH_GC` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_MOE_DP_CHUNK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_RESPONSES_API_STORE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENABLE_V1_MULTIPROCESSING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENGINE_ITERATION_TIMEOUT_S` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ENGINE_READY_TIMEOUT_S` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_FLASHINFER_MOE_BACKEND` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_FLOAT32_MATMUL_PRECISION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_FORCE_AOT_LOAD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_FUSED_MOE_CHUNK_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_GC_DEBUG` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_HAS_FLASHINFER_CUBIN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_HOST_IP` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_HTTP_TIMEOUT_KEEP_ALIVE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_IMAGE_FETCH_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_KEEP_ALIVE_ON_ENGINE_DEATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_KV_CACHE_LAYOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOGGING_COLOR` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOGGING_CONFIG_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOGGING_LEVEL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOGGING_PREFIX` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOGGING_STREAM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOG_BATCHSIZE_INTERVAL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOG_MODEL_INSPECTION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOG_STATS_INTERVAL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LOOPBACK_IP` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LORA_DISABLE_PDL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LORA_RESOLVER_CACHE_DIR` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_LORA_RESOLVER_HF_REPO_LIST` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MAIN_CUDA_VERSION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MARLIN_INPUT_DTYPE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MARLIN_USE_ATOMIC_ADD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MAX_AUDIO_CLIP_FILESIZE_MB` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MEDIA_CONNECTOR` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MEDIA_LOADING_THREAD_COUNT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MEDIA_URL_ALLOW_REDIRECTS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MLA_DISABLE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MM_HASHER_ALGORITHM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MODEL_REDIRECT_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MOE_DP_CHUNK_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MOE_ROUTING_SIMULATION_STRATEGY` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_MOE_USE_DEEP_GEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MOONCAKE_BOOTSTRAP_PORT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MORIIO_CONNECTOR_READ_MODE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MORIIO_NUM_WORKERS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MORIIO_POST_BATCH_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MORIIO_QP_PER_TRANSFER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MQ_MAX_CHUNK_BYTES_MB` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MSGPACK_ZERO_COPY_THRESHOLD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_MXFP4_USE_MARLIN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NCCL_INCLUDE_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NCCL_SO_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NIXL_ABORT_REQUEST_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NIXL_SIDE_CHANNEL_HOST` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NIXL_SIDE_CHANNEL_PORT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NO_USAGE_STATS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NVFP4_GEMM_BACKEND` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_NVTX_SCOPES_FOR_PROFILING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_PATTERN_MATCH_DEBUG` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_PLUGINS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_PORT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_PP_LAYER_PARTITION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_PROCESS_NAME_PREFIX` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_RANDOMIZE_DP_DUMMY_INPUTS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RAY_BUNDLE_INDICES` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RAY_DP_PACK_STRATEGY` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RAY_PER_WORKER_GPUS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RINGBUFFER_WARNING_INTERVAL` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_CUSTOM_PAGED_ATTN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_FP8_MFMA_PAGE_ATTN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_FP8_PADDING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_MOE_PADDING` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_QUICK_REDUCE_QUANTIZATION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_FP4BMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_FP4_ASM_GEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_FP8BMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_LINEAR` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_MHA` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_MLA` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_MOE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_PAGED_ATTN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_RMSNORM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_TRITON_GEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_TRITON_ROPE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_ROCM_USE_SKINNY_GEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RPC_BASE_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_RPC_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_SERVER_DEV_MODE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_SKIP_P2P_CHECK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_SLEEP_WHEN_IDLE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TARGET_DEVICE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TEST_FORCE_FP8_MARLIN` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_TEST_FORCE_LOAD_FORMAT` | vllm_env | vllm/envs.py:environment_variables |
-| `VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TPU_BUCKET_PADDING_GAP` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TPU_MOST_MODEL_LEN` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TPU_USING_PATHWAYS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TRACE_FUNCTION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_TUNED_CONFIG_FOLDER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USAGE_SOURCE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USAGE_STATS_SERVER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_AOT_COMPILE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_BYTECODE_HOOK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_DEEP_GEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_DEEP_GEMM_E8M0` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FBGEMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_FP16` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_FP4` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_FP8` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_INT4` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_BF16` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FLASHINFER_SAMPLER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_FUSED_MOE_GROUPED_TOPK` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_MEGA_AOT_ARTIFACT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_MODELSCOPE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_NCCL_SYMM_MEM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_NVFP4_CT_EMULATIONS` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_PRECOMPILED` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_RAY_WRAPPED_PP_COMM` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_STANDALONE_COMPILE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_TRITON_AWQ` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_USE_V2_MODEL_RUNNER` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_V1_OUTPUT_PROC_CHUNK_SIZE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_V1_USE_OUTLINES_CACHE` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_VIDEO_FETCH_TIMEOUT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_VIDEO_LOADER_BACKEND` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_WORKER_MULTIPROC_METHOD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_XGRAMMAR_CACHE_MB` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_XLA_CACHE_PATH` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_XLA_CHECK_RECOMPILATION` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `VLLM_XLA_USE_SPMD` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-| `V_SCALE_CONSTANT` | vllm_env | vllm/envs.py:environment_variables, vllm/envs.py:type_checking |
-
-Detailed semantics and combinations:
-- `../../deployment-config/references/global-parameter-feature-map.md`
-- `../../deployment-config/references/global-parameter-combination-guide.md`
-
-Machine-readable artifacts:
-- `generated/vllm_args_inventory.json`
-- `generated/vllm_env_inventory.json`
+| `CMAKE_BUILD_TYPE` | string | vllm/envs.py:501 |
+| `CUDA_HOME` | string | vllm/envs.py:553 |
+| `CUDA_VISIBLE_DEVICES` | string | vllm/envs.py:603 |
+| `K_SCALE_CONSTANT` | int | vllm/envs.py:998 |
+| `LD_LIBRARY_PATH` | string | vllm/envs.py:559 |
+| `LOCAL_RANK` | int | vllm/envs.py:601 |
+| `MAX_JOBS` | string | vllm/envs.py:477 |
+| `NO_COLOR` | string | vllm/envs.py:654 |
+| `NVCC_THREADS` | string | vllm/envs.py:481 |
+| `Q_SCALE_CONSTANT` | int | vllm/envs.py:996 |
+| `S3_ACCESS_KEY_ID` | string | vllm/envs.py:621 |
+| `S3_ENDPOINT_URL` | int | vllm/envs.py:623 |
+| `S3_SECRET_ACCESS_KEY` | string | vllm/envs.py:622 |
+| `VERBOSE` | int | vllm/envs.py:505 |
+| `VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE` | int | vllm/envs.py:1386 |
+| `VLLM_ALLOW_INSECURE_SERIALIZATION` | int | vllm/envs.py:1224 |
+| `VLLM_ALLOW_LONG_MAX_MODEL_LEN` | string | vllm/envs.py:819 |
+| `VLLM_ALLOW_RUNTIME_LORA_UPDATING` | string | vllm/envs.py:861 |
+| `VLLM_ALLREDUCE_USE_SYMM_MEM` | int | vllm/envs.py:1406 |
+| `VLLM_API_KEY` | string | vllm/envs.py:614 |
+| `VLLM_ASSETS_CACHE` | string | vllm/envs.py:716 |
+| `VLLM_ASSETS_CACHE_MODEL_CLEAN` | int | vllm/envs.py:724 |
+| `VLLM_AUDIO_FETCH_TIMEOUT` | int | vllm/envs.py:737 |
+| `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER` | int | vllm/envs.py:1171 |
+| `VLLM_CACHE_ROOT` | string | vllm/envs.py:520 |
+| `VLLM_CI_USE_S3` | string | vllm/envs.py:1081 |
+| `VLLM_COMPILE_CACHE_SAVE_FORMAT` | string | vllm/envs.py:1518 |
+| `VLLM_COMPUTE_NANS_IN_LOGITS` | int | vllm/envs.py:1311 |
+| `VLLM_CONFIGURE_LOGGING` | int | vllm/envs.py:640 |
+| `VLLM_CONFIG_ROOT` | string | vllm/envs.py:511 |
+| `VLLM_CPU_KVCACHE_SPACE` | int | vllm/envs.py:674 |
+| `VLLM_CPU_NUM_OF_RESERVED_CPU` | int | vllm/envs.py:682 |
+| `VLLM_CPU_OMP_THREADS_BIND` | string | vllm/envs.py:679 |
+| `VLLM_CPU_SGL_KERNEL` | int | vllm/envs.py:688 |
+| `VLLM_CUDART_SO_PATH` | string | vllm/envs.py:1038 |
+| `VLLM_CUSTOM_SCOPES_FOR_PROFILING` | int | vllm/envs.py:1435 |
+| `VLLM_DBO_COMM_SMS` | int | vllm/envs.py:1472 |
+| `VLLM_DEBUG_DUMP_PATH` | string | vllm/envs.py:578 |
+| `VLLM_DEBUG_LOG_API_SERVER_RESPONSE` | string | vllm/envs.py:616 |
+| `VLLM_DEBUG_MFU_METRICS` | int | vllm/envs.py:1532 |
+| `VLLM_DEBUG_WORKSPACE` | int | vllm/envs.py:1500 |
+| `VLLM_DEEPEPLL_NVFP4_DISPATCH` | int | vllm/envs.py:1107 |
+| `VLLM_DEEPEP_BUFFER_SIZE_MB` | int | vllm/envs.py:1456 |
+| `VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE` | int | vllm/envs.py:1462 |
+| `VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL` | int | vllm/envs.py:1467 |
+| `VLLM_DEEP_GEMM_WARMUP` | string | vllm/envs.py:1156 |
+| `VLLM_DISABLED_KERNELS` | string | vllm/envs.py:876 |
+| `VLLM_DISABLE_COMPILE_CACHE` | string | vllm/envs.py:1008 |
+| `VLLM_DISABLE_LOG_LOGO` | int | vllm/envs.py:1536 |
+| `VLLM_DISABLE_PYNCCL` | string | vllm/envs.py:880 |
+| `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | int | vllm/envs.py:1502 |
+| `VLLM_DOCKER_BUILD_CONTEXT` | string | vllm/envs.py:494 |
+| `VLLM_DO_NOT_TRACK` | string | vllm/envs.py:629 |
+| `VLLM_DP_MASTER_IP` | string | vllm/envs.py:1049 |
+| `VLLM_DP_MASTER_PORT` | int | vllm/envs.py:1051 |
+| `VLLM_DP_RANK` | int | vllm/envs.py:1040 |
+| `VLLM_DP_RANK_LOCAL` | int | vllm/envs.py:1043 |
+| `VLLM_DP_SIZE` | int | vllm/envs.py:1047 |
+| `VLLM_ENABLE_CUDAGRAPH_GC` | int | vllm/envs.py:1370 |
+| `VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING` | int | vllm/envs.py:807 |
+| `VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING` | int | vllm/envs.py:1481 |
+| `VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE` | int | vllm/envs.py:1476 |
+| `VLLM_ENABLE_MOE_DP_CHUNK` | int | vllm/envs.py:1058 |
+| `VLLM_ENABLE_RESPONSES_API_STORE` | int | vllm/envs.py:1398 |
+| `VLLM_ENABLE_V1_MULTIPROCESSING` | int | vllm/envs.py:1002 |
+| `VLLM_ENGINE_ITERATION_TIMEOUT_S` | int | vllm/envs.py:605 |
+| `VLLM_ENGINE_READY_TIMEOUT_S` | int | vllm/envs.py:610 |
+| `VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS` | int | vllm/envs.py:1295 |
+| `VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB` | json | vllm/envs.py:1268 |
+| `VLLM_FLASHINFER_MOE_BACKEND` | string | vllm/envs.py:1246 |
+| `VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE` | int | vllm/envs.py:1252 |
+| `VLLM_FLOAT32_MATMUL_PRECISION` | float | vllm/envs.py:469 |
+| `VLLM_FORCE_AOT_LOAD` | string | vllm/envs.py:591 |
+| `VLLM_FUSED_MOE_CHUNK_SIZE` | int | vllm/envs.py:801 |
+| `VLLM_GC_DEBUG` | string | vllm/envs.py:1497 |
+| `VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS` | int | vllm/envs.py:1425 |
+| `VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS` | int | vllm/envs.py:1419 |
+| `VLLM_HAS_FLASHINFER_CUBIN` | int | vllm/envs.py:1347 |
+| `VLLM_HOST_IP` | string | vllm/envs.py:530 |
+| `VLLM_HTTP_TIMEOUT_KEEP_ALIVE` | int | vllm/envs.py:836 |
+| `VLLM_IMAGE_FETCH_TIMEOUT` | int | vllm/envs.py:729 |
+| `VLLM_KEEP_ALIVE_ON_ENGINE_DEATH` | int | vllm/envs.py:812 |
+| `VLLM_KV_CACHE_LAYOUT` | string | vllm/envs.py:1305 |
+| `VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES` | int | vllm/envs.py:1444 |
+| `VLLM_LOGGING_COLOR` | string | vllm/envs.py:652 |
+| `VLLM_LOGGING_CONFIG_PATH` | string | vllm/envs.py:643 |
+| `VLLM_LOGGING_LEVEL` | string | vllm/envs.py:645 |
+| `VLLM_LOGGING_PREFIX` | string | vllm/envs.py:649 |
+| `VLLM_LOGGING_STREAM` | string | vllm/envs.py:647 |
+| `VLLM_LOG_BATCHSIZE_INTERVAL` | int | vllm/envs.py:1005 |
+| `VLLM_LOG_MODEL_INSPECTION` | int | vllm/envs.py:1528 |
+| `VLLM_LOG_STATS_INTERVAL` | int | vllm/envs.py:657 |
+| `VLLM_LOOPBACK_IP` | string | vllm/envs.py:1374 |
+| `VLLM_LORA_DISABLE_PDL` | int | vllm/envs.py:1539 |
+| `VLLM_LORA_RESOLVER_CACHE_DIR` | string | vllm/envs.py:848 |
+| `VLLM_LORA_RESOLVER_HF_REPO_LIST` | list | vllm/envs.py:855 |
+| `VLLM_MAIN_CUDA_VERSION` | string | vllm/envs.py:465 |
+| `VLLM_MARLIN_INPUT_DTYPE` | int | vllm/envs.py:1101 |
+| `VLLM_MARLIN_USE_ATOMIC_ADD` | string | vllm/envs.py:1092 |
+| `VLLM_MAX_AUDIO_CLIP_FILESIZE_MB` | int | vllm/envs.py:754 |
+| `VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE` | int | vllm/envs.py:1259 |
+| `VLLM_MEDIA_CONNECTOR` | string | vllm/envs.py:775 |
+| `VLLM_MEDIA_LOADING_THREAD_COUNT` | int | vllm/envs.py:748 |
+| `VLLM_MEDIA_URL_ALLOW_REDIRECTS` | int | vllm/envs.py:742 |
+| `VLLM_MLA_DISABLE` | int | vllm/envs.py:1024 |
+| `VLLM_MM_HASHER_ALGORITHM` | string | vllm/envs.py:781 |
+| `VLLM_MODEL_REDIRECT_PATH` | string | vllm/envs.py:1088 |
+| `VLLM_MOE_DP_CHUNK_SIZE` | int | vllm/envs.py:1057 |
+| `VLLM_MOE_ROUTING_SIMULATION_STRATEGY` | string | vllm/envs.py:1277 |
+| `VLLM_MOE_USE_DEEP_GEMM` | int | vllm/envs.py:1134 |
+| `VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT` | int | vllm/envs.py:1342 |
+| `VLLM_MOONCAKE_BOOTSTRAP_PORT` | int | vllm/envs.py:1236 |
+| `VLLM_MORIIO_CONNECTOR_READ_MODE` | string | vllm/envs.py:1328 |
+| `VLLM_MORIIO_NUM_WORKERS` | int | vllm/envs.py:1340 |
+| `VLLM_MORIIO_POST_BATCH_SIZE` | int | vllm/envs.py:1336 |
+| `VLLM_MORIIO_QP_PER_TRANSFER` | int | vllm/envs.py:1332 |
+| `VLLM_MQ_MAX_CHUNK_BYTES_MB` | int | vllm/envs.py:1290 |
+| `VLLM_MSGPACK_ZERO_COPY_THRESHOLD` | int | vllm/envs.py:1218 |
+| `VLLM_MXFP4_USE_MARLIN` | bool | vllm/envs.py:1097 |
+| `VLLM_NCCL_INCLUDE_PATH` | string | vllm/envs.py:1489 |
+| `VLLM_NCCL_SO_PATH` | string | vllm/envs.py:556 |
+| `VLLM_NIXL_ABORT_REQUEST_TIMEOUT` | int | vllm/envs.py:1324 |
+| `VLLM_NIXL_SIDE_CHANNEL_HOST` | string | vllm/envs.py:1228 |
+| `VLLM_NIXL_SIDE_CHANNEL_PORT` | int | vllm/envs.py:1232 |
+| `VLLM_NO_USAGE_STATS` | string | vllm/envs.py:628 |
+| `VLLM_NVFP4_GEMM_BACKEND` | string | vllm/envs.py:1356 |
+| `VLLM_NVTX_SCOPES_FOR_PROFILING` | int | vllm/envs.py:1439 |
+| `VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME` | string | vllm/envs.py:1451 |
+| `VLLM_PATTERN_MATCH_DEBUG` | string | vllm/envs.py:573 |
+| `VLLM_PLUGINS` | string | vllm/envs.py:842 |
+| `VLLM_PORT` | string | vllm/envs.py:535 |
+| `VLLM_PP_LAYER_PARTITION` | string | vllm/envs.py:671 |
+| `VLLM_PROCESS_NAME_PREFIX` | string | vllm/envs.py:1378 |
+| `VLLM_RANDOMIZE_DP_DUMMY_INPUTS` | string | vllm/envs.py:1062 |
+| `VLLM_RAY_BUNDLE_INDICES` | string | vllm/envs.py:1035 |
+| `VLLM_RAY_DP_PACK_STRATEGY` | string | vllm/envs.py:1077 |
+| `VLLM_RAY_PER_WORKER_GPUS` | float | vllm/envs.py:1029 |
+| `VLLM_RINGBUFFER_WARNING_INTERVAL` | int | vllm/envs.py:548 |
+| `VLLM_ROCM_CUSTOM_PAGED_ATTN` | string | vllm/envs.py:963 |
+| `VLLM_ROCM_FP8_MFMA_PAGE_ATTN` | int | vllm/envs.py:1402 |
+| `VLLM_ROCM_FP8_PADDING` | int | vllm/envs.py:959 |
+| `VLLM_ROCM_MOE_PADDING` | int | vllm/envs.py:961 |
+| `VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16` | string | vllm/envs.py:982 |
+| `VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB` | int | vllm/envs.py:992 |
+| `VLLM_ROCM_QUICK_REDUCE_QUANTIZATION` | int | vllm/envs.py:973 |
+| `VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT` | string | vllm/envs.py:967 |
+| `VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE` | int | vllm/envs.py:561 |
+| `VLLM_ROCM_USE_AITER` | string | vllm/envs.py:885 |
+| `VLLM_ROCM_USE_AITER_FP4BMM` | string | vllm/envs.py:935 |
+| `VLLM_ROCM_USE_AITER_FP4_ASM_GEMM` | string | vllm/envs.py:920 |
+| `VLLM_ROCM_USE_AITER_FP8BMM` | string | vllm/envs.py:930 |
+| `VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS` | string | vllm/envs.py:945 |
+| `VLLM_ROCM_USE_AITER_LINEAR` | string | vllm/envs.py:896 |
+| `VLLM_ROCM_USE_AITER_MHA` | string | vllm/envs.py:915 |
+| `VLLM_ROCM_USE_AITER_MLA` | string | vllm/envs.py:910 |
+| `VLLM_ROCM_USE_AITER_MOE` | string | vllm/envs.py:901 |
+| `VLLM_ROCM_USE_AITER_PAGED_ATTN` | string | vllm/envs.py:890 |
+| `VLLM_ROCM_USE_AITER_RMSNORM` | string | vllm/envs.py:905 |
+| `VLLM_ROCM_USE_AITER_TRITON_GEMM` | string | vllm/envs.py:951 |
+| `VLLM_ROCM_USE_AITER_TRITON_ROPE` | string | vllm/envs.py:925 |
+| `VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION` | string | vllm/envs.py:939 |
+| `VLLM_ROCM_USE_SKINNY_GEMM` | string | vllm/envs.py:955 |
+| `VLLM_RPC_BASE_PATH` | string | vllm/envs.py:538 |
+| `VLLM_RPC_TIMEOUT` | int | vllm/envs.py:834 |
+| `VLLM_SERVER_DEV_MODE` | int | vllm/envs.py:1012 |
+| `VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD` | int | vllm/envs.py:1509 |
+| `VLLM_SKIP_P2P_CHECK` | string | vllm/envs.py:871 |
+| `VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX` | int | vllm/envs.py:489 |
+| `VLLM_SLEEP_WHEN_IDLE` | int | vllm/envs.py:1286 |
+| `VLLM_TARGET_DEVICE` | string | vllm/envs.py:463 |
+| `VLLM_TEST_FORCE_FP8_MARLIN` | string | vllm/envs.py:825 |
+| `VLLM_TEST_FORCE_LOAD_FORMAT` | string | vllm/envs.py:829 |
+| `VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY` | int | vllm/envs.py:1431 |
+| `VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS` | int | vllm/envs.py:1281 |
+| `VLLM_TPU_BUCKET_PADDING_GAP` | int | vllm/envs.py:1119 |
+| `VLLM_TPU_MOST_MODEL_LEN` | int | vllm/envs.py:1124 |
+| `VLLM_TPU_USING_PATHWAYS` | bool | vllm/envs.py:1128 |
+| `VLLM_TRACE_FUNCTION` | int | vllm/envs.py:663 |
+| `VLLM_TUNED_CONFIG_FOLDER` | string | vllm/envs.py:1414 |
+| `VLLM_USAGE_SOURCE` | string | vllm/envs.py:635 |
+| `VLLM_USAGE_STATS_SERVER` | string | vllm/envs.py:625 |
+| `VLLM_USE_AOT_COMPILE` | string | vllm/envs.py:582 |
+| `VLLM_USE_BYTECODE_HOOK` | int | vllm/envs.py:585 |
+| `VLLM_USE_DEEP_GEMM` | int | vllm/envs.py:1132 |
+| `VLLM_USE_DEEP_GEMM_E8M0` | int | vllm/envs.py:1138 |
+| `VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES` | int | vllm/envs.py:1142 |
+| `VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT` | int | vllm/envs.py:1410 |
+| `VLLM_USE_FBGEMM` | int | vllm/envs.py:1491 |
+| `VLLM_USE_FLASHINFER_MOE_FP16` | int | vllm/envs.py:1175 |
+| `VLLM_USE_FLASHINFER_MOE_FP4` | int | vllm/envs.py:1183 |
+| `VLLM_USE_FLASHINFER_MOE_FP8` | int | vllm/envs.py:1179 |
+| `VLLM_USE_FLASHINFER_MOE_INT4` | int | vllm/envs.py:1187 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_BF16` | int | vllm/envs.py:1204 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8` | int | vllm/envs.py:1192 |
+| `VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS` | int | vllm/envs.py:1199 |
+| `VLLM_USE_FLASHINFER_SAMPLER` | int | vllm/envs.py:665 |
+| `VLLM_USE_FUSED_MOE_GROUPED_TOPK` | int | vllm/envs.py:1166 |
+| `VLLM_USE_MEGA_AOT_ARTIFACT` | string | vllm/envs.py:595 |
+| `VLLM_USE_MODELSCOPE` | string | vllm/envs.py:543 |
+| `VLLM_USE_NCCL_SYMM_MEM` | int | vllm/envs.py:1485 |
+| `VLLM_USE_NVFP4_CT_EMULATIONS` | int | vllm/envs.py:1317 |
+| `VLLM_USE_PRECOMPILED` | bool | vllm/envs.py:483 |
+| `VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE` | string | vllm/envs.py:696 |
+| `VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM` | int | vllm/envs.py:701 |
+| `VLLM_USE_RAY_WRAPPED_PP_COMM` | int | vllm/envs.py:707 |
+| `VLLM_USE_STANDALONE_COMPILE` | string | vllm/envs.py:567 |
+| `VLLM_USE_TRITON_AWQ` | int | vllm/envs.py:859 |
+| `VLLM_USE_V2_MODEL_RUNNER` | int | vllm/envs.py:1522 |
+| `VLLM_V1_OUTPUT_PROC_CHUNK_SIZE` | int | vllm/envs.py:1020 |
+| `VLLM_V1_USE_OUTLINES_CACHE` | string | vllm/envs.py:1113 |
+| `VLLM_VIDEO_FETCH_TIMEOUT` | int | vllm/envs.py:732 |
+| `VLLM_VIDEO_LOADER_BACKEND` | string | vllm/envs.py:765 |
+| `VLLM_WORKER_MULTIPROC_METHOD` | string | vllm/envs.py:712 |
+| `VLLM_XGRAMMAR_CACHE_MB` | int | vllm/envs.py:1210 |
+| `VLLM_XLA_CACHE_PATH` | string | vllm/envs.py:789 |
+| `VLLM_XLA_CHECK_RECOMPILATION` | int | vllm/envs.py:796 |
+| `VLLM_XLA_USE_SPMD` | int | vllm/envs.py:800 |
+| `V_SCALE_CONSTANT` | int | vllm/envs.py:1000 |
 
 Back to [INDEX](../../INDEX.md).

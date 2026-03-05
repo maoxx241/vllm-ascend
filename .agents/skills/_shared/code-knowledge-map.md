@@ -20,6 +20,8 @@ This file maps runtime/deployment code paths to shared knowledge docs.
 | `vllm_ascend/envs.py` | [vllm-ascend global inputs](vllm-ascend-core/references/vllm-ascend-inputs-and-envs-global.md) | Full vLLM-Ascend env var inventory |
 | `docs/source/tutorials/**/*.md` | [global combination guide](deployment-config/references/global-parameter-combination-guide.md) | Co-occurrence evidence for real-world flag stacks |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/build_global_param_kb.py` | [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) | Deterministic global KB generation pipeline |
+| `.agents/skills/vllm-ascend-deployment-assistant/scripts/build_global_param_kb.py` | [verification report](deployment-config/references/global-parameter-verification-report.md) | Dual-baseline verification and confidence scoring |
+| `.agents/skills/vllm-ascend-deployment-assistant/scripts/render_deploy_package.py` | [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) | Deployment output includes evidence and conflict alerts |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/normalize_terms.py` | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | Canonical feature mapping |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/render_deploy_package.py` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | Deterministic package generation |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/render_deploy_package.py` | [compatibility matrix](vllm-ascend-core/concepts/model-feature-compatibility-matrix.md) | Hard blocking for unsupported features |
