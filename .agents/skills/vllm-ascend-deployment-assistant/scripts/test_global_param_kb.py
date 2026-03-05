@@ -42,6 +42,7 @@ def main() -> int:
     combo_rules_path = deploy_root / "global_combo_rules.json"
     report_path = deploy_root / "global_validation_report.json"
     upstream_path = deploy_root / "global_upstream_snapshot.json"
+    value_semantics_progress_path = deploy_root / "global_value_semantics_progress.json"
     legacy_pairings_path = deploy_root / "global_flag_pairings.json"
     legacy_scan_files_path = deploy_root / "global_scan_files.json"
 
@@ -57,6 +58,7 @@ def main() -> int:
         combo_rules_path,
         report_path,
         upstream_path,
+        value_semantics_progress_path,
         legacy_pairings_path,
         legacy_scan_files_path,
         vllm_args_path,
@@ -74,6 +76,7 @@ def main() -> int:
     report = kb["validation_report"]
     summary = _load(feature_summary_path)
     upstream = _load(upstream_path)
+    value_semantics_progress = _load(value_semantics_progress_path)
     legacy_pairings = _load(legacy_pairings_path)
     legacy_scan_files = _load(legacy_scan_files_path)
     asc_args_freq = _load(asc_args_freq_path)
@@ -93,6 +96,8 @@ def main() -> int:
         assert isinstance(entry["web_refs"], list)
         assert isinstance(entry["confidence"], float)
         assert 0.0 < entry["confidence"] <= 1.0
+        assert isinstance(entry.get("value_semantics"), dict), f"Missing value_semantics: {entry['id']}"
+        assert entry.get("value_semantics_completion") in {"todo", "done"}
 
     # High-risk entries should be mostly backed by local docs + official web evidence
     high_risk_rows = [e for e in entries if e["primary_feature"] in HIGH_RISK]
@@ -122,6 +127,9 @@ def main() -> int:
     assert report["evidence_completeness"]["with_definition_ref"] == len(entries)
     assert report["high_risk_validated_count"] >= 20
     assert isinstance(report["unresolved_items"], list)
+    assert "value_semantics_progress" in report
+    assert report["value_semantics_progress"]["done"] >= 10
+    assert report["value_semantics_progress"]["ratio"] > 0
     stats = report["source_tier_stats"]
     assert stats["official_ref_count"] >= len(entries)
     assert stats["external_ref_count"] > 0
@@ -135,6 +143,7 @@ def main() -> int:
     assert any(path.startswith("examples/") for path in legacy_scan_files)
     assert isinstance(asc_args_freq, dict) and asc_args_freq, "vllm_ascend_args_frequency should be non-empty"
     assert asc_args_freq.get("--quantization", 0) > 0
+    assert value_semantics_progress["done"] == report["value_semantics_progress"]["done"]
 
     # Dataset snapshot interface exists for Skill consumption
     for key in ["vllm_args", "vllm_envs", "vllm_ascend_args", "vllm_ascend_envs"]:

@@ -18,6 +18,11 @@
     "entries_with_official_refs": 474,
     "entries_with_external_refs": 282
   },
+  "value_semantics_progress": {
+    "done": 53,
+    "todo": 421,
+    "ratio": 0.1118
+  },
   "unresolved_items": [
     "vllm.arg.disable_log_requests:upstream_delta",
     "vllm.arg.logits_processor_pattern:upstream_delta",
