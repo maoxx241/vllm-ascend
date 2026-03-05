@@ -51,19 +51,58 @@ SUPPORTED_FEATURES = {
     "weight_prefetch",
 }
 
-PROFILE_BLOCKED_FEATURES: Dict[str, Dict[str, str]] = {
+MODEL_KNOWLEDGE: Dict[str, Dict[str, Any]] = {
     "qwen3-32b-w8a8": {
-        "int4_quantization": (
-            "Qwen3-32B-W8A8 profile is fixed to W8A8 weights; int4/W4A4 is not available on this profile."
-        ),
-        "expert_parallel": (
-            "Qwen3-32B-W8A8 is a dense model; expert parallel (EP) is not applicable."
-        ),
+        "architecture": {
+            "family": "qwen3_dense",
+            "is_moe": False,
+            "has_moe_layers": False,
+            "num_experts": 0,
+        },
+        "quantization_profile": {
+            "fixed_weight_format": "w8a8",
+            "supported_variants": ["w8a8"],
+        },
+        "feature_constraints": {
+            "int4_quantization": {
+                "level": "hard_block",
+                "reason": "Profile is fixed to W8A8 weights; no validated INT4/W4A4 artifact in this profile.",
+            },
+        },
+        "feature_min_npu_count": {
+            "data_parallel": 8,
+            "context_parallel": 8,
+        },
+        "evidence_refs": [
+            ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+            "docs/source/tutorials/models/Qwen3-Dense.md",
+        ],
     },
     "qwen3-next-80b-a3b-instruct-w8a8": {
-        "int4_quantization": (
-            "Qwen3-Next-80B-A3B-Instruct-W8A8 has no validated int4 deployment path in this demo package."
-        ),
+        "architecture": {
+            "family": "qwen3_next",
+            "is_moe": True,
+            "has_moe_layers": True,
+            "num_experts": 80,
+        },
+        "quantization_profile": {
+            "fixed_weight_format": "w8a8",
+            "supported_variants": ["w8a8"],
+        },
+        "feature_constraints": {
+            "int4_quantization": {
+                "level": "hard_block",
+                "reason": "No validated INT4 deployment path in this demo package.",
+            },
+        },
+        "feature_min_npu_count": {
+            "data_parallel": 8,
+            "context_parallel": 8,
+        },
+        "evidence_refs": [
+            ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
+            "docs/source/tutorials/models/Qwen3-Next.md",
+        ],
     },
 }
 
@@ -206,20 +245,139 @@ def _build_evidence_block(
     return evidence_block, conflict_alerts
 
 
-def _apply_profile_compatibility(
+def _apply_model_knowledge_compatibility(
     model_profile: str,
     requested_features: List[str],
-) -> Tuple[List[str], List[Dict[str, str]]]:
-    blocked_map = PROFILE_BLOCKED_FEATURES.get(model_profile, {})
+    npu_count: int,
+) -> Tuple[List[str], List[Dict[str, Any]], List[Dict[str, Any]], List[Dict[str, Any]]]:
+    knowledge = MODEL_KNOWLEDGE.get(model_profile, {})
+    architecture = knowledge.get("architecture", {})
+    quant_profile = knowledge.get("quantization_profile", {})
+    feature_constraints = knowledge.get("feature_constraints", {})
+    min_npu_map = knowledge.get("feature_min_npu_count", {})
+    evidence_refs = knowledge.get("evidence_refs", [])
+
+    has_moe_layers = bool(architecture.get("has_moe_layers", False))
+    supported_variants = set(quant_profile.get("supported_variants", []))
+
     allowed: List[str] = []
-    blocked: List[Dict[str, str]] = []
+    blocked: List[Dict[str, Any]] = []
+    downgraded: List[Dict[str, Any]] = []
+    reasonability_checks: List[Dict[str, Any]] = []
+
     for feature in requested_features:
-        reason = blocked_map.get(feature)
-        if reason:
-            blocked.append({"feature": feature, "reason": reason})
+        # Generic inference from architecture knowledge.
+        if feature == "expert_parallel" and not has_moe_layers:
+            reason = (
+                f"Blocked by model knowledge: '{model_profile}' has no MoE layers "
+                f"(has_moe_layers={has_moe_layers}), so expert_parallel is not applicable."
+            )
+            blocked.append(
+                {
+                    "feature": feature,
+                    "reason": reason,
+                    "level": "hard_block",
+                    "source": "model_knowledge_inference",
+                    "evidence_refs": evidence_refs,
+                }
+            )
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "blocked",
+                    "why": reason,
+                    "inferred_from": "architecture.has_moe_layers",
+                }
+            )
             continue
+
+        # Generic inference from quantization artifact knowledge.
+        if feature == "int4_quantization" and "int4" not in supported_variants and "w4a4" not in supported_variants:
+            fixed = str(quant_profile.get("fixed_weight_format", "unknown"))
+            reason = (
+                f"Blocked by model knowledge: '{model_profile}' quantization is fixed to {fixed}, "
+                "INT4/W4A4 is not available in this profile."
+            )
+            blocked.append(
+                {
+                    "feature": feature,
+                    "reason": reason,
+                    "level": "hard_block",
+                    "source": "model_knowledge_inference",
+                    "evidence_refs": evidence_refs,
+                }
+            )
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "blocked",
+                    "why": reason,
+                    "inferred_from": "quantization_profile.supported_variants",
+                }
+            )
+            continue
+
+        # Explicit profile constraints.
+        if feature in feature_constraints:
+            rule = feature_constraints[feature]
+            reason = str(rule.get("reason", "Blocked by profile constraint."))
+            level = str(rule.get("level", "hard_block"))
+            blocked.append(
+                {
+                    "feature": feature,
+                    "reason": reason,
+                    "level": level,
+                    "source": "model_profile_constraint",
+                    "evidence_refs": evidence_refs,
+                }
+            )
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "blocked",
+                    "why": reason,
+                    "inferred_from": "feature_constraints",
+                }
+            )
+            continue
+
+        # Hardware reasonability check.
+        min_npu = int(min_npu_map.get(feature, 0) or 0)
+        if min_npu > 0 and npu_count < min_npu:
+            reason = (
+                f"Requested feature '{feature}' is not reasonable for current hardware "
+                f"(npu_count={npu_count} < required={min_npu})."
+            )
+            downgraded.append(
+                {
+                    "feature": feature,
+                    "reason": reason,
+                    "fallback": "Skip this feature and keep single-node safe defaults.",
+                    "source": "hardware_reasonability_inference",
+                    "evidence_refs": evidence_refs,
+                }
+            )
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "downgraded",
+                    "why": reason,
+                    "inferred_from": "feature_min_npu_count",
+                }
+            )
+            continue
+
         allowed.append(feature)
-    return allowed, blocked
+        reasonability_checks.append(
+            {
+                "feature": feature,
+                "result": "allowed",
+                "why": "No model/hardware conflict detected by model knowledge rules.",
+                "inferred_from": "model_knowledge",
+            }
+        )
+
+    return allowed, blocked, downgraded, reasonability_checks
 
 
 def _build_command_parts(
@@ -231,7 +389,6 @@ def _build_command_parts(
     max_num_batched_tokens: int,
     gpu_memory_utilization: float,
     features: List[str],
-    npu_count: int,
 ) -> Dict[str, object]:
     cmd_parts: List[str] = [
         "vllm serve",
@@ -265,17 +422,12 @@ def _build_command_parts(
         compilation_config["cudagraph_mode"] = "FULL_DECODE_ONLY"
 
     if "data_parallel" in features:
-        if npu_count >= 8:
-            cmd_parts.extend([
-                "--data-parallel-size 2",
-                "--data-parallel-size-local 2",
-                "--data-parallel-address 127.0.0.1",
-                "--data-parallel-rpc-port 13389",
-            ])
-        else:
-            risks.append(
-                "Requested data_parallel but npu_count < 8; keeping single-data-parallel deployment."
-            )
+        cmd_parts.extend([
+            "--data-parallel-size 2",
+            "--data-parallel-size-local 2",
+            "--data-parallel-address 127.0.0.1",
+            "--data-parallel-rpc-port 13389",
+        ])
 
     if "expert_parallel" in features:
         cmd_parts.append("--enable-expert-parallel")
@@ -286,12 +438,7 @@ def _build_command_parts(
         )
 
     if "context_parallel" in features:
-        if npu_count >= 8:
-            additional_config["context_parallel_size"] = 2
-        else:
-            risks.append(
-                "Requested context_parallel but npu_count < 8; skip CP config for demo stability."
-            )
+        additional_config["context_parallel_size"] = 2
 
     if "lora" in features:
         cmd_parts.append("--enable-lora")
@@ -349,9 +496,14 @@ def render_package(
 
     normalized_features = list(normalization["features"])
     requested_features = _dedupe(features_input + normalized_features)
-    applied_features, blocked_features = _apply_profile_compatibility(
-        model_profile, requested_features
+    applied_features, blocked_features, downgraded_features, reasonability_checks = (
+        _apply_model_knowledge_compatibility(
+            model_profile=model_profile,
+            requested_features=requested_features,
+            npu_count=npu_count,
+        )
     )
+    model_knowledge = MODEL_KNOWLEDGE.get(model_profile, {})
 
     kb_index = _load_global_kb_entries()
     evidence_block, conflict_alerts = _build_evidence_block(requested_features, kb_index)
@@ -373,7 +525,6 @@ def render_package(
         max_num_batched_tokens=max_num_batched_tokens,
         gpu_memory_utilization=gpu_memory_utilization,
         features=applied_features,
-        npu_count=npu_count,
     )
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -458,6 +609,11 @@ def render_package(
         risks.append(
             f"Blocked feature '{blocked['feature']}': {blocked['reason']}"
         )
+    for downgraded in downgraded_features:
+        risks.append(
+            f"Downgraded feature '{downgraded['feature']}': {downgraded['reason']} "
+            f"Fallback: {downgraded['fallback']}"
+        )
     if normalization["missing_slots"]:
         risks.append(
             "Input is ambiguous; ask one clarification before production execution: "
@@ -476,9 +632,12 @@ def render_package(
             "canonical_features": applied_features,
             "canonical_features_requested": requested_features,
             "canonical_features_applied": applied_features,
+            "model_knowledge": model_knowledge,
             "compatibility": {
                 "allowed_features": applied_features,
                 "blocked_features": blocked_features,
+                "downgraded_features": downgraded_features,
+                "reasonability_checks": reasonability_checks,
             },
             "evidence_block": evidence_block,
             "conflict_alerts": conflict_alerts,

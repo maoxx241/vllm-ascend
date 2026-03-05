@@ -59,11 +59,15 @@ def main() -> int:
                 )
                 plan = case["deployment_plan"]
                 assert "compatibility" in plan
+                assert "model_knowledge" in plan
                 blocked = {item["feature"] for item in plan["compatibility"]["blocked_features"]}
                 allowed = set(plan["compatibility"]["allowed_features"])
+                downgraded = {item["feature"] for item in plan["compatibility"]["downgraded_features"]}
                 assert feature in blocked or feature in allowed, (
                     f"Feature {feature} must be either allowed or blocked for profile {profile}."
                 )
+                if feature in downgraded:
+                    assert feature not in allowed
                 assert isinstance(plan["evidence_block"], list) and plan["evidence_block"], (
                     f"Feature {feature} should include evidence block for profile {profile}."
                 )

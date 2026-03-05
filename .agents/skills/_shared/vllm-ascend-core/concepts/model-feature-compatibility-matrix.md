@@ -28,6 +28,19 @@ This matrix drives hard blocking behavior in deployment package generation.
 - `qwen3-32b-w8a8`: dense, W8A8 quantized profile.
 - `qwen3-next-80b-a3b-instruct-w8a8`: MoE-like Next profile for backup demo.
 
+## Model Knowledge Fields (for deterministic inference)
+
+| Profile | `has_moe_layers` | `num_experts` | `fixed_weight_format` | `supported_variants` | `feature_min_npu_count` |
+| --- | --- | --- | --- | --- | --- |
+| `qwen3-32b-w8a8` | `false` | `0` | `w8a8` | `["w8a8"]` | `data_parallel=8, context_parallel=8` |
+| `qwen3-next-80b-a3b-instruct-w8a8` | `true` | `80` | `w8a8` | `["w8a8"]` | `data_parallel=8, context_parallel=8` |
+
+Inference rules:
+
+1. If `has_moe_layers=false`, then `expert_parallel` is `hard_block`.
+2. If `int4`/`w4a4` is not in `supported_variants`, then `int4_quantization` is `hard_block`.
+3. If requested feature has `feature_min_npu_count` and current `npu_count` is lower, then mark as `downgraded` and skip applying that feature.
+
 ## Feature Compatibility
 
 | Canonical feature | qwen3-32b-w8a8 | qwen3-next-80b-a3b-instruct-w8a8 | Rule |
@@ -51,6 +64,6 @@ This matrix drives hard blocking behavior in deployment package generation.
 - Request: `qwen3-32b-w8a8 + int4`
   - Result: blocked, reason: profile fixed to W8A8.
 - Request: `qwen3-32b-w8a8 + ep`
-  - Result: blocked, reason: dense model, EP not applicable.
+  - Result: blocked, reason: no MoE layers (`has_moe_layers=false`), EP not applicable.
 
 Back to [INDEX](../../../INDEX.md).

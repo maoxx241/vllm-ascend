@@ -53,6 +53,9 @@ def main() -> int:
         assert plan["model_profile"] == "qwen3-32b-w8a8"
         assert "compatibility" in plan
         assert plan["compatibility"]["blocked_features"] == []
+        assert plan["compatibility"]["downgraded_features"] == []
+        assert isinstance(plan["compatibility"]["reasonability_checks"], list)
+        assert plan["model_knowledge"]["architecture"]["has_moe_layers"] is False
         assert isinstance(plan["evidence_block"], list) and plan["evidence_block"], "evidence_block should exist"
         assert isinstance(plan["conflict_alerts"], list), "conflict_alerts should exist"
         assert any(section["feature"] == "graph_mode" for section in plan["evidence_block"])
@@ -95,6 +98,9 @@ def main() -> int:
         blocked_features = {item["feature"] for item in blocked_items}
         assert "int4_quantization" in blocked_features
         assert "expert_parallel" in blocked_features
+        ep_item = next(item for item in blocked_items if item["feature"] == "expert_parallel")
+        assert "no MoE layers" in ep_item["reason"]
+        assert ep_item["source"] in {"model_knowledge_inference", "model_profile_constraint"}
         assert any("Blocked feature 'int4_quantization'" in risk for risk in blocked_plan["risks"])
         assert any("Blocked feature 'expert_parallel'" in risk for risk in blocked_plan["risks"])
         assert isinstance(blocked_plan["conflict_alerts"], list)
@@ -127,6 +133,10 @@ def main() -> int:
             features_input=[],
         )
         cp_risks = cp_low_card["deployment_plan"]["risks"]
+        cp_downgraded = cp_low_card["deployment_plan"]["compatibility"]["downgraded_features"]
+        assert any(item["feature"] == "context_parallel" for item in cp_downgraded), (
+            "CP on low-card setup should be downgraded by model/hardware knowledge."
+        )
         assert any("context_parallel" in risk for risk in cp_risks), (
             "CP on low-card setup should report risk."
         )
