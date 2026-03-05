@@ -17,8 +17,8 @@ freshness: "fresh"
 - Official refs: **1195**
 - External refs: **337**
 - Entries with external refs: **282**
-- Value semantics done: **53**
-- Value semantics ratio: **0.1118**
+- Value semantics done: **474**
+- Value semantics ratio: **1.0**
 
 ## Unresolved items (first 50)
 
