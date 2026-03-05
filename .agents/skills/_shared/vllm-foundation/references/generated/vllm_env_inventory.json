@@ -1,0 +1,1527 @@
+{
+  "CMAKE_BUILD_TYPE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "CUDA_HOME": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "CUDA_VISIBLE_DEVICES": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "K_SCALE_CONSTANT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "LD_LIBRARY_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "LOCAL_RANK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "MAX_JOBS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "NOTE": {
+    "sources": [
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "NO_COLOR": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "NVCC_THREADS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "Q_SCALE_CONSTANT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "S3_ACCESS_KEY_ID": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "S3_ENDPOINT_URL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "S3_SECRET_ACCESS_KEY": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VERBOSE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ALLOW_INSECURE_SERIALIZATION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ALLOW_LONG_MAX_MODEL_LEN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ALLOW_RUNTIME_LORA_UPDATING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ALLREDUCE_USE_SYMM_MEM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_API_KEY": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ASSETS_CACHE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ASSETS_CACHE_MODEL_CLEAN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_AUDIO_FETCH_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CACHE_ROOT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CI_USE_S3": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_COMPILE_CACHE_SAVE_FORMAT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_COMPUTE_NANS_IN_LOGITS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CONFIGURE_LOGGING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CONFIG_ROOT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CPU_KVCACHE_SPACE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CPU_NUM_OF_RESERVED_CPU": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CPU_OMP_THREADS_BIND": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CPU_SGL_KERNEL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CUDART_SO_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_CUSTOM_SCOPES_FOR_PROFILING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DBO_COMM_SMS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEBUG_DUMP_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEBUG_LOG_API_SERVER_RESPONSE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEBUG_MFU_METRICS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEBUG_WORKSPACE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEEPEPLL_NVFP4_DISPATCH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEEPEP_BUFFER_SIZE_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEEPEP_HIGH_THROUGHPUT_FORCE_INTRA_NODE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEEPEP_LOW_LATENCY_USE_MNNVL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DEEP_GEMM_WARMUP": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DISABLED_KERNELS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DISABLE_COMPILE_CACHE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DISABLE_LOG_LOGO": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DISABLE_PYNCCL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DISABLE_SHARED_EXPERTS_STREAM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DOCKER_BUILD_CONTEXT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DO_NOT_TRACK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DP_MASTER_IP": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DP_MASTER_PORT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DP_RANK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DP_RANK_LOCAL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_DP_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_CUDAGRAPH_GC": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_FUSED_MOE_ACTIVATION_CHUNKING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_INDUCTOR_COORDINATE_DESCENT_TUNING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_INDUCTOR_MAX_AUTOTUNE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_MOE_DP_CHUNK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_RESPONSES_API_STORE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENABLE_V1_MULTIPROCESSING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENGINE_ITERATION_TIMEOUT_S": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ENGINE_READY_TIMEOUT_S": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FLASHINFER_ALLREDUCE_FUSION_THRESHOLDS_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FLASHINFER_MOE_BACKEND": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FLOAT32_MATMUL_PRECISION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FORCE_AOT_LOAD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_FUSED_MOE_CHUNK_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_GC_DEBUG": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_GPT_OSS_HARMONY_SYSTEM_INSTRUCTIONS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_GPT_OSS_SYSTEM_TOOL_MCP_LABELS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_HAS_FLASHINFER_CUBIN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_HOST_IP": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_HTTP_TIMEOUT_KEEP_ALIVE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_IMAGE_FETCH_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_KEEP_ALIVE_ON_ENGINE_DEATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_KV_CACHE_LAYOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_KV_EVENTS_USE_INT_BLOCK_HASHES": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOGGING_COLOR": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOGGING_CONFIG_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOGGING_LEVEL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOGGING_PREFIX": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOGGING_STREAM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOG_BATCHSIZE_INTERVAL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOG_MODEL_INSPECTION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOG_STATS_INTERVAL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LOOPBACK_IP": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LORA_DISABLE_PDL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LORA_RESOLVER_CACHE_DIR": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_LORA_RESOLVER_HF_REPO_LIST": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MAIN_CUDA_VERSION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MARLIN_INPUT_DTYPE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MARLIN_USE_ATOMIC_ADD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MAX_AUDIO_CLIP_FILESIZE_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MAX_TOKENS_PER_EXPERT_FP4_MOE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MEDIA_CONNECTOR": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MEDIA_LOADING_THREAD_COUNT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MEDIA_URL_ALLOW_REDIRECTS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MLA_DISABLE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MM_HASHER_ALGORITHM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MODEL_REDIRECT_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MOE_DP_CHUNK_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MOE_ROUTING_SIMULATION_STRATEGY": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MOE_USE_DEEP_GEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MOONCAKE_ABORT_REQUEST_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MOONCAKE_BOOTSTRAP_PORT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MORIIO_CONNECTOR_READ_MODE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MORIIO_NUM_WORKERS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MORIIO_POST_BATCH_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MORIIO_QP_PER_TRANSFER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MQ_MAX_CHUNK_BYTES_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MSGPACK_ZERO_COPY_THRESHOLD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_MXFP4_USE_MARLIN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NCCL_INCLUDE_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NCCL_SO_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NIXL_ABORT_REQUEST_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NIXL_SIDE_CHANNEL_HOST": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NIXL_SIDE_CHANNEL_PORT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NO_USAGE_STATS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NVFP4_GEMM_BACKEND": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_NVTX_SCOPES_FOR_PROFILING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_PATTERN_MATCH_DEBUG": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_PLUGINS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_PORT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_PP_LAYER_PARTITION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_PROCESS_NAME_PREFIX": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RANDOMIZE_DP_DUMMY_INPUTS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RAY_BUNDLE_INDICES": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RAY_DP_PACK_STRATEGY": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RAY_PER_WORKER_GPUS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RINGBUFFER_WARNING_INTERVAL": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_CUSTOM_PAGED_ATTN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_FP8_MFMA_PAGE_ATTN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_FP8_PADDING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_MOE_PADDING": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_QUICK_REDUCE_CAST_BF16_TO_FP16": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_QUICK_REDUCE_MAX_SIZE_BYTES_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_QUICK_REDUCE_QUANTIZATION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_SHUFFLE_KV_CACHE_LAYOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_FP4BMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_FP4_ASM_GEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_FP8BMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_LINEAR": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_MHA": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_MLA": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_MOE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_PAGED_ATTN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_RMSNORM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_TRITON_GEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_TRITON_ROPE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_AITER_UNIFIED_ATTENTION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_ROCM_USE_SKINNY_GEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RPC_BASE_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_RPC_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_SERVER_DEV_MODE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_SHARED_EXPERTS_STREAM_TOKEN_THRESHOLD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_SKIP_P2P_CHECK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_SLEEP_WHEN_IDLE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TARGET_DEVICE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TEST_FORCE_FP8_MARLIN": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TEST_FORCE_LOAD_FORMAT": {
+    "sources": [
+      "vllm/envs.py:environment_variables"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TOOL_JSON_ERROR_AUTOMATIC_RETRY": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TOOL_PARSE_REGEX_TIMEOUT_SECONDS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TPU_BUCKET_PADDING_GAP": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TPU_MOST_MODEL_LEN": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TPU_USING_PATHWAYS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TRACE_FUNCTION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_TUNED_CONFIG_FOLDER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USAGE_SOURCE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USAGE_STATS_SERVER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_AOT_COMPILE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_BYTECODE_HOOK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_DEEP_GEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_DEEP_GEMM_E8M0": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_DEEP_GEMM_TMA_ALIGNED_SCALES": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_EXPERIMENTAL_PARSER_CONTEXT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FBGEMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_FP16": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_FP4": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_FP8": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_INT4": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_MXFP4_BF16": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_MOE_MXFP4_MXFP8_CUTLASS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FLASHINFER_SAMPLER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_FUSED_MOE_GROUPED_TOPK": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_MEGA_AOT_ARTIFACT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_MODELSCOPE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_NCCL_SYMM_MEM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_NVFP4_CT_EMULATIONS": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_PRECOMPILED": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_RAY_COMPILED_DAG_CHANNEL_TYPE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_RAY_COMPILED_DAG_OVERLAP_COMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_RAY_WRAPPED_PP_COMM": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_STANDALONE_COMPILE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_TRITON_AWQ": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_USE_V2_MODEL_RUNNER": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_V1_OUTPUT_PROC_CHUNK_SIZE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_V1_USE_OUTLINES_CACHE": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_VIDEO_FETCH_TIMEOUT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_VIDEO_LOADER_BACKEND": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_WORKER_MULTIPROC_METHOD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_XGRAMMAR_CACHE_MB": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_XLA_CACHE_PATH": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_XLA_CHECK_RECOMPILATION": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "VLLM_XLA_USE_SPMD": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  },
+  "V_SCALE_CONSTANT": {
+    "sources": [
+      "vllm/envs.py:environment_variables",
+      "vllm/envs.py:type_checking"
+    ],
+    "kind": "vllm_env"
+  }
+}

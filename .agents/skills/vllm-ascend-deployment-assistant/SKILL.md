@@ -13,10 +13,12 @@ Convert natural-language deployment requests into deterministic deployment artif
 
 1. `../_shared/INDEX.md`
 2. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
-3. `../_shared/deployment-config/procedures/deployment-playbook.md`
-4. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
-5. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
-6. `references/output-schema.md`
+3. `../_shared/deployment-config/references/global-parameter-feature-map.md`
+4. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
+5. `../_shared/deployment-config/procedures/deployment-playbook.md`
+6. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
+7. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
+8. `references/output-schema.md`
 
 ## Weak-Reasoning Mode (Mandatory)
 

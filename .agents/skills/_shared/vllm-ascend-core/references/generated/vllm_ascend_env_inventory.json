@@ -1,0 +1,146 @@
+{
+  "ASCEND_HOME_PATH": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "CMAKE_BUILD_TYPE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "COMPILE_CUSTOM_KERNELS": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "CXX_COMPILER": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "C_COMPILER": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "DYNAMIC_EPLB": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "HCCL_SO_PATH": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "MAX_JOBS": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "MSMONITOR_USE_DAEMON": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "SOC_VERSION": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VERBOSE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_BALANCE_SCHEDULING": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_FLASHCOMM1": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_FUSED_MC2": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_MLAPO": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_NZ": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_ENABLE_PREFETCH_MLP": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  },
+  "VLLM_VERSION": {
+    "sources": [
+      "vllm_ascend/envs.py:env_variables"
+    ],
+    "kind": "vllm_ascend_env"
+  }
+}
