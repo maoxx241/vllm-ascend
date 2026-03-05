@@ -48,6 +48,8 @@ def main() -> int:
         assert "validation_steps" in primary
         assert "rollback_steps" in primary
         assert plan["model_profile"] == "qwen3-32b-w8a8"
+        assert "compatibility" in plan
+        assert plan["compatibility"]["blocked_features"] == []
 
         backup = render_package(
             output_dir=base / "backup",
@@ -67,6 +69,28 @@ def main() -> int:
         assert "--enable-expert-parallel" in backup_text
         assert "--speculative-config" in backup_text
 
+        blocked_case = render_package(
+            output_dir=base / "blocked",
+            model_profile="qwen3-32b-w8a8",
+            model_path_override=None,
+            hardware_type="Atlas A2",
+            npu_count=4,
+            port_override=None,
+            text="给qwen3-32b-w8a8开int4和ep",
+            features_input=[],
+        )
+        blocked_plan = blocked_case["deployment_plan"]
+        blocked_items = blocked_plan["compatibility"]["blocked_features"]
+        blocked_features = {item["feature"] for item in blocked_items}
+        assert "int4_quantization" in blocked_features
+        assert "expert_parallel" in blocked_features
+        assert any("Blocked feature 'int4_quantization'" in risk for risk in blocked_plan["risks"])
+        assert any("Blocked feature 'expert_parallel'" in risk for risk in blocked_plan["risks"])
+
+        blocked_start_text = _read(Path(blocked_case["generated_commands"]["start_script"]))
+        assert "--enable-expert-parallel" not in blocked_start_text
+        assert "int4" not in blocked_start_text.lower()
+
         ambiguous = render_package(
             output_dir=base / "ambiguous",
             model_profile="qwen3-32b-w8a8",
@@ -79,6 +103,41 @@ def main() -> int:
         )
         risks = ambiguous["deployment_plan"]["risks"]
         assert any("clarification" in risk for risk in risks), "Ambiguous input should add clarification risk"
+
+        cp_low_card = render_package(
+            output_dir=base / "cp_low_card",
+            model_profile="qwen3-32b-w8a8",
+            model_path_override=None,
+            hardware_type="Atlas A2",
+            npu_count=4,
+            port_override=None,
+            text="开context parallel",
+            features_input=[],
+        )
+        cp_risks = cp_low_card["deployment_plan"]["risks"]
+        assert any("context_parallel" in risk for risk in cp_risks), (
+            "CP on low-card setup should report risk."
+        )
+
+        all_features = render_package(
+            output_dir=base / "all_features",
+            model_profile="qwen3-next-80b-a3b-instruct-w8a8",
+            model_path_override=None,
+            hardware_type="Atlas A3",
+            npu_count=8,
+            port_override=19000,
+            text="开图+量化+dp+ep+lora+投机+sleep+预取+prefix cache",
+            features_input=[],
+        )
+        all_start_text = _read(Path(all_features["generated_commands"]["start_script"]))
+        assert "--compilation-config" in all_start_text
+        assert "--quantization ascend" in all_start_text
+        assert "--data-parallel-size 2" in all_start_text
+        assert "--enable-expert-parallel" in all_start_text
+        assert "--enable-lora" in all_start_text
+        assert "--enable-sleep-mode" in all_start_text
+        assert "--speculative-config" in all_start_text
+        assert "weight_prefetch_config" in all_start_text
 
     print("PASS: render package tests")
     return 0

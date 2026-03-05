@@ -7,6 +7,8 @@ This file maps runtime/deployment code paths to shared knowledge docs.
 | `docs/source/user_guide/feature_guide/quantization.md` | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | Quantization terms and CLI flags |
 | `docs/source/user_guide/feature_guide/graph_mode.md` | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | Graph-mode related aliases |
 | `docs/source/user_guide/feature_guide/context_parallel.md` | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | Context-parallel semantics |
+| `docs/source/user_guide/support_matrix/supported_features.md` | [repo-full-knowledge-map](vllm-ascend-core/references/repo-full-knowledge-map.md) | Global feature support truth |
+| `docs/source/user_guide/support_matrix/supported_models.md` | [compatibility matrix](vllm-ascend-core/concepts/model-feature-compatibility-matrix.md) | Model-feature constraints |
 | `docs/source/tutorials/models/Qwen3-Dense.md` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | Primary profile defaults |
 | `docs/source/tutorials/models/Qwen3-Next.md` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | Backup profile defaults |
 | `tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | CLI baseline for 32B W8A8 |
@@ -14,5 +16,6 @@ This file maps runtime/deployment code paths to shared knowledge docs.
 | `examples/run_dp_server.sh` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | DP/TP launch reference |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/normalize_terms.py` | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | Canonical feature mapping |
 | `.agents/skills/vllm-ascend-deployment-assistant/scripts/render_deploy_package.py` | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | Deterministic package generation |
+| `.agents/skills/vllm-ascend-deployment-assistant/scripts/render_deploy_package.py` | [compatibility matrix](vllm-ascend-core/concepts/model-feature-compatibility-matrix.md) | Hard blocking for unsupported features |
 
 Back to [INDEX.md](INDEX.md).

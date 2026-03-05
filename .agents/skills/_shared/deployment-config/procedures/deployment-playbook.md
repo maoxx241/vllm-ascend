@@ -28,9 +28,10 @@ Generate a runnable deployment package with stable output structure for weak rea
 
 1. Normalize user text to canonical features.
 2. Select model profile (`qwen3-32b-w8a8` by default).
-3. Render `start.sh`, `validate.sh`, `rollback.sh`, and `deployment_plan.json`.
-4. Validate `/v1/models` then one `/v1/chat/completions` request.
-5. If failure, return actionable rollback and one next action.
+3. Check model-feature compatibility matrix and block unsupported features.
+4. Render `start.sh`, `validate.sh`, `rollback.sh`, and `deployment_plan.json`.
+5. Validate `/v1/models` then one `/v1/chat/completions` request.
+6. If failure, return actionable rollback and one next action.
 
 ## Fixed Output Sections
 
@@ -40,6 +41,12 @@ Every skill response must contain exactly these blocks:
 2. 命令块
 3. 验证块
 4. 风险块
+
+For blocked features, `风险块` must contain:
+
+- blocked feature name
+- reason why blocked
+- one fallback option
 
 ## Quick Commands
 

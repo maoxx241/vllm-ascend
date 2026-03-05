@@ -55,7 +55,20 @@ Each feature entry follows:
   - `开图跑服务`
   - `enable graph mode`
 
-### 3) tensor_parallel
+### 3) int4_quantization
+
+- canonical_feature: `int4_quantization`
+- zh_aliases: `int4量化`, `w4a4`, `4bit量化`
+- en_aliases: `int4`, `w4a4`, `int4 quantization`, `4bit`
+- slang_aliases: `开int4`, `开4bit`
+- cli_flags: profile-dependent, no universal safe flag in this demo package
+- prerequisites: dedicated int4 model artifact and validated kernel path
+- incompatibilities: may be blocked by profile compatibility matrix
+- examples:
+  - `qwen3-32b-w8a8能开int4吗`
+  - `use w4a4`
+
+### 4) tensor_parallel
 
 - canonical_feature: `tensor_parallel`
 - zh_aliases: `张量并行`, `tp并行`, `切tp`
@@ -68,7 +81,7 @@ Each feature entry follows:
   - `我想开tp4`
   - `set tp=4`
 
-### 4) data_parallel
+### 5) data_parallel
 
 - canonical_feature: `data_parallel`
 - zh_aliases: `数据并行`, `dp并行`, `切dp`
@@ -81,7 +94,7 @@ Each feature entry follows:
   - `开dp`
   - `use data parallel`
 
-### 5) expert_parallel
+### 6) expert_parallel
 
 - canonical_feature: `expert_parallel`
 - zh_aliases: `专家并行`, `ep并行`
@@ -94,7 +107,7 @@ Each feature entry follows:
   - `moe模型开ep`
   - `enable EP`
 
-### 6) prefill_decode_disaggregation
+### 7) prefill_decode_disaggregation
 
 - canonical_feature: `prefill_decode_disaggregation`
 - zh_aliases: `预填充解码分离`, `pd分离`, `prefill-decode分离`
@@ -107,7 +120,7 @@ Each feature entry follows:
   - `我要做PD分离`
   - `enable prefill decode disaggregation`
 
-### 7) prefix_cache
+### 8) prefix_cache
 
 - canonical_feature: `prefix_cache`
 - zh_aliases: `前缀缓存`, `开缓存`
@@ -120,7 +133,7 @@ Each feature entry follows:
   - `保留prefix cache`
   - `turn on prefix caching`
 
-### 8) context_parallel
+### 9) context_parallel
 
 - canonical_feature: `context_parallel`
 - zh_aliases: `上下文并行`, `长上下文并行`, `cp并行`
@@ -133,7 +146,7 @@ Each feature entry follows:
   - `长上下文场景开cp`
   - `enable context parallel`
 
-### 9) lora
+### 10) lora
 
 - canonical_feature: `lora`
 - zh_aliases: `lora`, `lora适配`, `挂lora`
@@ -146,7 +159,7 @@ Each feature entry follows:
   - `把lora挂上`
   - `enable lora`
 
-### 10) speculative_decode
+### 11) speculative_decode
 
 - canonical_feature: `speculative_decode`
 - zh_aliases: `投机解码`, `草稿解码`, `spec decode`
@@ -159,7 +172,7 @@ Each feature entry follows:
   - `开投机`
   - `enable speculative decoding`
 
-### 11) sleep_mode
+### 12) sleep_mode
 
 - canonical_feature: `sleep_mode`
 - zh_aliases: `休眠模式`, `空闲休眠`
@@ -172,7 +185,7 @@ Each feature entry follows:
   - `空闲时休眠`
   - `enable sleep mode`
 
-### 12) weight_prefetch
+### 13) weight_prefetch
 
 - canonical_feature: `weight_prefetch`
 - zh_aliases: `权重预取`, `预取权重`
@@ -190,6 +203,7 @@ Each feature entry follows:
 - If phrase contains `并行` but not explicit `tp/dp/ep/cp`, mark as ambiguous.
 - If phrase contains `开图`, map to `graph_mode`.
 - If phrase contains `w8a8/int8`, map to `quantization`.
+- If phrase contains `int4/w4a4/4bit`, map to `int4_quantization`.
 - If phrase contains unknown feature words, return up to 3 candidate features and ask one clarification.
 
 ## Ambiguity Fallback

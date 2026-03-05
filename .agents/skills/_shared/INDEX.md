@@ -12,6 +12,7 @@ This index is optimized for weak-reasoning models. Always resolve user language 
 | "帮我部署模型" / deployment | [task-index.md](task-index.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
 | "先装环境" / bootstrap env | [task-index.md](task-index.md) | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) | `vllm-ascend-env-bootstrap` |
 | "开图/开并行/量化" | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
+| "这个特性能不能开" / compatibility | [compatibility matrix](vllm-ascend-core/concepts/model-feature-compatibility-matrix.md) | [unsupported cases](troubleshooting/procedures/unsupported-feature-cases.md) | `vllm-ascend-deployment-assistant` |
 | Runtime error / startup fail | [error-index.md](error-index.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
 
 ## Weak Model Guardrails
@@ -25,3 +26,4 @@ This index is optimized for weak-reasoning models. Always resolve user language 
 - [error-index.md](error-index.md)
 - [task-index.md](task-index.md)
 - [code-knowledge-map.md](code-knowledge-map.md)
+- [repo-full-knowledge-map](vllm-ascend-core/references/repo-full-knowledge-map.md)

@@ -9,6 +9,8 @@ from normalize_terms import normalize_input
 def main() -> int:
     cases = [
         ("帮我开w8a8部署qwen3", {"quantization"}),
+        ("请开int4量化", {"int4_quantization"}),
+        ("能不能开w4a4", {"int4_quantization"}),
         ("先开图模式再启动服务", {"graph_mode"}),
         ("我要tp4部署", {"tensor_parallel"}),
         ("这个模型加dp并行", {"data_parallel"}),
@@ -30,6 +32,14 @@ def main() -> int:
         ("请部署并开启sleep mode", {"sleep_mode"}),
         ("开图并开启prefix cache", {"graph_mode", "prefix_cache"}),
         ("我要在部署里开weight prefetch", {"weight_prefetch"}),
+        ("部署qwen3时开spec decode", {"speculative_decode"}),
+        ("先开context parallel再开prefix cache", {"context_parallel", "prefix_cache"}),
+        ("开ep和dp", {"expert_parallel", "data_parallel"}),
+        ("我就要4bit", {"int4_quantization"}),
+        ("给我开sleep mode和lora", {"sleep_mode", "lora"}),
+        ("开graph mode和tp", {"graph_mode", "tensor_parallel"}),
+        ("部署时开量化和投机", {"quantization", "speculative_decode"}),
+        ("做环境初始化并安装依赖", set()),
     ]
 
     passed = 0
@@ -52,6 +62,13 @@ def main() -> int:
         "Expected ambiguous parallel phrase to require parallel_strategy clarification."
     )
     assert ambiguous["clarification_question"], "Expected clarification question for ambiguous phrase."
+    assert ambiguous["intent"] == "deploy_model", "Ambiguous phrase should remain deployment intent."
+
+    env_bootstrap = normalize_input("帮我先做环境初始化并安装")
+    assert env_bootstrap["intent"] == "env_bootstrap", "Expected env_bootstrap intent."
+
+    int4_case = normalize_input("qwen3-32b-w8a8 能不能开int4")
+    assert "int4_quantization" in int4_case["features"], "int4 phrase should map to int4_quantization."
 
     unknown = normalize_input("给我来个黑科技")
     assert "feature" in unknown["missing_slots"], "Unknown phrase should request feature clarification."

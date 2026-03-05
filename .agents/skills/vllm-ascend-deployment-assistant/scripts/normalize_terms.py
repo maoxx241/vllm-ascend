@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from typing import Dict, List, Tuple
 
 FEATURES: List[Dict[str, List[str] | str]] = [
@@ -13,6 +14,12 @@ FEATURES: List[Dict[str, List[str] | str]] = [
         "zh_aliases": ["量化", "开量化", "int8量化", "w8a8"],
         "en_aliases": ["quantization", "int8", "w8a8"],
         "slang_aliases": ["压模型", "压权重"],
+    },
+    {
+        "canonical_feature": "int4_quantization",
+        "zh_aliases": ["int4量化", "w4a4", "4bit量化"],
+        "en_aliases": ["int4", "w4a4", "int4 quantization", "4bit"],
+        "slang_aliases": ["开int4", "开4bit"],
     },
     {
         "canonical_feature": "graph_mode",
@@ -71,12 +78,12 @@ FEATURES: List[Dict[str, List[str] | str]] = [
     {
         "canonical_feature": "sleep_mode",
         "zh_aliases": ["休眠模式", "空闲休眠"],
-        "en_aliases": ["sleep mode"],
+        "en_aliases": ["sleep mode", "sleep"],
         "slang_aliases": ["省电模式"],
     },
     {
         "canonical_feature": "weight_prefetch",
-        "zh_aliases": ["权重预取", "预取权重"],
+        "zh_aliases": ["权重预取", "预取权重", "预取"],
         "en_aliases": ["weight prefetch"],
         "slang_aliases": ["提前拉权重"],
     },
@@ -96,6 +103,10 @@ def _contains(text: str, text_lower: str, alias: str) -> bool:
         return False
     alias_lower = alias_norm.lower()
     if any("a" <= ch <= "z" for ch in alias_lower):
+        # Short ASCII aliases like "tp/dp/ep/cp" should use word boundaries.
+        if re.fullmatch(r"[a-z0-9]+", alias_lower) and len(alias_lower) <= 3:
+            pattern = rf"(?<![a-z0-9]){re.escape(alias_lower)}(?![a-z0-9])"
+            return re.search(pattern, text_lower) is not None
         return alias_lower in text_lower
     return alias_norm in text
 

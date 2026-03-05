@@ -5,10 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import shlex
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from normalize_terms import normalize_input
 
@@ -35,6 +34,7 @@ PROFILES: Dict[str, Dict[str, object]] = {
 
 SUPPORTED_FEATURES = {
     "quantization",
+    "int4_quantization",
     "graph_mode",
     "tensor_parallel",
     "data_parallel",
@@ -46,6 +46,22 @@ SUPPORTED_FEATURES = {
     "speculative_decode",
     "sleep_mode",
     "weight_prefetch",
+}
+
+PROFILE_BLOCKED_FEATURES: Dict[str, Dict[str, str]] = {
+    "qwen3-32b-w8a8": {
+        "int4_quantization": (
+            "Qwen3-32B-W8A8 profile is fixed to W8A8 weights; int4/W4A4 is not available on this profile."
+        ),
+        "expert_parallel": (
+            "Qwen3-32B-W8A8 is a dense model; expert parallel (EP) is not applicable."
+        ),
+    },
+    "qwen3-next-80b-a3b-instruct-w8a8": {
+        "int4_quantization": (
+            "Qwen3-Next-80B-A3B-Instruct-W8A8 has no validated int4 deployment path in this demo package."
+        ),
+    },
 }
 
 
@@ -70,6 +86,22 @@ def _parse_feature_list(raw: str | None) -> List[str]:
 def _write_file(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
     path.chmod(0o755)
+
+
+def _apply_profile_compatibility(
+    model_profile: str,
+    requested_features: List[str],
+) -> Tuple[List[str], List[Dict[str, str]]]:
+    blocked_map = PROFILE_BLOCKED_FEATURES.get(model_profile, {})
+    allowed: List[str] = []
+    blocked: List[Dict[str, str]] = []
+    for feature in requested_features:
+        reason = blocked_map.get(feature)
+        if reason:
+            blocked.append({"feature": feature, "reason": reason})
+            continue
+        allowed.append(feature)
+    return allowed, blocked
 
 
 def _build_command_parts(
@@ -198,7 +230,10 @@ def render_package(
     }
 
     normalized_features = list(normalization["features"])
-    features = _dedupe(features_input + normalized_features)
+    requested_features = _dedupe(features_input + normalized_features)
+    applied_features, blocked_features = _apply_profile_compatibility(
+        model_profile, requested_features
+    )
 
     model_path = model_path_override or str(profile["model"])
     served_model_name = str(profile["served_model_name"])
@@ -216,7 +251,7 @@ def render_package(
         max_model_len=max_model_len,
         max_num_batched_tokens=max_num_batched_tokens,
         gpu_memory_utilization=gpu_memory_utilization,
-        features=features,
+        features=applied_features,
         npu_count=npu_count,
     )
 
@@ -298,6 +333,10 @@ def render_package(
     )
 
     risks = list(built["risks"])
+    for blocked in blocked_features:
+        risks.append(
+            f"Blocked feature '{blocked['feature']}': {blocked['reason']}"
+        )
     if normalization["missing_slots"]:
         risks.append(
             "Input is ambiguous; ask one clarification before production execution: "
@@ -312,7 +351,13 @@ def render_package(
             "hardware_type": hardware_type,
             "npu_count": npu_count,
             "port": port,
-            "canonical_features": features,
+            "canonical_features": applied_features,
+            "canonical_features_requested": requested_features,
+            "canonical_features_applied": applied_features,
+            "compatibility": {
+                "allowed_features": applied_features,
+                "blocked_features": blocked_features,
+            },
             "normalization_confidence": normalization["confidence"],
             "missing_slots": normalization["missing_slots"],
             "clarification_question": normalization["clarification_question"],

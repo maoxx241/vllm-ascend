@@ -8,6 +8,9 @@ Use this fixed response skeleton:
 - 硬件: `<hardware_type>`
 - NPU 数: `<npu_count>`
 - Canonical Features: `<feature_1, feature_2, ...>`
+- 兼容性结果:
+  - Allowed: `<allowed_features>`
+  - Blocked: `<blocked_features_with_reasons>`
 
 ## 2) 命令块
 

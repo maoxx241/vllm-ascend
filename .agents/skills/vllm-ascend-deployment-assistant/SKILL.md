@@ -14,7 +14,9 @@ Convert natural-language deployment requests into deterministic deployment artif
 1. `../_shared/INDEX.md`
 2. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
 3. `../_shared/deployment-config/procedures/deployment-playbook.md`
-4. `references/output-schema.md`
+4. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
+5. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
+6. `references/output-schema.md`
 
 ## Weak-Reasoning Mode (Mandatory)
 
@@ -63,6 +65,14 @@ Supported model profiles:
 
 - `qwen3-32b-w8a8` (default)
 - `qwen3-next-80b-a3b-instruct-w8a8` (backup)
+
+## Compatibility Rules (Mandatory)
+
+- Always report blocked features with reasons.
+- Do not silently downgrade unsupported features.
+- For `qwen3-32b-w8a8`:
+  - `int4_quantization` must be blocked.
+  - `expert_parallel` must be blocked.
 
 ## Required Final Output Format
 
