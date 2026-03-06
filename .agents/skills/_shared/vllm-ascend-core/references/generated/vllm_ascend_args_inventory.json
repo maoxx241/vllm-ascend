@@ -1,0 +1,613 @@
+{
+  "--decode-servers-urls": {
+    "name": "--decode-servers-urls",
+    "aliases": [
+      "--decode-servers-urls"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:711"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated decode URLs (\"http://d1:8005,http://d2:8006\")",
+    "dest": "decode_servers_urls",
+    "source": "code"
+  },
+  "--decoder-hosts": {
+    "name": "--decoder-hosts",
+    "aliases": [
+      "--decoder-hosts"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:264",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:512"
+    ],
+    "default": [
+      "localhost"
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "decoder_hosts",
+    "source": "code"
+  },
+  "--decoder-ports": {
+    "name": "--decoder-ports",
+    "aliases": [
+      "--decoder-ports"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:265",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:513"
+    ],
+    "default": [
+      8002
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "decoder_ports",
+    "source": "code"
+  },
+  "--dp-address": {
+    "name": "--dp-address",
+    "aliases": [
+      "--dp-address"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:14"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "IP address for data parallel master node.",
+    "dest": "dp_address",
+    "source": "code"
+  },
+  "--dp-hosts": {
+    "name": "--dp-hosts",
+    "aliases": [
+      "--dp-hosts"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:185"
+    ],
+    "default": [
+      "localhost"
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dp_hosts",
+    "source": "code"
+  },
+  "--dp-ports": {
+    "name": "--dp-ports",
+    "aliases": [
+      "--dp-ports"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:186"
+    ],
+    "default": [
+      8001
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "dp_ports",
+    "source": "code"
+  },
+  "--dp-rank-start": {
+    "name": "--dp-rank-start",
+    "aliases": [
+      "--dp-rank-start"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:13"
+    ],
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Starting rank for data parallel.",
+    "dest": "dp_rank_start",
+    "source": "code"
+  },
+  "--dp-rpc-port": {
+    "name": "--dp-rpc-port",
+    "aliases": [
+      "--dp-rpc-port"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:15"
+    ],
+    "default": 12345,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Port for data parallel master node.",
+    "dest": "dp_rpc_port",
+    "source": "code"
+  },
+  "--dp-size": {
+    "name": "--dp-size",
+    "aliases": [
+      "--dp-size"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:10",
+      "examples/offline_data_parallel.py:81"
+    ],
+    "default": 2,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Data parallel size",
+    "dest": "dp_size",
+    "source": "code"
+  },
+  "--dp-size-local": {
+    "name": "--dp-size-local",
+    "aliases": [
+      "--dp-size-local"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:12"
+    ],
+    "default": -1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Local data parallel size.",
+    "dest": "dp_size_local",
+    "source": "code"
+  },
+  "--enable-expert-parallel": {
+    "name": "--enable-expert-parallel",
+    "aliases": [
+      "--enable-expert-parallel"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:89",
+      "examples/offline_external_launcher.py:122",
+      "examples/offline_weight_load.py:131"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enable expert parallel, used in MOE models.",
+    "dest": "enable_expert_parallel",
+    "source": "code"
+  },
+  "--enable-sleep-mode": {
+    "name": "--enable-sleep-mode",
+    "aliases": [
+      "--enable-sleep-mode"
+    ],
+    "definition_ref": [
+      "examples/offline_external_launcher.py:125",
+      "examples/offline_weight_load.py:134"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enable sleep mode for the engine.",
+    "dest": "enable_sleep_mode",
+    "source": "code"
+  },
+  "--encode-servers-urls": {
+    "name": "--encode-servers-urls",
+    "aliases": [
+      "--encode-servers-urls"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:700"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated encode URLs (\"http://e1:8001,http://e2:8001\")",
+    "dest": "encode_servers_urls",
+    "source": "code"
+  },
+  "--encoder-dispatch-mode": {
+    "name": "--encoder-dispatch-mode",
+    "aliases": [
+      "--encoder-dispatch-mode"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:717"
+    ],
+    "default": "single",
+    "type": "string",
+    "valid_values": [
+      "single",
+      "fanout"
+    ],
+    "help_text": "Encoder dispatch mode: single (one request) or fanout (per-MM-item)",
+    "dest": "encoder_dispatch_mode",
+    "source": "code"
+  },
+  "--enforce-eager": {
+    "name": "--enforce-eager",
+    "aliases": [
+      "--enforce-eager"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:87",
+      "examples/offline_external_launcher.py:120",
+      "examples/offline_weight_load.py:129"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Enforce eager mode execution.",
+    "dest": "enforce_eager",
+    "source": "code"
+  },
+  "--host": {
+    "name": "--host",
+    "aliases": [
+      "--host"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:698",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:261",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:509",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:184"
+    ],
+    "default": "localhost",
+    "type": "string",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "host",
+    "source": "code"
+  },
+  "--master-addr": {
+    "name": "--master-addr",
+    "aliases": [
+      "--master-addr"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:85",
+      "examples/offline_external_launcher.py:118",
+      "examples/offline_weight_load.py:127"
+    ],
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Master node IP address",
+    "dest": "master_addr",
+    "source": "code"
+  },
+  "--master-port": {
+    "name": "--master-port",
+    "aliases": [
+      "--master-port"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:86",
+      "examples/offline_external_launcher.py:119",
+      "examples/offline_weight_load.py:128"
+    ],
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Master node port",
+    "dest": "master_port",
+    "source": "code"
+  },
+  "--max-retries": {
+    "name": "--max-retries",
+    "aliases": [
+      "--max-retries"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:266",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:514",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:187"
+    ],
+    "default": 3,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Maximum number of retries for HTTP requests",
+    "dest": "max_retries",
+    "source": "code"
+  },
+  "--max-waiting-retries": {
+    "name": "--max-waiting-retries",
+    "aliases": [
+      "--max-waiting-retries"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:518"
+    ],
+    "default": 3,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Maximum number of retries for waiting nodes to be started",
+    "dest": "max_waiting_retries",
+    "source": "code"
+  },
+  "--model": {
+    "name": "--model",
+    "aliases": [
+      "--model"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:75",
+      "examples/offline_external_launcher.py:108",
+      "examples/offline_weight_load.py:117"
+    ],
+    "default": "Qwen/Qwen3-0.6B",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Model name or path",
+    "dest": "model",
+    "source": "code"
+  },
+  "--model-weight-gib": {
+    "name": "--model-weight-gib",
+    "aliases": [
+      "--model-weight-gib"
+    ],
+    "definition_ref": [
+      "examples/offline_external_launcher.py:129",
+      "examples/offline_weight_load.py:138"
+    ],
+    "default": null,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Model weight memory usage in GiB (e.g., 1.0 for 0.5B model).",
+    "dest": "model_weight_gib",
+    "source": "code"
+  },
+  "--node-rank": {
+    "name": "--node-rank",
+    "aliases": [
+      "--node-rank"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:84",
+      "examples/offline_external_launcher.py:116",
+      "examples/offline_weight_load.py:125"
+    ],
+    "default": 0,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Rank of the current node",
+    "dest": "node_rank",
+    "source": "code"
+  },
+  "--node-size": {
+    "name": "--node-size",
+    "aliases": [
+      "--node-size"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:83",
+      "examples/offline_external_launcher.py:115",
+      "examples/offline_weight_load.py:124"
+    ],
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Total number of nodes",
+    "dest": "node_size",
+    "source": "code"
+  },
+  "--port": {
+    "name": "--port",
+    "aliases": [
+      "--port"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:699",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:260",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:508",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:183"
+    ],
+    "default": 8000,
+    "type": "int",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "port",
+    "source": "code"
+  },
+  "--prefill-servers-urls": {
+    "name": "--prefill-servers-urls",
+    "aliases": [
+      "--prefill-servers-urls"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_encoder/disagg_epd_proxy.py:705"
+    ],
+    "default": null,
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Comma-separated prefill URLs (\"http://p1:8003,http://p2:8004\") to enable E->P->D, set \"disable\" or \"none\" to enable E->PD",
+    "dest": "prefill_servers_urls",
+    "source": "code"
+  },
+  "--prefiller-hosts": {
+    "name": "--prefiller-hosts",
+    "aliases": [
+      "--prefiller-hosts"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:262",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:510"
+    ],
+    "default": [
+      "localhost"
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefiller_hosts",
+    "source": "code"
+  },
+  "--prefiller-ports": {
+    "name": "--prefiller-ports",
+    "aliases": [
+      "--prefiller-ports"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:263",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:511"
+    ],
+    "default": [
+      8001
+    ],
+    "type": "list",
+    "valid_values": [],
+    "help_text": null,
+    "dest": "prefiller_ports",
+    "source": "code"
+  },
+  "--proc-per-node": {
+    "name": "--proc-per-node",
+    "aliases": [
+      "--proc-per-node"
+    ],
+    "definition_ref": [
+      "examples/offline_external_launcher.py:117",
+      "examples/offline_weight_load.py:126"
+    ],
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Number of processes per node",
+    "dest": "proc_per_node",
+    "source": "code"
+  },
+  "--quantization": {
+    "name": "--quantization",
+    "aliases": [
+      "--quantization"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:92"
+    ],
+    "default": "",
+    "type": "string",
+    "valid_values": [],
+    "help_text": "Use quantization models",
+    "dest": "quantization",
+    "source": "code"
+  },
+  "--retry-delay": {
+    "name": "--retry-delay",
+    "aliases": [
+      "--retry-delay"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:267",
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:515",
+      "examples/external_online_dp/dp_load_balance_proxy_server.py:188"
+    ],
+    "default": 0.001,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Base delay (seconds) for exponential backoff retries",
+    "dest": "retry_delay",
+    "source": "code"
+  },
+  "--sleep-mode-level": {
+    "name": "--sleep-mode-level",
+    "aliases": [
+      "--sleep-mode-level"
+    ],
+    "definition_ref": [
+      "examples/offline_external_launcher.py:135"
+    ],
+    "default": 1,
+    "type": "int",
+    "valid_values": [
+      "1",
+      "2"
+    ],
+    "help_text": "Sleep mode level: 1 or 2. This example of level 2 is only supported for dense model.",
+    "dest": "sleep_mode_level",
+    "source": "code"
+  },
+  "--temperature": {
+    "name": "--temperature",
+    "aliases": [
+      "--temperature"
+    ],
+    "definition_ref": [
+      "examples/offline_external_launcher.py:126",
+      "examples/offline_weight_load.py:135"
+    ],
+    "default": 0.8,
+    "type": "float",
+    "valid_values": [],
+    "help_text": "Float that controls the randomness of the sampling.",
+    "dest": "temperature",
+    "source": "code"
+  },
+  "--tp-size": {
+    "name": "--tp-size",
+    "aliases": [
+      "--tp-size"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:11",
+      "examples/offline_data_parallel.py:82",
+      "examples/offline_external_launcher.py:114",
+      "examples/offline_weight_load.py:123"
+    ],
+    "default": 1,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Tensor parallel size",
+    "dest": "tp_size",
+    "source": "code"
+  },
+  "--trust-remote-code": {
+    "name": "--trust-remote-code",
+    "aliases": [
+      "--trust-remote-code"
+    ],
+    "definition_ref": [
+      "examples/offline_data_parallel.py:88",
+      "examples/offline_external_launcher.py:121",
+      "examples/offline_weight_load.py:130"
+    ],
+    "default": null,
+    "type": "bool",
+    "valid_values": [],
+    "help_text": "Trust remote code.",
+    "dest": "trust_remote_code",
+    "source": "code"
+  },
+  "--vllm-start-port": {
+    "name": "--vllm-start-port",
+    "aliases": [
+      "--vllm-start-port"
+    ],
+    "definition_ref": [
+      "examples/external_online_dp/launch_online_dp.py:16"
+    ],
+    "default": 9000,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Starting port for the engine.",
+    "dest": "vllm_start_port",
+    "source": "code"
+  },
+  "--waiting-retry-interval": {
+    "name": "--waiting-retry-interval",
+    "aliases": [
+      "--waiting-retry-interval"
+    ],
+    "definition_ref": [
+      "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:521"
+    ],
+    "default": 10,
+    "type": "int",
+    "valid_values": [],
+    "help_text": "Check interval (seconds) for waiting nodes to be started",
+    "dest": "waiting_retry_interval",
+    "source": "code"
+  }
+}

@@ -9,6 +9,8 @@ Note: Please copy the skills directory `.agents/skills` to `.claude/skills` if y
 - [vLLM Ascend Model Adapter Skill](#vllm-ascend-model-adapter-skill)
 - [vLLM Ascend main2main Skill](#vllm-ascend-main2main-skill)
 - [vLLM Ascend Release Note Writer Skill](#vllm-ascend-release-note-writer-skill)
+- [vLLM Ascend Deployment Assistant Skill](#vllm-ascend-deployment-assistant-skill)
+- [vLLM Ascend Env Bootstrap Skill](#vllm-ascend-env-bootstrap-skill)
 
 ## vLLM Ascend Model Adapter Skill
 
@@ -113,3 +115,35 @@ This skill guides you through a structured workflow to:
 - Focus on user-facing impact and include context for practical usage.
 - Verify details by checking linked PRs (use GitHub API for descriptions if needed).
 - Keep notes concise and avoid unnecessary technical details.
+
+## vLLM Ascend Deployment Assistant Skill
+
+Natural-language model deployment skill with deterministic normalization and package rendering.
+
+### What it does
+
+1. Normalize user phrases to canonical deployment features.
+2. Render runnable `start/validate/rollback` scripts.
+3. Output stable response blocks (params, commands, validation, risks).
+4. Provide single-step rollback guidance when validation fails.
+
+### File layout
+
+| File | Purpose |
+| ---- | ------- |
+| `SKILL.md` | Skill contract and execution rules |
+| `scripts/normalize_terms.py` | Natural-language term normalization |
+| `scripts/render_deploy_package.py` | Deployment package rendering |
+| `scripts/test_*.py` | Deterministic regression tests |
+| `assets/demo-talk-track.md` | 10-15 min demo script |
+
+## vLLM Ascend Env Bootstrap Skill
+
+Deterministic environment bootstrap skill for weak-reasoning deployment assistants.
+
+### What it does
+
+1. Run environment checks.
+2. Follow fixed install command order.
+3. Run health checks.
+4. Return one-step repair actions for failures.
