@@ -74,21 +74,20 @@ async def test_models(model: str, mode: str, tp_size: int) -> None:
         "TASK_QUEUE_ENABLE": "1",
         "OMP_PROC_BIND": "false",
         "HCCL_OP_EXPANSION_MODE": "AIV",
-        "VLLM_ASCEND_ENABLE_FLASHCOMM": "1",
-        "VLLM_ASCEND_ENABLE_DEBSE_OPTIMIZE": "1"
+        "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1",
     }
     server_args = [
         "--tensor-parallel-size",
         str(tp_size), "--port",
         str(port), "--max-model-len", "36864", "--max-num-batched-tokens",
         "36864", "--block-size", "128", "--trust-remote-code",
-        "--gpu-memory-utilization", "0.9", "--compilation_config",
+        "--gpu-memory-utilization", "0.9", "--compilation-config",
         '{"cudagraph_mode":"FULL_DECODE_ONLY", "cudagraph_capture_sizes": [1, 8, 24, 48, 60]}',
-        "--reasoning-parser", "deepseek_r1", "--distributed_executor_backend",
+        "--reasoning-parser", "deepseek_r1", "--distributed-executor-backend",
         "mp", "--additional-config", '{"weight_prefetch_config":{"enabled":true}}'
     ]
     if mode == "single":
-        server_args.remove("--compilation_config")
+        server_args.remove("--compilation-config")
         server_args.remove(
             '{"cudagraph_mode":"FULL_DECODE_ONLY", "cudagraph_capture_sizes": [1, 8, 24, 48, 60]}'
         )

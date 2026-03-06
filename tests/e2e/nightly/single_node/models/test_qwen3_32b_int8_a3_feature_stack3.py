@@ -66,18 +66,17 @@ aisbench_cases = [{
 async def test_models(model: str, tp_size: int) -> None:
     port = get_open_port()
     env_dict = {
-        "VLLM_USE": "1",
+        "VLLM_USE_V1": "1",
         "TASK_QUEUE_ENABLE": "1",
         "HCCL_OP_EXPANSION_MODE": "AIV",
         "OMP_PROC_BIND": "false",
-        "VLLM_ASCEND_ENABLE_TOPK_OPTIMIZE": "1",
-        "VLLM_ASCEND_ENABLE_FLASHCOMM": "1",
+        "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1",
     }
     server_args = [
         "--quantization", "ascend", "--tensor-parallel-size",
         str(tp_size), "--port",
         str(port), "--trust-remote-code", "--reasoning-parser", "qwen3",
-        "--distributed_executor_backend", "mp", "--gpu-memory-utilization",
+        "--distributed-executor-backend", "mp", "--gpu-memory-utilization",
         "0.9", "--block-size", "128", "--max-num-seqs", "256",
         "--enforce-eager", "--max-model-len", "35840",
         "--max-num-batched-tokens", "35840", "--additional-config",

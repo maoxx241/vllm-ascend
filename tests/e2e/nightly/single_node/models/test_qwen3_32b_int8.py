@@ -82,7 +82,7 @@ async def test_models(model: str, mode: str, tp_size: int) -> None:
     env_dict = {
         "TASK_QUEUE_ENABLE": "1",
         "HCCL_OP_EXPANSION_MODE": "AIV",
-        "VLLM_ASCEND_ENABLE_FLASHCOMM": "1",
+        "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1",
     }
     compilation_config = {
         "cudagraph_mode":
