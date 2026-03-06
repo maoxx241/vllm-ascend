@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `speculative_decode`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 配置投机解码策略（如 mtp），用于降低解码延迟。
 - aliases: `--speculative-config`, `speculative-config`, `speculative_config`, `speculative config`, `speculativeconfig`, `speculative_decode`, `speculative decode`, `speculative-decode`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 服务启动后推理错误; 吞吐波动
 - value_failure_signals: ValueError: num_speculative_tokens must be provided ...; ValueError: 'tensor_parallel_size' is not a valid argument in speculative_config; ValueError: async scheduling is only supported with EAGLE/MTP/Draft ...
 - recommendation: 先用小 token 数验证，再逐步增加并发。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

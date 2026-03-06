@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `aligned` / `0.98`
+- status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code_definition
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_DP_RANK_LOCAL`, `vllm_dp_rank_local`, `vllm-dp-rank-local`, `vllm dp rank local`, `data_parallel`, `data parallel`, `data-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: 本地 rank 与实际拓扑不匹配时会导致通信/映射异常。
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -51,6 +51,7 @@ def main() -> int:
     view_index = _load(indexes_root / "view-index.json")
     rule_index = _load(indexes_root / "rule-index.json")
     report = _load(indexes_root / "build-report.json")
+    qwen3_profile = _load(profiles_root / "qwen3-32b-w8a8.json")
 
     topics = topic_index["topics"]
     assert topics, "topic-index topics must be non-empty"
@@ -60,6 +61,8 @@ def main() -> int:
     assert report["coverage_from_global_kb"]["ratio"] == 1.0
     assert report["coverage_from_global_kb"]["actual"] == report["coverage_from_global_kb"]["expected"]
     assert report["model_profile_count"] >= 2
+    assert "resource_guidance" in qwen3_profile
+    assert "feature_min_npu_count" not in qwen3_profile
 
     # One-topic-one-file structure with fixed sections.
     sample_topic = topics_root / "vllm.arg.async_scheduling.md"
@@ -93,6 +96,9 @@ def main() -> int:
     rule_ids = {row.get("rule_id") for row in rules if isinstance(row, dict)}
     assert "hard_block.qwen3_32b_w8a8_int4" in rule_ids
     assert "hard_block.qwen3_32b_w8a8_ep" in rule_ids
+
+    model_topic = (topics_root / "model.qwen3-32b-w8a8.md").read_text(encoding="utf-8")
+    assert "resource_guidance.recommended" in model_topic
 
     print("PASS: topic-centered knowledge base")
     return 0

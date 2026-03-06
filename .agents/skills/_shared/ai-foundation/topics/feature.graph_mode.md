@@ -14,15 +14,15 @@ topic_kind: feature
 
 ## Foundation
 
-- 图模式通过稳定执行图降低调度抖动，提升吞吐稳定性。
+- Ascend 图模式由 ACLGraph 与 Xlite 图配置共同作用，FULL_DECODE_ONLY 常用于先稳态加速 decode。
 
 ## Deployment View
 
-- 先小流量验证，再放大并发。
+- 优先用 --compilation-config {'cudagraph_mode':'FULL_DECODE_ONLY'} 做灰度，必要时用 --enforce-eager 回退。
 
 ## Development View
 
-- 关注图捕获边界、动态 shape 分支、fallback 到 eager 的触发条件。
+- 关注 full_mode/xlite 约束、block_size 要求、动态 shape 分支与 eager fallback 触发条件。
 
 ## Details/Edge Cases
 

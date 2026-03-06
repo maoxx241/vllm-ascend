@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `throughput_tuning`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 调度和批处理参数调优，目标提升吞吐。
 - aliases: `VLLM_DBO_COMM_SMS`, `vllm_dbo_comm_sms`, `vllm-dbo-comm-sms`, `vllm dbo comm sms`, `throughput_tuning`, `throughput tuning`, `throughput-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: TTFT/TPOT 退化; OOM
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `multimodal`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 控制多模态输入处理和缓存策略。
 - aliases: `VLLM_USE_NCCL_SYMM_MEM`, `vllm_use_nccl_symm_mem`, `vllm-use-nccl-symm-mem`, `vllm use nccl symm mem`, `multimodal`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -3,7 +3,7 @@ knowledge_id: deployment-config.global-parameter-verification-report
 domain: deployment-config
 knowledge_type: verification
 summary: Dual-baseline verification report (local code truth + upstream web checks).
-last_verified: "2026-03-05"
+last_verified: "2026-03-06"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---
@@ -11,13 +11,13 @@ freshness: "fresh"
 # Global Parameter Verification Report
 
 - Coverage ratio: **1.0**
-- Evidence completeness ratio: **1.0**
-- Conflict count: **224**
-- High-risk validated count: **52**
-- Official refs: **1195**
-- External refs: **337**
-- Entries with external refs: **282**
-- Value semantics done: **474**
+- Evidence completeness ratio: **0.9891**
+- Conflict count: **467**
+- High-risk validated count: **53**
+- Official refs: **1272**
+- External refs: **338**
+- Entries with external refs: **283**
+- Value semantics done: **491**
 - Value semantics ratio: **1.0**
 
 ## Unresolved items (first 50)

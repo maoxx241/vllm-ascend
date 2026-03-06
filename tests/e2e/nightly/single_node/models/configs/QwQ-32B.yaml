@@ -6,8 +6,7 @@ _envs: &envs
   TASK_QUEUE_ENABLE: "1"
   OMP_PROC_BIND: "false"
   HCCL_OP_EXPANSION_MODE: "AIV"
-  VLLM_ASCEND_ENABLE_FLASHCOMM: "1"
-  VLLM_ASCEND_ENABLE_DEBSE_OPTIMIZE: "1"
+  VLLM_ASCEND_ENABLE_FLASHCOMM1: "1"
   SERVER_PORT: "DEFAULT_PORT"
 
 _server_cmd: &server_cmd
@@ -26,7 +25,7 @@ _server_cmd: &server_cmd
   - "0.9"
   - "--reasoning-parser"
   - "deepseek_r1"
-  - "--distributed_executor_backend"
+  - "--distributed-executor-backend"
   - "mp"
   - "--additional-config"
   - '{"weight_prefetch_config":{"enabled":true}}'
@@ -63,7 +62,7 @@ test_cases:
       <<: *envs
     server_cmd: *server_cmd
     server_cmd_extra:
-      - "--compilation_config"
+      - "--compilation-config"
       - '{"cudagraph_mode":"FULL_DECODE_ONLY", "cudagraph_capture_sizes": [1, 8, 24, 48, 60]}'
     benchmarks:
       <<: *benchmarks

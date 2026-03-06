@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `memory_tuning`
-- status/confidence: `aligned` / `0.98`
+- status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code_definition
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `VLLM_ALLOW_LONG_MAX_MODEL_LEN`, `vllm_allow_long_max_model_len`, `vllm-allow-long-max-model-len`, `vllm allow long max model len`, `memory_tuning`, `memory tuning`, `memory-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: ValueError: User-specified max_model_len ... To allow overriding this maximum, set VLLM_ALLOW_LONG_MAX_MODEL_LEN=1; warning: positions exceeding derived_max_model_len may lead to NaN/OOB
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `aligned` / `0.95`
+- status/confidence: `upstream_delta` / `0.75`
+- source: `code` / source_tags: code_reference
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_WORKER_MULTIPROC_METHOD`, `vllm_worker_multiproc_method`, `vllm-worker-multiproc-method`, `vllm worker multiproc method`, `general_runtime`, `general runtime`, `general-runtime`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: warning: Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'; warning: Whisper is known to have issues with forked workers
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

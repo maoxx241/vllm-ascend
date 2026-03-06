@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `expert_parallel`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `VLLM_USE_FLASHINFER_MOE_FP4`, `vllm_use_flashinfer_moe_fp4`, `vllm-use-flashinfer-moe-fp4`, `vllm use flashinfer moe fp4`, `expert_parallel`, `expert parallel`, `expert-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

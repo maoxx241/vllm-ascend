@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `expert_parallel`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 开启 MoE 专家并行，仅对 MoE 模型有效。
 - aliases: `--enable-expert-parallel`, `enable-expert-parallel`, `enable_expert_parallel`, `enable expert parallel`, `enableexpertparallel`, `expert_parallel`, `expert parallel`, `expert-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: ValueError: Number of experts in the model must be greater than 0 when expert parallelism is enabled.
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

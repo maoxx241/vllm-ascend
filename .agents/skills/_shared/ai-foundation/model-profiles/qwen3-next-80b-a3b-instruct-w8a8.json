@@ -13,9 +13,34 @@
       "w8a8"
     ]
   },
-  "feature_min_npu_count": {
-    "data_parallel": 8,
-    "context_parallel": 8
+  "resource_guidance": {
+    "recommended": {
+      "data_parallel": {
+        "min_npu_count": 8,
+        "notes": "80B MoE 常用多副本扩展吞吐。"
+      },
+      "context_parallel": {
+        "min_npu_count": 8,
+        "notes": "长上下文 CP 建议从高卡场景评估。"
+      }
+    },
+    "validated": {
+      "tensor_parallel": {
+        "min_npu_count": 4,
+        "notes": "官方教程示例覆盖 TP4。"
+      },
+      "expert_parallel": {
+        "min_npu_count": 8,
+        "notes": "EP 需结合 MoE 路由与更高通信预算。"
+      }
+    },
+    "boot_min": {
+      "min_npu_count": 4,
+      "notes": "基础启动可从 4 卡开始。"
+    },
+    "evidence_refs": [
+      "docs/source/tutorials/models/Qwen3-Next.md"
+    ]
   },
   "evidence_refs": [
     ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",

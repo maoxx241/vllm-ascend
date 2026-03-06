@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `expert_parallel`
-- status/confidence: `upstream_delta` / `0.78`
+- status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code_definition
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `VLLM_SLEEP_WHEN_IDLE`, `vllm_sleep_when_idle`, `vllm-sleep-when-idle`, `vllm sleep when idle`, `expert_parallel`, `expert parallel`, `expert-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

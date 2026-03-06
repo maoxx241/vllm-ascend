@@ -21,6 +21,9 @@ FLAG_PATTERN = re.compile(r"^--[a-z0-9][a-z0-9\-]*$")
 FLAG_IN_TEXT_PATTERN = re.compile(r"(?<![A-Za-z0-9_])(--[a-z0-9][a-z0-9\-]*)(?![A-Za-z0-9_])")
 ENV_TOKEN_PATTERN = re.compile(r"\b([A-Z][A-Z0-9_]{2,})\b")
 IDENT_PATTERN = re.compile(r"\b([a-z_][a-z0-9_]{2,})\b")
+EXPORT_ENV_PATTERN = re.compile(r"\bexport\s+([A-Z][A-Z0-9_]+)\s*=\s*([^\s`]+)")
+ENV_BLOCK_START_PATTERN = re.compile(r"^(_?envs)\s*:\s*(?:&[A-Za-z0-9_-]+)?\s*$")
+YAML_ENV_KEY_PATTERN = re.compile(r"^([A-Z][A-Z0-9_]+)\s*:\s*(.*)$")
 
 STATUS_ALIGNED = "aligned"
 STATUS_UPSTREAM_DELTA = "upstream_delta"
@@ -52,6 +55,30 @@ DEPLOYMENT_ASCEND_ARG_FILES = [
     "examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py",
     "examples/disaggregated_encoder/disagg_epd_proxy.py",
 ]
+
+ASCEND_RUNTIME_ENV_PREFIXES = (
+    "VLLM_ASCEND_",
+    "ASCEND_",
+    "HCCL_",
+    "PYTORCH_NPU_",
+    "ACL_",
+)
+
+ASCEND_RUNTIME_ENV_EXACT = {
+    "TASK_QUEUE_ENABLE",
+    "OMP_PROC_BIND",
+    "SERVER_PORT",
+    "PAGED_ATTENTION_MASK_LEN",
+    "VLLM_USE_V1",
+    "VLLM_USE",
+    "VLLM_TARGET_DEVICE",
+    "CUDA_VISIBLE_DEVICES",
+    "MASTER_ADDR",
+    "MASTER_PORT",
+    "WORLD_SIZE",
+    "RANK",
+    "LOCAL_RANK",
+}
 
 FEATURE_PRIORITY = [
     "quantization",
@@ -299,6 +326,15 @@ ENTRY_OVERRIDES: dict[str, dict[str, Any]] = {
     },
     "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL": {
         "semantics": "控制 Ascend 侧 Context Parallel 开关。",
+    },
+    "VLLM_ASCEND_ENABLE_FLASHCOMM": {
+        "semantics": "FlashComm1 旧兼容开关，推荐使用 VLLM_ASCEND_ENABLE_FLASHCOMM1。",
+    },
+    "TASK_QUEUE_ENABLE": {
+        "semantics": "控制 Ascend 任务队列执行模式，常与高并发服务配置同时启用。",
+    },
+    "HCCL_OP_EXPANSION_MODE": {
+        "semantics": "控制 HCCL 算子展开策略（常见 AIV），影响通信兼容性与性能。",
     },
 }
 
@@ -715,15 +751,18 @@ VALUE_SEMANTICS_OVERRIDES: dict[str, dict[str, Any]] = {
         ],
         "default_behavior": "默认空字典，不启用额外插件特性。",
         "value_effects": [
-            "按子字段启用 Ascend 扩展能力（图模式、预取、细粒度 TP、动态调度等）。",
+            "按子字段启用 Ascend 扩展能力（Xlite/ACLGraph 协同、权重预取、细粒度 TP、动态调度等）。",
         ],
         "constraints": [
             "xlite_graph_config.enabled=true 时要求 block_size=128 且不兼容 speculative decoding",
+            "xlite_graph_config.full_mode=true 时应与 FULL/FULL_DECODE_ONLY 图模式联合验证",
             "weight_prefetch_config 需结合并发与模型类型调优 prefetch_ratio",
+            "enforce-eager=true 时图相关 additional_config 子字段会退化为无效配置",
         ],
         "combo_effects": [
             "与 --compilation-config、--block-size、并行参数共同决定最终执行路径",
             "与部分环境变量存在兼容层（如 VLLM_ASCEND_ENABLE_PREFETCH_MLP）",
+            "ascend_compilation_config.enable_npugraph_ex 与 ACLGraph 图模式需协同验证",
         ],
         "performance_tradeoffs": [
             "开启更多优化项可能提升吞吐，但会提高配置复杂度和不兼容风险",
@@ -848,15 +887,18 @@ VALUE_SEMANTICS_OVERRIDES: dict[str, dict[str, Any]] = {
         "default_behavior": "默认空对象，系统按 optimization_level 自动补全 mode/cudagraph 默认值。",
         "value_effects": [
             "可细粒度控制编译后端、图模式、capture 尺寸与 pass 行为。",
+            "Ascend 场景常用 cudagraph_mode=FULL_DECODE_ONLY 作为优先推荐图模式。",
         ],
         "constraints": [
             "--cudagraph-capture-sizes 与 compilation_config.cudagraph_capture_sizes 互斥。",
             "--max-cudagraph-capture-size 与 compilation_config.max_cudagraph_capture_size 互斥。",
             "若 cudagraph_mode 需要 piecewise，但 mode 非 VLLM_COMPILE，会被覆盖到 NONE。",
+            "enforce-eager=true 时 cudagraph_mode 会被覆盖为 NONE。",
         ],
         "combo_effects": [
             "与 --enforce-eager 冲突：eager 打开会清空 cudagraph 相关设置。",
             "与 --optimization-level 叠加决定最终编译策略。",
+            "与 --additional-config.xlite_graph_config/ascend_compilation_config 协同决定 ACLGraph/Xlite 行为边界。",
         ],
         "performance_tradeoffs": [
             "正确配置可显著降开销；错误配置会导致启动失败或图优化被回退。",
@@ -1634,6 +1676,74 @@ VALUE_SEMANTICS_OVERRIDES: dict[str, dict[str, Any]] = {
         ],
         "completion_status": "done",
     },
+    "VLLM_ASCEND_ENABLE_FLASHCOMM": {
+        "value_shape": "binary_toggle",
+        "accepted_values": ["0", "1"],
+        "default_behavior": "默认 0（关闭），作为 FLASHCOMM1 兼容别名读取。",
+        "value_effects": [
+            "1: 通过兼容路径启用 FlashComm1 相关优化。",
+            "0: 保持默认通信路径。",
+        ],
+        "constraints": ["推荐改用 VLLM_ASCEND_ENABLE_FLASHCOMM1。"],
+        "combo_effects": [
+            "与 VLLM_ASCEND_ENABLE_FLASHCOMM1 同时设置时，以功能等价方式生效。",
+        ],
+        "performance_tradeoffs": [
+            "高并发可提升吞吐；配置复杂度与兼容风险高于默认路径。",
+        ],
+        "failure_signals": ["通信参数不匹配时收益不稳定或出现告警。"],
+        "evidence_refs": [
+            "vllm-ascend/vllm_ascend/utils.py:764",
+            "vllm-ascend/vllm_ascend/utils.py:765",
+        ],
+        "completion_status": "done",
+    },
+    "TASK_QUEUE_ENABLE": {
+        "value_shape": "binary_toggle",
+        "accepted_values": ["0", "1"],
+        "default_behavior": "在多数 Ascend 部署样例中推荐设置为 1。",
+        "value_effects": [
+            "1: 启用任务队列执行路径，常用于提升并发稳定性。",
+            "0: 回落为非任务队列路径。",
+        ],
+        "constraints": ["需结合模型并发参数与通信参数联合验证。"],
+        "combo_effects": [
+            "常与 HCCL_OP_EXPANSION_MODE、--max-num-batched-tokens、图模式配置同时调优。",
+        ],
+        "performance_tradeoffs": [
+            "通常提升稳态吞吐，但错误组合可能造成时延波动。",
+        ],
+        "failure_signals": ["高并发下吞吐抖动或稳定性下降。"],
+        "evidence_refs": [
+            "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:9",
+            "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:6",
+        ],
+        "completion_status": "done",
+    },
+    "HCCL_OP_EXPANSION_MODE": {
+        "value_shape": "enum",
+        "accepted_values": ["AIV", "default(HCCL)"],
+        "default_behavior": "未设置时使用 HCCL 默认展开策略。",
+        "value_effects": [
+            "AIV: 启用算子展开优化路径，常用于提升支持 shape 范围或稳定性。",
+            "default(HCCL): 使用系统默认策略。",
+        ],
+        "constraints": ["仅在 HCCL 版本与驱动组合支持时生效。"],
+        "combo_effects": [
+            "与 TP/DP/CP 并行拓扑强耦合，不匹配会影响通信性能。",
+        ],
+        "performance_tradeoffs": [
+            "在大 batch/多并行场景通常更稳，但需额外验证通信行为。",
+        ],
+        "failure_signals": [
+            "HCCL 初始化或通信超时告警。",
+        ],
+        "evidence_refs": [
+            "vllm-ascend/vllm_ascend/utils.py:499",
+            "vllm-ascend/vllm_ascend/utils.py:547",
+        ],
+        "completion_status": "done",
+    },
 }
 
 COMBO_RULES: list[dict[str, Any]] = [
@@ -1994,6 +2104,112 @@ def _collect_ascend_arg_defs(ascend_root: Path) -> dict[str, dict[str, Any]]:
     return dict(sorted(merged.items()))
 
 
+def _is_ascend_runtime_env(name: str) -> bool:
+    if not re.fullmatch(r"[A-Z][A-Z0-9_]+", name):
+        return False
+    if name in ASCEND_RUNTIME_ENV_EXACT:
+        return True
+    return name.startswith(ASCEND_RUNTIME_ENV_PREFIXES)
+
+
+def _normalize_env_value(raw: str) -> str:
+    value = raw.strip()
+    if value.startswith(("'", '"')) and value.endswith(("'", '"')) and len(value) >= 2:
+        value = value[1:-1]
+    return value
+
+
+def _collect_doc_export_env_defs(ascend_root: Path) -> dict[str, dict[str, Any]]:
+    doc_root = ascend_root / "docs" / "source"
+    if not doc_root.exists():
+        return {}
+
+    rows: dict[str, dict[str, Any]] = {}
+    for path in sorted(doc_root.rglob("*.md")):
+        lines = _read(path).splitlines()
+        for lineno, line in enumerate(lines, start=1):
+            for match in EXPORT_ENV_PATTERN.finditer(line):
+                name = match.group(1)
+                if not _is_ascend_runtime_env(name):
+                    continue
+                value = _normalize_env_value(match.group(2))
+                row = rows.setdefault(
+                    name,
+                    {
+                        "name": name,
+                        "definition_ref": [],
+                        "default": None,
+                        "type": "string",
+                        "valid_values": [],
+                        "source": "docs_export",
+                        "source_tags": [],
+                    },
+                )
+                row["definition_ref"] = sorted(set(row["definition_ref"]) | {_ref(path, lineno, ascend_root)})
+                if value and row.get("default") is None:
+                    row["default"] = value
+                row["source_tags"] = sorted(set(row.get("source_tags", [])) | {"docs_export"})
+
+    return dict(sorted(rows.items()))
+
+
+def _collect_yaml_env_defs(ascend_root: Path) -> dict[str, dict[str, Any]]:
+    config_root = ascend_root / "tests" / "e2e" / "nightly" / "single_node" / "models" / "configs"
+    if not config_root.exists():
+        return {}
+
+    rows: dict[str, dict[str, Any]] = {}
+    for path in sorted(config_root.glob("*32B*.yaml")):
+        lines = _read(path).splitlines()
+        in_env_block = False
+        env_indent = -1
+
+        for lineno, line in enumerate(lines, start=1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            indent = len(line) - len(line.lstrip(" "))
+
+            if in_env_block and indent <= env_indent:
+                in_env_block = False
+                env_indent = -1
+
+            if not in_env_block and ENV_BLOCK_START_PATTERN.match(stripped):
+                in_env_block = True
+                env_indent = indent
+                continue
+
+            if not in_env_block:
+                continue
+
+            matched = YAML_ENV_KEY_PATTERN.match(stripped)
+            if not matched:
+                continue
+            name = matched.group(1)
+            if not _is_ascend_runtime_env(name):
+                continue
+            value = _normalize_env_value(matched.group(2))
+
+            row = rows.setdefault(
+                name,
+                {
+                    "name": name,
+                    "definition_ref": [],
+                    "default": None,
+                    "type": "string",
+                    "valid_values": [],
+                    "source": "tests_yaml",
+                    "source_tags": [],
+                },
+            )
+            row["definition_ref"] = sorted(set(row["definition_ref"]) | {_ref(path, lineno, ascend_root)})
+            if value and value not in {"null", "~"} and row.get("default") is None:
+                row["default"] = value
+            row["source_tags"] = sorted(set(row.get("source_tags", [])) | {"tests_yaml"})
+
+    return dict(sorted(rows.items()))
+
+
 def _extract_env_defs_from_file(path: Path, repo_root: Path) -> dict[str, dict[str, Any]]:
     text = _read(path)
     try:
@@ -2032,6 +2248,7 @@ def _extract_env_defs_from_file(path: Path, repo_root: Path) -> dict[str, dict[s
                 "type": value_type,
                 "valid_values": [],
                 "source": "code",
+                "source_tags": ["code_definition"],
             }
 
     for node in ast.walk(tree):
@@ -2098,9 +2315,37 @@ def _collect_ascend_env_defs(ascend_root: Path) -> dict[str, dict[str, Any]]:
                     "type": "string",
                     "valid_values": [],
                     "source": "code",
+                    "source_tags": [],
                 },
             )
             row["definition_ref"] = sorted(set(row["definition_ref"]) | refs)
+            row["source_tags"] = sorted(set(row.get("source_tags", [])) | {"code_reference"})
+
+    docs_export_defs = _collect_doc_export_env_defs(ascend_root)
+    yaml_env_defs = _collect_yaml_env_defs(ascend_root)
+
+    for source_name, source_rows in (("docs_export", docs_export_defs), ("tests_yaml", yaml_env_defs)):
+        for name, payload in source_rows.items():
+            row = envs.setdefault(
+                name,
+                {
+                    "name": name,
+                    "definition_ref": [],
+                    "default": None,
+                    "type": "string",
+                    "valid_values": [],
+                    "source": source_name,
+                    "source_tags": [],
+                },
+            )
+            row["definition_ref"] = sorted(set(row["definition_ref"]) | set(payload.get("definition_ref", [])))
+            if row.get("default") is None and payload.get("default") is not None:
+                row["default"] = payload["default"]
+            row["source_tags"] = sorted(
+                set(row.get("source_tags", []))
+                | set(payload.get("source_tags", []))
+                | {source_name}
+            )
 
     return dict(sorted(envs.items()))
 
@@ -2119,7 +2364,12 @@ def _collect_docs_index(doc_files: list[Path], repo_root: Path) -> dict[str, lis
             for flag in FLAG_IN_TEXT_PATTERN.findall(line):
                 index[flag].append(f"{rel}:{lineno}")
             for env_name in ENV_TOKEN_PATTERN.findall(line):
-                if env_name.startswith("VLLM") or env_name.startswith("ASCEND") or env_name.startswith("HCCL"):
+                if (
+                    env_name.startswith("VLLM")
+                    or env_name.startswith("ASCEND")
+                    or env_name.startswith("HCCL")
+                    or _is_ascend_runtime_env(env_name)
+                ):
                     index[env_name].append(f"{rel}:{lineno}")
     return {k: v[:12] for k, v in index.items()}
 
@@ -2545,6 +2795,60 @@ def _merge_value_semantics(base: dict[str, Any], override: dict[str, Any]) -> di
     return merged
 
 
+def _generic_hccl_value_semantics(name: str) -> dict[str, Any]:
+    return {
+        "value_shape": "runtime_string_or_numeric",
+        "accepted_values": ["由 HCCL 文档定义，常见为整数/枚举字符串"],
+        "default_behavior": f"{name} 未设置时使用 HCCL 默认行为。",
+        "value_effects": [
+            "影响跨卡通信策略、超时阈值或算子展开路径。",
+        ],
+        "constraints": [
+            "不同 CANN/HCCL 版本支持范围不同，应与平台版本矩阵对齐。",
+        ],
+        "combo_effects": [
+            "与 TP/DP/CP 等并行参数耦合，配置不当会导致通信性能下降或初始化失败。",
+        ],
+        "performance_tradeoffs": [
+            "可改善吞吐稳定性，但错误取值可能导致卡间通信瓶颈。",
+        ],
+        "failure_signals": [
+            "HCCL init failed",
+            "Communication timeout",
+        ],
+        "completion_status": "done",
+    }
+
+
+def _resolve_entry_source(raw: dict[str, Any]) -> tuple[str, list[str]]:
+    raw_tags = raw.get("source_tags", [])
+    tags: list[str] = []
+    if isinstance(raw_tags, list):
+        tags = [str(tag).strip() for tag in raw_tags if str(tag).strip()]
+
+    source_hint = str(raw.get("source", "code")).strip() or "code"
+    if not tags:
+        tags = [source_hint]
+
+    tags = list(dict.fromkeys(tags))
+    has_code = any(tag == "code" or tag.startswith("code_") for tag in tags)
+    has_docs = "docs_export" in tags
+    has_tests = "tests_yaml" in tags
+
+    if has_code and not (has_docs or has_tests):
+        source = "code"
+    elif has_docs and not (has_code or has_tests):
+        source = "docs_export"
+    elif has_tests and not (has_code or has_docs):
+        source = "tests_yaml"
+    elif has_docs or has_tests:
+        source = "multi_source"
+    else:
+        source = source_hint
+
+    return source, tags
+
+
 def _write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -2599,8 +2903,11 @@ def _build_entries(
         value_semantics = _default_value_semantics(name, raw, defaults)
         if name in VALUE_SEMANTICS_OVERRIDES:
             value_semantics = _merge_value_semantics(value_semantics, VALUE_SEMANTICS_OVERRIDES[name])
+        if kind == "env" and name.startswith("HCCL_") and name not in VALUE_SEMANTICS_OVERRIDES:
+            value_semantics = _merge_value_semantics(value_semantics, _generic_hccl_value_semantics(name))
         if not value_semantics.get("evidence_refs"):
             value_semantics["evidence_refs"] = (definition_ref + effect_ref + read_ref)[:6]
+        source, source_tags = _resolve_entry_source(raw)
 
         entry = {
             "id": f"{scope}.{kind}.{name.lstrip('-').replace('-', '_').lower()}",
@@ -2611,7 +2918,8 @@ def _build_entries(
             "type": raw.get("type", "string"),
             "default": raw.get("default"),
             "valid_values": raw.get("valid_values", []),
-            "source": "code",
+            "source": source,
+            "source_tags": source_tags,
             "definition_ref": definition_ref[:8],
             "read_ref": read_ref[:8],
             "effect_ref": effect_ref[:8],

@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `network_serving`
 - status/confidence: `needs_manual_review` / `0.83`
+- source: `code` / source_tags: code
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `--api-server-count`, `api-server-count`, `api_server_count`, `api server count`, `apiservercount`, `network_serving`, `network serving`, `network-serving`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

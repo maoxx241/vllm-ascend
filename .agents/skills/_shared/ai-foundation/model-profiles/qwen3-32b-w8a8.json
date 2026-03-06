@@ -13,9 +13,50 @@
       "w8a8"
     ]
   },
-  "feature_min_npu_count": {
-    "data_parallel": 8,
-    "context_parallel": 8
+  "variant_scope": {
+    "base_model": "qwen3-32b",
+    "validated_artifacts": [
+      "vllm-ascend/Qwen3-32B-W8A8"
+    ],
+    "other_known_variants": [
+      "Qwen/Qwen3-32B"
+    ],
+    "notes": "该 profile 聚焦已验证 W8A8 工件；Qwen3-32B 其他精度形态需独立验证。"
+  },
+  "resource_guidance": {
+    "recommended": {
+      "tensor_parallel": {
+        "min_npu_count": 4,
+        "notes": "单机 TP4 是常见起点。"
+      },
+      "data_parallel": {
+        "min_npu_count": 8,
+        "notes": "DP 常用于吞吐扩展，建议 8 卡起评估收益。"
+      },
+      "context_parallel": {
+        "min_npu_count": 8,
+        "notes": "CP 主要面向长上下文和高并发场景。"
+      }
+    },
+    "validated": {
+      "tensor_parallel": {
+        "min_npu_count": 4,
+        "notes": "Qwen3-Dense 教程与 nightly 32B 配置均覆盖 TP4。"
+      },
+      "graph_mode": {
+        "min_npu_count": 4,
+        "notes": "FULL_DECODE_ONLY 在 4 卡配置已有验证样例。"
+      }
+    },
+    "boot_min": {
+      "min_npu_count": 4,
+      "notes": "当前知识库保证 4 卡 TP4 启动基线；更低卡数需专项验证。"
+    },
+    "evidence_refs": [
+      "docs/source/tutorials/models/Qwen3-Dense.md",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
+    ]
   },
   "evidence_refs": [
     ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",

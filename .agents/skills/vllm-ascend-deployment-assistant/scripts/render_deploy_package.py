@@ -251,17 +251,41 @@ def _apply_model_knowledge_compatibility(
 
     architecture = knowledge.get("architecture", {})
     quant_profile = knowledge.get("quantization_profile", {})
-    min_npu_map = knowledge.get("feature_min_npu_count", {})
+    resource_guidance = knowledge.get("resource_guidance", {})
     evidence_refs = knowledge.get("evidence_refs", [])
+    recommended_map = (
+        resource_guidance.get("recommended", {})
+        if isinstance(resource_guidance, dict) and isinstance(resource_guidance.get("recommended"), dict)
+        else {}
+    )
+    validated_map = (
+        resource_guidance.get("validated", {})
+        if isinstance(resource_guidance, dict) and isinstance(resource_guidance.get("validated"), dict)
+        else {}
+    )
+    guidance_evidence_refs = (
+        resource_guidance.get("evidence_refs", [])
+        if isinstance(resource_guidance, dict) and isinstance(resource_guidance.get("evidence_refs"), list)
+        else []
+    )
 
     has_moe_layers = bool(architecture.get("has_moe_layers", False))
     supported_variants = set(quant_profile.get("supported_variants", []))
 
     allowed: List[str] = []
     blocked: List[Dict[str, Any]] = []
-    downgraded: List[Dict[str, Any]] = []
+    advisory: List[Dict[str, Any]] = []
     reasonability_checks: List[Dict[str, Any]] = []
     rule_hits: List[Dict[str, Any]] = []
+
+    def _extract_min_npu(value: Any) -> int:
+        if not isinstance(value, dict):
+            return 0
+        raw = value.get("min_npu_count", 0)
+        try:
+            return int(raw or 0)
+        except (TypeError, ValueError):
+            return 0
 
     for feature in requested_features:
         # Generic inference from architecture knowledge.
@@ -364,31 +388,43 @@ def _apply_model_knowledge_compatibility(
             )
             continue
 
-        # Hardware reasonability check.
-        min_npu = int(min_npu_map.get(feature, 0) or 0)
-        if min_npu > 0 and npu_count < min_npu:
+        # Hardware reasonability advisory (no forced downgrade).
+        rec_cfg = recommended_map.get(feature, {}) if isinstance(recommended_map, dict) else {}
+        val_cfg = validated_map.get(feature, {}) if isinstance(validated_map, dict) else {}
+        rec_min = _extract_min_npu(rec_cfg)
+        val_min = _extract_min_npu(val_cfg)
+        if (rec_min > 0 and npu_count < rec_min) or (val_min > 0 and npu_count < val_min):
+            rec_note = str(rec_cfg.get("notes", "")).strip() if isinstance(rec_cfg, dict) else ""
+            val_note = str(val_cfg.get("notes", "")).strip() if isinstance(val_cfg, dict) else ""
             reason = (
-                f"Requested feature '{feature}' is not reasonable for current hardware "
-                f"(npu_count={npu_count} < required={min_npu})."
+                f"Feature '{feature}' requested with npu_count={npu_count}; "
+                f"recommended_min={rec_min or 'N/A'}, validated_min={val_min or 'N/A'}."
             )
-            downgraded.append(
+            fallback = (
+                "可继续尝试当前配置并观察吞吐/稳定性；或降低并行度，或增加 NPU 数后再放量。"
+            )
+            advisory.append(
                 {
                     "feature": feature,
+                    "level": "warning",
                     "reason": reason,
-                    "fallback": "Skip this feature and keep single-node safe defaults.",
-                    "source": "hardware_reasonability_inference",
-                    "evidence_refs": evidence_refs,
+                    "recommended_min_npu_count": rec_min or None,
+                    "validated_min_npu_count": val_min or None,
+                    "recommended_notes": rec_note or None,
+                    "validated_notes": val_note or None,
+                    "fallback": fallback,
+                    "source": "resource_guidance_inference",
+                    "evidence_refs": _dedupe([*(guidance_evidence_refs or []), *(evidence_refs or [])])[:6],
                 }
             )
             reasonability_checks.append(
                 {
                     "feature": feature,
-                    "result": "downgraded",
+                    "result": "advisory",
                     "why": reason,
-                    "inferred_from": "feature_min_npu_count",
+                    "inferred_from": "resource_guidance",
                 }
             )
-            continue
 
         if warnings:
             warning = warnings[0]
@@ -423,16 +459,20 @@ def _apply_model_knowledge_compatibility(
             )
 
         allowed.append(feature)
-        reasonability_checks.append(
-            {
-                "feature": feature,
-                "result": "allowed",
-                "why": "No model/hardware conflict detected by model knowledge rules.",
-                "inferred_from": "model_knowledge",
-            }
-        )
+        if not any(
+            row.get("feature") == feature and row.get("result") in {"advisory", "warning", "blocked"}
+            for row in reasonability_checks
+        ):
+            reasonability_checks.append(
+                {
+                    "feature": feature,
+                    "result": "allowed",
+                    "why": "No model/hardware conflict detected by model knowledge rules.",
+                    "inferred_from": "model_knowledge",
+                }
+            )
 
-    return allowed, blocked, downgraded, reasonability_checks, rule_hits
+    return allowed, blocked, advisory, reasonability_checks, rule_hits
 
 
 def _build_command_parts(
@@ -554,7 +594,7 @@ def render_package(
     (
         applied_features,
         blocked_features,
-        downgraded_features,
+        advisory_features,
         reasonability_checks,
         rule_hits,
     ) = (
@@ -671,10 +711,10 @@ def render_package(
         risks.append(
             f"Blocked feature '{blocked['feature']}': {blocked['reason']}"
         )
-    for downgraded in downgraded_features:
+    for advisory in advisory_features:
         risks.append(
-            f"Downgraded feature '{downgraded['feature']}': {downgraded['reason']} "
-            f"Fallback: {downgraded['fallback']}"
+            f"Advisory feature '{advisory['feature']}': {advisory['reason']} "
+            f"Fallback: {advisory['fallback']}"
         )
     for hit in rule_hits:
         if str(hit.get("level")) != "warning":
@@ -707,7 +747,8 @@ def render_package(
             "compatibility": {
                 "allowed_features": applied_features,
                 "blocked_features": blocked_features,
-                "downgraded_features": downgraded_features,
+                "advisory_features": advisory_features,
+                "downgraded_features": [],
                 "reasonability_checks": reasonability_checks,
                 "rule_hits": rule_hits,
             },

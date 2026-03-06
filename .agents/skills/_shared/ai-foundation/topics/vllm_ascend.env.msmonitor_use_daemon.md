@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `profiling_observability`
 - status/confidence: `aligned` / `0.88`
+- source: `code` / source_tags: code_definition, code_reference
 - semantics: 控制 profiling 和 tracing 输出。
 - aliases: `MSMONITOR_USE_DAEMON`, `msmonitor_use_daemon`, `msmonitor-use-daemon`, `msmonitor use daemon`, `profiling_observability`, `profiling observability`, `profiling-observability`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 指标缺失; 追踪上报失败
 - value_failure_signals: 指标缺失; 追踪上报失败
 - recommendation: 按需开启细粒度 tracing，避免全量常开。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

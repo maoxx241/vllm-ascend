@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-05T23:40:10.395782+00:00",
+  "generated_at": "2026-03-06T00:31:00.213515+00:00",
   "feature_aliases": {
     "quantization": [
       "quantization",
@@ -15019,6 +15019,181 @@
       "topic_id": "vllm_ascend.arg.waiting_retry_interval"
     },
     {
+      "alias": "ACL_OP_INIT_MODE",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "acl_op_init_mode",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "acl-op-init-mode",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "acl op init mode",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "ACL_OP_INIT_MODE",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode"
+    },
+    {
+      "alias": "ASCEND_A3_ENABLE",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "ascend_a3_enable",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "ascend-a3-enable",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "ascend a3 enable",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "ASCEND_A3_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable"
+    },
+    {
+      "alias": "ASCEND_AGGREGATE_ENABLE",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "ascend_aggregate_enable",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "ascend-aggregate-enable",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "ascend aggregate enable",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "ASCEND_AGGREGATE_ENABLE",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable"
+    },
+    {
+      "alias": "ASCEND_BUFFER_POOL",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "ascend_buffer_pool",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "ascend-buffer-pool",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "ascend buffer pool",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "ASCEND_BUFFER_POOL",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool"
+    },
+    {
+      "alias": "ASCEND_CONNECT_TIMEOUT",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "ascend_connect_timeout",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "ascend-connect-timeout",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "ascend connect timeout",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "ASCEND_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout"
+    },
+    {
       "alias": "ASCEND_CUSTOM_OPP_PATH",
       "canonical_term": "ASCEND_CUSTOM_OPP_PATH",
       "topic_id": "vllm_ascend.env.ascend_custom_opp_path"
@@ -15192,6 +15367,41 @@
       "alias": "general-runtime",
       "canonical_term": "ASCEND_TRANSFER_TIMEOUT",
       "topic_id": "vllm_ascend.env.ascend_transfer_timeout"
+    },
+    {
+      "alias": "ASCEND_TRANSPORT_PRINT",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "ascend_transport_print",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "ascend-transport-print",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "ascend transport print",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "network_serving",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "network serving",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
+    },
+    {
+      "alias": "network-serving",
+      "canonical_term": "ASCEND_TRANSPORT_PRINT",
+      "topic_id": "vllm_ascend.env.ascend_transport_print"
     },
     {
       "alias": "CMAKE_BUILD_TYPE",
@@ -15404,6 +15614,76 @@
       "topic_id": "vllm_ascend.env.expert_map_record"
     },
     {
+      "alias": "HCCL_BUFFSIZE",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "hccl_buffsize",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "hccl-buffsize",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "hccl buffsize",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "HCCL_BUFFSIZE",
+      "topic_id": "vllm_ascend.env.hccl_buffsize"
+    },
+    {
+      "alias": "HCCL_CONNECT_TIMEOUT",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "hccl_connect_timeout",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "hccl-connect-timeout",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "hccl connect timeout",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "HCCL_CONNECT_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout"
+    },
+    {
       "alias": "HCCL_DETERMINISTIC",
       "canonical_term": "HCCL_DETERMINISTIC",
       "topic_id": "vllm_ascend.env.hccl_deterministic"
@@ -15437,6 +15717,76 @@
       "alias": "general-runtime",
       "canonical_term": "HCCL_DETERMINISTIC",
       "topic_id": "vllm_ascend.env.hccl_deterministic"
+    },
+    {
+      "alias": "HCCL_EXEC_TIMEOUT",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "hccl_exec_timeout",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "hccl-exec-timeout",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "hccl exec timeout",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "HCCL_EXEC_TIMEOUT",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout"
+    },
+    {
+      "alias": "HCCL_IF_IP",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "hccl_if_ip",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "hccl-if-ip",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "hccl if ip",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "HCCL_IF_IP",
+      "topic_id": "vllm_ascend.env.hccl_if_ip"
     },
     {
       "alias": "HCCL_INTRA_PCIE_ENABLE",
@@ -15612,6 +15962,41 @@
       "alias": "general-runtime",
       "canonical_term": "HCCL_RDMA_TIMEOUT",
       "topic_id": "vllm_ascend.env.hccl_rdma_timeout"
+    },
+    {
+      "alias": "HCCL_SOCKET_IFNAME",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "hccl_socket_ifname",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "hccl-socket-ifname",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "hccl socket ifname",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "HCCL_SOCKET_IFNAME",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname"
     },
     {
       "alias": "HCCL_SO_PATH",
@@ -15894,6 +16279,41 @@
       "topic_id": "vllm_ascend.env.msmonitor_use_daemon"
     },
     {
+      "alias": "OMP_PROC_BIND",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "omp_proc_bind",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "omp-proc-bind",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "omp proc bind",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "OMP_PROC_BIND",
+      "topic_id": "vllm_ascend.env.omp_proc_bind"
+    },
+    {
       "alias": "OPENAI_API_KEY",
       "canonical_term": "OPENAI_API_KEY",
       "topic_id": "vllm_ascend.env.openai_api_key"
@@ -15927,6 +16347,41 @@
       "alias": "network-serving",
       "canonical_term": "OPENAI_API_KEY",
       "topic_id": "vllm_ascend.env.openai_api_key"
+    },
+    {
+      "alias": "PAGED_ATTENTION_MASK_LEN",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "paged_attention_mask_len",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "paged-attention-mask-len",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "paged attention mask len",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
     },
     {
       "alias": "PYTORCH_NPU_ALLOC_CONF",
@@ -15989,6 +16444,41 @@
       "topic_id": "vllm_ascend.env.rank"
     },
     {
+      "alias": "SERVER_PORT",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "server_port",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "server-port",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "server port",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "network_serving",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "network serving",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
+      "alias": "network-serving",
+      "canonical_term": "SERVER_PORT",
+      "topic_id": "vllm_ascend.env.server_port"
+    },
+    {
       "alias": "SOC_VERSION",
       "canonical_term": "SOC_VERSION",
       "topic_id": "vllm_ascend.env.soc_version"
@@ -16022,6 +16512,41 @@
       "alias": "general-runtime",
       "canonical_term": "SOC_VERSION",
       "topic_id": "vllm_ascend.env.soc_version"
+    },
+    {
+      "alias": "TASK_QUEUE_ENABLE",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "task_queue_enable",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "task-queue-enable",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "task queue enable",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "model_selection",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "model selection",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
+    },
+    {
+      "alias": "model-selection",
+      "canonical_term": "TASK_QUEUE_ENABLE",
+      "topic_id": "vllm_ascend.env.task_queue_enable"
     },
     {
       "alias": "TRITON_ALL_BLOCKS_PARALLEL",
@@ -16397,6 +16922,41 @@
       "alias": "weight-prefetch",
       "canonical_term": "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_prefetch_mlp"
+    },
+    {
+      "alias": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "vllm_ascend_external_dp_lb_enabled",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "vllm-ascend-external-dp-lb-enabled",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "vllm ascend external dp lb enabled",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "data_parallel",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "data parallel",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
+    },
+    {
+      "alias": "data-parallel",
+      "canonical_term": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled"
     },
     {
       "alias": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
@@ -16782,6 +17342,41 @@
       "alias": "model-selection",
       "canonical_term": "VLLM_USE_MODELSCOPE",
       "topic_id": "vllm_ascend.env.vllm_use_modelscope"
+    },
+    {
+      "alias": "VLLM_USE_V1",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "vllm_use_v1",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "vllm-use-v1",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "vllm use v1",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "VLLM_USE_V1",
+      "topic_id": "vllm_ascend.env.vllm_use_v1"
     },
     {
       "alias": "VLLM_VERSION",

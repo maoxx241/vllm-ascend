@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `general_runtime`
 - status/confidence: `needs_manual_review` / `0.83`
+- source: `code` / source_tags: code
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `--pipeline-parallel-size`, `pipeline-parallel-size`, `pipeline_parallel_size`, `pipeline parallel size`, `pipelineparallelsize`, `general_runtime`, `general runtime`, `general-runtime`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: NotImplementedError: Pipeline parallelism is not supported for this model; unsupported: Pipeline Parallelism without Ray/mp/external launcher
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

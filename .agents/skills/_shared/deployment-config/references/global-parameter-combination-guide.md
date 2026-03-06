@@ -3,7 +3,7 @@ knowledge_id: deployment-config.global-parameter-combination-guide
 domain: deployment-config
 knowledge_type: procedure
 summary: Combination constraints and profile-level blocks with evidence refs.
-last_verified: "2026-03-05"
+last_verified: "2026-03-06"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---

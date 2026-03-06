@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_RANDOMIZE_DP_DUMMY_INPUTS`, `vllm_randomize_dp_dummy_inputs`, `vllm-randomize-dp-dummy-inputs`, `vllm randomize dp dummy inputs`, `data_parallel`, `data parallel`, `data-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: RPC 连接失败; 请求分发不均衡
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

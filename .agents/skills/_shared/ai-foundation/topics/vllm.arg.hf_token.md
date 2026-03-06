@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `security_auth`
 - status/confidence: `needs_manual_review` / `0.76`
+- source: `code` / source_tags: code
 - semantics: 控制 API 鉴权和 TLS 安全边界。
 - aliases: `--hf-token`, `hf-token`, `hf_token`, `hf token`, `hftoken`, `security_auth`, `security auth`, `security-auth`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 401/403; TLS 握手失败
 - value_failure_signals: 401/403; TLS 握手失败
 - recommendation: 生产默认开启鉴权并最小化 CORS 白名单。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

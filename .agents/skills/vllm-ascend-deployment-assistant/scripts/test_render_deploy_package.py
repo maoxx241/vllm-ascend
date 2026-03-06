@@ -53,6 +53,7 @@ def main() -> int:
         assert plan["model_profile"] == "qwen3-32b-w8a8"
         assert "compatibility" in plan
         assert plan["compatibility"]["blocked_features"] == []
+        assert isinstance(plan["compatibility"]["advisory_features"], list)
         assert plan["compatibility"]["downgraded_features"] == []
         assert isinstance(plan["compatibility"]["reasonability_checks"], list)
         assert plan["model_knowledge"]["architecture"]["has_moe_layers"] is False
@@ -133,11 +134,12 @@ def main() -> int:
             features_input=[],
         )
         cp_risks = cp_low_card["deployment_plan"]["risks"]
-        cp_downgraded = cp_low_card["deployment_plan"]["compatibility"]["downgraded_features"]
-        assert any(item["feature"] == "context_parallel" for item in cp_downgraded), (
-            "CP on low-card setup should be downgraded by model/hardware knowledge."
+        cp_advisory = cp_low_card["deployment_plan"]["compatibility"]["advisory_features"]
+        assert cp_low_card["deployment_plan"]["compatibility"]["downgraded_features"] == []
+        assert any(item["feature"] == "context_parallel" for item in cp_advisory), (
+            "CP on low-card setup should be advisory by model/hardware knowledge."
         )
-        assert any("context_parallel" in risk for risk in cp_risks), (
+        assert any("Advisory feature 'context_parallel'" in risk for risk in cp_risks), (
             "CP on low-card setup should report risk."
         )
 

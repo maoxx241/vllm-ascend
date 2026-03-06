@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `logging_debug`
 - status/confidence: `needs_manual_review` / `0.76`
+- source: `code` / source_tags: code
 - semantics: 控制日志和调试可观测性。
 - aliases: `--aggregate-engine-logging`, `aggregate-engine-logging`, `aggregate_engine_logging`, `aggregate engine logging`, `aggregateenginelogging`, `logging_debug`, `logging debug`, `logging-debug`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

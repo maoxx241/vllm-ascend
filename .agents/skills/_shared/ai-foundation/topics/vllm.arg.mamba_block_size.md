@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `memory_tuning`
 - status/confidence: `needs_manual_review` / `0.76`
+- source: `code` / source_tags: code
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `--mamba-block-size`, `mamba-block-size`, `mamba_block_size`, `mamba block size`, `mambablocksize`, `memory_tuning`, `memory tuning`, `memory-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

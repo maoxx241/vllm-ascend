@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `tensor_parallel`
 - status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code
 - semantics: 按张量维度切分模型以扩展单模型可用算力。
 - aliases: `--all2all-backend`, `all2all-backend`, `all2all_backend`, `all2all backend`, `all2allbackend`, `tensor_parallel`, `tensor parallel`, `tensor-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: 非法枚举值会在参数解析阶段报错。
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `lora`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 开启 LoRA 适配器加载与路由。
 - aliases: `VLLM_LORA_RESOLVER_CACHE_DIR`, `vllm_lora_resolver_cache_dir`, `vllm-lora-resolver-cache-dir`, `vllm lora resolver cache dir`, `lora`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

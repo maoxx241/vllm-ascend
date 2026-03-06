@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-05T23:40:10.395952+00:00",
+  "generated_at": "2026-03-06T00:31:00.213721+00:00",
   "routes": [
     {
       "query_intent": "deploy",
@@ -6303,6 +6303,81 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.acl_op_init_mode",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.ascend_a3_enable",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.ascend_custom_opp_path",
       "target_section": "Deployment View"
     },
@@ -6374,6 +6449,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.ascend_transfer_timeout",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.ascend_transport_print",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.ascend_transport_print",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.ascend_transport_print",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -6468,6 +6558,36 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.hccl_buffsize",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.hccl_buffsize",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.hccl_buffsize",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.hccl_deterministic",
       "target_section": "Deployment View"
     },
@@ -6479,6 +6599,36 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.hccl_deterministic",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.hccl_if_ip",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.hccl_if_ip",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.hccl_if_ip",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -6554,6 +6704,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.hccl_rdma_timeout",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -6678,6 +6843,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.omp_proc_bind",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.omp_proc_bind",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.omp_proc_bind",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.openai_api_key",
       "target_section": "Deployment View"
     },
@@ -6689,6 +6869,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.openai_api_key",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -6723,6 +6918,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.server_port",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.server_port",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.server_port",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.soc_version",
       "target_section": "Deployment View"
     },
@@ -6734,6 +6944,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.soc_version",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.task_queue_enable",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.task_queue_enable",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.task_queue_enable",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -6903,6 +7128,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.vllm_ascend_flashcomm2_parallel_size",
       "target_section": "Deployment View"
     },
@@ -7064,6 +7304,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.vllm_use_modelscope",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm_ascend.env.vllm_use_v1",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm_ascend.env.vllm_use_v1",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm_ascend.env.vllm_use_v1",
       "target_section": "Details/Edge Cases"
     },
     {

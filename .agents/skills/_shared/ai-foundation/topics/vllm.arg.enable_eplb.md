@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `expert_parallel`
 - status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `--enable-eplb`, `enable-eplb`, `enable_eplb`, `enable eplb`, `enableeplb`, `expert_parallel`, `expert parallel`, `expert-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: ValueError: enable_expert_parallel must be True to use EPLB.; ValueError: EPLB requires tensor_parallel_size or data_parallel_size to be greater than 1.
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

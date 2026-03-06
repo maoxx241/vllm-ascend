@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `quantization`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 指定量化后端/方法（如 ascend），影响权重加载和算子路径。
 - aliases: `--quantization`, `quantization`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: ValueError: Unknown quantization method; ValueError: Quantization method specified in model config does not match argument; ValueError: quantization method is deprecated ... set --allow-deprecated-quantization
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

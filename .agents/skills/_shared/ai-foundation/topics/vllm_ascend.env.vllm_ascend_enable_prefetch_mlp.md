@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `weight_prefetch`
 - status/confidence: `aligned` / `0.98`
+- source: `multi_source` / source_tags: code_definition, code_reference, docs_export
 - semantics: 旧版 MLP 预取开关（已在新版本迁移到 additional_config 的 weight_prefetch_config）。
 - aliases: `VLLM_ASCEND_ENABLE_PREFETCH_MLP`, `vllm_ascend_enable_prefetch_mlp`, `vllm-ascend-enable-prefetch-mlp`, `vllm ascend enable prefetch mlp`, `weight_prefetch`, `weight prefetch`, `weight-prefetch`
 
@@ -32,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/ascend_config.py:150, vllm_ascend/envs.py:81
+- definition_ref: docs/source/tutorials/features/suffix_speculative_decoding.md:84, vllm_ascend/ascend_config.py:150, vllm_ascend/envs.py:81
 - read_ref: vllm-ascend/vllm_ascend/ascend_config.py:150, vllm-ascend/vllm_ascend/ascend_config.py:158, vllm-ascend/vllm_ascend/ascend_config.py:163
 - effect_ref: vllm-ascend/vllm_ascend/ascend_config.py:150, vllm-ascend/vllm_ascend/ascend_config.py:163
 - web_refs: 7
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 显存 OOM; 收益不稳定
 - value_failure_signals: DeprecationWarning: VLLM_ASCEND_ENABLE_PREFETCH_MLP is deprecated
 - recommendation: 与 max_model_len/gpu_memory_utilization 联动调优。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

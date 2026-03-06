@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `prefill_decode_disaggregation`
 - status/confidence: `needs_manual_review` / `0.76`
+- source: `code` / source_tags: code
 - semantics: 预填充与解码分离部署，优化资源利用和吞吐扩展。
 - aliases: `--decode-servers-urls`, `decode-servers-urls`, `decode_servers_urls`, `decode servers urls`, `decodeserversurls`, `prefill_decode_disaggregation`, `prefill decode disaggregation`, `prefill-decode-disaggregation`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: connector 超时; P/D 节点路由异常
 - value_failure_signals: connector 超时; P/D 节点路由异常
 - recommendation: 先验证连接器与地址，再调并行参数。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `data_parallel`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 设置 DP 副本数，影响吞吐扩展与地址配置要求。
 - aliases: `--data-parallel-size`, `data-parallel-size`, `data_parallel_size`, `data parallel size`, `dataparallelsize`, `data_parallel`, `data parallel`, `data-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: ValueError: data_parallel_size_local ... must be <= data_parallel_size; ValueError: data_parallel_external_lb can only be set when data_parallel_size > 1
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

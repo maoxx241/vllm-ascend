@@ -101,8 +101,15 @@ def main() -> int:
     assert len(entries) >= 350, f"Expected broad coverage, got {len(entries)}"
 
     # Schema + evidence checks
+    allowed_sources = {"code", "docs_export", "tests_yaml", "multi_source"}
     for entry in entries:
-        assert entry["source"] == "code", f"Non-code entry detected: {entry['id']}"
+        assert entry["source"] in allowed_sources, f"Unexpected source detected: {entry['id']}"
+        assert isinstance(entry.get("source_tags"), list) and entry["source_tags"], (
+            f"Missing source_tags: {entry['id']}"
+        )
+        if entry["source"] != "code":
+            assert entry["scope"] == "vllm_ascend", f"Non-code source should stay in vllm_ascend scope: {entry['id']}"
+            assert entry["kind"] == "env", f"Non-code source should only contribute env entries: {entry['id']}"
         assert entry["kind"] in {"arg", "env"}
         assert entry["scope"] in {"vllm", "vllm_ascend"}
         assert entry["status"] in ALLOWED_STATUS
@@ -132,6 +139,9 @@ def main() -> int:
     assert by_name["--compilation-config"]["primary_feature"] == "graph_mode"
     assert by_name["--enable-expert-parallel"]["primary_feature"] == "expert_parallel"
     assert by_name["VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL"]["primary_feature"] == "context_parallel"
+    assert by_name["TASK_QUEUE_ENABLE"]["scope"] == "vllm_ascend"
+    assert by_name["HCCL_OP_EXPANSION_MODE"]["scope"] == "vllm_ascend"
+    assert by_name["TASK_QUEUE_ENABLE"]["source"] in {"tests_yaml", "docs_export", "multi_source", "code"}
 
     rule_ids = {row["rule_id"] for row in combo_rules}
     assert "hard_block.qwen3_32b_w8a8_int4" in rule_ids

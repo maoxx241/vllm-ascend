@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `model_selection`
-- status/confidence: `aligned` / `0.98`
+- status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code_definition
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS`, `vllm_execute_model_timeout_seconds`, `vllm-execute-model-timeout-seconds`, `vllm execute model timeout seconds`, `model_selection`, `model selection`, `model-selection`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

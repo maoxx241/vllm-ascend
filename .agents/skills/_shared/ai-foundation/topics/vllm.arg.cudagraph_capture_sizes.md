@@ -14,12 +14,13 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `graph_mode`
 - status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code
 - semantics: 控制 eager/graph 执行策略，通常优化吞吐与时延抖动。
 - aliases: `--cudagraph-capture-sizes`, `cudagraph-capture-sizes`, `cudagraph_capture_sizes`, `cudagraph capture sizes`, `cudagraphcapturesizes`, `graph_mode`, `graph mode`, `graph-mode`
 
 ## Foundation
 
-- 图模式通过稳定执行图降低调度抖动，提升吞吐稳定性。
+- Ascend 图模式由 ACLGraph 与 Xlite 图配置共同作用，FULL_DECODE_ONLY 常用于先稳态加速 decode。
 - 推荐结合 feature: `graph_mode` 查看稳定原理。
 
 ## Deployment View
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: ValueError: cudagraph_capture_sizes and compilation_config... are mutually exclusive; AssertionError: cudagraph_capture_sizes should contain at least one element
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

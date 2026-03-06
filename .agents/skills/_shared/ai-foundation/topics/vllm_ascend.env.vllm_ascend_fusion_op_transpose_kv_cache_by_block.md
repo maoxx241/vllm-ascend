@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `memory_tuning`
 - status/confidence: `aligned` / `0.88`
+- source: `code` / source_tags: code_definition, code_reference
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK`, `vllm_ascend_fusion_op_transpose_kv_cache_by_block`, `vllm-ascend-fusion-op-transpose-kv-cache-by-block`, `vllm ascend fusion op transpose kv cache by block`, `memory_tuning`, `memory tuning`, `memory-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

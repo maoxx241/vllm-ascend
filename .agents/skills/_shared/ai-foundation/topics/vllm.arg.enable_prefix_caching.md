@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `prefix_cache`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 启用前缀缓存，加速重复前缀请求的 prefill 阶段。
 - aliases: `--enable-prefix-caching`, `enable-prefix-caching`, `enable_prefix_caching`, `enable prefix caching`, `enableprefixcaching`, `prefix_cache`, `prefix cache`, `prefix-cache`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - value_failure_signals: warning: model does not officially support prefix caching; ValueError: --mamba-block-size can only be set with --enable-prefix-caching
 - recommendation: 结合业务前缀分布评估收益，保留回退开关。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `data_parallel`
 - status/confidence: `needs_manual_review` / `0.86`
+- source: `code` / source_tags: code
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `--data-parallel-size-local`, `data-parallel-size-local`, `data_parallel_size_local`, `data parallel size local`, `dataparallelsizelocal`, `data_parallel`, `data parallel`, `data-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: AssertionError: data_parallel_size_local must be 1 or None when data_parallel_rank is set; AssertionError: data_parallel_size_local must be set to use data_parallel_hybrid_lb
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

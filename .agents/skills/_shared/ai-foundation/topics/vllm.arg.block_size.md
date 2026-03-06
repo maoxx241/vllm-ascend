@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `memory_tuning`
 - status/confidence: `needs_manual_review` / `0.83`
+- source: `code` / source_tags: code
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `--block-size`, `block-size`, `block_size`, `block size`, `blocksize`, `memory_tuning`, `memory tuning`, `memory-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: RuntimeError: Xlite graph mode is only compatible with block_size of 128; AssertionError: block_size should be divisible by cp_kv_cache_interleave_size
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

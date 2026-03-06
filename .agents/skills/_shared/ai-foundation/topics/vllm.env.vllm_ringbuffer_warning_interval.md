@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `logging_debug`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 控制日志和调试可观测性。
 - aliases: `VLLM_RINGBUFFER_WARNING_INTERVAL`, `vllm_ringbuffer_warning_interval`, `vllm-ringbuffer-warning-interval`, `vllm ringbuffer warning interval`, `logging_debug`, `logging debug`, `logging-debug`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

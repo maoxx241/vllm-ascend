@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `lora`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 开启 LoRA 适配器加载与路由。
 - aliases: `VLLM_ALLOW_RUNTIME_LORA_UPDATING`, `vllm_allow_runtime_lora_updating`, `vllm-allow-runtime-lora-updating`, `vllm allow runtime lora updating`, `lora`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: ValueError: VLLM_ALLOW_RUNTIME_LORA_UPDATING cannot be used with api_server_count > 1; warning: LoRA dynamic loading & unloading is enabled ... ONLY be used for local development
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

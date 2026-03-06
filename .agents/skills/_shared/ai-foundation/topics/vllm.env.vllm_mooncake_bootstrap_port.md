@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `network_serving`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `VLLM_MOONCAKE_BOOTSTRAP_PORT`, `vllm_mooncake_bootstrap_port`, `vllm-mooncake-bootstrap-port`, `vllm mooncake bootstrap port`, `network_serving`, `network serving`, `network-serving`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

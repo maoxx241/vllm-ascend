@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `model_selection`
 - status/confidence: `needs_manual_review` / `0.83`
+- source: `code` / source_tags: code
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `--tokenizer`, `tokenizer`, `model_selection`, `model selection`, `model-selection`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

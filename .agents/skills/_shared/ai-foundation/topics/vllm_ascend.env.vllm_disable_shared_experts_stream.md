@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `aligned` / `0.88`
+- status/confidence: `upstream_delta` / `0.68`
+- source: `code` / source_tags: code_reference
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_DISABLE_SHARED_EXPERTS_STREAM`, `vllm_disable_shared_experts_stream`, `vllm-disable-shared-experts-stream`, `vllm disable shared experts stream`, `general_runtime`, `general runtime`, `general-runtime`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

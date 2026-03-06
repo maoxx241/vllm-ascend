@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `profiling_observability`
 - status/confidence: `needs_manual_review` / `0.76`
+- source: `code` / source_tags: code
 - semantics: 控制 profiling 和 tracing 输出。
 - aliases: `--enable-mfu-metrics`, `enable-mfu-metrics`, `enable_mfu_metrics`, `enable mfu metrics`, `enablemfumetrics`, `profiling_observability`, `profiling observability`, `profiling-observability`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 指标缺失; 追踪上报失败
 - value_failure_signals: 指标缺失; 追踪上报失败
 - recommendation: 按需开启细粒度 tracing，避免全量常开。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

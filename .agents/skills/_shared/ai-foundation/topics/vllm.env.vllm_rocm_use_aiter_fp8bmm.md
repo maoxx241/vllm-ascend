@@ -13,7 +13,8 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `quantization`
-- status/confidence: `aligned` / `0.91`
+- status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code_definition
 - semantics: 选择量化实现和权重加载路径，直接影响吞吐、显存和精度。
 - aliases: `VLLM_ROCM_USE_AITER_FP8BMM`, `vllm_rocm_use_aiter_fp8bmm`, `vllm-rocm-use-aiter-fp8bmm`, `vllm rocm use aiter fp8bmm`, `quantization`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: 模型加载失败; 精度异常; 推理速度低于预期
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

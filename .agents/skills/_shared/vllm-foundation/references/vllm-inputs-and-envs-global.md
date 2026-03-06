@@ -3,7 +3,7 @@ knowledge_id: vllm-foundation.inputs-and-envs-global
 domain: vllm-foundation
 knowledge_type: reference
 summary: Code-truth inventory of vLLM deployment arguments and environment variables with evidence refs.
-last_verified: "2026-03-05"
+last_verified: "2026-03-06"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---

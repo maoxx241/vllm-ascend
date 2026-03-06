@@ -109,9 +109,9 @@ FEATURE_FOUNDATION_FACTS: dict[str, dict[str, Any]] = {
         "development": "增加 profile 规则，明确哪些模型可用 INT4。",
     },
     "graph_mode": {
-        "core": "图模式通过稳定执行图降低调度抖动，提升吞吐稳定性。",
-        "deployment": "先小流量验证，再放大并发。",
-        "development": "关注图捕获边界、动态 shape 分支、fallback 到 eager 的触发条件。",
+        "core": "Ascend 图模式由 ACLGraph 与 Xlite 图配置共同作用，FULL_DECODE_ONLY 常用于先稳态加速 decode。",
+        "deployment": "优先用 --compilation-config {'cudagraph_mode':'FULL_DECODE_ONLY'} 做灰度，必要时用 --enforce-eager 回退。",
+        "development": "关注 full_mode/xlite 约束、block_size 要求、动态 shape 分支与 eager fallback 触发条件。",
     },
     "expert_parallel": {
         "core": "EP 面向 MoE 专家路由，Dense 模型没有专家层时不成立。",
@@ -134,9 +134,46 @@ MODEL_PROFILES: dict[str, dict[str, Any]] = {
             "fixed_weight_format": "w8a8",
             "supported_variants": ["w8a8"],
         },
-        "feature_min_npu_count": {
-            "data_parallel": 8,
-            "context_parallel": 8,
+        "variant_scope": {
+            "base_model": "qwen3-32b",
+            "validated_artifacts": ["vllm-ascend/Qwen3-32B-W8A8"],
+            "other_known_variants": ["Qwen/Qwen3-32B"],
+            "notes": "该 profile 聚焦已验证 W8A8 工件；Qwen3-32B 其他精度形态需独立验证。",
+        },
+        "resource_guidance": {
+            "recommended": {
+                "tensor_parallel": {
+                    "min_npu_count": 4,
+                    "notes": "单机 TP4 是常见起点。",
+                },
+                "data_parallel": {
+                    "min_npu_count": 8,
+                    "notes": "DP 常用于吞吐扩展，建议 8 卡起评估收益。",
+                },
+                "context_parallel": {
+                    "min_npu_count": 8,
+                    "notes": "CP 主要面向长上下文和高并发场景。",
+                },
+            },
+            "validated": {
+                "tensor_parallel": {
+                    "min_npu_count": 4,
+                    "notes": "Qwen3-Dense 教程与 nightly 32B 配置均覆盖 TP4。",
+                },
+                "graph_mode": {
+                    "min_npu_count": 4,
+                    "notes": "FULL_DECODE_ONLY 在 4 卡配置已有验证样例。",
+                },
+            },
+            "boot_min": {
+                "min_npu_count": 4,
+                "notes": "当前知识库保证 4 卡 TP4 启动基线；更低卡数需专项验证。",
+            },
+            "evidence_refs": [
+                "docs/source/tutorials/models/Qwen3-Dense.md",
+                "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml",
+                "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
+            ],
         },
         "evidence_refs": [
             ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
@@ -156,9 +193,34 @@ MODEL_PROFILES: dict[str, dict[str, Any]] = {
             "fixed_weight_format": "w8a8",
             "supported_variants": ["w8a8"],
         },
-        "feature_min_npu_count": {
-            "data_parallel": 8,
-            "context_parallel": 8,
+        "resource_guidance": {
+            "recommended": {
+                "data_parallel": {
+                    "min_npu_count": 8,
+                    "notes": "80B MoE 常用多副本扩展吞吐。",
+                },
+                "context_parallel": {
+                    "min_npu_count": 8,
+                    "notes": "长上下文 CP 建议从高卡场景评估。",
+                },
+            },
+            "validated": {
+                "tensor_parallel": {
+                    "min_npu_count": 4,
+                    "notes": "官方教程示例覆盖 TP4。",
+                },
+                "expert_parallel": {
+                    "min_npu_count": 8,
+                    "notes": "EP 需结合 MoE 路由与更高通信预算。",
+                },
+            },
+            "boot_min": {
+                "min_npu_count": 4,
+                "notes": "基础启动可从 4 卡开始。",
+            },
+            "evidence_refs": [
+                "docs/source/tutorials/models/Qwen3-Next.md",
+            ],
         },
         "evidence_refs": [
             ".agents/skills/_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md",
@@ -267,6 +329,10 @@ def _write_param_topic(topic_path: Path, entry: dict[str, Any]) -> None:
         f"stage: `{entry.get('stage')}`",
         f"primary_feature: `{entry.get('primary_feature')}`",
         f"status/confidence: `{entry.get('status')}` / `{entry.get('confidence')}`",
+        (
+            f"source: `{entry.get('source', 'unknown')}` / "
+            f"source_tags: {', '.join(str(tag) for tag in entry.get('source_tags', [])) or 'N/A'}"
+        ),
         f"semantics: {entry.get('semantics') or 'N/A'}",
         f"aliases: {', '.join(f'`{alias}`' for alias in aliases[:16])}",
     ]
@@ -383,6 +449,24 @@ def _write_feature_topic(topic_path: Path, feature: str, cfg: dict[str, list[str
 def _write_model_topic(topic_path: Path, model_id: str, profile: dict[str, Any]) -> None:
     architecture = profile.get("architecture", {})
     quant_profile = profile.get("quantization_profile", {})
+    variant_scope = profile.get("variant_scope", {}) if isinstance(profile.get("variant_scope"), dict) else {}
+    resource_guidance = profile.get("resource_guidance", {}) if isinstance(profile.get("resource_guidance"), dict) else {}
+    recommended = resource_guidance.get("recommended", {}) if isinstance(resource_guidance.get("recommended"), dict) else {}
+    validated = resource_guidance.get("validated", {}) if isinstance(resource_guidance.get("validated"), dict) else {}
+    boot_min = resource_guidance.get("boot_min", {}) if isinstance(resource_guidance.get("boot_min"), dict) else {}
+
+    def _format_guidance_rows(payload: dict[str, Any]) -> str:
+        rows: list[str] = []
+        for key, row in payload.items():
+            if not isinstance(row, dict):
+                continue
+            min_npu = row.get("min_npu_count", "N/A")
+            note = str(row.get("notes", "")).strip()
+            if note:
+                rows.append(f"{key}: >= {min_npu} ({note})")
+            else:
+                rows.append(f"{key}: >= {min_npu}")
+        return "; ".join(rows) if rows else "N/A"
 
     core_rows = [
         f"topic_id: `{profile.get('topic_id')}`",
@@ -390,22 +474,33 @@ def _write_model_topic(topic_path: Path, model_id: str, profile: dict[str, Any])
         f"has_moe_layers: `{architecture.get('has_moe_layers')}`",
         f"num_experts: `{architecture.get('num_experts')}`",
         f"fixed_weight_format: `{quant_profile.get('fixed_weight_format')}`",
+        f"base_model: `{variant_scope.get('base_model', 'N/A')}`",
     ]
     foundation_rows = [
         "模型画像用于配置可行性推导，不参与业务逻辑改写。",
-        "Dense 模型不适用 EP；MoE 模型可进一步评估 EP。",
+        "Dense 模型不适用 EP；MoE 模型可进一步评估 EP；资源建议采用 recommended/validated 双口径。",
     ]
     deploy_rows = [
-        "部署前先做 profile 校验：量化工件支持、并行能力边界、最小卡数。",
-        "不满足条件时返回 hard_block/warning，并附 fallback。",
+        "部署前先做 profile 校验：量化工件支持、并行能力边界、resource_guidance（recommended/validated/boot_min）。",
+        "资源不足时输出 advisory + fallback，不把建议卡数当成硬门槛降级。",
     ]
     dev_rows = [
         f"evidence_refs: {', '.join(profile.get('evidence_refs', [])) or 'N/A'}",
-        f"feature_min_npu_count: {profile.get('feature_min_npu_count', {})}",
+        f"resource_guidance.recommended: {_format_guidance_rows(recommended)}",
+        f"resource_guidance.validated: {_format_guidance_rows(validated)}",
+        (
+            f"resource_guidance.boot_min: >= {boot_min.get('min_npu_count', 'N/A')} "
+            f"({boot_min.get('notes', 'N/A')})"
+        ),
     ]
     detail_rows = [
         f"supported_variants: {quant_profile.get('supported_variants', [])}",
         f"architecture_family: {architecture.get('family', 'unknown')}",
+        f"variant_scope.notes: {variant_scope.get('notes', 'N/A')}",
+        (
+            f"resource_guidance.evidence_refs: "
+            f"{', '.join(resource_guidance.get('evidence_refs', []) if isinstance(resource_guidance.get('evidence_refs'), list) else []) or 'N/A'}"
+        ),
     ]
 
     content = [

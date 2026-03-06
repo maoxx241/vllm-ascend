@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `lora`
 - status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code
 - semantics: 开启 LoRA 适配器加载与路由。
 - aliases: `--default-mm-loras`, `default-mm-loras`, `default_mm_loras`, `default mm loras`, `defaultmmloras`, `lora`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

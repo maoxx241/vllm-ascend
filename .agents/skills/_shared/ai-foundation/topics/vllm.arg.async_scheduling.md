@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `throughput_tuning`
 - status/confidence: `needs_manual_review` / `0.83`
+- source: `code` / source_tags: code
 - semantics: 调度和批处理参数调优，目标提升吞吐。
 - aliases: `--async-scheduling`, `async-scheduling`, `async_scheduling`, `async scheduling`, `asyncscheduling`, `throughput_tuning`, `throughput tuning`, `throughput-tuning`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: ValueError: async scheduling only supports mp/uni/external_launcher; ValueError: not compatible with disable_padded_drafter_batch=True
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

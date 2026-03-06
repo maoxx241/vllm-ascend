@@ -14,7 +14,8 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `throughput_tuning`
 - status/confidence: `upstream_delta` / `0.75`
-- semantics: 调度和批处理参数调优，目标提升吞吐。
+- source: `code` / source_tags: code_reference
+- semantics: FlashComm1 旧兼容开关，推荐使用 VLLM_ASCEND_ENABLE_FLASHCOMM1。
 - aliases: `VLLM_ASCEND_ENABLE_FLASHCOMM`, `vllm_ascend_enable_flashcomm`, `vllm-ascend-enable-flashcomm`, `vllm ascend enable flashcomm`, `throughput_tuning`, `throughput tuning`, `throughput-tuning`
 
 ## Foundation
@@ -24,11 +25,11 @@ topic_kind: parameter
 
 ## Deployment View
 
-- default_behavior: 未显式设置时使用系统默认行为。
-- value_shape: `free_form`
-- accepted_values: string value
-- constraints: 过大批处理会增大时延和显存压力
-- combo_effects: N/A
+- default_behavior: 默认 0（关闭），作为 FLASHCOMM1 兼容别名读取。
+- value_shape: `binary_toggle`
+- accepted_values: 0, 1
+- constraints: 推荐改用 VLLM_ASCEND_ENABLE_FLASHCOMM1。
+- combo_effects: 与 VLLM_ASCEND_ENABLE_FLASHCOMM1 同时设置时，以功能等价方式生效。
 
 ## Development View
 
@@ -40,6 +41,6 @@ topic_kind: parameter
 ## Details/Edge Cases
 
 - failure_modes: TTFT/TPOT 退化; OOM
-- value_failure_signals: TTFT/TPOT 退化; OOM
+- value_failure_signals: 通信参数不匹配时收益不稳定或出现告警。
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

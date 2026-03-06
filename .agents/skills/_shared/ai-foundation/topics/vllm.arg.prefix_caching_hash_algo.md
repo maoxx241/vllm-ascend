@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `startup`
 - primary_feature: `prefix_cache`
 - status/confidence: `needs_manual_review` / `0.79`
+- source: `code` / source_tags: code
 - semantics: 复用公共前缀缓存，降低 prefill 计算成本。
 - aliases: `--prefix-caching-hash-algo`, `prefix-caching-hash-algo`, `prefix_caching_hash_algo`, `prefix caching hash algo`, `prefixcachinghashalgo`, `prefix_cache`, `prefix cache`, `prefix-cache`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - value_failure_signals: 缺少 xxhash 依赖时启用 xxhash 系列会失败。
 - recommendation: 结合业务前缀分布评估收益，保留回退开关。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06

@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-03-05T23:40:10.483294+00:00",
-  "topic_count": 474,
+  "generated_at": "2026-03-06T00:31:00.303542+00:00",
+  "topic_count": 491,
   "feature_topic_count": 13,
   "model_profile_count": 2,
-  "total_topics": 489,
+  "total_topics": 506,
   "rule_count": 7,
   "coverage_from_global_kb": {
-    "expected": 474,
-    "actual": 474,
+    "expected": 491,
+    "actual": 491,
     "ratio": 1.0
   }
 }

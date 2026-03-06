@@ -6,12 +6,11 @@ test_cases:
   - name: "Qwen3-32B-W8A8-a3-feature-stack3"
     model: "vllm-ascend/Qwen3-32B-W8A8"
     envs:
-      VLLM_USE: "1"
+      VLLM_USE_V1: "1"
       TASK_QUEUE_ENABLE: "1"
       HCCL_OP_EXPANSION_MODE: "AIV"
       OMP_PROC_BIND: "false"
-      VLLM_ASCEND_ENABLE_TOPK_OPTIMIZE: "1"
-      VLLM_ASCEND_ENABLE_FLASHCOMM: "1"
+      VLLM_ASCEND_ENABLE_FLASHCOMM1: "1"
       SERVER_PORT: "DEFAULT_PORT"
     prompts:
       - "9.11 and 9.8, which is greater?"
@@ -28,7 +27,7 @@ test_cases:
       - "--trust-remote-code"
       - "--reasoning-parser"
       - "qwen3"
-      - "--distributed_executor_backend"
+      - "--distributed-executor-backend"
       - "mp"
       - "--gpu-memory-utilization"
       - "0.9"

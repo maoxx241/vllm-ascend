@@ -1,4 +1,94 @@
 {
+  "ACL_OP_INIT_MODE": {
+    "name": "ACL_OP_INIT_MODE",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:527",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:602",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:680",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:757",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1057",
+      "docs/source/user_guide/feature_guide/kv_pool.md:149",
+      "docs/source/user_guide/feature_guide/kv_pool.md:222",
+      "docs/source/user_guide/feature_guide/kv_pool.md:333",
+      "docs/source/user_guide/feature_guide/kv_pool.md:762",
+      "docs/source/user_guide/feature_guide/kv_pool.md:836"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "ASCEND_A3_ENABLE": {
+    "name": "ASCEND_A3_ENABLE",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:528",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:603",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:681",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:758"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "ASCEND_AGGREGATE_ENABLE": {
+    "name": "ASCEND_AGGREGATE_ENABLE",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:525",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:600",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:678",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:755"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "ASCEND_BUFFER_POOL": {
+    "name": "ASCEND_BUFFER_POOL",
+    "definition_ref": [
+      "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md:221",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:299",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:376",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:453",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:529",
+      "docs/source/user_guide/feature_guide/kv_pool.md:152",
+      "docs/source/user_guide/feature_guide/kv_pool.md:223",
+      "docs/source/user_guide/feature_guide/kv_pool.md:334",
+      "docs/source/user_guide/feature_guide/kv_pool.md:95"
+    ],
+    "default": "4:8",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "ASCEND_CONNECT_TIMEOUT": {
+    "name": "ASCEND_CONNECT_TIMEOUT",
+    "definition_ref": [
+      "docs/source/user_guide/feature_guide/kv_pool.md:157",
+      "docs/source/user_guide/feature_guide/kv_pool.md:224",
+      "docs/source/user_guide/feature_guide/kv_pool.md:335"
+    ],
+    "default": "10000",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
   "ASCEND_CUSTOM_OPP_PATH": {
     "name": "ASCEND_CUSTOM_OPP_PATH",
     "definition_ref": [
@@ -8,18 +98,26 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "ASCEND_ENABLE_USE_FABRIC_MEM": {
     "name": "ASCEND_ENABLE_USE_FABRIC_MEM",
     "definition_ref": [
+      "docs/source/user_guide/feature_guide/kv_pool.md:90",
       "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39",
       "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:74"
     ],
-    "default": null,
+    "default": "1",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
   },
   "ASCEND_HOME_PATH": {
     "name": "ASCEND_HOME_PATH",
@@ -30,29 +128,92 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "ASCEND_RT_VISIBLE_DEVICES": {
     "name": "ASCEND_RT_VISIBLE_DEVICES",
     "definition_ref": [
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:272",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:331",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:390",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:448",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:515",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:574",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:633",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:691",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:153",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:195",
+      "docs/source/tutorials/features/ray.md:116",
+      "docs/source/tutorials/features/ray.md:132",
+      "docs/source/tutorials/features/suffix_speculative_decoding.md:78",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:298",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:375",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:452",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:528",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:531",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:606",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:686",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:763",
+      "docs/source/tutorials/models/Qwen2.5-7B.md:101",
+      "docs/source/tutorials/models/Qwen3-32B-W4A4.md:59",
+      "docs/source/tutorials/models/Qwen3-8B-W4A8.md:53",
+      "docs/source/tutorials/models/Qwen3-Dense.md:158",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1056",
+      "docs/source/user_guide/feature_guide/kv_pool.md:148",
+      "docs/source/user_guide/feature_guide/kv_pool.md:221",
+      "docs/source/user_guide/feature_guide/kv_pool.md:331",
+      "docs/source/user_guide/feature_guide/kv_pool.md:761",
+      "docs/source/user_guide/feature_guide/kv_pool.md:835",
+      "docs/source/user_guide/feature_guide/quantization.md:44",
       "vllm_ascend/cpu_binding.py:17"
     ],
-    "default": null,
+    "default": "$1",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
   },
   "ASCEND_TRANSFER_TIMEOUT": {
     "name": "ASCEND_TRANSFER_TIMEOUT",
     "definition_ref": [
+      "docs/source/user_guide/feature_guide/kv_pool.md:160",
+      "docs/source/user_guide/feature_guide/kv_pool.md:225",
+      "docs/source/user_guide/feature_guide/kv_pool.md:336",
       "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097",
       "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809",
       "vllm_ascend/distributed/kv_transfer/utils/utils.py:52"
     ],
-    "default": null,
+    "default": "10000",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
+  },
+  "ASCEND_TRANSPORT_PRINT": {
+    "name": "ASCEND_TRANSPORT_PRINT",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:526",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:601",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:679",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:756"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
   },
   "CMAKE_BUILD_TYPE": {
     "name": "CMAKE_BUILD_TYPE",
@@ -62,7 +223,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "COMPILE_CUSTOM_KERNELS": {
     "name": "COMPILE_CUSTOM_KERNELS",
@@ -72,7 +237,11 @@
     "default": "1",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "CXX_COMPILER": {
     "name": "CXX_COMPILER",
@@ -82,7 +251,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "C_COMPILER": {
     "name": "C_COMPILER",
@@ -92,7 +265,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "DYNAMIC_EPLB": {
     "name": "DYNAMIC_EPLB",
@@ -104,7 +281,11 @@
     "default": "false",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "EXPERT_MAP_RECORD": {
     "name": "EXPERT_MAP_RECORD",
@@ -115,47 +296,293 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
+  },
+  "HCCL_BUFFSIZE": {
+    "name": "HCCL_BUFFSIZE",
+    "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:153",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:220",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:86",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:78",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:268",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:327",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:386",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:444",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:511",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:570",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:629",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:687",
+      "docs/source/tutorials/models/DeepSeek-R1.md:150",
+      "docs/source/tutorials/models/DeepSeek-R1.md:196",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:170",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:222",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:294",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:371",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:448",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:524",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:140",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:199",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:248",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:303",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:357",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:523",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:598",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:675",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:753",
+      "docs/source/tutorials/models/GLM4.x.md:83",
+      "docs/source/tutorials/models/GLM5.md:167",
+      "docs/source/tutorials/models/GLM5.md:207",
+      "docs/source/tutorials/models/GLM5.md:277",
+      "docs/source/tutorials/models/GLM5.md:322",
+      "docs/source/tutorials/models/GLM5.md:375",
+      "docs/source/tutorials/models/GLM5.md:422",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:101",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:174",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:219",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:341",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:415",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:480",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:545",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:111",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:157",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1061",
+      "docs/source/user_guide/feature_guide/kv_pool.md:604",
+      "docs/source/user_guide/feature_guide/kv_pool.md:687",
+      "docs/source/user_guide/feature_guide/kv_pool.md:766",
+      "docs/source/user_guide/feature_guide/kv_pool.md:840",
+      "docs/source/user_guide/feature_guide/kv_pool.md:932",
+      "docs/source/user_guide/feature_guide/kv_pool.md:995",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:124",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:191"
+    ],
+    "default": "768",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "HCCL_CONNECT_TIMEOUT": {
+    "name": "HCCL_CONNECT_TIMEOUT",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:289",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:366",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:443",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:519",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:307",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:361"
+    ],
+    "default": "120",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
   },
   "HCCL_DETERMINISTIC": {
     "name": "HCCL_DETERMINISTIC",
     "definition_ref": [
+      "docs/source/faqs.md:199",
       "vllm_ascend/batch_invariant.py:85"
     ],
-    "default": null,
+    "default": "true",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
+  },
+  "HCCL_EXEC_TIMEOUT": {
+    "name": "HCCL_EXEC_TIMEOUT",
+    "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:288",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:365",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:442",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:518"
+    ],
+    "default": "204",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
+  },
+  "HCCL_IF_IP": {
+    "name": "HCCL_IF_IP",
+    "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:149",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:216",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:82",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:261",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:320",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:379",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:437",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:504",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:563",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:622",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:680",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:154",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:196",
+      "docs/source/tutorials/features/ray.md:112",
+      "docs/source/tutorials/features/ray.md:128",
+      "docs/source/tutorials/models/DeepSeek-R1.md:144",
+      "docs/source/tutorials/models/DeepSeek-R1.md:190",
+      "docs/source/tutorials/models/DeepSeek-R1.md:93",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:105",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:164",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:216",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:281",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:358",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:435",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:511",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:192",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:241",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:296",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:350",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:514",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:589",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:664",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:742",
+      "docs/source/tutorials/models/GLM5.md:270",
+      "docs/source/tutorials/models/GLM5.md:315",
+      "docs/source/tutorials/models/GLM5.md:368",
+      "docs/source/tutorials/models/GLM5.md:415",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:168",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:213",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:402",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:468",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:533",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:105",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:151",
+      "docs/source/user_guide/feature_guide/kv_pool.md:598",
+      "docs/source/user_guide/feature_guide/kv_pool.md:681",
+      "docs/source/user_guide/feature_guide/kv_pool.md:925",
+      "docs/source/user_guide/feature_guide/kv_pool.md:989",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:118",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:185"
+    ],
+    "default": "$local_ip",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
   },
   "HCCL_INTRA_PCIE_ENABLE": {
     "name": "HCCL_INTRA_PCIE_ENABLE",
     "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-R1.md:153",
+      "docs/source/tutorials/models/DeepSeek-R1.md:199",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:173",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:225",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:308",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:362",
       "vllm_ascend/utils.py:959"
     ],
-    "default": null,
+    "default": "1",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
   },
   "HCCL_INTRA_ROCE_ENABLE": {
     "name": "HCCL_INTRA_ROCE_ENABLE",
     "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-R1.md:154",
+      "docs/source/tutorials/models/DeepSeek-R1.md:200",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:174",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:226",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:309",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:363",
       "vllm_ascend/utils.py:959"
     ],
-    "default": null,
+    "default": "0",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
   },
   "HCCL_OP_EXPANSION_MODE": {
     "name": "HCCL_OP_EXPANSION_MODE",
     "definition_ref": [
+      "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:176",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:158",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:224",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:91",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:79",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:270",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:329",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:388",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:446",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:513",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:572",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:631",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:689",
+      "docs/source/tutorials/features/suffix_speculative_decoding.md:82",
+      "docs/source/tutorials/models/DeepSeek-R1.md:91",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:103",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:296",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:373",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:450",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:526",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:136",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:190",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:239",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:294",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:348",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:512",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:587",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:662",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:740",
+      "docs/source/tutorials/models/GLM4.x.md:87",
+      "docs/source/tutorials/models/GLM5.md:163",
+      "docs/source/tutorials/models/GLM5.md:203",
+      "docs/source/tutorials/models/GLM5.md:268",
+      "docs/source/tutorials/models/GLM5.md:313",
+      "docs/source/tutorials/models/GLM5.md:366",
+      "docs/source/tutorials/models/GLM5.md:413",
+      "docs/source/tutorials/models/Qwen-VL-Dense.md:399",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:342",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:416",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:481",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:546",
+      "docs/source/tutorials/models/Qwen3-Dense.md:172",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:113",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:159",
+      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:10",
+      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:8",
+      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:11",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:7",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:11",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:7",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:11",
       "vllm_ascend/utils.py:499"
     ],
-    "default": null,
+    "default": "AIV",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "HCCL_RDMA_RETRY_CNT": {
     "name": "HCCL_RDMA_RETRY_CNT",
@@ -165,7 +592,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "HCCL_RDMA_TIMEOUT": {
     "name": "HCCL_RDMA_TIMEOUT",
@@ -175,7 +605,70 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
+  },
+  "HCCL_SOCKET_IFNAME": {
+    "name": "HCCL_SOCKET_IFNAME",
+    "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:152",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:219",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:85",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:264",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:323",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:382",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:440",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:507",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:566",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:625",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:683",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:157",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:199",
+      "docs/source/tutorials/models/DeepSeek-R1.md:147",
+      "docs/source/tutorials/models/DeepSeek-R1.md:193",
+      "docs/source/tutorials/models/DeepSeek-R1.md:96",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:108",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:167",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:219",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:284",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:361",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:438",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:514",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:195",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:244",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:299",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:353",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:517",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:592",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:667",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:745",
+      "docs/source/tutorials/models/GLM5.md:273",
+      "docs/source/tutorials/models/GLM5.md:318",
+      "docs/source/tutorials/models/GLM5.md:371",
+      "docs/source/tutorials/models/GLM5.md:418",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:171",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:216",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:409",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:474",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:539",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:108",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:154",
+      "docs/source/user_guide/feature_guide/kv_pool.md:601",
+      "docs/source/user_guide/feature_guide/kv_pool.md:684",
+      "docs/source/user_guide/feature_guide/kv_pool.md:928",
+      "docs/source/user_guide/feature_guide/kv_pool.md:992",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:121",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:188"
+    ],
+    "default": "$nic_name",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
   },
   "HCCL_SO_PATH": {
     "name": "HCCL_SO_PATH",
@@ -185,7 +678,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "LCCL_DETERMINISTIC": {
     "name": "LCCL_DETERMINISTIC",
@@ -195,7 +692,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "LOCAL_RANK": {
     "name": "LOCAL_RANK",
@@ -206,7 +706,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "MASTER_ADDR": {
     "name": "MASTER_ADDR",
@@ -217,7 +720,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "MASTER_PORT": {
     "name": "MASTER_PORT",
@@ -228,7 +734,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "MAX_JOBS": {
     "name": "MAX_JOBS",
@@ -238,7 +747,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "MOONCAKE_CONFIG_PATH": {
     "name": "MOONCAKE_CONFIG_PATH",
@@ -248,7 +761,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "MSMONITOR_USE_DAEMON": {
     "name": "MSMONITOR_USE_DAEMON",
@@ -258,7 +774,80 @@
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
+  },
+  "OMP_PROC_BIND": {
+    "name": "OMP_PROC_BIND",
+    "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:154",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:221",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:87",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:80",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:265",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:324",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:383",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:441",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:508",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:567",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:626",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:684",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:158",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md:200",
+      "docs/source/tutorials/models/DeepSeek-R1.md:148",
+      "docs/source/tutorials/models/DeepSeek-R1.md:194",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:168",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:220",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:291",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:368",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:445",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:521",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:137",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:196",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:245",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:300",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:354",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:519",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:594",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:670",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:748",
+      "docs/source/tutorials/models/GLM4.x.md:84",
+      "docs/source/tutorials/models/GLM5.md:164",
+      "docs/source/tutorials/models/GLM5.md:204",
+      "docs/source/tutorials/models/GLM5.md:274",
+      "docs/source/tutorials/models/GLM5.md:319",
+      "docs/source/tutorials/models/GLM5.md:372",
+      "docs/source/tutorials/models/GLM5.md:419",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:102",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:172",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:217",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:343",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:417",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:482",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:547",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:109",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:155",
+      "docs/source/user_guide/feature_guide/kv_pool.md:605",
+      "docs/source/user_guide/feature_guide/kv_pool.md:688",
+      "docs/source/user_guide/feature_guide/kv_pool.md:933",
+      "docs/source/user_guide/feature_guide/kv_pool.md:996",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:122",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:189",
+      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:7",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:12",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:10"
+    ],
+    "default": "false",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "OPENAI_API_KEY": {
     "name": "OPENAI_API_KEY",
@@ -268,18 +857,104 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
+  },
+  "PAGED_ATTENTION_MASK_LEN": {
+    "name": "PAGED_ATTENTION_MASK_LEN",
+    "definition_ref": [
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:12"
+    ],
+    "default": "5500",
+    "type": "string",
+    "valid_values": [],
+    "source": "tests_yaml",
+    "source_tags": [
+      "tests_yaml"
+    ]
   },
   "PYTORCH_NPU_ALLOC_CONF": {
     "name": "PYTORCH_NPU_ALLOC_CONF",
     "definition_ref": [
+      "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:149",
+      "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:152",
+      "docs/source/faqs.md:149",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:156",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:222",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:89",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:77",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:267",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:326",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:385",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:443",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:510",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:569",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:628",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:686",
+      "docs/source/tutorials/hardwares/310p.md:47",
+      "docs/source/tutorials/models/DeepSeek-R1.md:151",
+      "docs/source/tutorials/models/DeepSeek-R1.md:197",
+      "docs/source/tutorials/models/DeepSeek-R1.md:98",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:110",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:171",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:223",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:293",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:370",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:447",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:523",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:142",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:201",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:250",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:305",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:359",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:521",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:596",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:607",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:673",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:751",
+      "docs/source/tutorials/models/GLM4.x.md:86",
+      "docs/source/tutorials/models/GLM5.md:168",
+      "docs/source/tutorials/models/GLM5.md:208",
+      "docs/source/tutorials/models/GLM5.md:278",
+      "docs/source/tutorials/models/GLM5.md:323",
+      "docs/source/tutorials/models/GLM5.md:376",
+      "docs/source/tutorials/models/GLM5.md:423",
+      "docs/source/tutorials/models/PaddleOCR-VL.md:79",
+      "docs/source/tutorials/models/Qwen-VL-Dense.md:108",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:100",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:162",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:204",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:340",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:414",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:479",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:544",
+      "docs/source/tutorials/models/Qwen3-30B-A3B.md:41",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:142",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:99",
+      "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md:65",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1058",
+      "docs/source/user_guide/feature_guide/kv_pool.md:607",
+      "docs/source/user_guide/feature_guide/kv_pool.md:690",
+      "docs/source/user_guide/feature_guide/kv_pool.md:763",
+      "docs/source/user_guide/feature_guide/kv_pool.md:837",
+      "docs/source/user_guide/feature_guide/kv_pool.md:935",
+      "docs/source/user_guide/feature_guide/kv_pool.md:998",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:135",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:202",
+      "docs/source/user_guide/feature_guide/quantization.md:45",
       "vllm_ascend/platform.py:423",
       "vllm_ascend/platform.py:435"
     ],
-    "default": null,
+    "default": "max_split_size_mb:250",
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference",
+      "docs_export"
+    ]
   },
   "RANK": {
     "name": "RANK",
@@ -290,7 +965,29 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
+  },
+  "SERVER_PORT": {
+    "name": "SERVER_PORT",
+    "definition_ref": [
+      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:11",
+      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:10",
+      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:12",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:9",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:14",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:9",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:13"
+    ],
+    "default": "DEFAULT_PORT",
+    "type": "string",
+    "valid_values": [],
+    "source": "tests_yaml",
+    "source_tags": [
+      "tests_yaml"
+    ]
   },
   "SOC_VERSION": {
     "name": "SOC_VERSION",
@@ -300,7 +997,64 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
+  },
+  "TASK_QUEUE_ENABLE": {
+    "name": "TASK_QUEUE_ENABLE",
+    "definition_ref": [
+      "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:160",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:160",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:226",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:93",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:83",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:269",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:328",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:387",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:445",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:512",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:571",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:630",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:688",
+      "docs/source/tutorials/features/suffix_speculative_decoding.md:80",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:295",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:372",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:449",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:525",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:684",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:761",
+      "docs/source/tutorials/models/PaddleOCR-VL.md:77",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:105",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:175",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:220",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:347",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:421",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:486",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:551",
+      "docs/source/tutorials/models/Qwen3-Dense.md:161",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:112",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:158",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:136",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:203",
+      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:9",
+      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:6",
+      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:9",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:6",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:10",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:6",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:9"
+    ],
+    "default": "2",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "TRITON_ALL_BLOCKS_PARALLEL": {
     "name": "TRITON_ALL_BLOCKS_PARALLEL",
@@ -310,7 +1064,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VERBOSE": {
     "name": "VERBOSE",
@@ -320,27 +1077,53 @@
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_ASCEND_BALANCE_SCHEDULING": {
     "name": "VLLM_ASCEND_BALANCE_SCHEDULING",
     "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-R1.md:152",
+      "docs/source/tutorials/models/DeepSeek-R1.md:198",
+      "docs/source/tutorials/models/DeepSeek-R1.md:97",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:109",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:172",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:224",
+      "docs/source/tutorials/models/GLM5.md:169",
+      "docs/source/tutorials/models/GLM5.md:209",
       "vllm_ascend/envs.py:115"
     ],
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL": {
     "name": "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL",
     "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:161",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:227",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:321",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:94",
       "vllm_ascend/envs.py:103"
     ],
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_ENABLE_FLASHCOMM": {
     "name": "VLLM_ASCEND_ENABLE_FLASHCOMM",
@@ -350,27 +1133,77 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_ASCEND_ENABLE_FLASHCOMM1": {
     "name": "VLLM_ASCEND_ENABLE_FLASHCOMM1",
     "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:155",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:320",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:88",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:129",
+      "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:82",
+      "docs/source/tutorials/features/suffix_speculative_decoding.md:86",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:302",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:379",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:143",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:202",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:251",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:306",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:310",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:360",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:364",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:533",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:609",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:104",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:149",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:345",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:419",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:484",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:549",
+      "docs/source/tutorials/models/Qwen3-Dense.md:175",
+      "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:197",
+      "docs/source/user_guide/feature_guide/layer_sharding.md:68",
+      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:9",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:8",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:13",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:8",
       "vllm_ascend/envs.py:74"
     ],
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "VLLM_ASCEND_ENABLE_FUSED_MC2": {
     "name": "VLLM_ASCEND_ENABLE_FUSED_MC2",
     "definition_ref": [
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:346",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:392",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:420",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:485",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:550",
+      "docs/source/tutorials/models/Qwen3-235B-A22B.md:625",
       "vllm_ascend/envs.py:113"
     ],
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE": {
     "name": "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE",
@@ -381,49 +1214,97 @@
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_ASCEND_ENABLE_MLAPO": {
     "name": "VLLM_ASCEND_ENABLE_MLAPO",
     "definition_ref": [
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:141",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:200",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:249",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:304",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:358",
       "vllm_ascend/envs.py:96"
     ],
     "default": "1",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_ENABLE_NZ": {
     "name": "VLLM_ASCEND_ENABLE_NZ",
     "definition_ref": [
+      "docs/source/user_guide/feature_guide/sleep_mode.md:81",
+      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:10",
       "vllm_ascend/batch_invariant.py:80",
       "vllm_ascend/envs.py:101"
     ],
     "default": 1,
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "VLLM_ASCEND_ENABLE_PREFETCH_MLP": {
     "name": "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
     "definition_ref": [
+      "docs/source/tutorials/features/suffix_speculative_decoding.md:84",
       "vllm_ascend/ascend_config.py:150",
       "vllm_ascend/envs.py:81"
     ],
     "default": "0",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
+  },
+  "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED": {
+    "name": "VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED",
+    "definition_ref": [
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:141",
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:208"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE": {
     "name": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
     "definition_ref": [
+      "docs/source/user_guide/feature_guide/layer_sharding.md:53",
       "vllm_ascend/envs.py:79"
     ],
     "default": 0,
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference",
+      "docs_export"
+    ]
   },
   "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK": {
     "name": "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK",
@@ -434,7 +1315,11 @@
     "default": "1",
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE": {
     "name": "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE",
@@ -446,7 +1331,11 @@
     "default": null,
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE": {
     "name": "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
@@ -458,7 +1347,11 @@
     "default": null,
     "type": "int",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_DISABLE_SHARED_EXPERTS_STREAM": {
     "name": "VLLM_DISABLE_SHARED_EXPERTS_STREAM",
@@ -468,7 +1361,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_DP_MASTER_IP": {
     "name": "VLLM_DP_MASTER_IP",
@@ -478,7 +1374,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_DP_MASTER_PORT": {
     "name": "VLLM_DP_MASTER_PORT",
@@ -488,7 +1387,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_DP_RANK": {
     "name": "VLLM_DP_RANK",
@@ -498,7 +1400,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_DP_RANK_LOCAL": {
     "name": "VLLM_DP_RANK_LOCAL",
@@ -508,7 +1413,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_DP_SIZE": {
     "name": "VLLM_DP_SIZE",
@@ -518,7 +1426,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "VLLM_USE_MODELSCOPE": {
     "name": "VLLM_USE_MODELSCOPE",
@@ -530,7 +1441,62 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
+  },
+  "VLLM_USE_V1": {
+    "name": "VLLM_USE_V1",
+    "definition_ref": [
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:159",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:225",
+      "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:92",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:271",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:330",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:389",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:447",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:514",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:573",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:632",
+      "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:690",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:297",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:374",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:451",
+      "docs/source/tutorials/models/DeepSeek-V3.1.md:527",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:139",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:198",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:247",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:302",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:356",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:522",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:597",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:674",
+      "docs/source/tutorials/models/DeepSeek-V3.2.md:752",
+      "docs/source/tutorials/models/GLM5.md:166",
+      "docs/source/tutorials/models/GLM5.md:206",
+      "docs/source/tutorials/models/GLM5.md:276",
+      "docs/source/tutorials/models/GLM5.md:321",
+      "docs/source/tutorials/models/GLM5.md:374",
+      "docs/source/tutorials/models/GLM5.md:421",
+      "docs/source/tutorials/models/Qwen-VL-Dense.md:401",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1055",
+      "docs/source/user_guide/feature_guide/kv_pool.md:608",
+      "docs/source/user_guide/feature_guide/kv_pool.md:691",
+      "docs/source/user_guide/feature_guide/kv_pool.md:760",
+      "docs/source/user_guide/feature_guide/kv_pool.md:834",
+      "docs/source/user_guide/feature_guide/kv_pool.md:936",
+      "docs/source/user_guide/feature_guide/kv_pool.md:999",
+      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:9"
+    ],
+    "default": "1",
+    "type": "string",
+    "valid_values": [],
+    "source": "docs_export",
+    "source_tags": [
+      "docs_export",
+      "tests_yaml"
+    ]
   },
   "VLLM_VERSION": {
     "name": "VLLM_VERSION",
@@ -540,7 +1506,11 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_definition",
+      "code_reference"
+    ]
   },
   "VLLM_WORKER_MULTIPROC_METHOD": {
     "name": "VLLM_WORKER_MULTIPROC_METHOD",
@@ -552,7 +1522,10 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   },
   "WORLD_SIZE": {
     "name": "WORLD_SIZE",
@@ -563,6 +1536,9 @@
     "default": null,
     "type": "string",
     "valid_values": [],
-    "source": "code"
+    "source": "code",
+    "source_tags": [
+      "code_reference"
+    ]
   }
 }

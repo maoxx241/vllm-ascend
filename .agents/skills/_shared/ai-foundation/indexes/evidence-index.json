@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-05T23:40:10.395953+00:00",
+  "generated_at": "2026-03-06T00:31:00.213723+00:00",
   "evidence": [
     {
       "topic_id": "vllm.arg.additional_config",
@@ -15329,6 +15329,183 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.acl_op_init_mode",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:527",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:602",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:680",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:757",
+        "docs/source/user_guide/feature_guide/kv_pool.md:1057",
+        "docs/source/user_guide/feature_guide/kv_pool.md:149",
+        "docs/source/user_guide/feature_guide/kv_pool.md:222",
+        "docs/source/user_guide/feature_guide/kv_pool.md:333"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.2.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.ascend_a3_enable",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:528",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:603",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:681",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:758"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.2.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.ascend_aggregate_enable",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:525",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:600",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:678",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:755"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.2.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.ascend_buffer_pool",
+      "definition_ref": [
+        "docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md:221",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:299",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:376",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:453",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:529",
+        "docs/source/user_guide/feature_guide/kv_pool.md:152",
+        "docs/source/user_guide/feature_guide/kv_pool.md:223",
+        "docs/source/user_guide/feature_guide/kv_pool.md:334"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.1.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.ascend_connect_timeout",
+      "definition_ref": [
+        "docs/source/user_guide/feature_guide/kv_pool.md:157",
+        "docs/source/user_guide/feature_guide/kv_pool.md:224",
+        "docs/source/user_guide/feature_guide/kv_pool.md:335"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/user_guide/feature_guide/kv_pool.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.ascend_custom_opp_path",
       "definition_ref": [
         "vllm_ascend/platform.py:471",
@@ -15365,6 +15542,7 @@
     {
       "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem",
       "definition_ref": [
+        "docs/source/user_guide/feature_guide/kv_pool.md:90",
         "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39",
         "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:74"
       ],
@@ -15438,7 +15616,14 @@
     {
       "topic_id": "vllm_ascend.env.ascend_rt_visible_devices",
       "definition_ref": [
-        "vllm_ascend/cpu_binding.py:17"
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:272",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:331",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:390",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:448",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:515",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:574",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:633",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:691"
       ],
       "read_ref": [
         "vllm-ascend/vllm_ascend/cpu_binding.py:17",
@@ -15477,6 +15662,9 @@
     {
       "topic_id": "vllm_ascend.env.ascend_transfer_timeout",
       "definition_ref": [
+        "docs/source/user_guide/feature_guide/kv_pool.md:160",
+        "docs/source/user_guide/feature_guide/kv_pool.md:225",
+        "docs/source/user_guide/feature_guide/kv_pool.md:336",
         "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097",
         "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809",
         "vllm_ascend/distributed/kv_transfer/utils/utils.py:52"
@@ -15510,6 +15698,39 @@
         {
           "title": "Local vLLM-Ascend doc mirror (GitHub)",
           "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/user_guide/feature_guide/kv_pool.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.ascend_transport_print",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:526",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:601",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:679",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:756"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.2.md",
           "tier": "official"
         }
       ]
@@ -15716,8 +15937,90 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.hccl_buffsize",
+      "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:153",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:220",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:86",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:78",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:268",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:327",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:386",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:444"
+      ],
+      "read_ref": [
+        "vllm-ascend/vllm_ascend/utils.py:926"
+      ],
+      "effect_ref": [
+        "vllm-ascend/vllm_ascend/utils.py:926"
+      ],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/multi_node_test.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.hccl_connect_timeout",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:289",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:366",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:443",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:519",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:307",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:361"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.1.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.hccl_deterministic",
       "definition_ref": [
+        "docs/source/faqs.md:199",
         "vllm_ascend/batch_invariant.py:85"
       ],
       "read_ref": [
@@ -15750,8 +16053,89 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.hccl_exec_timeout",
+      "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:288",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:365",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:442",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:518"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/models/DeepSeek-V3.1.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.hccl_if_ip",
+      "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:149",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:216",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:82",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:261",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:320",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:379",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:437",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:504"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/multi_node_test.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.hccl_intra_pcie_enable",
       "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-R1.md:153",
+        "docs/source/tutorials/models/DeepSeek-R1.md:199",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:173",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:225",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:308",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:362",
         "vllm_ascend/utils.py:959"
       ],
       "read_ref": [
@@ -15793,6 +16177,12 @@
     {
       "topic_id": "vllm_ascend.env.hccl_intra_roce_enable",
       "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-R1.md:154",
+        "docs/source/tutorials/models/DeepSeek-R1.md:200",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:174",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:226",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:309",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:363",
         "vllm_ascend/utils.py:959"
       ],
       "read_ref": [
@@ -15834,7 +16224,14 @@
     {
       "topic_id": "vllm_ascend.env.hccl_op_expansion_mode",
       "definition_ref": [
-        "vllm_ascend/utils.py:499"
+        "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:176",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:158",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:224",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:91",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:79",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:270",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:329",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:388"
       ],
       "read_ref": [
         "vllm-ascend/vllm_ascend/utils.py:499",
@@ -15925,6 +16322,48 @@
         {
           "title": "vLLM-Ascend Release Notes",
           "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.hccl_socket_ifname",
+      "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:152",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:219",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:85",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:264",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:323",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:382",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:440",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:507"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/multi_node_test.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
           "tier": "official"
         }
       ]
@@ -16198,6 +16637,48 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.omp_proc_bind",
+      "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:154",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:221",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:87",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:80",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:265",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:324",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:383",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:441"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/multi_node_test.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.openai_api_key",
       "definition_ref": [
         "examples/disaggregated_encoder/disagg_epd_proxy.py:650"
@@ -16234,10 +16715,41 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
+      "definition_ref": [
+        "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:12"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.pytorch_npu_alloc_conf",
       "definition_ref": [
-        "vllm_ascend/platform.py:423",
-        "vllm_ascend/platform.py:435"
+        "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:149",
+        "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:152",
+        "docs/source/faqs.md:149",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:156",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:222",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:89",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:77",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:267"
       ],
       "read_ref": [
         "vllm-ascend/vllm_ascend/device_allocator/camem.py:149",
@@ -16265,6 +16777,21 @@
         {
           "title": "vLLM-Ascend Release Notes",
           "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/evaluation/using_ais_bench.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/evaluation/using_evalscope.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/evaluation/using_lm_eval.md",
           "tier": "official"
         }
       ]
@@ -16303,6 +16830,47 @@
           "title": "vLLM-Ascend Release Notes",
           "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
           "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/user_guide/feature_guide/netloader.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.server_port",
+      "definition_ref": [
+        "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:11",
+        "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:10",
+        "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:12",
+        "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:9",
+        "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:14",
+        "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:9",
+        "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:13"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/multi_node_test.md",
+          "tier": "official"
         }
       ]
     },
@@ -16333,6 +16901,48 @@
         {
           "title": "vLLM-Ascend Release Notes",
           "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.task_queue_enable",
+      "definition_ref": [
+        "docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:160",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:160",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:226",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:93",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:83",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:269",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:328",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:387"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
           "tier": "official"
         }
       ]
@@ -16407,7 +17017,14 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_balance_scheduling",
       "definition_ref": [
-        "vllm_ascend/envs.py:115"
+        "docs/source/tutorials/models/DeepSeek-R1.md:152",
+        "docs/source/tutorials/models/DeepSeek-R1.md:198",
+        "docs/source/tutorials/models/DeepSeek-R1.md:97",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:109",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:172",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:224",
+        "docs/source/tutorials/models/GLM5.md:169",
+        "docs/source/tutorials/models/GLM5.md:209"
       ],
       "read_ref": [
         "vllm-ascend/vllm_ascend/envs.py:115",
@@ -16445,6 +17062,10 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_context_parallel",
       "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:161",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:227",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:321",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:94",
         "vllm_ascend/envs.py:103"
       ],
       "read_ref": [
@@ -16528,7 +17149,14 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_flashcomm1",
       "definition_ref": [
-        "vllm_ascend/envs.py:74"
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:155",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:320",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:88",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:129",
+        "docs/source/tutorials/features/long_sequence_context_parallel_single_node.md:82",
+        "docs/source/tutorials/features/suffix_speculative_decoding.md:86",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:302",
+        "docs/source/tutorials/models/DeepSeek-V3.1.md:379"
       ],
       "read_ref": [
         "vllm-ascend/vllm_ascend/envs.py:74",
@@ -16568,6 +17196,12 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_fused_mc2",
       "definition_ref": [
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:346",
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:392",
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:420",
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:485",
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:550",
+        "docs/source/tutorials/models/Qwen3-235B-A22B.md:625",
         "vllm_ascend/envs.py:113"
       ],
       "read_ref": [
@@ -16655,6 +17289,11 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_mlapo",
       "definition_ref": [
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:141",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:200",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:249",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:304",
+        "docs/source/tutorials/models/DeepSeek-V3.2.md:358",
         "vllm_ascend/envs.py:96"
       ],
       "read_ref": [
@@ -16697,6 +17336,8 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_nz",
       "definition_ref": [
+        "docs/source/user_guide/feature_guide/sleep_mode.md:81",
+        "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:10",
         "vllm_ascend/batch_invariant.py:80",
         "vllm_ascend/envs.py:101"
       ],
@@ -16746,6 +17387,7 @@
     {
       "topic_id": "vllm_ascend.env.vllm_ascend_enable_prefetch_mlp",
       "definition_ref": [
+        "docs/source/tutorials/features/suffix_speculative_decoding.md:84",
         "vllm_ascend/ascend_config.py:150",
         "vllm_ascend/envs.py:81"
       ],
@@ -16799,8 +17441,45 @@
       ]
     },
     {
+      "topic_id": "vllm_ascend.env.vllm_ascend_external_dp_lb_enabled",
+      "definition_ref": [
+        "docs/source/user_guide/feature_guide/large_scale_ep.md:141",
+        "docs/source/user_guide/feature_guide/large_scale_ep.md:208"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM data parallel issue search",
+          "url": "https://github.com/vllm-project/vllm/issues?q=data+parallel",
+          "tier": "external"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/user_guide/feature_guide/large_scale_ep.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
       "topic_id": "vllm_ascend.env.vllm_ascend_flashcomm2_parallel_size",
       "definition_ref": [
+        "docs/source/user_guide/feature_guide/layer_sharding.md:53",
         "vllm_ascend/envs.py:79"
       ],
       "read_ref": [
@@ -17266,6 +17945,43 @@
         {
           "title": "Local vLLM-Ascend doc mirror (GitHub)",
           "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/developer_guide/contribution/testing.md",
+          "tier": "official"
+        }
+      ]
+    },
+    {
+      "topic_id": "vllm_ascend.env.vllm_use_v1",
+      "definition_ref": [
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:159",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:225",
+        "docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:92",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:271",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:330",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:389",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:447",
+        "docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:514"
+      ],
+      "read_ref": [],
+      "effect_ref": [],
+      "web_refs": [
+        {
+          "title": "vLLM-Ascend Environment Variables",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend envs.py",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/vllm_ascend/envs.py",
+          "tier": "official"
+        },
+        {
+          "title": "vLLM-Ascend Release Notes",
+          "url": "https://docs.vllm.ai/projects/ascend/en/latest/user_guide/release_notes.html",
+          "tier": "official"
+        },
+        {
+          "title": "Local vLLM-Ascend doc mirror (GitHub)",
+          "url": "https://github.com/vllm-project/vllm-ascend/blob/main/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md",
           "tier": "official"
         }
       ]

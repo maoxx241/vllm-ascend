@@ -14,6 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `tensor_parallel`
 - status/confidence: `aligned` / `0.98`
+- source: `code` / source_tags: code_definition, code_reference
 - semantics: 按张量维度切分模型以扩展单模型可用算力。
 - aliases: `VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE`, `vllm_ascend_enable_matmul_allreduce`, `vllm-ascend-enable-matmul-allreduce`, `vllm ascend enable matmul allreduce`, `tensor_parallel`, `tensor parallel`, `tensor-parallel`
 
@@ -42,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: HCCL/NCCL 初始化失败; 跨卡通信超时
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-05
+- updated_at: 2026-03-06
