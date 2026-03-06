@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `graph_mode`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 控制 eager/graph 执行策略，通常优化吞吐与时延抖动。
 - aliases: `--max-cudagraph-capture-size`, `max-cudagraph-capture-size`, `max_cudagraph_capture_size`, `max cudagraph capture size`, `maxcudagraphcapturesize`, `graph_mode`, `graph mode`, `graph-mode`

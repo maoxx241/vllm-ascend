@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `graph_mode`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制 eager/graph 执行策略，通常优化吞吐与时延抖动。
 - aliases: `VLLM_XLA_CHECK_RECOMPILATION`, `vllm_xla_check_recompilation`, `vllm-xla-check-recompilation`, `vllm xla check recompilation`, `graph_mode`, `graph mode`, `graph-mode`

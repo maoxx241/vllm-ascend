@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `tensor_parallel`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 设置 TP 并行度，直接影响通信拓扑与单模型吞吐。
 - aliases: `--tensor-parallel-size`, `tensor-parallel-size`, `tensor_parallel_size`, `tensor parallel size`, `tensorparallelsize`, `tensor_parallel`, `tensor parallel`, `tensor-parallel`

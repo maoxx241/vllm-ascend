@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `quantization`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 选择量化实现和权重加载路径，直接影响吞吐、显存和精度。
 - aliases: `VLLM_BLOCKSCALE_FP8_GEMM_FLASHINFER`, `vllm_blockscale_fp8_gemm_flashinfer`, `vllm-blockscale-fp8-gemm-flashinfer`, `vllm blockscale fp8 gemm flashinfer`, `quantization`

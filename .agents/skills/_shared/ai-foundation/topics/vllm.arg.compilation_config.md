@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `graph_mode`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 控制图编译细节（如 cudagraph_mode），决定 eager/graph 行为。
 - aliases: `--compilation-config`, `compilation-config`, `compilation_config`, `compilation config`, `compilationconfig`, `graph_mode`, `graph mode`, `graph-mode`

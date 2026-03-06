@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `model_selection`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `--skip-tokenizer-init`, `skip-tokenizer-init`, `skip_tokenizer_init`, `skip tokenizer init`, `skiptokenizerinit`, `model_selection`, `model selection`, `model-selection`

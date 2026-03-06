@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `expert_parallel`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `upstream_delta` / `0.78`
 - source: `code` / source_tags: code_definition
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `VLLM_SLEEP_WHEN_IDLE`, `vllm_sleep_when_idle`, `vllm-sleep-when-idle`, `vllm sleep when idle`, `expert_parallel`, `expert parallel`, `expert-parallel`

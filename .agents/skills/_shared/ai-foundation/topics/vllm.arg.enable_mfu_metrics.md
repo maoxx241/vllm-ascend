@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `profiling_observability`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制 profiling 和 tracing 输出。
 - aliases: `--enable-mfu-metrics`, `enable-mfu-metrics`, `enable_mfu_metrics`, `enable mfu metrics`, `enablemfumetrics`, `profiling_observability`, `profiling observability`, `profiling-observability`

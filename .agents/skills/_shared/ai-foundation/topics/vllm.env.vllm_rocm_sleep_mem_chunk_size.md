@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `expert_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `VLLM_ROCM_SLEEP_MEM_CHUNK_SIZE`, `vllm_rocm_sleep_mem_chunk_size`, `vllm-rocm-sleep-mem-chunk-size`, `vllm rocm sleep mem chunk size`, `expert_parallel`, `expert parallel`, `expert-parallel`

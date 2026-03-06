@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `profiling_observability`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制 profiling 和 tracing 输出。
 - aliases: `--show-hidden-metrics-for-version`, `show-hidden-metrics-for-version`, `show_hidden_metrics_for_version`, `show hidden metrics for version`, `showhiddenmetricsforversion`, `profiling_observability`, `profiling observability`, `profiling-observability`

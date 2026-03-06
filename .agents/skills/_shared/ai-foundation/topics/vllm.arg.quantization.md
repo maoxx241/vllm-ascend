@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `quantization`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 指定量化后端/方法（如 ascend），影响权重加载和算子路径。
 - aliases: `--quantization`, `quantization`

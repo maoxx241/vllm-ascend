@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `network_serving`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `--otlp-traces-endpoint`, `otlp-traces-endpoint`, `otlp_traces_endpoint`, `otlp traces endpoint`, `otlptracesendpoint`, `network_serving`, `network serving`, `network-serving`

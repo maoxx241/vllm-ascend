@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `prefill_decode_disaggregation`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 预填充与解码分离部署，优化资源利用和吞吐扩展。
 - aliases: `--ec-transfer-config`, `ec-transfer-config`, `ec_transfer_config`, `ec transfer config`, `ectransferconfig`, `prefill_decode_disaggregation`, `prefill decode disaggregation`, `prefill-decode-disaggregation`

@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `model_selection`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code_definition
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `VLLM_USE_MODELSCOPE`, `vllm_use_modelscope`, `vllm-use-modelscope`, `vllm use modelscope`, `model_selection`, `model selection`, `model-selection`

@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `security_auth`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 控制 API 鉴权和 TLS 安全边界。
 - aliases: `--trust-remote-code`, `trust-remote-code`, `trust_remote_code`, `trust remote code`, `trustremotecode`, `security_auth`, `security auth`, `security-auth`

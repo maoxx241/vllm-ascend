@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `quantization`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 选择量化实现和权重加载路径，直接影响吞吐、显存和精度。
 - aliases: `VLLM_ROCM_USE_AITER_FP8BMM`, `vllm_rocm_use_aiter_fp8bmm`, `vllm-rocm-use-aiter-fp8bmm`, `vllm rocm use aiter fp8bmm`, `quantization`

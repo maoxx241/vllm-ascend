@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `tensor_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 按张量维度切分模型以扩展单模型可用算力。
 - aliases: `--all2all-backend`, `all2all-backend`, `all2all_backend`, `all2all backend`, `all2allbackend`, `tensor_parallel`, `tensor parallel`, `tensor-parallel`

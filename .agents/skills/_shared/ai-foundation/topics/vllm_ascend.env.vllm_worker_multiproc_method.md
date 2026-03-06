@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `upstream_delta` / `0.75`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code_reference
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_WORKER_MULTIPROC_METHOD`, `vllm_worker_multiproc_method`, `vllm-worker-multiproc-method`, `vllm worker multiproc method`, `general_runtime`, `general runtime`, `general-runtime`

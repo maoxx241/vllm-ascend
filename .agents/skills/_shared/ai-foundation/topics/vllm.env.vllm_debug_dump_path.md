@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `logging_debug`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制日志和调试可观测性。
 - aliases: `VLLM_DEBUG_DUMP_PATH`, `vllm_debug_dump_path`, `vllm-debug-dump-path`, `vllm debug dump path`, `logging_debug`, `logging debug`, `logging-debug`

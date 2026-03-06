@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `memory_tuning`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `--gpu-memory-utilization`, `gpu-memory-utilization`, `gpu_memory_utilization`, `gpu memory utilization`, `gpumemoryutilization`, `memory_tuning`, `memory tuning`, `memory-tuning`

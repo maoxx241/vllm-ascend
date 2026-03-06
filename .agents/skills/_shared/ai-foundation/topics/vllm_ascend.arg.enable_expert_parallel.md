@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm_ascend`
 - stage: `startup`
 - primary_feature: `expert_parallel`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 开启 MoE 专家并行，仅对 MoE 模型有效。
 - aliases: `--enable-expert-parallel`, `enable-expert-parallel`, `enable_expert_parallel`, `enable expert parallel`, `enableexpertparallel`, `expert_parallel`, `expert parallel`, `expert-parallel`

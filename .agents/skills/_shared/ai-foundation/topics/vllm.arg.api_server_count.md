@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `network_serving`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `upstream_delta` / `0.75`
 - source: `code` / source_tags: code
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `--api-server-count`, `api-server-count`, `api_server_count`, `api server count`, `apiservercount`, `network_serving`, `network serving`, `network-serving`

@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `model_selection`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `VLLM_MARLIN_INPUT_DTYPE`, `vllm_marlin_input_dtype`, `vllm-marlin-input-dtype`, `vllm marlin input dtype`, `model_selection`, `model selection`, `model-selection`

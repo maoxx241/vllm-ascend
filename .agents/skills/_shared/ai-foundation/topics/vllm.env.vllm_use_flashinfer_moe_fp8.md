@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `quantization`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 选择量化实现和权重加载路径，直接影响吞吐、显存和精度。
 - aliases: `VLLM_USE_FLASHINFER_MOE_FP8`, `vllm_use_flashinfer_moe_fp8`, `vllm-use-flashinfer-moe-fp8`, `vllm use flashinfer moe fp8`, `quantization`

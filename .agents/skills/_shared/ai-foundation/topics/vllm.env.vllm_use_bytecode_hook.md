@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_USE_BYTECODE_HOOK`, `vllm_use_bytecode_hook`, `vllm-use-bytecode-hook`, `vllm use bytecode hook`, `general_runtime`, `general runtime`, `general-runtime`

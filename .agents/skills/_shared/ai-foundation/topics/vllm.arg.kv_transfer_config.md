@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `prefill_decode_disaggregation`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 预填充与解码分离部署，优化资源利用和吞吐扩展。
 - aliases: `--kv-transfer-config`, `kv-transfer-config`, `kv_transfer_config`, `kv transfer config`, `kvtransferconfig`, `prefill_decode_disaggregation`, `prefill decode disaggregation`, `prefill-decode-disaggregation`

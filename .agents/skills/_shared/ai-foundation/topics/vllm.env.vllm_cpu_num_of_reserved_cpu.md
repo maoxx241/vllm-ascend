@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_CPU_NUM_OF_RESERVED_CPU`, `vllm_cpu_num_of_reserved_cpu`, `vllm-cpu-num-of-reserved-cpu`, `vllm cpu num of reserved cpu`, `general_runtime`, `general runtime`, `general-runtime`

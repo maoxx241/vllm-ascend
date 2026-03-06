@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm_ascend`
 - stage: `startup`
 - primary_feature: `expert_parallel`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 开启 sleep 模式以降低空闲资源占用。
 - aliases: `--enable-sleep-mode`, `enable-sleep-mode`, `enable_sleep_mode`, `enable sleep mode`, `enablesleepmode`, `expert_parallel`, `expert parallel`, `expert-parallel`

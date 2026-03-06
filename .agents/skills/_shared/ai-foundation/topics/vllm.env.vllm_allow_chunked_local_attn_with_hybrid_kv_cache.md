@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `memory_tuning`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制 KV/权重/中间缓存占用，平衡容量与性能。
 - aliases: `VLLM_ALLOW_CHUNKED_LOCAL_ATTN_WITH_HYBRID_KV_CACHE`, `vllm_allow_chunked_local_attn_with_hybrid_kv_cache`, `vllm-allow-chunked-local-attn-with-hybrid-kv-cache`, `vllm allow chunked local attn with hybrid kv cache`, `memory_tuning`, `memory tuning`, `memory-tuning`

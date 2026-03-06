@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `data_parallel`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 设置 DP 副本数，影响吞吐扩展与地址配置要求。
 - aliases: `--data-parallel-size`, `data-parallel-size`, `data_parallel_size`, `data parallel size`, `dataparallelsize`, `data_parallel`, `data parallel`, `data-parallel`

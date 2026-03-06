@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `security_auth`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制 API 鉴权和 TLS 安全边界。
 - aliases: `--hf-token`, `hf-token`, `hf_token`, `hf token`, `hftoken`, `security_auth`, `security auth`, `security-auth`

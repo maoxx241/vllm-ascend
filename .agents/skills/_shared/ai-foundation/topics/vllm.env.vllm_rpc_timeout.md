@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `network_serving`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code_definition
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `VLLM_RPC_TIMEOUT`, `vllm_rpc_timeout`, `vllm-rpc-timeout`, `vllm rpc timeout`, `network_serving`, `network serving`, `network-serving`

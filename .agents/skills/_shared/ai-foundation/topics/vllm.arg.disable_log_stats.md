@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `logging_debug`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 控制日志和调试可观测性。
 - aliases: `--disable-log-stats`, `disable-log-stats`, `disable_log_stats`, `disable log stats`, `disablelogstats`, `logging_debug`, `logging debug`, `logging-debug`

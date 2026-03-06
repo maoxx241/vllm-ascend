@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_RANDOMIZE_DP_DUMMY_INPUTS`, `vllm_randomize_dp_dummy_inputs`, `vllm-randomize-dp-dummy-inputs`, `vllm randomize dp dummy inputs`, `data_parallel`, `data parallel`, `data-parallel`

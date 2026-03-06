@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 承载扩展配置，如 weight_prefetch_config 等。
 - aliases: `--additional-config`, `additional-config`, `additional_config`, `additional config`, `additionalconfig`, `general_runtime`, `general runtime`, `general-runtime`

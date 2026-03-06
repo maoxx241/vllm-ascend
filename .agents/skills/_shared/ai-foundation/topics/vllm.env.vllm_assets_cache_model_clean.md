@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `model_selection`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制模型、分词器和版本选择。
 - aliases: `VLLM_ASSETS_CACHE_MODEL_CLEAN`, `vllm_assets_cache_model_clean`, `vllm-assets-cache-model-clean`, `vllm assets cache model clean`, `model_selection`, `model selection`, `model-selection`

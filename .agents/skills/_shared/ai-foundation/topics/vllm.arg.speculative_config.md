@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `speculative_decode`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 配置投机解码策略（如 mtp），用于降低解码延迟。
 - aliases: `--speculative-config`, `speculative-config`, `speculative_config`, `speculative config`, `speculativeconfig`, `speculative_decode`, `speculative decode`, `speculative-decode`

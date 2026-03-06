@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `data_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `--disable-nccl-for-dp-synchronization`, `disable-nccl-for-dp-synchronization`, `disable_nccl_for_dp_synchronization`, `disable nccl for dp synchronization`, `disablencclfordpsynchronization`, `data_parallel`, `data parallel`, `data-parallel`

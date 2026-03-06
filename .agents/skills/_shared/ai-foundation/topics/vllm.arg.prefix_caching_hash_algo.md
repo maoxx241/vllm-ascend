@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `prefix_cache`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 复用公共前缀缓存，降低 prefill 计算成本。
 - aliases: `--prefix-caching-hash-algo`, `prefix-caching-hash-algo`, `prefix_caching_hash_algo`, `prefix caching hash algo`, `prefixcachinghashalgo`, `prefix_cache`, `prefix cache`, `prefix-cache`

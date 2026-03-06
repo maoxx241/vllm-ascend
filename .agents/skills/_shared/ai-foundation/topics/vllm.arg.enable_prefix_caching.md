@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `prefix_cache`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 启用前缀缓存，加速重复前缀请求的 prefill 阶段。
 - aliases: `--enable-prefix-caching`, `enable-prefix-caching`, `enable_prefix_caching`, `enable prefix caching`, `enableprefixcaching`, `prefix_cache`, `prefix cache`, `prefix-cache`

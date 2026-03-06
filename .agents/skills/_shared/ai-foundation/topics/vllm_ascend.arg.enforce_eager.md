@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm_ascend`
 - stage: `startup`
 - primary_feature: `graph_mode`
-- status/confidence: `needs_manual_review` / `0.86`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code
 - semantics: 控制 eager/graph 执行策略，通常优化吞吐与时延抖动。
 - aliases: `--enforce-eager`, `enforce-eager`, `enforce_eager`, `enforce eager`, `enforceeager`, `graph_mode`, `graph mode`, `graph-mode`

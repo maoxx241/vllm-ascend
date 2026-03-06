@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `upstream_delta` / `0.68`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code_reference
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `LOCAL_RANK`, `local_rank`, `local-rank`, `local rank`, `general_runtime`, `general runtime`, `general-runtime`

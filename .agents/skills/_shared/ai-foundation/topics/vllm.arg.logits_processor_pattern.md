@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `logging_debug`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `upstream_delta` / `0.68`
 - source: `code` / source_tags: code
 - semantics: 控制日志和调试可观测性。
 - aliases: `--logits-processor-pattern`, `logits-processor-pattern`, `logits_processor_pattern`, `logits processor pattern`, `logitsprocessorpattern`, `logging_debug`, `logging debug`, `logging-debug`

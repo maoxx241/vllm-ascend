@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `lora`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 开启 LoRA 适配器加载与路由。
 - aliases: `VLLM_ALLOW_RUNTIME_LORA_UPDATING`, `vllm_allow_runtime_lora_updating`, `vllm-allow-runtime-lora-updating`, `vllm allow runtime lora updating`, `lora`

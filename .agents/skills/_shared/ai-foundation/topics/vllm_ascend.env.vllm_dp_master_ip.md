@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `upstream_delta` / `0.78`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code_reference
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_DP_MASTER_IP`, `vllm_dp_master_ip`, `vllm-dp-master-ip`, `vllm dp master ip`, `data_parallel`, `data parallel`, `data-parallel`

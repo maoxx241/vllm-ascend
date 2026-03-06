@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm_ascend`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `upstream_delta` / `0.78`
+- status/confidence: `aligned` / `0.98`
 - source: `code` / source_tags: code_reference
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_DP_RANK_LOCAL`, `vllm_dp_rank_local`, `vllm-dp-rank-local`, `vllm dp rank local`, `data_parallel`, `data parallel`, `data-parallel`

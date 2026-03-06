@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `throughput_tuning`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 调度和批处理参数调优，目标提升吞吐。
 - aliases: `--async-scheduling`, `async-scheduling`, `async_scheduling`, `async scheduling`, `asyncscheduling`, `throughput_tuning`, `throughput tuning`, `throughput-tuning`

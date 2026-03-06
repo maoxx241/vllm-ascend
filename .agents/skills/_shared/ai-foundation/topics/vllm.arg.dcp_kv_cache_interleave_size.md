@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `context_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 将长上下文处理拆分到多个并行单元，降低单卡压力。
 - aliases: `--dcp-kv-cache-interleave-size`, `dcp-kv-cache-interleave-size`, `dcp_kv_cache_interleave_size`, `dcp kv cache interleave size`, `dcpkvcacheinterleavesize`, `context_parallel`, `context parallel`, `context-parallel`

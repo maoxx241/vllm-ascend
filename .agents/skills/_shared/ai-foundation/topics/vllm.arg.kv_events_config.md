@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `--kv-events-config`, `kv-events-config`, `kv_events_config`, `kv events config`, `kveventsconfig`, `general_runtime`, `general runtime`, `general-runtime`

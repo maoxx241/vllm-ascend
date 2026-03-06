@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `multimodal`
-- status/confidence: `needs_manual_review` / `0.76`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 控制多模态输入处理和缓存策略。
 - aliases: `--mm-encoder-tp-mode`, `mm-encoder-tp-mode`, `mm_encoder_tp_mode`, `mm encoder tp mode`, `mmencodertpmode`, `multimodal`

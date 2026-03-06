@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME`, `vllm_object_storage_shm_buffer_name`, `vllm-object-storage-shm-buffer-name`, `vllm object storage shm buffer name`, `general_runtime`, `general runtime`, `general-runtime`

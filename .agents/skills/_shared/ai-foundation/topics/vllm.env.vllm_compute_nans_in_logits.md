@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `logging_debug`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制日志和调试可观测性。
 - aliases: `VLLM_COMPUTE_NANS_IN_LOGITS`, `vllm_compute_nans_in_logits`, `vllm-compute-nans-in-logits`, `vllm compute nans in logits`, `logging_debug`, `logging debug`, `logging-debug`

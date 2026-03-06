@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm_ascend`
 - stage: `startup`
 - primary_feature: `general_runtime`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `--node-rank`, `node-rank`, `node_rank`, `node rank`, `noderank`, `general_runtime`, `general runtime`, `general-runtime`

@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `expert_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: MoE 专家并行，提升大规模专家模型吞吐。
 - aliases: `VLLM_USE_FLASHINFER_MOE_MXFP4_BF16`, `vllm_use_flashinfer_moe_mxfp4_bf16`, `vllm-use-flashinfer-moe-mxfp4-bf16`, `vllm use flashinfer moe mxfp4 bf16`, `expert_parallel`, `expert parallel`, `expert-parallel`

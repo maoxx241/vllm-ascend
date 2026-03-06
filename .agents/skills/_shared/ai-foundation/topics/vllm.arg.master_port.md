@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `network_serving`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `--master-port`, `master-port`, `master_port`, `master port`, `masterport`, `network_serving`, `network serving`, `network-serving`

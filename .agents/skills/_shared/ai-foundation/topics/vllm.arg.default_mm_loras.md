@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `lora`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code
 - semantics: 开启 LoRA 适配器加载与路由。
 - aliases: `--default-mm-loras`, `default-mm-loras`, `default_mm_loras`, `default mm loras`, `defaultmmloras`, `lora`

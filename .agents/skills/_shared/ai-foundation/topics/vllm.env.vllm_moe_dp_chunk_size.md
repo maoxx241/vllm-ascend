@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `data_parallel`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 通过副本扩展吞吐能力，并依赖 DP 地址和 RPC 协调。
 - aliases: `VLLM_MOE_DP_CHUNK_SIZE`, `vllm_moe_dp_chunk_size`, `vllm-moe-dp-chunk-size`, `vllm moe dp chunk size`, `data_parallel`, `data parallel`, `data-parallel`

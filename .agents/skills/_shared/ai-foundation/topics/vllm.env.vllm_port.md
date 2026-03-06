@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `network_serving`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 控制服务监听、路由和 API 暴露。
 - aliases: `VLLM_PORT`, `vllm_port`, `vllm-port`, `vllm port`, `network_serving`, `network serving`, `network-serving`

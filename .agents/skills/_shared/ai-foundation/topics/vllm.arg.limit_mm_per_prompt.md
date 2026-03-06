@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `multimodal`
-- status/confidence: `needs_manual_review` / `0.83`
+- status/confidence: `aligned` / `0.95`
 - source: `code` / source_tags: code
 - semantics: 控制多模态输入处理和缓存策略。
 - aliases: `--limit-mm-per-prompt`, `limit-mm-per-prompt`, `limit_mm_per_prompt`, `limit mm per prompt`, `limitmmperprompt`, `multimodal`

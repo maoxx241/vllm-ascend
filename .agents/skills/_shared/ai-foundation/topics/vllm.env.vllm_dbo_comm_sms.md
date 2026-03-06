@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `env` / `vllm`
 - stage: `runtime`
 - primary_feature: `throughput_tuning`
-- status/confidence: `needs_manual_review` / `0.79`
+- status/confidence: `aligned` / `0.91`
 - source: `code` / source_tags: code_definition
 - semantics: 调度和批处理参数调优，目标提升吞吐。
 - aliases: `VLLM_DBO_COMM_SMS`, `vllm_dbo_comm_sms`, `vllm-dbo-comm-sms`, `vllm dbo comm sms`, `throughput_tuning`, `throughput tuning`, `throughput-tuning`
