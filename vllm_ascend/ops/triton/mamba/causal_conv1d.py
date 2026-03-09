@@ -275,7 +275,8 @@ def _is_non_overlapping_positive_view(tensor: torch.Tensor) -> bool:
     overlap_check = getattr(torch, "_debug_has_internal_overlap", None)
     if overlap_check is None:
         return True
-    return int(overlap_check(tensor)) == 0
+    overlap_state = int(overlap_check(tensor))
+    return overlap_state != 1
 
 
 def _is_fast_path_regular_layout(
