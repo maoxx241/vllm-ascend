@@ -173,13 +173,22 @@ def _pick_causal_conv1d_update_launch_params(
     batch: int,
     dim: int,
     vectorcore_num: int | None = None,
+    dtype: torch.dtype | None = None,
+    width: int | None = None,
+    seqlen: int | None = None,
 ) -> tuple[int, int, int]:
     if vectorcore_num is None:
         vectorcore_num = _get_causal_conv1d_vectorcore_num()
 
     # Keep total programs near ~2x vector cores while allowing larger dim
     # cases to reduce scheduling overhead with a wider channel tile.
-    block_n = 512 if dim >= 512 else 256
+    use_small_channel_tile = dtype == torch.float32 and (
+        (width is not None and width >= 4) or (seqlen is not None and seqlen > 1)
+    )
+    if use_small_channel_tile:
+        block_n = 256 if dim >= 256 else 128
+    else:
+        block_n = 512 if dim >= 512 else 256
     grid_c = triton.cdiv(dim, block_n)
     target_programs = max(2 * vectorcore_num, 1)
     b_tile_raw = max(1, triton.cdiv(batch * grid_c, target_programs))
@@ -682,7 +691,13 @@ def causal_conv1d_update_npu(
         eff_state_len = width - 1
     np2_statelen = triton.next_power_of_2(eff_state_len)
 
-    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_launch_params(batch, dim)
+    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_launch_params(
+        batch,
+        dim,
+        dtype=conv_state.dtype,
+        width=width,
+        seqlen=seqlen,
+    )
 
     def grid(META):
         return (

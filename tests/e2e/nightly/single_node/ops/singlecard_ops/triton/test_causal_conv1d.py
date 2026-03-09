@@ -293,6 +293,20 @@ def test_causal_conv1d_update_launch_params_vectorcore_generalization(
     assert t_chunk == 1
 
 
+def test_causal_conv1d_update_launch_params_fp32_compile_guard():
+    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_launch_params(
+        batch=4,
+        dim=1040,
+        vectorcore_num=24,
+        dtype=torch.float32,
+        width=4,
+        seqlen=3,
+    )
+    assert block_n == 256
+    assert b_tile == 1
+    assert t_chunk == 48
+
+
 @pytest.mark.parametrize("itype", [torch.float32, torch.bfloat16])
 @pytest.mark.parametrize("has_bias", [False, True])
 @pytest.mark.parametrize("width", [3, 4])
