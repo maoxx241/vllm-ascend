@@ -280,9 +280,6 @@ def _causal_conv1d_update_kernel_npu_tiled(
     else:
         acc_bias = tl.zeros((BLOCK_N,), dtype=tl.float32)
 
-    # token index vector for chunked copy
-    tok_vec = tl.arange(0, T_CHUNK)  # [T_CHUNK]
-
     # process B_TILE sequences inside the same program instance
     for bi in tl.static_range(0, B_TILE):
         b = pid_b * B_TILE + bi  # scalar tl.int32
@@ -391,46 +388,77 @@ def _causal_conv1d_update_kernel_npu_tiled(
 
         x_base = x_ptr + x_offset + idx_feats * stride_x_dim
 
+        # Use 1D vector loads/stores here. Ascend Triton is more reliable with
+        # strided state tensors when we avoid 2D irregular pointer matrices.
         # A) shift old state into dst[0:keep_shift)  (only when seqlen_run < state_len_run)
-        for t0 in tl.static_range(0, NP2_STATELEN, T_CHUNK):
-            dst_tok = (t0 + tok_vec).to(tl.int32)  # [T_CHUNK]
-            src_tok = (dst_tok + shift).to(tl.int32)  # [T_CHUNK]
-            m_tok = use_shift & (dst_tok < keep_shift) & (src_tok < state_len_run) & (dst_tok < state_len_run)
+        for dst_tok in tl.static_range(0, NP2_STATELEN):
+            src_tok = (dst_tok + shift).to(tl.int32)
             m = (
-                (lane_active & m_tok)[:, None]
-                & mask_w[None, :]
+                lane_active
+                & use_shift
+                & (dst_tok < keep_shift)
+                & (src_tok < state_len_run)
+                & mask_w
                 & (conv_states_input_coord < num_cache_lines)
                 & (conv_states_offset < num_cache_lines)
             )
 
-            src_ptrs = state_src_base[None, :] + src_tok[:, None] * stride_conv_state_tok
-            dst_ptrs = state_dst_base[None, :] + dst_tok[:, None] * stride_conv_state_tok
-            vals = tl.load(src_ptrs, mask=m, other=0.0)
-            tl.store(dst_ptrs, vals, mask=m)
+            vals = tl.load(
+                state_src_base + src_tok * stride_conv_state_tok,
+                mask=m,
+                other=0.0,
+            )
+            tl.store(
+                state_dst_base + dst_tok * stride_conv_state_tok,
+                vals,
+                mask=m,
+            )
 
         # B) append x into dst[keep_shift : keep_shift+seqlen_run) (only when seqlen_run < state_len_run)
-        for t0 in tl.static_range(0, seqlen, T_CHUNK):
-            x_tok = (t0 + tok_vec).to(tl.int32)  # [T_CHUNK]
-            dst_tok = (keep_shift + x_tok).to(tl.int32)  # [T_CHUNK]
-            m_tok = use_shift & (x_tok < seqlen_run) & (dst_tok < state_len_run)
-            m = (lane_active & m_tok)[:, None] & mask_w[None, :] & (conv_states_offset < num_cache_lines)
+        for x_tok in tl.static_range(0, seqlen):
+            dst_tok = (keep_shift + x_tok).to(tl.int32)
+            m = (
+                lane_active
+                & use_shift
+                & (x_tok < seqlen_run)
+                & (dst_tok < state_len_run)
+                & mask_w
+                & (conv_states_offset < num_cache_lines)
+            )
 
-            x_ptrs = x_base[None, :] + x_tok[:, None] * stride_x_token
-            dst_ptrs = state_dst_base[None, :] + dst_tok[:, None] * stride_conv_state_tok
-            x_vals = tl.load(x_ptrs, mask=m, other=0.0)
-            tl.store(dst_ptrs, x_vals, mask=m)
+            x_vals = tl.load(
+                x_base + x_tok * stride_x_token,
+                mask=m,
+                other=0.0,
+            )
+            tl.store(
+                state_dst_base + dst_tok * stride_conv_state_tok,
+                x_vals,
+                mask=m,
+            )
 
         # C) if seqlen_run >= state_len_run, overwrite dst with the tail of x
-        for t0 in tl.static_range(0, NP2_STATELEN, T_CHUNK):
-            dst_tok = (t0 + tok_vec).to(tl.int32)  # [T_CHUNK]
-            x_tok = (tail_start + dst_tok).to(tl.int32)  # [T_CHUNK]
-            m_tok = use_tail & (dst_tok < state_len_run) & (x_tok < seqlen_run)
-            m = (lane_active & m_tok)[:, None] & mask_w[None, :] & (conv_states_offset < num_cache_lines)
+        for dst_tok in tl.static_range(0, NP2_STATELEN):
+            x_tok = (tail_start + dst_tok).to(tl.int32)
+            m = (
+                lane_active
+                & use_tail
+                & (dst_tok < state_len_run)
+                & (x_tok < seqlen_run)
+                & mask_w
+                & (conv_states_offset < num_cache_lines)
+            )
 
-            x_ptrs = x_base[None, :] + x_tok[:, None] * stride_x_token
-            dst_ptrs = state_dst_base[None, :] + dst_tok[:, None] * stride_conv_state_tok
-            x_vals = tl.load(x_ptrs, mask=m, other=0.0)
-            tl.store(dst_ptrs, x_vals, mask=m)
+            x_vals = tl.load(
+                x_base + x_tok * stride_x_token,
+                mask=m,
+                other=0.0,
+            )
+            tl.store(
+                state_dst_base + dst_tok * stride_conv_state_tok,
+                x_vals,
+                mask=m,
+            )
 
         # -------------------------
         # STEP 3/4/5: causal conv1d (+ optional SiLU) and store output
