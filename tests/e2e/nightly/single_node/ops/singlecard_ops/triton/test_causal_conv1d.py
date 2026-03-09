@@ -5,6 +5,7 @@ import torch
 import torch.nn.functional as F
 
 from vllm_ascend.ops.triton.mamba.causal_conv1d import (PAD_SLOT_ID,
+                                                        _pick_causal_conv1d_update_launch_params,
                                                         causal_conv1d_fn)
 from vllm_ascend.ops.triton.mamba.causal_conv1d import \
     causal_conv1d_update_npu as causal_conv1d_update
@@ -280,6 +281,70 @@ def causal_conv1d_update_ref(x,
     if unsqueeze:
         out = out.squeeze(-1)
     return (out if activation is None else F.silu(out)).to(dtype=dtype_in)
+
+
+@pytest.mark.parametrize("vectorcore_num, expected_b_tile", [(20, 4), (24, 2)])
+def test_causal_conv1d_update_launch_params_vectorcore_generalization(
+        vectorcore_num, expected_b_tile):
+    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_launch_params(
+        batch=12, dim=4096, vectorcore_num=vectorcore_num)
+    assert block_n == 512
+    assert b_tile == expected_b_tile
+    assert t_chunk == 1
+
+
+@pytest.mark.parametrize("itype", [torch.float32, torch.bfloat16])
+@pytest.mark.parametrize("has_bias", [False, True])
+@pytest.mark.parametrize("width", [3, 4])
+@pytest.mark.parametrize("seqlen", [1, 3])
+def test_causal_conv1d_update_strided_views(itype, has_bias, width, seqlen):
+    device = "npu"
+    batch_size = 4
+    total_entries = 4 * batch_size
+    dim = 1024 + 16
+
+    x_base = torch.randn(batch_size,
+                         dim * 2,
+                         seqlen,
+                         device=device,
+                         dtype=itype)
+    x = x_base[:, 1::2, :]
+    x_ref = x.clone()
+
+    conv_state_base = torch.randn(total_entries,
+                                  dim * 2,
+                                  width - 1,
+                                  device=device,
+                                  dtype=itype)
+    conv_state = conv_state_base[:, 1::2, :]
+    conv_state_indices = torch.arange(batch_size,
+                                      dtype=torch.int32,
+                                      device=device)
+    conv_state_ref = conv_state[conv_state_indices].detach().clone()
+
+    weight_base = torch.randn(dim,
+                              width * 2,
+                              device=device,
+                              dtype=itype)
+    weight = weight_base[:, 1::2]
+    bias = torch.randn(dim, device=device, dtype=itype) if has_bias else None
+
+    out = causal_conv1d_update(x,
+                               conv_state,
+                               weight,
+                               bias,
+                               activation="silu",
+                               conv_state_indices=conv_state_indices)
+    out_ref = causal_conv1d_update_ref(x_ref,
+                                       conv_state_ref,
+                                       weight.clone(),
+                                       bias.clone() if bias is not None else None,
+                                       activation="silu")
+
+    assert out.data_ptr() == x.data_ptr()
+    assert out.stride() == x.stride()
+    validate_cmp(out, out_ref, itype)
+    validate_cmp(conv_state[conv_state_indices], conv_state_ref, itype)
 
 
 @pytest.mark.parametrize("itype", [torch.bfloat16])

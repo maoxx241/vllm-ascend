@@ -16,6 +16,10 @@ import triton.language as tl
 from vllm.distributed import get_pcp_group
 from vllm.forward_context import get_forward_context
 from vllm.v1.attention.backends.utils import PAD_SLOT_ID  # type: ignore
+from vllm_ascend.ops.triton.triton_utils import (
+    get_vectorcore_num,
+    init_device_properties_triton,
+)
 
 
 def causal_conv1d_ref(
@@ -155,6 +159,42 @@ def extract_last_width(x, start_loc, width):
     indices = end_loc.unsqueeze(1) - width + offsets.unsqueeze(0)  # (num_seqs, width)
 
     return x[:, indices].permute(1, 0, 2)
+
+
+def _get_causal_conv1d_vectorcore_num() -> int:
+    try:
+        init_device_properties_triton()
+        return get_vectorcore_num()
+    except Exception:
+        return 40
+
+
+def _pick_causal_conv1d_update_launch_params(
+    batch: int,
+    dim: int,
+    vectorcore_num: int | None = None,
+) -> tuple[int, int, int]:
+    if vectorcore_num is None:
+        vectorcore_num = _get_causal_conv1d_vectorcore_num()
+
+    # Keep total programs near ~2x vector cores while allowing larger dim
+    # cases to reduce scheduling overhead with a wider channel tile.
+    block_n = 512 if dim >= 512 else 256
+    grid_c = triton.cdiv(dim, block_n)
+    target_programs = max(2 * vectorcore_num, 1)
+    b_tile_raw = max(1, triton.cdiv(batch * grid_c, target_programs))
+
+    if b_tile_raw <= 1:
+        b_tile = 1
+    elif b_tile_raw <= 2:
+        b_tile = 2
+    elif b_tile_raw <= 4:
+        b_tile = 4
+    else:
+        b_tile = 8
+
+    t_chunk = 1 if block_n == 512 else 48
+    return block_n, b_tile, t_chunk
 
 
 @triton.jit
@@ -305,31 +345,21 @@ def _causal_conv1d_update_kernel_npu_tiled(
         prior_tokens = conv_states_base + conv_state_token_offset * stride_conv_state_tok
 
         # define history vectors as zeros then load conditionally
-        col0 = tl.zeros((BLOCK_N,), dtype=tl.float16)
-        col1 = tl.zeros((BLOCK_N,), dtype=tl.float16)
-        col2 = tl.zeros((BLOCK_N,), dtype=tl.float16)
-        col3 = tl.zeros((BLOCK_N,), dtype=tl.float16)
-        col4 = tl.zeros((BLOCK_N,), dtype=tl.float16)
+        col0 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col1 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col2 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col3 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col4 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
         if KERNEL_WIDTH >= 2:
-            col0 = tl.load(prior_tokens + 0 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0).to(
-                tl.float16
-            )
+            col0 = tl.load(prior_tokens + 0 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
         if KERNEL_WIDTH >= 3:
-            col1 = tl.load(prior_tokens + 1 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0).to(
-                tl.float16
-            )
+            col1 = tl.load(prior_tokens + 1 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
         if KERNEL_WIDTH >= 4:
-            col2 = tl.load(prior_tokens + 2 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0).to(
-                tl.float16
-            )
+            col2 = tl.load(prior_tokens + 2 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
         if KERNEL_WIDTH >= 5:
-            col3 = tl.load(prior_tokens + 3 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0).to(
-                tl.float16
-            )
+            col3 = tl.load(prior_tokens + 3 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
         if KERNEL_WIDTH >= 6:
-            col4 = tl.load(prior_tokens + 4 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0).to(
-                tl.float16
-            )
+            col4 = tl.load(prior_tokens + 4 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
 
         # -------------------------
         # STEP 2: chunked state update (replaces original NP2_STATELEN x BLOCK_N big block)
@@ -423,13 +453,13 @@ def _causal_conv1d_update_kernel_npu_tiled(
                 if KERNEL_WIDTH == 1:
                     # only x[t] * w0
                     x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                    matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                    matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
                     matrix_w = w_col0
                 elif KERNEL_WIDTH == 2:
                     if j == 1:
                         matrix_w = w_col1
                         x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
                 elif KERNEL_WIDTH == 3:
                     if j == 1:
                         matrix_w = w_col1
@@ -437,7 +467,7 @@ def _causal_conv1d_update_kernel_npu_tiled(
                     elif j == 2:
                         matrix_w = w_col2
                         x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
                 elif KERNEL_WIDTH == 4:
                     if j == 1:
                         matrix_w = w_col1
@@ -448,7 +478,7 @@ def _causal_conv1d_update_kernel_npu_tiled(
                     elif j == 3:
                         matrix_w = w_col3
                         x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
                 elif KERNEL_WIDTH == 5:
                     if j == 1:
                         matrix_w = w_col1
@@ -462,7 +492,7 @@ def _causal_conv1d_update_kernel_npu_tiled(
                     elif j == 4:
                         matrix_w = w_col4
                         x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
                 elif KERNEL_WIDTH == 6:
                     if j == 1:
                         matrix_w = w_col1
@@ -479,7 +509,7 @@ def _causal_conv1d_update_kernel_npu_tiled(
                     elif j == 5:
                         matrix_w = w_col5
                         x_ptrs_1d = x_base_1d + idx_token * stride_x_token
-                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0).to(tl.float16)
+                        matrix_x = tl.load(x_ptrs_1d, mask=lane_active & mask_w, other=0.0)
 
                 acc += matrix_x.to(tl.float32) * matrix_w  # [BLOCK_N]
 
@@ -566,11 +596,8 @@ def causal_conv1d_update_npu(
             indices 0 and 3
     out: (batch, dim) or (batch, dim, seqlen) or (num_tokens, dim), same shape as `x`
     """
-    weight = weight.transpose(0, 1).contiguous()
-    conv_state = conv_state.transpose(1, 2).contiguous()
     if validate_data:
         assert pad_slot_id is not None
-        assert x.stride(1) == 1
     if isinstance(activation, bool):
         activation = "silu" if activation is True else None
     elif activation is not None:
@@ -581,33 +608,43 @@ def causal_conv1d_update_npu(
     unsqueeze = query_start_loc is None and x.dim() == 2
     if unsqueeze:
         # make it (batch, dim, seqlen) with seqlen == 1
-        x = x.unsqueeze(1)
+        x = x.unsqueeze(-1)
 
     if query_start_loc is None:
-        batch, seqlen, dim = x.shape
+        batch, dim, seqlen = x.shape
     else:
         assert conv_state_indices is not None
         batch = conv_state_indices.size(0)
         dim = x.size(1)
         seqlen = max_query_len
 
-    width, _ = weight.shape
-    num_cache_lines, state_len_total, _ = conv_state.size()
+    _, width = weight.shape
+    num_cache_lines, _, state_len_total = conv_state.size()
+
+    if validate_data:
+        assert dim == weight.size(0)
+        assert state_len_total >= width - 1
+        assert dim == conv_state.size(1)
+        if conv_state_indices is None:
+            assert conv_state.size(0) >= batch
+        else:
+            assert (batch,) == conv_state_indices.shape
+        assert num_cache_lines >= batch
 
     # overwrite-on-x strategy same as original
     out = x
 
-    stride_w_width, stride_w_dim = weight.stride()
+    stride_w_dim, stride_w_width = weight.stride()
     if query_start_loc is None:
-        stride_x_seq, stride_x_token, stride_x_dim = x.stride()
-        stride_o_seq, stride_o_token, stride_o_dim = out.stride()
+        stride_x_seq, stride_x_dim, stride_x_token = x.stride()
+        stride_o_seq, stride_o_dim, stride_o_token = out.stride()
     else:
         stride_x_token, stride_x_dim = x.stride()
         stride_x_seq = 0
         stride_o_token, stride_o_dim = out.stride()
         stride_o_seq = 0
 
-    stride_istate_seq, stride_istate_token, stride_istate_dim = conv_state.stride()
+    stride_istate_seq, stride_istate_dim, stride_istate_token = conv_state.stride()
     stride_state_indices = conv_state_indices.stride(0) if conv_state_indices is not None else 0
 
     # effective state_len exactly as original
@@ -617,28 +654,7 @@ def causal_conv1d_update_npu(
         eff_state_len = width - 1
     np2_statelen = triton.next_power_of_2(eff_state_len)
 
-    # -------- tiling heuristic--------
-    # keep program count around ~[80..160]
-    # vector core 40
-    # TODO: use driver to get the vector core num
-    CORE_HINT = 40
-    # channel tile: 512 when dim large (reduce tasks), else 256
-    block_n = 512 if dim >= 512 else 256
-    g = triton.cdiv(dim, block_n)
-    target = 2 * CORE_HINT  # ~80
-    b_tile_raw = max(1, (batch * g + target - 1) // target)
-    # clamp to small set
-    if b_tile_raw <= 1:
-        b_tile = 1
-    elif b_tile_raw <= 2:
-        b_tile = 2
-    elif b_tile_raw <= 4:
-        b_tile = 4
-    else:
-        b_tile = 8
-
-    # token chunk based on block_n (32KB UB idea); conservative
-    t_chunk = 1 if block_n == 512 else 48
+    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_launch_params(batch, dim)
 
     def grid(META):
         return (
@@ -689,5 +705,5 @@ def causal_conv1d_update_npu(
     )
 
     if unsqueeze:
-        out = out.squeeze(1)
+        out = out.squeeze(-1)
     return out.to(original_x_dtype)

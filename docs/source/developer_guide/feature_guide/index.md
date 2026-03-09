@@ -6,6 +6,7 @@ This section provides an overview of the features implemented in vLLM Ascend. De
 :caption: Feature Guide
 :maxdepth: 1
 patch
+causal_conv1d_update_npu_fix
 ModelRunner_prepare_inputs
 disaggregated_prefill
 eplb_swift_balancer
