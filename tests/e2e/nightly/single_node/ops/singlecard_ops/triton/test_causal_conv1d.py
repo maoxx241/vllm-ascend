@@ -9,8 +9,10 @@ from vllm_ascend.ops.triton.mamba.causal_conv1d import (PAD_SLOT_ID,
                                                         _clear_weight_prepack_cache,
                                                         _get_weight_prepack_cache_size,
                                                         _pick_causal_conv1d_update_fast_path_launch_params,
+                                                        _pick_causal_conv1d_update_sla_launch_params,
                                                         _pick_causal_conv1d_update_launch_params,
                                                         _prepack_causal_conv1d_weight,
+                                                        _select_causal_conv1d_update_sla_fast_path,
                                                         _select_causal_conv1d_update_fast_path,
                                                         causal_conv1d_fn)
 from vllm_ascend.ops.triton.mamba.causal_conv1d import \
@@ -309,7 +311,6 @@ def causal_conv1d_update_mtp_ref(x,
         start = int(query_start_loc[batch_idx].item())
         end = int(query_start_loc[batch_idx + 1].item())
         seq = x[start:end]
-        assert seq.shape[0] == 4
 
         state_slice = conv_state[state_idx, :, offset:offset + 3]
         x_t = seq.transpose(0, 1)
@@ -359,6 +360,22 @@ def _measure_causal_conv1d_update_latency_us(fn,
         "p50_us": samples_tensor.quantile(0.5).item(),
         "p95_us": samples_tensor.quantile(0.95).item(),
     }
+
+
+def _make_cache_line_stride_conv_state(total_entries, dim, state_len, dtype,
+                                       device):
+    backing = torch.randn(total_entries * 2,
+                          dim,
+                          state_len,
+                          device=device,
+                          dtype=dtype)
+    return backing[::2]
+
+
+def _make_stride_state_indices(total_entries, device):
+    return torch.arange(total_entries,
+                        device=device,
+                        dtype=torch.int32).repeat_interleave(2)[::2]
 
 
 @pytest.mark.parametrize("vectorcore_num, expected_b_tile", [(20, 4), (24, 2)])
@@ -420,6 +437,22 @@ def test_causal_conv1d_update_fast_path_launch_params(path, vectorcore_num,
         batch=64,
         dim=4096,
         vectorcore_num=vectorcore_num,
+    ) == expected
+
+
+@pytest.mark.parametrize(
+    "path, expected",
+    [
+        ("decode_s1_bf16_w4", (512, 4, 1)),
+        ("spec_mtp1_s2_bf16_w4", (512, 4, 1)),
+    ],
+)
+def test_causal_conv1d_update_sla_launch_params_40core(path, expected):
+    assert _pick_causal_conv1d_update_sla_launch_params(
+        path=path,
+        batch=64,
+        dim=2048,
+        vectorcore_num=40,
     ) == expected
 
 
@@ -546,6 +579,172 @@ def test_causal_conv1d_update_fast_path_dispatch_mtp(layout_kind):
     )
     expected = "mtp_contig_k3_bf16_w4" if layout_kind == "contig" else "mtp_stride_k3_bf16_w4"
     assert fast_path == expected
+
+
+@pytest.mark.parametrize("layout_kind", ["contig", "state_stride"])
+def test_causal_conv1d_update_sla_fast_path_dispatch_decode(layout_kind):
+    device = "npu"
+    batch = 4
+    dim = 2048
+    x = torch.randn(batch, dim, device=device, dtype=torch.bfloat16)
+    weight = torch.randn(dim, 4, device=device, dtype=torch.bfloat16)
+    bias = torch.randn(dim, device=device, dtype=torch.bfloat16)
+    if layout_kind == "contig":
+        conv_state = torch.randn(batch, dim, 3, device=device, dtype=torch.bfloat16)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+    else:
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 3, torch.bfloat16, device)
+        conv_state_indices = _make_stride_state_indices(batch, device)
+
+    path = _select_causal_conv1d_update_sla_fast_path(
+        x=x,
+        conv_state=conv_state,
+        weight=weight,
+        bias=bias,
+        activation="silu",
+        conv_state_indices=conv_state_indices,
+        num_accepted_tokens=None,
+        query_start_loc=None,
+        max_query_len=-1,
+        block_idx_last_scheduled_token=None,
+        initial_state_idx=None,
+    )
+    assert path == "decode_s1_bf16_w4"
+
+
+@pytest.mark.parametrize("layout_kind, accepted_pattern", [("contig", "all1"),
+                                                           ("state_stride",
+                                                            "alt12")])
+def test_causal_conv1d_update_sla_fast_path_dispatch_mtp1(layout_kind,
+                                                          accepted_pattern):
+    device = "npu"
+    batch = 4
+    dim = 2048
+    x = torch.randn(batch * 2, dim, device=device, dtype=torch.bfloat16)
+    weight = torch.randn(dim, 4, device=device, dtype=torch.bfloat16)
+    bias = torch.randn(dim, device=device, dtype=torch.bfloat16)
+    if layout_kind == "contig":
+        conv_state = torch.randn(batch, dim, 4, device=device, dtype=torch.bfloat16)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+    else:
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 4, torch.bfloat16, device)
+        conv_state_indices = _make_stride_state_indices(batch, device)
+    query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+    num_accepted_tokens = torch.tensor(
+        [1] * batch if accepted_pattern == "all1" else [1, 2] * (batch // 2),
+        device=device,
+        dtype=torch.int32,
+    )
+
+    path = _select_causal_conv1d_update_sla_fast_path(
+        x=x,
+        conv_state=conv_state,
+        weight=weight,
+        bias=bias,
+        activation="silu",
+        conv_state_indices=conv_state_indices,
+        num_accepted_tokens=num_accepted_tokens,
+        query_start_loc=query_start_loc,
+        max_query_len=2,
+        block_idx_last_scheduled_token=None,
+        initial_state_idx=None,
+    )
+    assert path == "spec_mtp1_s2_bf16_w4"
+
+
+@pytest.mark.parametrize("layout_kind", ["contig", "state_stride"])
+def test_causal_conv1d_update_sla_decode_correctness(layout_kind):
+    device = "npu"
+    dtype = torch.bfloat16
+    batch = 8
+    dim = 2048
+    x = torch.randn(batch, dim, device=device, dtype=dtype)
+    x_ref = x.clone()
+    weight = torch.randn(dim, 4, device=device, dtype=dtype)
+    bias = torch.randn(dim, device=device, dtype=dtype)
+
+    if layout_kind == "contig":
+        conv_state = torch.randn(batch, dim, 3, device=device, dtype=dtype)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+        conv_state_ref = conv_state.clone()
+    else:
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 3, dtype, device)
+        conv_state_ref = conv_state.clone()
+        conv_state_indices = _make_stride_state_indices(batch, device)
+
+    out = causal_conv1d_update(
+        x,
+        conv_state,
+        weight,
+        bias,
+        activation="silu",
+        conv_state_indices=conv_state_indices,
+    )
+    out_ref = causal_conv1d_update_ref(
+        x_ref,
+        conv_state_ref,
+        weight,
+        bias,
+        activation="silu",
+    )
+
+    validate_cmp(out, out_ref, dtype)
+    validate_cmp(conv_state, conv_state_ref, dtype)
+
+
+@pytest.mark.parametrize("layout_kind, accepted_pattern", [("contig", "all1"),
+                                                           ("state_stride",
+                                                            "alt12")])
+def test_causal_conv1d_update_sla_mtp1_correctness(layout_kind,
+                                                   accepted_pattern):
+    device = "npu"
+    dtype = torch.bfloat16
+    batch = 8
+    dim = 2048
+    x = torch.randn(batch * 2, dim, device=device, dtype=dtype)
+    x_ref = x.clone()
+    weight = torch.randn(dim, 4, device=device, dtype=dtype)
+    bias = torch.randn(dim, device=device, dtype=dtype)
+    query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+    num_accepted_tokens = torch.tensor(
+        [1] * batch if accepted_pattern == "all1" else [1, 2] * (batch // 2),
+        device=device,
+        dtype=torch.int32,
+    )
+
+    if layout_kind == "contig":
+        conv_state = torch.randn(batch, dim, 4, device=device, dtype=dtype)
+        conv_state_ref = conv_state.clone()
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+    else:
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 4, dtype, device)
+        conv_state_ref = conv_state.clone()
+        conv_state_indices = _make_stride_state_indices(batch, device)
+
+    out = causal_conv1d_update(
+        x,
+        conv_state,
+        weight,
+        bias,
+        activation="silu",
+        conv_state_indices=conv_state_indices,
+        num_accepted_tokens=num_accepted_tokens,
+        query_start_loc=query_start_loc,
+        max_query_len=2,
+    )
+    out_ref = causal_conv1d_update_mtp_ref(
+        x_ref,
+        conv_state_ref,
+        weight,
+        query_start_loc,
+        conv_state_indices,
+        num_accepted_tokens,
+        bias=bias,
+        activation="silu",
+    )
+
+    validate_cmp(out, out_ref, dtype)
+    validate_cmp(conv_state, conv_state_ref, dtype)
 
 
 @pytest.mark.parametrize("itype", [torch.float32, torch.bfloat16])
@@ -691,83 +890,63 @@ def test_causal_conv1d_update_mtp(layout_kind, with_padding, has_bias,
 @pytest.mark.skipif(os.getenv("VLLM_ASCEND_RUN_PERF") != "1",
                     reason="set VLLM_ASCEND_RUN_PERF=1 to run latency gates")
 @pytest.mark.parametrize(
-    "case_name, layout_kind, seqlen, is_mtp",
+    "case_name",
     [
-        ("decode_contig", "contig", 1, False),
-        ("decode_stride", "stride", 1, False),
-        ("update_contig", "contig", 3, False),
-        ("update_stride", "stride", 3, False),
-        ("mtp_contig", "contig", 4, True),
-        ("mtp_stride", "stride", 4, True),
+        "decode_contig",
+        "decode_state_stride",
+        "mtp1_contig_all1",
+        "mtp1_contig_alt12",
+        "mtp1_state_stride_all1",
+        "mtp1_state_stride_alt12",
     ],
 )
-def test_causal_conv1d_update_perf_gate(case_name, layout_kind, seqlen,
-                                        is_mtp):
+def test_causal_conv1d_update_perf_gate(case_name):
     device = "npu"
     dtype = torch.bfloat16
     batch = 64
-    dim = 4096
-    total_entries = batch
-
-    if is_mtp:
-        if layout_kind == "contig":
-            x = torch.randn(batch * seqlen, dim, device=device, dtype=dtype)
-            x_base = x.clone()
-            conv_state = torch.randn(total_entries,
-                                     6,
-                                     dim,
-                                     device=device,
-                                     dtype=dtype).transpose(1, 2)
-            conv_state_base = conv_state.clone()
-            weight = torch.randn(dim, 4, device=device, dtype=dtype)
-        else:
-            x = torch.randn(batch * seqlen, dim * 2, device=device,
-                            dtype=dtype)[:, 1::2]
-            x_base = x.clone()
-            conv_state = torch.randn(total_entries,
-                                     dim * 2,
-                                     6,
-                                     device=device,
-                                     dtype=dtype)[:, 1::2, :]
-            conv_state_base = conv_state.clone()
-            weight = torch.randn(dim * 2, 4, device=device,
-                                 dtype=dtype)[1::2, :]
-        query_start_loc = torch.arange(0,
-                                       (batch + 1) * seqlen,
-                                       seqlen,
-                                       device=device,
-                                       dtype=torch.int32)
-        num_accepted_tokens = torch.tensor(([1, 2, 4, 1] * (batch // 4)),
-                                           device=device,
-                                           dtype=torch.int32)
-    else:
-        if layout_kind == "contig":
-            x = torch.randn(batch, dim, seqlen, device=device, dtype=dtype)
-            x_base = x.clone()
-            conv_state = torch.randn(total_entries,
-                                     3,
-                                     dim,
-                                     device=device,
-                                     dtype=dtype).transpose(1, 2)
-            conv_state_base = conv_state.clone()
-            weight = torch.randn(dim, 4, device=device, dtype=dtype)
-        else:
-            x = torch.randn(batch, dim * 2, seqlen, device=device,
-                            dtype=dtype)[:, 1::2, :]
-            x_base = x.clone()
-            conv_state = torch.randn(total_entries,
-                                     dim * 2,
-                                     3,
-                                     device=device,
-                                     dtype=dtype)[:, 1::2, :]
-            conv_state_base = conv_state.clone()
-            weight = torch.randn(dim * 2, 4, device=device,
-                                 dtype=dtype)[1::2, :]
-        query_start_loc = None
-        num_accepted_tokens = None
-
+    dim = 2048
+    weight = torch.randn(dim, 4, device=device, dtype=dtype)
     bias = torch.randn(dim, device=device, dtype=dtype)
-    conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+    query_start_loc = None
+    num_accepted_tokens = None
+
+    if case_name == "decode_contig":
+        x = torch.randn(batch, dim, device=device, dtype=dtype)
+        conv_state = torch.randn(batch, dim, 3, device=device, dtype=dtype)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+    elif case_name == "decode_state_stride":
+        x = torch.randn(batch, dim, device=device, dtype=dtype)
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 3, dtype, device)
+        conv_state_indices = _make_stride_state_indices(batch, device)
+    elif case_name == "mtp1_contig_all1":
+        x = torch.randn(batch * 2, dim, device=device, dtype=dtype)
+        conv_state = torch.randn(batch, dim, 4, device=device, dtype=dtype)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+        query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+        num_accepted_tokens = torch.ones(batch, device=device, dtype=torch.int32)
+    elif case_name == "mtp1_contig_alt12":
+        x = torch.randn(batch * 2, dim, device=device, dtype=dtype)
+        conv_state = torch.randn(batch, dim, 4, device=device, dtype=dtype)
+        conv_state_indices = torch.arange(batch, device=device, dtype=torch.int32)
+        query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+        num_accepted_tokens = torch.tensor([1, 2] * (batch // 2), device=device, dtype=torch.int32)
+    elif case_name == "mtp1_state_stride_all1":
+        x = torch.randn(batch * 2, dim, device=device, dtype=dtype)
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 4, dtype, device)
+        conv_state_indices = _make_stride_state_indices(batch, device)
+        query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+        num_accepted_tokens = torch.ones(batch, device=device, dtype=torch.int32)
+    elif case_name == "mtp1_state_stride_alt12":
+        x = torch.randn(batch * 2, dim, device=device, dtype=dtype)
+        conv_state = _make_cache_line_stride_conv_state(batch, dim, 4, dtype, device)
+        conv_state_indices = _make_stride_state_indices(batch, device)
+        query_start_loc = torch.arange(0, (batch + 1) * 2, 2, device=device, dtype=torch.int32)
+        num_accepted_tokens = torch.tensor([1, 2] * (batch // 2), device=device, dtype=torch.int32)
+    else:
+        raise AssertionError(f"unsupported case: {case_name}")
+
+    x_base = x.clone()
+    conv_state_base = conv_state.clone()
 
     def setup():
         x.copy_(x_base)
@@ -783,7 +962,7 @@ def test_causal_conv1d_update_perf_gate(case_name, layout_kind, seqlen,
             conv_state_indices=conv_state_indices,
             num_accepted_tokens=num_accepted_tokens,
             query_start_loc=query_start_loc,
-            max_query_len=seqlen if is_mtp else -1,
+            max_query_len=2 if num_accepted_tokens is not None else -1,
             pad_slot_id=PAD_SLOT_ID,
         )
 

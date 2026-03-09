@@ -212,6 +212,113 @@ def _pick_causal_conv1d_update_launch_params(
     return block_n, b_tile, t_chunk
 
 
+_SLA_FAST_PATH_WIDTH = 4
+_SLA_FAST_PATH_SPEC_SEQLEN = 2
+_SLA_FAST_PATH_DISPATCH_TABLE: dict[tuple[str, int, str, str], tuple[int, int, int]] = {
+    ("decode_s1_bf16_w4", 40, "le64", "ge2048"): (512, 4, 1),
+    ("spec_mtp1_s2_bf16_w4", 40, "le64", "ge2048"): (512, 4, 1),
+    ("decode_s1_bf16_w4", 40, "le64", "ge4096"): (512, 8, 1),
+    ("spec_mtp1_s2_bf16_w4", 40, "le64", "ge4096"): (512, 8, 1),
+}
+
+
+def _is_cache_line_stride_conv_state_layout(conv_state: torch.Tensor) -> bool:
+    if conv_state.dim() != 3:
+        return False
+    stride_cache, stride_dim, stride_state = conv_state.stride()
+    state_len = conv_state.shape[2]
+    return stride_cache > 0 and stride_dim == state_len and stride_state == 1
+
+
+def _select_causal_conv1d_update_sla_fast_path(
+    x: torch.Tensor,
+    conv_state: torch.Tensor,
+    weight: torch.Tensor,
+    bias: torch.Tensor | None,
+    activation: str | None,
+    conv_state_indices: torch.Tensor | None,
+    num_accepted_tokens: torch.Tensor | None,
+    query_start_loc: torch.Tensor | None,
+    max_query_len: int,
+    block_idx_last_scheduled_token: torch.Tensor | None,
+    initial_state_idx: torch.Tensor | None,
+) -> str | None:
+    if x.device.type != "npu":
+        return None
+    if conv_state_indices is None:
+        return None
+    if block_idx_last_scheduled_token is not None or initial_state_idx is not None:
+        return None
+    if x.dtype != torch.bfloat16 or conv_state.dtype != torch.bfloat16 or weight.dtype != torch.bfloat16:
+        return None
+    if bias is not None and bias.dtype != torch.bfloat16:
+        return None
+    if activation not in [None, "silu", "swish"]:
+        return None
+    if x.dim() != 2 or not x.is_contiguous():
+        return None
+    if weight.shape[1] != _SLA_FAST_PATH_WIDTH or not weight.is_contiguous():
+        return None
+    if not _is_cache_line_stride_conv_state_layout(conv_state):
+        return None
+    if conv_state.shape[1] != weight.shape[0]:
+        return None
+    if not all(
+        _is_non_overlapping_positive_view(t)
+        for t in (conv_state, conv_state_indices)
+    ):
+        return None
+    if query_start_loc is not None and not _is_non_overlapping_positive_view(query_start_loc):
+        return None
+    if num_accepted_tokens is not None and not _is_non_overlapping_positive_view(num_accepted_tokens):
+        return None
+
+    if query_start_loc is None and num_accepted_tokens is None:
+        if conv_state.shape[2] < _SLA_FAST_PATH_WIDTH - 1:
+            return None
+        return "decode_s1_bf16_w4"
+
+    if (
+        query_start_loc is not None
+        and num_accepted_tokens is not None
+        and max_query_len == _SLA_FAST_PATH_SPEC_SEQLEN
+        and conv_state.shape[2] >= _SLA_FAST_PATH_WIDTH
+        and _all_query_lengths_equal(query_start_loc, _SLA_FAST_PATH_SPEC_SEQLEN)
+    ):
+        return "spec_mtp1_s2_bf16_w4"
+    return None
+
+
+def _pick_causal_conv1d_update_sla_launch_params(
+    path: str,
+    batch: int,
+    dim: int,
+    vectorcore_num: int | None = None,
+) -> tuple[int, int, int]:
+    if vectorcore_num is None:
+        vectorcore_num = _get_causal_conv1d_vectorcore_num()
+
+    key = (path, vectorcore_num, _bucket_batch(batch), _bucket_dim(dim))
+    config = _SLA_FAST_PATH_DISPATCH_TABLE.get(key)
+    if config is not None:
+        return config
+
+    block_n = 512 if dim >= 512 else 256
+    grid_c = triton.cdiv(dim, block_n)
+    target_programs = max(2 * vectorcore_num, 1)
+    b_tile_raw = max(1, triton.cdiv(batch * grid_c, target_programs))
+    if b_tile_raw <= 1:
+        b_tile = 1
+    elif b_tile_raw <= 2:
+        b_tile = 2
+    elif b_tile_raw <= 4:
+        b_tile = 4
+    else:
+        b_tile = 8
+    t_chunk = 1 if block_n == 512 else 48
+    return block_n, b_tile, t_chunk
+
+
 _FAST_PATH_WIDTH = 4
 _FAST_PATH_MTP_SEQLEN = 4
 _WEIGHT_PREPACK_CACHE_MAXSIZE = 16
@@ -800,6 +907,271 @@ def _causal_conv1d_update_kernel_npu_tiled(
 
 
 @triton.jit
+def _causal_conv1d_update_kernel_npu_sla_tiled(
+    x_ptr,
+    w_ptr,
+    bias_ptr,
+    conv_state_ptr,
+    conv_state_indices_ptr,
+    num_accepted_tokens_ptr,
+    query_start_loc_ptr,
+    o_ptr,
+    batch: tl.int32,
+    dim: tl.constexpr,
+    seqlen: tl.constexpr,
+    state_len: tl.constexpr,
+    num_cache_lines: tl.constexpr,
+    stride_x_seq: tl.constexpr,
+    stride_x_dim: tl.constexpr,
+    stride_x_token: tl.constexpr,
+    stride_w_dim: tl.constexpr,
+    stride_w_width: tl.constexpr,
+    stride_conv_state_seq: tl.constexpr,
+    stride_conv_state_dim: tl.constexpr,
+    stride_conv_state_tok: tl.constexpr,
+    stride_state_indices: tl.constexpr,
+    stride_query_start_loc: tl.constexpr,
+    stride_o_seq: tl.constexpr,
+    stride_o_dim: tl.constexpr,
+    stride_o_token: tl.constexpr,
+    pad_slot_id: tl.constexpr,
+    HAS_BIAS: tl.constexpr,
+    SILU_ACTIVATION: tl.constexpr,
+    IS_SPEC_DECODING: tl.constexpr,
+    NP2_STATELEN: tl.constexpr,
+    USE_PAD_SLOT: tl.constexpr,
+    BLOCK_N: tl.constexpr,
+    B_TILE: tl.constexpr,
+    T_CHUNK: tl.constexpr,
+):
+    pid_b = tl.program_id(0)
+    pid_c = tl.program_id(1)
+
+    idx_feats = pid_c * BLOCK_N + tl.arange(0, BLOCK_N)
+    mask_w = idx_feats < dim
+
+    w_base = w_ptr + idx_feats * stride_w_dim
+    w_col0 = tl.load(w_base + 0 * stride_w_width, mask=mask_w, other=0.0).to(tl.float32)
+    w_col1 = tl.load(w_base + 1 * stride_w_width, mask=mask_w, other=0.0).to(tl.float32)
+    w_col2 = tl.load(w_base + 2 * stride_w_width, mask=mask_w, other=0.0).to(tl.float32)
+    w_col3 = tl.load(w_base + 3 * stride_w_width, mask=mask_w, other=0.0).to(tl.float32)
+
+    if HAS_BIAS:
+        acc_bias = tl.load(bias_ptr + idx_feats, mask=mask_w, other=0.0).to(tl.float32)
+    else:
+        acc_bias = tl.zeros((BLOCK_N,), dtype=tl.float32)
+
+    tok_vec = tl.arange(0, T_CHUNK)
+
+    for bi in tl.static_range(0, B_TILE):
+        b = pid_b * B_TILE + bi
+        lane_active = b < batch
+
+        state_index = tl.load(
+            conv_state_indices_ptr + b * stride_state_indices,
+            mask=lane_active,
+            other=0,
+        ).to(tl.int64)
+        lane_active = lane_active & (state_index < num_cache_lines)
+        if USE_PAD_SLOT:
+            lane_active = lane_active & (state_index != pad_slot_id)
+        state_index = tl.where(lane_active, state_index, 0)
+
+        if IS_SPEC_DECODING:
+            query_start = tl.load(
+                query_start_loc_ptr + b * stride_query_start_loc,
+                mask=lane_active,
+                other=0,
+            ).to(tl.int64)
+            x_offset = (query_start * stride_x_token).to(tl.int64)
+            o_offset = (query_start * stride_o_token).to(tl.int64)
+            accepted_tokens = tl.load(
+                num_accepted_tokens_ptr + b,
+                mask=lane_active,
+                other=1,
+            ).to(tl.int32)
+            conv_state_token_offset = (tl.minimum(
+                tl.maximum(accepted_tokens, 1), seqlen
+            ) - 1).to(tl.int64)
+            shift = tl.full((), 1, tl.int32)
+        else:
+            x_offset = (b * stride_x_seq).to(tl.int64)
+            o_offset = (b * stride_o_seq).to(tl.int64)
+            conv_state_token_offset = tl.full((), 0, tl.int64)
+            shift = tl.full((), seqlen, tl.int32)
+
+        state_len_run = tl.full((), state_len, tl.int32)
+        seqlen_run = tl.full((), seqlen, tl.int32)
+
+        conv_states_base = conv_state_ptr + state_index * stride_conv_state_seq + idx_feats * stride_conv_state_dim
+        prior_tokens = conv_states_base + conv_state_token_offset * stride_conv_state_tok
+
+        col0 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col1 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col2 = tl.zeros((BLOCK_N,), dtype=x_ptr.dtype.element_ty)
+        col0 = tl.load(prior_tokens + 0 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
+        col1 = tl.load(prior_tokens + 1 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
+        col2 = tl.load(prior_tokens + 2 * stride_conv_state_tok, mask=lane_active & mask_w, other=0.0)
+
+        state_src_base = (
+            conv_state_ptr
+            + state_index * stride_conv_state_seq
+            + conv_state_token_offset * stride_conv_state_tok
+            + idx_feats * stride_conv_state_dim
+        )
+        state_dst_base = conv_state_ptr + state_index * stride_conv_state_seq + idx_feats * stride_conv_state_dim
+        x_base = x_ptr + x_offset + idx_feats * stride_x_dim
+
+        keep_shift = (state_len_run - seqlen_run).to(tl.int32)
+        for t0 in tl.static_range(0, NP2_STATELEN, T_CHUNK):
+            dst_tok = (t0 + tok_vec).to(tl.int32)
+            src_tok = (dst_tok + shift).to(tl.int32)
+            m_tok = (dst_tok < keep_shift) & (src_tok < state_len_run)
+            m = (lane_active & m_tok)[:, None] & mask_w[None, :]
+            src_ptrs = state_src_base[None, :] + src_tok[:, None] * stride_conv_state_tok
+            dst_ptrs = state_dst_base[None, :] + dst_tok[:, None] * stride_conv_state_tok
+            vals = tl.load(src_ptrs, mask=m, other=0.0)
+            tl.store(dst_ptrs, vals, mask=m)
+
+        for t0 in tl.static_range(0, seqlen, T_CHUNK):
+            x_tok = (t0 + tok_vec).to(tl.int32)
+            dst_tok = (keep_shift + x_tok).to(tl.int32)
+            m_tok = (x_tok < seqlen_run) & (dst_tok < state_len_run)
+            m = (lane_active & m_tok)[:, None] & mask_w[None, :]
+            x_ptrs = x_base[None, :] + x_tok[:, None] * stride_x_token
+            dst_ptrs = state_dst_base[None, :] + dst_tok[:, None] * stride_conv_state_tok
+            x_vals = tl.load(x_ptrs, mask=m, other=0.0)
+            tl.store(dst_ptrs, x_vals, mask=m)
+
+        x_base_1d = x_base
+        o_base_1d = o_ptr + o_offset + idx_feats * stride_o_dim
+        acc_preload = acc_bias
+
+        for idx_token in tl.static_range(0, seqlen):
+            acc = acc_preload
+            matrix_w = w_col0
+            matrix_x = col0
+            for j in tl.static_range(4):
+                if j == 1:
+                    matrix_w = w_col1
+                    matrix_x = col1
+                elif j == 2:
+                    matrix_w = w_col2
+                    matrix_x = col2
+                elif j == 3:
+                    matrix_w = w_col3
+                    matrix_x = tl.load(
+                        x_base_1d + idx_token * stride_x_token,
+                        mask=lane_active & mask_w,
+                        other=0.0,
+                    )
+                acc += matrix_x.to(tl.float32) * matrix_w
+
+            col0 = col1
+            col1 = col2
+            col2 = matrix_x
+
+            if SILU_ACTIVATION:
+                acc = acc / (1.0 + tl.exp(-acc))
+
+            tl.store(
+                o_base_1d + idx_token * stride_o_token,
+                acc,
+                mask=lane_active & mask_w,
+            )
+
+
+def _launch_causal_conv1d_update_sla_fast_path(
+    path: str,
+    x: torch.Tensor,
+    conv_state: torch.Tensor,
+    weight: torch.Tensor,
+    bias: torch.Tensor | None,
+    activation: str | None,
+    conv_state_indices: torch.Tensor,
+    num_accepted_tokens: torch.Tensor | None,
+    query_start_loc: torch.Tensor | None,
+    pad_slot_id: int,
+) -> None:
+    weight_t = weight.transpose(0, 1)
+    conv_state_t = conv_state.transpose(1, 2)
+    batch = conv_state_indices.size(0)
+    dim = weight.shape[0]
+    num_cache_lines = conv_state_t.size(0)
+    block_n, b_tile, t_chunk = _pick_causal_conv1d_update_sla_launch_params(path, batch, dim)
+
+    def grid(meta):
+        return (
+            triton.cdiv(batch, meta["B_TILE"]),
+            triton.cdiv(dim, meta["BLOCK_N"]),
+        )
+
+    if path == "decode_s1_bf16_w4":
+        x_t = x.unsqueeze(1)
+        out = x_t
+        seqlen = 1
+        state_len = weight.shape[1] - 1
+        stride_x_seq, stride_x_token, stride_x_dim = x_t.stride()
+        stride_o_seq, stride_o_token, stride_o_dim = out.stride()
+        stride_query_start_loc = 0
+    else:
+        assert num_accepted_tokens is not None
+        assert query_start_loc is not None
+        out = x
+        seqlen = _SLA_FAST_PATH_SPEC_SEQLEN
+        state_len = weight.shape[1]
+        stride_x_token, stride_x_dim = x.stride()
+        stride_x_seq = 0
+        stride_o_token, stride_o_dim = out.stride()
+        stride_o_seq = 0
+        stride_query_start_loc = query_start_loc.stride(0)
+        x_t = x
+
+    stride_w_width, stride_w_dim = weight_t.stride()
+    stride_state_seq, stride_state_token, stride_state_dim = conv_state_t.stride()
+    stride_state_indices = conv_state_indices.stride(0)
+    np2_statelen = triton.next_power_of_2(state_len)
+
+    _causal_conv1d_update_kernel_npu_sla_tiled[grid](
+        x_t,
+        weight_t,
+        bias,
+        conv_state_t,
+        conv_state_indices,
+        num_accepted_tokens,
+        query_start_loc,
+        out,
+        batch,
+        dim,
+        seqlen,
+        state_len,
+        num_cache_lines,
+        stride_x_seq,
+        stride_x_dim,
+        stride_x_token,
+        stride_w_dim,
+        stride_w_width,
+        stride_state_seq,
+        stride_state_dim,
+        stride_state_token,
+        stride_state_indices,
+        stride_query_start_loc,
+        stride_o_seq,
+        stride_o_dim,
+        stride_o_token,
+        pad_slot_id,
+        HAS_BIAS=bias is not None,
+        SILU_ACTIVATION=activation in ["silu", "swish"],
+        IS_SPEC_DECODING=path == "spec_mtp1_s2_bf16_w4",
+        NP2_STATELEN=np2_statelen,
+        USE_PAD_SLOT=pad_slot_id is not None,
+        BLOCK_N=block_n,
+        B_TILE=b_tile,
+        T_CHUNK=t_chunk,
+    )
+
+
+@triton.jit
 def _causal_conv1d_update_w4_small_bf16_kernel(
     x_ptr,
     w_ptr,
@@ -1274,6 +1646,36 @@ def causal_conv1d_update_npu(
 
     original_x_dtype = x.dtype
     x = x.to(conv_state.dtype)
+
+    sla_fast_path = _select_causal_conv1d_update_sla_fast_path(
+        x,
+        conv_state,
+        weight,
+        bias,
+        activation,
+        conv_state_indices,
+        num_accepted_tokens,
+        query_start_loc,
+        max_query_len,
+        block_idx_last_scheduled_token,
+        initial_state_idx,
+    )
+    if sla_fast_path is not None:
+        assert conv_state_indices is not None
+        _launch_causal_conv1d_update_sla_fast_path(
+            sla_fast_path,
+            x,
+            conv_state,
+            weight,
+            bias,
+            activation,
+            conv_state_indices,
+            num_accepted_tokens,
+            query_start_loc,
+            pad_slot_id,
+        )
+        return x.to(original_x_dtype)
+
     unsqueeze = query_start_loc is None and x.dim() == 2
     if unsqueeze:
         # make it (batch, dim, seqlen) with seqlen == 1
