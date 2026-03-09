@@ -220,16 +220,22 @@ _WEIGHT_PREPACK_CACHE: "OrderedDict[tuple[Any, ...], torch.Tensor]" = OrderedDic
 _FAST_PATH_DISPATCH_TABLE: dict[tuple[str, int, str, str], tuple[int, int, int]] = {
     ("decode_contig_s1_bf16_w4", 20, "le64", "ge4096"): (512, 4, 0),
     ("decode_contig_s1_bf16_w4", 24, "le64", "ge4096"): (512, 4, 0),
+    ("decode_contig_s1_bf16_w4", 40, "le64", "ge4096"): (256, 2, 0),
     ("decode_stride_s1_bf16_w4", 20, "le64", "ge4096"): (512, 2, 0),
     ("decode_stride_s1_bf16_w4", 24, "le64", "ge4096"): (512, 2, 0),
+    ("decode_stride_s1_bf16_w4", 40, "le64", "ge4096"): (256, 1, 0),
     ("update_contig_s3_bf16_w4", 20, "le64", "ge4096"): (256, 2, 0),
     ("update_contig_s3_bf16_w4", 24, "le64", "ge4096"): (256, 2, 0),
+    ("update_contig_s3_bf16_w4", 40, "le64", "ge4096"): (128, 2, 0),
     ("update_stride_s3_bf16_w4", 20, "le64", "ge4096"): (256, 1, 0),
     ("update_stride_s3_bf16_w4", 24, "le64", "ge4096"): (256, 1, 0),
+    ("update_stride_s3_bf16_w4", 40, "le64", "ge4096"): (128, 1, 0),
     ("mtp_contig_k3_bf16_w4", 20, "le64", "ge4096"): (256, 1, 0),
     ("mtp_contig_k3_bf16_w4", 24, "le64", "ge4096"): (256, 1, 0),
+    ("mtp_contig_k3_bf16_w4", 40, "le64", "ge4096"): (128, 1, 0),
     ("mtp_stride_k3_bf16_w4", 20, "le64", "ge4096"): (128, 1, 0),
     ("mtp_stride_k3_bf16_w4", 24, "le64", "ge4096"): (128, 1, 0),
+    ("mtp_stride_k3_bf16_w4", 40, "le64", "ge4096"): (128, 1, 0),
 }
 
 
@@ -1161,6 +1167,7 @@ def _launch_causal_conv1d_update_fast_path(
             USE_PAD_SLOT=pad_slot_id is not None,
             BLOCK_N=block_n,
             B_TILE=b_tile,
+            multibuffer=False,
         )
         return
 
@@ -1201,6 +1208,7 @@ def _launch_causal_conv1d_update_fast_path(
         SEQLEN=seqlen,
         BLOCK_N=block_n,
         B_TILE=b_tile,
+        multibuffer=False,
     )
 
 

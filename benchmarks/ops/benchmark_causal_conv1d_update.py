@@ -201,8 +201,12 @@ def main() -> None:
         cases = [args.case]
 
     for case_name in cases:
-        benchmark_case(case_name, args.batch, args.dim, args.warmup,
-                       args.measure, args.device)
+        try:
+            benchmark_case(case_name, args.batch, args.dim, args.warmup,
+                           args.measure, args.device)
+        except Exception as exc:
+            print(f"CASE={case_name}")
+            print(f"ERROR={type(exc).__name__}: {exc}")
 
 
 if __name__ == "__main__":
