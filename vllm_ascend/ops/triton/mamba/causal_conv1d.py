@@ -176,14 +176,16 @@ def _pick_causal_conv1d_update_launch_params(
     dtype: torch.dtype | None = None,
     width: int | None = None,
     seqlen: int | None = None,
+    general_stride: bool = False,
 ) -> tuple[int, int, int]:
     if vectorcore_num is None:
         vectorcore_num = _get_causal_conv1d_vectorcore_num()
 
     # Keep total programs near ~2x vector cores while allowing larger dim
     # cases to reduce scheduling overhead with a wider channel tile.
-    use_small_channel_tile = dtype == torch.float32 and (
-        (width is not None and width >= 4) or (seqlen is not None and seqlen > 1)
+    use_small_channel_tile = (
+        (dtype == torch.float32 and ((width is not None and width >= 4) or (seqlen is not None and seqlen > 1)))
+        or (general_stride and width is not None and width >= 4 and seqlen is not None and seqlen > 1)
     )
     if use_small_channel_tile:
         block_n = 256 if dim >= 256 else 128
@@ -201,6 +203,9 @@ def _pick_causal_conv1d_update_launch_params(
         b_tile = 4
     else:
         b_tile = 8
+
+    if general_stride and width is not None and width >= 4 and seqlen is not None and seqlen > 1:
+        b_tile = min(b_tile, 2)
 
     t_chunk = 1 if block_n == 512 else 48
     return block_n, b_tile, t_chunk
@@ -683,6 +688,12 @@ def causal_conv1d_update_npu(
 
     stride_istate_seq, stride_istate_dim, stride_istate_token = conv_state.stride()
     stride_state_indices = conv_state_indices.stride(0) if conv_state_indices is not None else 0
+    general_stride = (
+        stride_w_width != 1
+        or stride_x_dim != 1
+        or stride_o_dim != 1
+        or stride_istate_dim != 1
+    )
 
     # effective state_len exactly as original
     if num_accepted_tokens is not None:
@@ -697,6 +708,7 @@ def causal_conv1d_update_npu(
         dtype=conv_state.dtype,
         width=width,
         seqlen=seqlen,
+        general_stride=general_stride,
     )
 
     def grid(META):
