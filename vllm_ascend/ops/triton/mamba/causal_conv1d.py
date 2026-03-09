@@ -1093,8 +1093,12 @@ def _launch_causal_conv1d_update_sla_fast_path(
     query_start_loc: torch.Tensor | None,
     pad_slot_id: int,
 ) -> None:
-    weight_t = weight.transpose(0, 1)
-    conv_state_t = conv_state.transpose(1, 2)
+    weight_t = _prepack_causal_conv1d_weight(weight)
+    conv_state_t = conv_state.transpose(1, 2).contiguous()
+    conv_state_indices_t = conv_state_indices.contiguous()
+    query_start_loc_t = query_start_loc.contiguous() if query_start_loc is not None else None
+    num_accepted_tokens_t = (num_accepted_tokens.contiguous()
+                             if num_accepted_tokens is not None else None)
     batch = conv_state_indices.size(0)
     dim = weight.shape[0]
     num_cache_lines = conv_state_t.size(0)
@@ -1124,12 +1128,12 @@ def _launch_causal_conv1d_update_sla_fast_path(
         stride_x_seq = 0
         stride_o_token, stride_o_dim = out.stride()
         stride_o_seq = 0
-        stride_query_start_loc = query_start_loc.stride(0)
+        stride_query_start_loc = query_start_loc_t.stride(0)
         x_t = x
 
     stride_w_width, stride_w_dim = weight_t.stride()
     stride_state_seq, stride_state_token, stride_state_dim = conv_state_t.stride()
-    stride_state_indices = conv_state_indices.stride(0)
+    stride_state_indices = conv_state_indices_t.stride(0)
     np2_statelen = triton.next_power_of_2(state_len)
 
     _causal_conv1d_update_kernel_npu_sla_tiled[grid](
@@ -1137,9 +1141,9 @@ def _launch_causal_conv1d_update_sla_fast_path(
         weight_t,
         bias,
         conv_state_t,
-        conv_state_indices,
-        num_accepted_tokens,
-        query_start_loc,
+        conv_state_indices_t,
+        num_accepted_tokens_t,
+        query_start_loc_t,
         out,
         batch,
         dim,
@@ -1169,6 +1173,7 @@ def _launch_causal_conv1d_update_sla_fast_path(
         B_TILE=b_tile,
         T_CHUNK=t_chunk,
     )
+    conv_state.copy_(conv_state_t.transpose(1, 2))
 
 
 @triton.jit
