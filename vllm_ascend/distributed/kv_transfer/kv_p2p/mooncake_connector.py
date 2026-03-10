@@ -4,6 +4,7 @@ import copy
 import hashlib
 import math
 import os
+import platform
 import queue
 import random
 import struct
@@ -48,6 +49,7 @@ from vllm.v1.request import RequestStatus
 
 from vllm_ascend import envs as ascend_envs
 from vllm_ascend.ascend_config import get_ascend_config, init_ascend_config
+from vllm_ascend.diagnostics import emit_diag, env_flag, format_cpu_list
 from vllm_ascend.distributed.kv_transfer.utils.mooncake_transfer_engine import global_te
 from vllm_ascend.distributed.kv_transfer.utils.utils import get_transfer_timeout_value
 from vllm_ascend.utils import enable_custom_op, is_vl_model
@@ -62,6 +64,20 @@ if TYPE_CHECKING:
 
 GET_META_MSG = b"get_meta_msg"
 DONE_RECVING_MSG = b"done_recving_msg"
+_MOONCAKE_DIAG_ENABLED = env_flag("VLLM_ASCEND_MOONCAKE_DIAG")
+
+
+def _emit_mooncake_diag(event: str, **fields: Any) -> None:
+    emit_diag("mooncake_diag", event, _MOONCAKE_DIAG_ENABLED, **fields)
+
+
+def _get_current_cpu_affinity() -> str | None:
+    if not hasattr(os, "sched_getaffinity"):
+        return None
+    try:
+        return format_cpu_list(os.sched_getaffinity(0))
+    except OSError:
+        return None
 
 
 class RemotePortInfo(TypedDict):
@@ -133,8 +149,16 @@ class KVCacheTaskTracker:
         with self.done_task_lock:
             self.finished_requests.add(request_id)
             self.reqs_to_process.discard(request_id)
+        _emit_mooncake_diag(
+            "task_tracker.add_not_transfer_request",
+            request_id=request_id,
+            delayed_queue_size=len(self.delayed_free_requests),
+            reqs_to_process_size=len(self.reqs_to_process),
+        )
 
     def update_done_task_count(self, request_id: str):
+        was_tracked = request_id in self.reqs_to_process
+        was_delayed = request_id in self.delayed_free_requests
         with self.done_task_lock:
             if request_id in self.reqs_to_process:
                 self.finished_requests.add(request_id)
@@ -145,6 +169,15 @@ class KVCacheTaskTracker:
                     "MooncakeConnector finish req not in reqs to process."
                     "If it is a P node, this request may have been force freed."
                 )
+        _emit_mooncake_diag(
+            "task_tracker.update_done_task_count",
+            request_id=request_id,
+            was_tracked=was_tracked,
+            was_delayed=was_delayed,
+            finished_queue_size=len(self.finished_requests),
+            delayed_queue_size=len(self.delayed_free_requests),
+            reqs_to_process_size=len(self.reqs_to_process),
+        )
 
     def get_and_clear_finished_requests(self) -> set[str]:
         """
@@ -157,13 +190,31 @@ class KVCacheTaskTracker:
             expired_requests = self._retrieve_expired_requests()
             finished_requests.update(expired_requests)
             self.finished_requests.clear()
+        if finished_requests or expired_requests:
+            _emit_mooncake_diag(
+                "task_tracker.get_and_clear_finished_requests",
+                finished_requests=finished_requests,
+                expired_requests=expired_requests,
+                delayed_queue_size=len(self.delayed_free_requests),
+                reqs_to_process_size=len(self.reqs_to_process),
+            )
         return finished_requests
 
     def add_delayed_request(self, request_id: str, delay_start_time: float):
         """Add a delayed free request."""
+        added = False
         with self.done_task_lock:
             if request_id in self.reqs_to_process:
                 self.delayed_free_requests[request_id] = delay_start_time
+                added = True
+        _emit_mooncake_diag(
+            "task_tracker.add_delayed_request",
+            request_id=request_id,
+            added=added,
+            delay_age_ms=max((time.time() - delay_start_time) * 1000, 0),
+            delayed_queue_size=len(self.delayed_free_requests),
+            reqs_to_process_size=len(self.reqs_to_process),
+        )
 
     def _retrieve_expired_requests(self):
         """Retrieve all expired delayed requests."""
@@ -272,22 +323,50 @@ class KVCacheSendingThread(threading.Thread):
                     logger.debug("Got DONE_RECVING_MSG for request %s", msg[1])
                     request_id = msg[1]
                     remote_port_send_num = msg[2]
+                    local_done_count = None
+                    expected_done_count = None
+                    updated_done_task_count = False
                     if remote_port_send_num:
                         if request_id not in self.port_send_num:
                             self.port_send_num[request_id] = 0
                         self.port_send_num[request_id] += 1
+                        local_done_count = self.port_send_num[request_id]
                         device_index = self.pp_rank * self.tp_size + self.tp_rank + self.pcp_rank * self.prefill_tp_size
                         handshake_port = self.side_channel_port + device_index
-                        if self.port_send_num[request_id] >= remote_port_send_num[handshake_port]["num"]:
+                        expected_done_count = remote_port_send_num[handshake_port]["num"]
+                        if self.port_send_num[request_id] >= expected_done_count:
                             self.task_tracker.update_done_task_count(request_id)
+                            updated_done_task_count = True
                             del self.port_send_num[request_id]
                     else:
                         self.task_tracker.update_done_task_count(request_id)
+                        updated_done_task_count = True
+                    _emit_mooncake_diag(
+                        "send_thread.done_recving_msg_received",
+                        request_id=request_id,
+                        tp_rank=self.tp_rank,
+                        pp_rank=self.pp_rank,
+                        pcp_rank=self.pcp_rank,
+                        local_done_count=local_done_count,
+                        expected_done_count=expected_done_count,
+                        updated_done_task_count=updated_done_task_count,
+                        remote_port_send_num=remote_port_send_num,
+                    )
                     # Acknowledge the request completion.
+                    ack_start = time.monotonic()
                     while True:
                         try:
                             # Send ACK to the sender.
                             sock.send_multipart((identity, b"", b"ACK"), flags=zmq.NOBLOCK)  # type: ignore
+                            _emit_mooncake_diag(
+                                "send_thread.done_recving_ack_sent",
+                                request_id=request_id,
+                                tp_rank=self.tp_rank,
+                                pp_rank=self.pp_rank,
+                                pcp_rank=self.pcp_rank,
+                                ack_send_wait_ms=(time.monotonic() - ack_start) * 1000,
+                                updated_done_task_count=updated_done_task_count,
+                            )
                             break
                         except zmq.Again:  # type: ignore
                             # If the socket is not ready, retry sending.
@@ -722,6 +801,15 @@ class KVCacheRecvingThread(threading.Thread):
             "Sending done recving signal for request %s to %s:%d", request_id, remote_host, remote_handshake_port
         )
         sock: zmq.Socket | None = None  # type: ignore
+        send_start = time.monotonic()
+        _emit_mooncake_diag(
+            "recv_thread.done_recving_msg_sent",
+            request_id=request_id,
+            tp_rank=self.tp_rank,
+            remote_host=remote_host,
+            remote_handshake_port=remote_handshake_port,
+            remote_port_send_num=remote_port_send_num,
+        )
         try:
             sock = self._get_remote_socket(remote_host, remote_handshake_port)
             data_bytes = self.encoder.encode((DONE_RECVING_MSG, request_id, remote_port_send_num))
@@ -730,12 +818,30 @@ class KVCacheRecvingThread(threading.Thread):
                 sock, self.remote_poller, f"{remote_host}:{remote_handshake_port}", timeout=self.timeout
             )
             logger.debug(f"Received response for request {request_id}: {resp.decode('utf-8')}")
+            _emit_mooncake_diag(
+                "recv_thread.done_recving_ack_received",
+                request_id=request_id,
+                tp_rank=self.tp_rank,
+                remote_host=remote_host,
+                remote_handshake_port=remote_handshake_port,
+                ack_wait_ms=(time.monotonic() - send_start) * 1000,
+                response=resp,
+            )
             if resp != b"ACK":
                 logger.error(
                     "Failed to receive ACK for request %s from %s:%d", request_id, remote_host, remote_handshake_port
                 )
                 raise RuntimeError(f"Failed to receive ACK, resp: {resp.decode('utf-8')}")
         except RuntimeError as e:
+            _emit_mooncake_diag(
+                "recv_thread.done_recving_ack_error",
+                request_id=request_id,
+                tp_rank=self.tp_rank,
+                remote_host=remote_host,
+                remote_handshake_port=remote_handshake_port,
+                ack_wait_ms=(time.monotonic() - send_start) * 1000,
+                error=str(e),
+            )
             if isinstance(sock, zmq.Socket):  # type: ignore
                 sock.close()
                 sock = None
@@ -1027,6 +1133,14 @@ class MooncakeConnectorScheduler:
         meta.reqs_in_batch = self._reqs_in_batch
         self._reqs_in_batch = set()
 
+        if meta.requests_to_send:
+            _emit_mooncake_diag(
+                "scheduler.build_connector_meta",
+                requests_to_send=meta.requests_to_send,
+                reqs_in_batch=meta.reqs_in_batch,
+                requests_to_recv=list(meta.requests.keys()),
+            )
+
         return meta
 
     def request_finished(
@@ -1055,7 +1169,16 @@ class MooncakeConnectorScheduler:
         delay_free_blocks = len(computed_block_ids) > 0
         if delay_free_blocks:
             logger.info("Delaying free of %d blocks for request %s", len(computed_block_ids), request.request_id)
-            self._reqs_need_send[request.request_id] = time.time()
+            delay_start_time = time.time()
+            self._reqs_need_send[request.request_id] = delay_start_time
+            _emit_mooncake_diag(
+                "scheduler.request_finished",
+                request_id=request.request_id,
+                delayed_block_count=len(computed_block_ids),
+                request_status=request.status,
+                prompt_tokens=len(request.prompt_token_ids),
+                delay_start_epoch_ms=delay_start_time * 1000,
+            )
 
         num_prompt_blocks = math.ceil(len(request.prompt_token_ids) / self.block_size)
 
@@ -1157,6 +1280,31 @@ class MooncakeConnectorWorker:
             self.tp_num_need_pulls = num_d_block_heads // num_p_block_heads
         self.local_remote_block_port_mapping: dict[str, list[list[int]] | None] = {}
         self.remote_port_send_num: dict[str, dict[int, RemotePortInfo]] = {}
+        self._diag_send_poll_counts: defaultdict[str, int] = defaultdict(int)
+        self._diag_send_delay_start: dict[str, float] = {}
+
+        _emit_mooncake_diag(
+            "worker.init",
+            engine_id=self.engine_id,
+            kv_role=self.kv_role,
+            tp_rank=self.tp_rank,
+            tp_size=self.tp_size,
+            pp_rank=self.pp_rank,
+            pp_size=self.pp_size,
+            pcp_rank=self.pcp_rank,
+            pcp_size=self.pcp_size,
+            dcp_rank=self.dcp_rank,
+            dcp_size=self.dcp_size,
+            dp_rank=self.dp_rank,
+            dp_size=self.dp_size,
+            prefill_tp_size=self._prefill_tp_size,
+            decode_tp_size=self._decode_tp_size,
+            async_scheduling=getattr(getattr(vllm_config, "scheduler_config", None), "async_scheduling", None),
+            cpu_binding_enabled=getattr(self.ascend_config, "enable_cpu_binding", None),
+            cpu_affinity=_get_current_cpu_affinity(),
+            omp_num_threads=os.getenv("OMP_NUM_THREADS"),
+            cpu_arch=platform.machine(),
+        )
 
     def _get_prefill_decode_size(self, vllm_config: VllmConfig):
         # get prefill tp and dp size from extra config
@@ -1285,6 +1433,10 @@ class MooncakeConnectorWorker:
             time.sleep(3)
 
     def get_finished(self) -> tuple[set[str], set[str]]:
+        tracked_sending_before = set(self._diag_send_delay_start)
+        for request_id in tracked_sending_before:
+            self._diag_send_poll_counts[request_id] += 1
+
         done_sending = (
             self.kv_send_thread.get_and_clear_finished_requests(  # type: ignore[union-attr]
             )
@@ -1302,6 +1454,32 @@ class MooncakeConnectorWorker:
                 "Number of completed KV cache send requests: %d, receive requests: %d",
                 len(done_sending),
                 len(done_recving),
+            )
+
+        for request_id in done_sending:
+            delay_start_time = self._diag_send_delay_start.pop(request_id, None)
+            _emit_mooncake_diag(
+                "worker.get_finished.done_sending",
+                request_id=request_id,
+                engine_id=self.engine_id,
+                tp_rank=self.tp_rank,
+                pp_rank=self.pp_rank,
+                pcp_rank=self.pcp_rank,
+                poll_count=self._diag_send_poll_counts.pop(request_id, 0),
+                delay_since_request_finished_ms=(
+                    None if delay_start_time is None else max((time.time() - delay_start_time) * 1000, 0)
+                ),
+                tracked_before=request_id in tracked_sending_before,
+            )
+
+        for request_id in done_recving:
+            _emit_mooncake_diag(
+                "worker.get_finished.done_recving",
+                request_id=request_id,
+                engine_id=self.engine_id,
+                tp_rank=self.tp_rank,
+                pp_rank=self.pp_rank,
+                pcp_rank=self.pcp_rank,
             )
         return done_sending, done_recving
 
@@ -1595,14 +1773,38 @@ class MooncakeConnectorWorker:
 
         if self.kv_send_thread is not None and self.pcp_size * self.dcp_size == 1:
             for req_id, delay_start_time in metadata.requests_to_send.items():
-                if self.tp_rank in self._prefill_get_remote_rank(req_id):
+                selected_tp_ranks = self._prefill_get_remote_rank(req_id)
+                is_participant = self.tp_rank in selected_tp_ranks
+                _emit_mooncake_diag(
+                    "worker.start_load_kv.requests_to_send",
+                    request_id=req_id,
+                    tp_rank=self.tp_rank,
+                    pp_rank=self.pp_rank,
+                    pcp_rank=self.pcp_rank,
+                    selected_tp_ranks=selected_tp_ranks,
+                    is_participant=is_participant,
+                    delay_age_ms=max((time.time() - delay_start_time) * 1000, 0),
+                )
+                if is_participant:
                     self.kv_send_thread.add_delayed_request(req_id, delay_start_time)
+                    self._diag_send_delay_start[req_id] = delay_start_time
                 else:
                     self.kv_send_thread.add_not_transfer_request(req_id)
 
         if self.kv_send_thread is not None and self.pcp_size * self.dcp_size > 1:
             for req_id, delay_start_time in metadata.requests_to_send.items():
                 self.kv_send_thread.add_delayed_request(req_id, delay_start_time)
+                self._diag_send_delay_start[req_id] = delay_start_time
+                _emit_mooncake_diag(
+                    "worker.start_load_kv.requests_to_send",
+                    request_id=req_id,
+                    tp_rank=self.tp_rank,
+                    pp_rank=self.pp_rank,
+                    pcp_rank=self.pcp_rank,
+                    selected_tp_ranks=None,
+                    is_participant=True,
+                    delay_age_ms=max((time.time() - delay_start_time) * 1000, 0),
+                )
 
     def _get_tp_num_need_pulls(self, prefill_tp_size: int) -> int:
         if prefill_tp_size is None:

@@ -94,6 +94,21 @@
 #    Future Plan:
 #       Remove this patch when vLLM merge the PR.
 #
+# ** 6. File: platform/patch_shm_broadcast_diag.py**
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   1. `vllm.distributed.device_communicators.shm_broadcast.MessageQueue`
+#    Why:
+#       PD 分离和 Mooncake 控制面问题排障时，需要区分 `acquire_write` 与 `acquire_read`
+#       的长时间等待，定位本地 MQ 背压还是 worker 读侧空轮询。
+#    How：
+#       在设置 `VLLM_ASCEND_SHM_BROADCAST_DIAG=1` 后，记录 `shm_broadcast` 等待事件，
+#       聚合输出等待时长、循环次数和命中行号，不改变默认行为。
+#    Related PR (if no, explain why):
+#       No. This is temporary instrumentation for Ascend diagnosis.
+#    Future Plan:
+#       Remove this patch after the root cause is confirmed and no longer needs
+#       runtime instrumentation.
+#
 # * Worker Patch:
 # ===============
 #
