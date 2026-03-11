@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-deployment-assistant
-description: Deploy models on vLLM-Ascend from natural language requests using deterministic term normalization, fixed output templates, and runnable start/validate packages.
+description: Deploy models on vLLM-Ascend from natural language requests using deterministic term normalization, fixed output templates, and runnable start/validate packages. For profiling, debugging, design, adaptation, sync, release, or operator requests, immediately reroute to vllm-ascend-developer-assistant before loading deployment-heavy knowledge.
 ---
 
 # vLLM Ascend Deployment Assistant (E2)
@@ -13,20 +13,27 @@ This is one of the only two top-level entry skills. Environment bootstrap, compa
 
 ## Read Order
 
+Phase 0: cheap entry gate, always read first.
+
 1. `../_shared/INDEX.md`
-2. `../_shared/ai-foundation/INDEX.md`
-3. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
-4. `../_shared/ai-foundation/indexes/topic-index.json`
-5. `../_shared/ai-foundation/indexes/term-alias-index.json`
-6. `../_shared/ai-foundation/indexes/view-index.json`
-7. `../_shared/ai-foundation/indexes/rule-index.json`
-8. `../_shared/deployment-config/references/global-parameter-feature-map.md`
-9. `../_shared/deployment-config/references/global-parameter-verification-report.md`
-10. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
-11. `../_shared/deployment-config/procedures/deployment-playbook.md`
-12. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
-13. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
-14. `references/output-schema.md`
+2. `../_shared/task-index.md`
+3. `references/entry-routing.md`
+
+Phase 1: only read these if the request remains in the deployment chain.
+
+4. `../_shared/ai-foundation/INDEX.md`
+5. `../_shared/deployment-config/concepts/feature-semantic-dictionary.md`
+6. `../_shared/ai-foundation/indexes/topic-index.json`
+7. `../_shared/ai-foundation/indexes/term-alias-index.json`
+8. `../_shared/ai-foundation/indexes/view-index.json`
+9. `../_shared/ai-foundation/indexes/rule-index.json`
+10. `../_shared/deployment-config/references/global-parameter-feature-map.md`
+11. `../_shared/deployment-config/references/global-parameter-verification-report.md`
+12. `../_shared/deployment-config/references/global-parameter-combination-guide.md`
+13. `../_shared/deployment-config/procedures/deployment-playbook.md`
+14. `../_shared/vllm-ascend-core/concepts/model-feature-compatibility-matrix.md`
+15. `../_shared/troubleshooting/procedures/unsupported-feature-cases.md`
+16. `references/output-schema.md`
 
 ## Weak-Reasoning Mode (Mandatory)
 
@@ -35,7 +42,35 @@ This is one of the only two top-level entry skills. Environment bootstrap, compa
 - If ambiguous, return up to 3 candidates and ask one clarification.
 - All commands must be copy-paste runnable.
 
-## Two-Step Execution
+## Route Gate (Mandatory)
+
+Run this before any deployment KB loads:
+
+```bash
+python .agents/skills/vllm-ascend-deployment-assistant/scripts/classify_entry_task.py \
+  --text "<user_input>"
+```
+
+Expected output interface:
+
+```json
+{
+  "task_type": "performance_analysis",
+  "entry_skill": "vllm-ascend-developer-assistant",
+  "should_continue_in_deployment_assistant": false,
+  "matched_signals": ["profiling"],
+  "reason": "profiling/performance signals require the developer entry chain"
+}
+```
+
+If `should_continue_in_deployment_assistant` is `false`:
+
+- stop immediately
+- do not load `ai-foundation` or deployment-config references
+- hand off to `vllm-ascend-developer-assistant`
+- preserve the original user request and the classifier result in the handoff
+
+## Two-Step Deployment Execution
 
 ### Step 1: Intent Normalization
 
