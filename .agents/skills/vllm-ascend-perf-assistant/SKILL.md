@@ -17,7 +17,6 @@ This is not a top-level entry skill. It must be invoked through `vllm-ascend-dev
 
 1. `references/perf-taxonomy.md`
 2. `references/minimal-evidence-gate.md`
-3. `../_shared/task-index.md`
 
 ## Conditional Reads
 
