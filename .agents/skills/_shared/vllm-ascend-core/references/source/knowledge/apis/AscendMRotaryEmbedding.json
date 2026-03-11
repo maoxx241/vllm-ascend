@@ -1,0 +1,106 @@
+{
+  "id": "api:ascend_mrotary_embedding",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMRotaryEmbedding",
+  "summary": "昇腾多模态旋转位置编码，实现多模态模型的mRoPE位置编码",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "300-350"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MRotaryEmbedding",
+    "AscendRotaryEmbedding"
+  ],
+  "related_features": [
+    "rope",
+    "multimodal",
+    "mrope"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行mRoPE计算"
+      ],
+      "memory_impact": "管理多模态cos/sin缓存",
+      "throughput_impact": "支持多模态位置编码",
+      "latency_impact": "额外计算略微增加延迟",
+      "test_cases": [
+        {
+          "name": "mRoPE测试",
+          "description": ""
+        },
+        {
+          "name": "多模态测试",
+          "description": ""
+        },
+        {
+          "name": "Triton kernel测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen2-VL",
+        "Qwen3-VL",
+        "Pixtral等多模态模型"
+      ],
+      "enable_config": "自动检测多模态模型启用",
+      "unsuitable_scenarios": [
+        "纯文本模型"
+      ],
+      "best_practices": [
+        "使用Triton kernel优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/rotary_embedding.py:300-350",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "mRoPE计算逻辑",
+        "Triton kernel"
+      ],
+      "affected_features": [
+        "多模态位置编码",
+        "mRoPE"
+      ]
+    },
+    "design": {
+      "principle": "继承MRotaryEmbedding，适配NPU",
+      "theory_analysis": "使用mRoPE处理多模态输入的位置编码",
+      "design_decisions": [
+        {
+          "decision": "支持Triton kernel",
+          "reason": ""
+        },
+        {
+          "decision": "支持多模态输入",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "bee1ca59016488e1ebaca37dd26e6be95fc13ffee7983d0fceb53983b2e4e87f",
+  "knowledge_domain": "vllm-ascend-core"
+}

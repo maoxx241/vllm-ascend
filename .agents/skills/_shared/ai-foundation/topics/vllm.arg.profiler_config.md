@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1217
+- definition_ref: vllm/engine/arg_utils.py:1222
 - read_ref: vllm/vllm/benchmarks/latency.py:141, vllm/vllm/benchmarks/latency.py:141, vllm/vllm/benchmarks/latency.py:142
-- effect_ref: vllm/vllm/benchmarks/latency.py:142, vllm/vllm/benchmarks/latency.py:147, vllm/vllm/config/vllm.py:341
+- effect_ref: vllm/vllm/benchmarks/latency.py:142, vllm/vllm/benchmarks/latency.py:147, vllm/vllm/config/vllm.py:350
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 指标缺失; 追踪上报失败
 - value_failure_signals: 指标缺失; 追踪上报失败
 - recommendation: 按需开启细粒度 tracing，避免全量常开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:814
+- definition_ref: vllm/engine/arg_utils.py:813
 - read_ref: vllm/vllm/config/parallel.py:101, vllm/vllm/config/parallel.py:552, vllm/vllm/engine/arg_utils.py:396
-- effect_ref: vllm/vllm/platforms/rocm.py:512, vllm-ascend/vllm_ascend/ascend_config.py:71, vllm-ascend/vllm_ascend/attention/utils.py:61
+- effect_ref: vllm/vllm/platforms/rocm.py:509, vllm-ascend/vllm_ascend/ascend_config.py:71, vllm-ascend/vllm_ascend/attention/utils.py:61
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: KV 传输配置错误; 时延反而变高
 - value_failure_signals: KV 传输配置错误; 时延反而变高
 - recommendation: 优先在高并发长上下文场景启用并做 A/B。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:681
-- read_ref: vllm/vllm/config/model.py:206, vllm/vllm/config/model.py:337, vllm/vllm/engine/arg_utils.py:445
+- definition_ref: vllm/engine/arg_utils.py:683
+- read_ref: vllm/vllm/config/model.py:206, vllm/vllm/config/model.py:334, vllm/vllm/engine/arg_utils.py:446
 - effect_ref: vllm/vllm/v1/sample/ops/topk_topp_sampler.py:106, vllm/vllm/v1/sample/ops/topk_topp_sampler.py:108, vllm/vllm/v1/sample/ops/topk_topp_sampler.py:154
 - web_refs: 3
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

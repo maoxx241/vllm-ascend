@@ -1,0 +1,161 @@
+{
+  "id": "feature:ascend_eagle_proposer",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "AscendEagleProposer",
+  "summary": "基于EAGLE/MTP架构的推测解码提议器，利用目标模型隐藏状态生成草稿token，支持EAGLE/EAGLE3/MTP三种变体，实现NPU上的高效推测解码加速。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/spec_decode/eagle_proposer.py",
+      "lines": "1-1393"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/spec_decode/__init__.py",
+      "lines": "1-35"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK"
+  ],
+  "related_apis": [
+    "AscendEagleProposer",
+    "EagleProposer",
+    "ACLGraphWrapper",
+    "AscendCommonAttentionMetadata"
+  ],
+  "related_features": [
+    "speculative_decoding",
+    "acl_graph",
+    "prefix_caching",
+    "chunked_prefill"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与ACLGraphWrapper交互进行图模式捕获和执行",
+        "与AttentionMetadataBuilder交互构建注意力元数据",
+        "与PCP/DCP管理器交互处理长序列分割"
+      ],
+      "memory_impact": "需要额外分配草稿模型的KV cache和隐藏状态缓冲区，内存占用约为目标模型的10-20%",
+      "throughput_impact": "在accept rate较高时(>60%)可提升throughput 1.5-2.5倍，accept rate低时可能略有下降",
+      "latency_impact": "TTFT略有增加(约5-10%)，但整体请求延迟在accept rate高时显著降低",
+      "test_cases": [
+        {
+          "name": "test_initialization_eagle_graph: 验证EAGLE模式图模式初始化",
+          "description": ""
+        },
+        {
+          "name": "test_initialization_eagle3_enforce_eager: 验证EAGLE3强制eager模式",
+          "description": ""
+        },
+        {
+          "name": "test_initialization_mtp_full_graph_async: 验证MTP异步调度模式",
+          "description": ""
+        },
+        {
+          "name": "test_load_model_pp1/pp_gt1: 验证Pipeline Parallel下模型加载",
+          "description": ""
+        },
+        {
+          "name": "test_dummy_run_basic/with_prefill/in_graph_capture: 验证不同场景下的dummy run",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Llama系列 (EAGLE/EAGLE3)",
+        "DeepSeek-V3 (MTP)",
+        "Qwen2.5-VL (EAGLE多模态)",
+        "Qwen3-VL (EAGLE多模态)"
+      ],
+      "enable_config": "speculative_config.method='eagle'/'eagle3'/'mtp', speculative_config.num_speculative_tokens=4-8",
+      "unsuitable_scenarios": [
+        "accept rate预期低于40%的场景",
+        "内存受限无法容纳草稿模型的场景",
+        "需要严格确定性输出的场景(推测解码有随机性)",
+        "MTP模式不支持异步调度(async_scheduling=True时自动禁用图模式)"
+      ],
+      "best_practices": [
+        "EAGLE/EAGLE3: 适用于通用LLM，推荐num_speculative_tokens=4-8",
+        "MTP: 专为DeepSeek-V3设计，利用其Multi-Token Prediction架构",
+        "EAGLE3: 使用组合隐藏状态，对模型架构有特定要求",
+        "建议配合ACLGraph使用以获得最佳性能",
+        "PCP/DCP场景下需注意slot_mapping的正确更新"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "eagle_proposer.py",
+          "function": "_propose",
+          "purpose": "核心提议逻辑，生成草稿token"
+        },
+        {
+          "file": "eagle_proposer.py",
+          "function": "_run_merged_draft",
+          "purpose": "合并执行草稿模型前向传播"
+        },
+        {
+          "file": "eagle_proposer.py",
+          "function": "load_model",
+          "purpose": "加载草稿模型并共享embedding"
+        },
+        {
+          "file": "eagle_proposer.py",
+          "function": "attn_update_stack_num_spec_norm",
+          "purpose": "更新多步推测的注意力元数据"
+        }
+      ],
+      "modification_points": [
+        "新增推测方法: 在__init__.py的get_spec_decode_method中注册",
+        "自定义隐藏状态处理: 修改_propose中的target_hidden_states处理逻辑",
+        "扩展多模态支持: 在load_model中添加新的多模态模型处理",
+        "优化图模式: 修改_run_merged_draft中的计算流程"
+      ],
+      "affected_features": [
+        "KV Transfer: MTP层需要额外的KV cache传输支持",
+        "ACLGraph: 图模式参数更新逻辑需要同步修改",
+        "Attention Backend: 需要支持SpecDecoding和ChunkedPrefill状态"
+      ]
+    },
+    "design": {
+      "principle": "基于draft-then-verify范式，使用轻量级草稿模型快速生成候选token序列，由目标模型并行验证，接受正确前缀从而加速解码。EAGLE利用目标模型的隐藏状态作为输入，MTP利用DeepSeek-V3的Multi-Token Prediction架构。",
+      "theory_analysis": "推测解码的理论加速比取决于accept rate和推测长度。设accept rate为p，推测长度为k，期望接受的token数为E=(1-p^k)/(1-p)，加速比约为E/(1+k*prefill_overhead)。EAGLE通过利用隐藏状态信息提高了accept rate。",
+      "design_decisions": [
+        {
+          "decision": "EAGLE/EAGLE3/MTP统一使用AscendEagleProposer",
+          "reason": "三种方法核心逻辑相似(利用隐藏状态生成草稿)，差异在于隐藏状态处理方式，统一实现减少代码重复"
+        },
+        {
+          "decision": "MTP在异步调度时禁用图模式",
+          "reason": "MTP的slot_mapping更新逻辑与异步调度存在冲突，需要等待fx-graph bug修复后才能支持"
+        },
+        {
+          "decision": "共享目标模型的embedding和lm_head",
+          "reason": "草稿模型通常不需要独立的词表层，共享可减少内存占用和参数同步开销"
+        },
+        {
+          "decision": "支持PCP/DCP场景",
+          "reason": "长序列场景需要Context Parallel，草稿模型的slot_mapping需要特殊处理以适配CP分割"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "82530f4a30b512c5698191271071caeda41ec42ebcc270c244705354879ecff9",
+  "knowledge_domain": "integration-core"
+}

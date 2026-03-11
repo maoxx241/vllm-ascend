@@ -1,0 +1,112 @@
+{
+  "id": "feature:balance_scheduling",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Balance Scheduling",
+  "summary": "负载均衡调度策略，优化多卡场景下的请求分配，提升整体资源利用率",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "114-115"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_BALANCE_SCHEDULING"
+  ],
+  "related_apis": [],
+  "related_features": [
+    "feature:dynamic_batch_scheduler",
+    "feature:eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与DP调度集成测试",
+        "多卡负载均衡测试",
+        "请求分布不均匀场景测试"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "多卡场景吞吐量提升，减少负载不均导致的空闲",
+      "latency_impact": "减少请求排队延迟",
+      "test_cases": [
+        {
+          "name": "测试多卡场景下的负载分布",
+          "description": ""
+        },
+        {
+          "name": "测试不同请求大小下的调度效果",
+          "description": ""
+        },
+        {
+          "name": "测试动态负载变化场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "环境变量: VLLM_ASCEND_BALANCE_SCHEDULING=1",
+      "unsuitable_scenarios": [
+        "单卡场景",
+        "请求大小完全均匀的场景"
+      ],
+      "best_practices": [
+        "多卡DP场景启用",
+        "配合动态batch scheduler使用",
+        "监控各卡负载分布"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "envs.py：环境变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "调度器相关代码",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多调度策略",
+        "优化负载均衡算法"
+      ],
+      "affected_features": [
+        "请求调度流程",
+        "DP通信"
+      ]
+    },
+    "design": {
+      "principle": "在多卡DP场景下，根据各卡的当前负载动态分配请求，避免某些卡过载而其他卡空闲。",
+      "theory_analysis": "传统轮询调度可能导致负载不均。Balance scheduling考虑各卡的当前请求数、内存占用等因素，动态分配新请求，实现负载均衡。",
+      "design_decisions": [
+        {
+          "decision": "可选启用：默认关闭，用户按需开启",
+          "reason": ""
+        },
+        {
+          "decision": "环境变量控制：简单易用的配置方式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "6434ed7acd6cc09fe25f44161d406312b2605cd3689e11d06afaaf32cafa2adb",
+  "knowledge_domain": "vllm-ascend-core"
+}

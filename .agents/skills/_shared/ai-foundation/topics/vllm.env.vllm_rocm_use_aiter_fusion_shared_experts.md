@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:945
+- definition_ref: vllm/envs.py:957
 - read_ref: vllm/vllm/_aiter_ops.py:860, vllm/vllm/_aiter_ops.py:916, vllm/vllm/_aiter_ops.py:941
 - effect_ref: vllm/vllm/_aiter_ops.py:860, vllm/vllm/_aiter_ops.py:916, vllm/vllm/_aiter_ops.py:941
 - web_refs: 2
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/disaggregated_encoder/disagg_epd_proxy.py:650
-- read_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:145, vllm/vllm/entrypoints/cli/openai.py:33, vllm-ascend/examples/disaggregated_encoder/disagg_epd_proxy.py:650
-- effect_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:145, vllm/vllm/entrypoints/cli/openai.py:33, vllm-ascend/examples/disaggregated_encoder/disagg_epd_proxy.py:650
+- read_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:146, vllm/vllm/entrypoints/cli/openai.py:33, vllm-ascend/examples/disaggregated_encoder/disagg_epd_proxy.py:650
+- effect_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:146, vllm/vllm/entrypoints/cli/openai.py:33, vllm-ascend/examples/disaggregated_encoder/disagg_epd_proxy.py:650
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

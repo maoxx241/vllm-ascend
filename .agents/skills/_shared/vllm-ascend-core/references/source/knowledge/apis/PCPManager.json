@@ -1,0 +1,110 @@
+{
+  "id": "api:pcpmanager",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "PCPManager",
+  "summary": "PCP(Pipeline Context Parallel)管理器，管理上下文并行的通信和同步",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/pcp_utils.py",
+      "lines": "50-300"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_PCP_SIZE"
+  ],
+  "related_apis": [
+    "NPUModelRunner",
+    "NPUCommunicator",
+    "ContextParallelMode"
+  ],
+  "related_features": [
+    "context_parallel",
+    "long_context",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "prepare_pcp()准备PCP通信",
+        "sync_pcp()同步PCP状态",
+        "get_pcp_metadata()获取元数据"
+      ],
+      "memory_impact": "管理PCP通信缓冲区",
+      "throughput_impact": "PCP扩展支持更长序列，提升吞吐量",
+      "latency_impact": "通信开销可能增加延迟",
+      "test_cases": [
+        {
+          "name": "PCP通信测试",
+          "description": ""
+        },
+        {
+          "name": "PCP同步测试",
+          "description": ""
+        },
+        {
+          "name": "长序列测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "配置PCP size启用",
+      "unsuitable_scenarios": [
+        "单卡推理"
+      ],
+      "best_practices": [
+        "合理配置PCP size",
+        "优化通信模式"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/pcp_utils.py:50-300",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "prepare_pcp()准备逻辑",
+        "sync_pcp()同步逻辑"
+      ],
+      "affected_features": [
+        "Context Parallel",
+        "分布式通信"
+      ]
+    },
+    "design": {
+      "principle": "管理PCP通信和同步，支持长序列推理",
+      "theory_analysis": "将长序列分割到多个设备并行处理",
+      "design_decisions": [
+        {
+          "decision": "支持动态PCP配置",
+          "reason": ""
+        },
+        {
+          "decision": "优化通信模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "e650990d8263877fe3a928de575c1e217c22f43a823784239a632e37bfe6387e",
+  "knowledge_domain": "vllm-ascend-core"
+}

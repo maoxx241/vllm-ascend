@@ -1,0 +1,114 @@
+{
+  "id": "api:ascend_attention_backend",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendAttentionBackend",
+  "summary": "昇腾Attention后端，实现NPU上的注意力计算，支持多种attention实现和优化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/attention_v1.py",
+      "lines": "50-350"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ",
+    "VLLM_ASCEND_ENABLE_FLASH_COMMON"
+  ],
+  "related_apis": [
+    "AscendAttentionMetadata",
+    "AscendAttentionState",
+    "PagedAttention"
+  ],
+  "related_features": [
+    "flash_attention",
+    "prefix_caching",
+    "chunked_prefill"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行attention",
+        "get_impl_cls()获取实现类",
+        "get_supported_kernel_block_sizes()获取支持的块大小"
+      ],
+      "memory_impact": "管理KV Cache和attention workspace",
+      "throughput_impact": "优化的flash attention实现提升吞吐量",
+      "latency_impact": "高效的attention kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "prefill attention测试",
+          "description": ""
+        },
+        {
+          "name": "decode attention测试",
+          "description": ""
+        },
+        {
+          "name": "prefix cache测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用attention的模型"
+      ],
+      "enable_config": "自动选择或通过配置指定",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "启用flash attention优化",
+        "合理设置block size"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/attention_v1.py:50-350",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()执行逻辑",
+        "新增attention实现"
+      ],
+      "affected_features": [
+        "Attention计算",
+        "KV Cache管理"
+      ]
+    },
+    "design": {
+      "principle": "实现AttentionBackend接口，适配NPU特性",
+      "theory_analysis": "使用NPU优化的flash attention kernel",
+      "design_decisions": [
+        {
+          "decision": "支持多种attention实现",
+          "reason": ""
+        },
+        {
+          "decision": "集成prefix caching",
+          "reason": ""
+        },
+        {
+          "decision": "支持chunked prefill",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "459ffc722e98a864f0dc9cb071bc0efe6fc50d7bb03ed488f8a864f3795724c9",
+  "knowledge_domain": "integration-core"
+}

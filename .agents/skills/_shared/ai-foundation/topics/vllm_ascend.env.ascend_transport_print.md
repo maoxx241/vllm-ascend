@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,128 @@
+{
+  "id": "api:async_llm",
+  "type": "api",
+  "category": "vllm",
+  "name": "AsyncLLM",
+  "summary": "vLLM异步引擎类，提供异步推理接口，支持流式输出、多客户端并发和弹性扩展",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/engine/async_llm.py",
+      "lines": "71-1072"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_V1_MULTIPROCESSING",
+    "VLLM_LOG_STATS_INTERVAL",
+    "VLLM_V1_OUTPUT_PROC_CHUNK_SIZE"
+  ],
+  "related_apis": [
+    "LLMEngine",
+    "EngineCoreClient",
+    "RequestOutputCollector",
+    "StreamingInput"
+  ],
+  "related_features": [
+    "async_scheduling",
+    "continuous_batching",
+    "elastic_ep",
+    "kv_transfer"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "generate()异步生成",
+        "encode()编码请求",
+        "abort()取消请求",
+        "scale_elastic_ep()弹性扩展"
+      ],
+      "memory_impact": "支持sleep/wake模式，可动态释放和恢复显存",
+      "throughput_impact": "异步调度优化，支持多客户端并发",
+      "latency_impact": "流式输出降低首token延迟，异步处理减少阻塞",
+      "test_cases": [
+        {
+          "name": "异步生成测试",
+          "description": ""
+        },
+        {
+          "name": "流式输出测试",
+          "description": ""
+        },
+        {
+          "name": "多客户端并发测试",
+          "description": ""
+        },
+        {
+          "name": "弹性扩展测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有HuggingFace transformers模型",
+        "多模态模型",
+        "MoE模型"
+      ],
+      "enable_config": "from_engine_args()或from_vllm_config()创建实例",
+      "unsuitable_scenarios": [
+        "需要同步接口的离线批处理(推荐使用LLMEngine)"
+      ],
+      "best_practices": [
+        "使用generate()的AsyncGenerator接口",
+        "合理设置stream_interval",
+        "启用async_scheduling优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/engine/async_llm.py:71-1072",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "generate()生成逻辑",
+        "_run_output_handler()输出处理",
+        "scale_elastic_ep()弹性扩展"
+      ],
+      "affected_features": [
+        "异步调度",
+        "流式输出",
+        "弹性扩展"
+      ]
+    },
+    "design": {
+      "principle": "基于asyncio的异步架构，后台output_handler任务持续处理输出，支持流式输入和弹性扩展",
+      "theory_analysis": "异步非阻塞设计，最大化GPU利用率，支持多客户端并发",
+      "design_decisions": [
+        {
+          "decision": "使用AsyncGenerator接口",
+          "reason": ""
+        },
+        {
+          "decision": "支持流式输入StreamingInput",
+          "reason": ""
+        },
+        {
+          "decision": "集成弹性扩展ElasticEP",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "eb544c9bf0c15cfc844f5c0d442093539fdedf084ee7f2ca73b103e1ff96314c",
+  "knowledge_domain": "vllm-upstream"
+}

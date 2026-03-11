@@ -1,0 +1,113 @@
+{
+  "id": "api:ascend_multi_head_latent_attention",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMultiHeadLatentAttention",
+  "summary": "昇腾多头潜在注意力层，实现DeepSeek-V2/V3的MLA注意力机制",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/mla.py",
+      "lines": "66-154"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "IndexerWrapper",
+    "MLAAttention",
+    "MultiHeadLatentAttentionWrapper"
+  ],
+  "related_features": [
+    "mla_attention",
+    "deepseek_v2",
+    "deepseek_v3"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行MLA计算",
+        "process_weights_after_loading()处理权重"
+      ],
+      "memory_impact": "使用压缩KV Cache，内存效率高",
+      "throughput_impact": "MLA压缩提升吞吐量",
+      "latency_impact": "优化的MLA kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "MLA前向测试",
+          "description": ""
+        },
+        {
+          "name": "Indexer测试",
+          "description": ""
+        },
+        {
+          "name": "权重处理测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2",
+        "DeepSeek-V3",
+        "DeepSeek-V3-0324"
+      ],
+      "enable_config": "自动检测MLA模型启用",
+      "unsuitable_scenarios": [
+        "非MLA架构模型"
+      ],
+      "best_practices": [
+        "启用shared_expert_dp优化",
+        "配置Indexer"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/mla.py:66-154",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()计算逻辑",
+        "权重处理逻辑"
+      ],
+      "affected_features": [
+        "MLA计算",
+        "KV Cache压缩"
+      ]
+    },
+    "design": {
+      "principle": "继承MultiHeadLatentAttentionWrapper，适配NPU",
+      "theory_analysis": "使用潜在表示压缩KV Cache，减少内存和计算",
+      "design_decisions": [
+        {
+          "decision": "支持Indexer加速",
+          "reason": ""
+        },
+        {
+          "decision": "支持shared_expert_dp",
+          "reason": ""
+        },
+        {
+          "decision": "使用自定义op",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "7361c72a115451d6b0509525b71838fde8fb2ea2b9df4dc278d7e41496fd22bf",
+  "knowledge_domain": "vllm-ascend-core"
+}

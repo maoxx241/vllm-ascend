@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:489
-- read_ref: vllm/vllm/envs.py:80, vllm/vllm/envs.py:489, vllm/vllm/envs.py:490
-- effect_ref: vllm/vllm/envs.py:80, vllm/vllm/envs.py:489, vllm/vllm/envs.py:490
+- definition_ref: vllm/envs.py:492
+- read_ref: vllm/vllm/envs.py:80, vllm/vllm/envs.py:492, vllm/vllm/envs.py:493
+- effect_ref: vllm/vllm/envs.py:80, vllm/vllm/envs.py:492, vllm/vllm/envs.py:493
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:925
-- read_ref: vllm/vllm/config/cache.py:49, vllm/vllm/config/cache.py:154, vllm/vllm/config/cache.py:157
-- effect_ref: vllm/vllm/config/cache.py:49, vllm/vllm/config/cache.py:154, vllm/vllm/config/cache.py:157
+- definition_ref: vllm/engine/arg_utils.py:924
+- read_ref: vllm/vllm/config/cache.py:49, vllm/vllm/config/cache.py:165, vllm/vllm/config/cache.py:168
+- effect_ref: vllm/vllm/config/cache.py:49, vllm/vllm/config/cache.py:165, vllm/vllm/config/cache.py:168
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 运行期 OOM、服务重启或显存不足告警
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:887
+- definition_ref: vllm/engine/arg_utils.py:886
 - read_ref: vllm/vllm/config/parallel.py:179, vllm/vllm/engine/arg_utils.py:414, vllm/vllm/engine/arg_utils.py:414
 - effect_ref: vllm/vllm/v1/worker/ubatch_utils.py:46
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: connector 超时; P/D 节点路由异常
 - value_failure_signals: connector 超时; P/D 节点路由异常
 - recommendation: 先验证连接器与地址，再调并行参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

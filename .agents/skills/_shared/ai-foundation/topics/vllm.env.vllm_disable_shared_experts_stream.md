@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1502
-- read_ref: vllm/vllm/envs.py:226, vllm/vllm/envs.py:1502, vllm/vllm/envs.py:1503
-- effect_ref: vllm/vllm/model_executor/layers/fused_moe/layer.py:346
+- definition_ref: vllm/envs.py:1514
+- read_ref: vllm/vllm/envs.py:227, vllm/vllm/envs.py:1514, vllm/vllm/envs.py:1515
+- effect_ref: vllm/vllm/model_executor/layers/fused_moe/runner/default_moe_runner.py:183
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

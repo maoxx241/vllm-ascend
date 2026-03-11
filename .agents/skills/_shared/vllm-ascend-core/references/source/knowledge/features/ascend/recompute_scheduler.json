@@ -1,0 +1,128 @@
+{
+  "id": "feature:recompute_scheduler",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Recompute Scheduler",
+  "summary": "支持请求重计算的调度器，在PD disaggregation场景下处理KV cache加载失败等异常情况",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/core/recompute_scheduler.py",
+      "lines": "1-938"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "RecomputeScheduler",
+    "RecomputeSchedulerOutput",
+    "RecomputeReqInfo"
+  ],
+  "related_features": [
+    "feature:pd_disaggregation",
+    "feature:dynamic_batch_scheduler"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与KV transfer集成测试",
+        "KV cache加载失败场景测试",
+        "Preemption和recompute交互测试"
+      ],
+      "memory_impact": "无直接影响，但recompute会增加计算开销",
+      "throughput_impact": "异常场景下保证服务可用性，正常场景无影响",
+      "latency_impact": "recompute请求延迟增加",
+      "test_cases": [
+        {
+          "name": "测试KV load失败时的recompute流程",
+          "description": ""
+        },
+        {
+          "name": "测试is_mtp_kv_consumer场景的placeholder token处理",
+          "description": ""
+        },
+        {
+          "name": "测试preempted request的recompute逻辑",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "additional_config: {recompute_scheduler_enable: true}",
+      "unsuitable_scenarios": [
+        "非PD disaggregation场景",
+        "内存充足无需preemption的场景"
+      ],
+      "best_practices": [
+        "PD场景Decode节点启用",
+        "配合KV connector使用",
+        "监控recompute频率"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "RecomputeScheduler：调度器主类",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "RecomputeReqInfo：重计算请求信息",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "schedule()：调度逻辑，包含recompute处理",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展recompute触发条件",
+        "优化recompute策略"
+      ],
+      "affected_features": [
+        "请求调度流程",
+        "KV cache管理",
+        "Preemption处理"
+      ]
+    },
+    "design": {
+      "principle": "在PD disaggregation场景，当Decode节点无法加载Prefill节点的KV cache时，通过recompute重新计算，保证服务可用性。",
+      "theory_analysis": "KV cache传输可能因网络问题失败。Recompute机制允许Decode节点丢弃失败的请求，通知客户端重新发起，避免服务中断。",
+      "design_decisions": [
+        {
+          "decision": "继承vLLM Scheduler：复用基础调度逻辑",
+          "reason": ""
+        },
+        {
+          "decision": "RecomputeReqInfo：携带重计算所需信息",
+          "reason": ""
+        },
+        {
+          "decision": "is_mtp_kv_consumer：MTP场景的特殊处理",
+          "reason": ""
+        },
+        {
+          "decision": "placeholder token：确保graph兼容性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "70e28c76f09e472551f58edfbb1e92da11220651b22a54dded0dce2af3d19ba4",
+  "knowledge_domain": "vllm-ascend-core"
+}

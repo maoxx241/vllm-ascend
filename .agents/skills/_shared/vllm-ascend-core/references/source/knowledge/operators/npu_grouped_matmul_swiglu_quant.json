@@ -1,0 +1,123 @@
+{
+  "id": "operator:npu_grouped_matmul_swiglu_quant",
+  "type": "operator",
+  "category": "moe",
+  "name": "npu_grouped_matmul_swiglu_quant",
+  "summary": "NPU分组矩阵乘法SwiGLU量化融合算子，将MoE的gate_up投影、SwiGLU激活和量化融合为单一操作。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_mlp.py",
+      "lines": "152-173, 257-278"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "torch_npu.npu_grouped_matmul_swiglu_quant",
+    "torch_npu.npu_grouped_matmul_swiglu_quant_v2",
+    "torch.ops._C_ascend.grouped_matmul_swiglu_quant_weight_nz_tensor_list"
+  ],
+  "related_features": [
+    "moe",
+    "swiglu",
+    "w8a8_quantization",
+    "fusion"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与group_list配合处理专家分组",
+        "与pertoken_scale配合量化"
+      ],
+      "memory_impact": "融合减少中间张量",
+      "throughput_impact": "融合gate_up和swiglu提升吞吐",
+      "latency_impact": "单算子完成投影和激活",
+      "test_cases": [
+        {
+          "name": "MC2通信模式",
+          "description": ""
+        },
+        {
+          "name": "非MC2模式",
+          "description": ""
+        },
+        {
+          "name": "MXFP量化模式(A5)",
+          "description": ""
+        },
+        {
+          "name": "dynamic_eplb模式",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有W8A8量化的MoE模型"
+      ],
+      "enable_config": "quantization=W8A8_DYNAMIC且MoE模型",
+      "unsuitable_scenarios": [
+        "非量化MoE模型"
+      ],
+      "best_practices": [
+        "权重使用NZ格式",
+        "group_list类型正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "quant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "DeviceOperator.npu_grouped_matmul_swiglu_quant",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "dequant_mode/quant_mode(A5)",
+        "weight_scale_dtype(A5)"
+      ],
+      "affected_features": [
+        "MoE计算效率",
+        "量化精度"
+      ]
+    },
+    "design": {
+      "principle": "将分组矩阵乘法、SwiGLU激活和量化融合，减少内存访问和kernel启动",
+      "theory_analysis": "MoE的gate_up投影后接SwiGLU激活，融合可减少中间结果存储",
+      "design_decisions": [
+        {
+          "decision": "支持NZ格式权重",
+          "reason": ""
+        },
+        {
+          "decision": "A5支持MXFP8量化",
+          "reason": ""
+        },
+        {
+          "decision": "支持bias输入",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "683890ded5b743ee17bbb877558f4205a91d71f58e984a88d53493c4288f5bb7",
+  "knowledge_domain": "vllm-ascend-core"
+}

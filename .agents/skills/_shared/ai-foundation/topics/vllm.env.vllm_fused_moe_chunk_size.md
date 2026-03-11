@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:801
-- read_ref: vllm/vllm/envs.py:56, vllm/vllm/envs.py:801, vllm/vllm/envs.py:802
-- effect_ref: vllm/vllm/model_executor/layers/fused_moe/modular_kernel.py:875
+- definition_ref: vllm/envs.py:813
+- read_ref: vllm/vllm/envs.py:56, vllm/vllm/envs.py:813, vllm/vllm/envs.py:814
+- effect_ref: vllm/vllm/model_executor/layers/fused_moe/modular_kernel.py:877
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

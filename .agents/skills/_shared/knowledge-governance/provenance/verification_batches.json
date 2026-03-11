@@ -1,0 +1,931 @@
+{
+  "generated_at": "2026-03-11T07:48:53+00:00",
+  "current_batch_id": null,
+  "batches": [
+    {
+      "batch_id": "B001",
+      "name": "feature_config_design-1",
+      "task_family": "deployment+performance+design",
+      "categories": [
+        "configs",
+        "devices"
+      ],
+      "status": "ready",
+      "entry_count": 18,
+      "completed_entries": 18,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/configs/ascend_compilation_config.json",
+        "vllm-ascend-core/configs/config_compatibility_matrix.json",
+        "vllm-ascend-core/configs/dump_config_path.json",
+        "vllm-ascend-core/configs/enable_kv_nz.json",
+        "vllm-ascend-core/configs/enable_shared_expert_dp.json",
+        "vllm-ascend-core/configs/eplb_config.json",
+        "vllm-ascend-core/configs/finegrained_tp_config.json",
+        "vllm-ascend-core/configs/layer_sharding.json",
+        "vllm-ascend-core/configs/multistream_overlap_gate.json",
+        "vllm-ascend-core/configs/multistream_overlap_shared_expert.json",
+        "vllm-ascend-core/configs/num_head_replica.json",
+        "vllm-ascend-core/configs/pd_head_ratio.json",
+        "vllm-ascend-core/configs/pd_tp_ratio.json",
+        "vllm-ascend-core/configs/recompute_scheduler_enable.json",
+        "vllm-ascend-core/configs/weight_prefetch_config.json",
+        "vllm-ascend-core/configs/xlite_graph_config.json",
+        "vllm-ascend-core/devices/A2.json",
+        "vllm-ascend-core/devices/A3.json"
+      ],
+      "source_ids": [
+        "config:ascend_compilation_config",
+        "config:config_compatibility_matrix",
+        "config:dump_config_path",
+        "config:enable_kv_nz",
+        "config:enable_shared_expert_dp",
+        "config:eplb_config",
+        "config:finegrained_tp_config",
+        "config:layer_sharding",
+        "config:multistream_overlap_gate",
+        "config:multistream_overlap_shared_expert",
+        "config:num_head_replica",
+        "config:pd_head_ratio",
+        "config:pd_tp_ratio",
+        "config:recompute_scheduler_enable",
+        "config:weight_prefetch_config",
+        "config:xlite_graph_config",
+        "device:a2",
+        "device:a3"
+      ],
+      "design_analysis_entries": [
+        "config:ascend_compilation_config",
+        "config:config_compatibility_matrix",
+        "config:dump_config_path",
+        "config:enable_kv_nz",
+        "config:enable_shared_expert_dp",
+        "config:eplb_config",
+        "config:finegrained_tp_config",
+        "config:layer_sharding",
+        "config:multistream_overlap_gate",
+        "config:multistream_overlap_shared_expert",
+        "config:num_head_replica",
+        "config:pd_head_ratio",
+        "config:pd_tp_ratio",
+        "config:recompute_scheduler_enable",
+        "config:weight_prefetch_config",
+        "config:xlite_graph_config",
+        "device:a2",
+        "device:a3"
+      ]
+    },
+    {
+      "batch_id": "B002",
+      "name": "feature_config_design-2",
+      "task_family": "deployment+performance+design",
+      "categories": [
+        "devices",
+        "features/ascend"
+      ],
+      "status": "ready",
+      "entry_count": 18,
+      "completed_entries": 18,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/devices/A5.json",
+        "vllm-ascend-core/devices/_310P.json",
+        "vllm-ascend-core/features/ascend/acl_graph.json",
+        "integration-core/features/ascend/ascend_eagle_proposer.json",
+        "integration-core/features/ascend/ascend_speculative_decoding.json",
+        "vllm-ascend-core/features/ascend/balance_scheduling.json",
+        "vllm-ascend-core/features/ascend/batch_invariant.json",
+        "integration-core/features/ascend/context_parallel.json",
+        "vllm-ascend-core/features/ascend/device_adaptor.json",
+        "vllm-ascend-core/features/ascend/dsa_cp.json",
+        "vllm-ascend-core/features/ascend/dynamic_batch_scheduler.json",
+        "integration-core/features/ascend/dynamic_eplb.json",
+        "vllm-ascend-core/features/ascend/eplb.json",
+        "vllm-ascend-core/features/ascend/finegrained_tp.json",
+        "vllm-ascend-core/features/ascend/flashcomm1.json",
+        "vllm-ascend-core/features/ascend/flashcomm2.json",
+        "vllm-ascend-core/features/ascend/fused_mc2.json",
+        "vllm-ascend-core/features/ascend/graph_fusion_passes.json"
+      ],
+      "source_ids": [
+        "device:a5",
+        "device:310_p",
+        "feature:acl_graph",
+        "feature:ascend_eagle_proposer",
+        "feature:ascend_speculative_decoding",
+        "feature:balance_scheduling",
+        "feature:batch_invariant",
+        "feature:context_parallel",
+        "feature:device_adaptor",
+        "feature:dsa_cp",
+        "feature:dynamic_batch_scheduler",
+        "feature:dynamic_eplb",
+        "feature:eplb",
+        "feature:finegrained_tp",
+        "feature:flashcomm1",
+        "feature:flashcomm2",
+        "feature:fused_mc2",
+        "feature:graph_fusion_passes"
+      ],
+      "design_analysis_entries": [
+        "device:a5",
+        "device:310_p",
+        "feature:acl_graph",
+        "feature:ascend_eagle_proposer",
+        "feature:ascend_speculative_decoding",
+        "feature:balance_scheduling",
+        "feature:batch_invariant",
+        "feature:context_parallel",
+        "feature:device_adaptor",
+        "feature:dsa_cp",
+        "feature:dynamic_batch_scheduler",
+        "feature:dynamic_eplb",
+        "feature:eplb",
+        "feature:finegrained_tp",
+        "feature:flashcomm1",
+        "feature:flashcomm2",
+        "feature:fused_mc2",
+        "feature:graph_fusion_passes"
+      ]
+    },
+    {
+      "batch_id": "B003",
+      "name": "feature_config_design-3",
+      "task_family": "deployment+performance+design",
+      "categories": [
+        "features/ascend",
+        "features/vllm"
+      ],
+      "status": "ready",
+      "entry_count": 18,
+      "completed_entries": 18,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/features/ascend/kv_nz_format.json",
+        "integration-core/features/ascend/kv_transfer_ascend.json",
+        "vllm-ascend-core/features/ascend/layer_sharding.json",
+        "integration-core/features/ascend/lora_ascend.json",
+        "vllm-ascend-core/features/ascend/matmul_allreduce.json",
+        "vllm-ascend-core/features/ascend/mc2_communication.json",
+        "vllm-ascend-core/features/ascend/mlapo.json",
+        "vllm-ascend-core/features/ascend/multistream_overlap.json",
+        "vllm-ascend-core/features/ascend/pd_disaggregation.json",
+        "vllm-ascend-core/features/ascend/recompute_scheduler.json",
+        "vllm-ascend-core/features/ascend/sequence_parallelism.json",
+        "vllm-ascend-core/features/ascend/shared_expert_dp.json",
+        "vllm-ascend-core/features/ascend/sleep_mode_npu.json",
+        "vllm-ascend-core/features/ascend/weight_prefetch.json",
+        "vllm-ascend-core/features/ascend/xlite_graph.json",
+        "vllm-upstream/features/vllm/async_scheduling.json",
+        "vllm-upstream/features/vllm/chunked_prefill.json",
+        "vllm-upstream/features/vllm/continuous_batching.json"
+      ],
+      "source_ids": [
+        "feature:kv_nz_format",
+        "feature:kv_transfer_ascend",
+        "feature:layer_sharding",
+        "feature:lora_ascend",
+        "feature:matmul_allreduce",
+        "feature:mc2_communication",
+        "feature:mlapo",
+        "feature:multistream_overlap",
+        "feature:pd_disaggregation",
+        "feature:recompute_scheduler",
+        "feature:sequence_parallelism",
+        "feature:shared_expert_dp",
+        "feature:sleep_mode_npu",
+        "feature:weight_prefetch",
+        "feature:xlite_graph",
+        "feature:async_scheduling",
+        "feature:chunked_prefill",
+        "feature:continuous_batching"
+      ],
+      "design_analysis_entries": [
+        "feature:kv_nz_format",
+        "feature:kv_transfer_ascend",
+        "feature:layer_sharding",
+        "feature:lora_ascend",
+        "feature:matmul_allreduce",
+        "feature:mc2_communication",
+        "feature:mlapo",
+        "feature:multistream_overlap",
+        "feature:pd_disaggregation",
+        "feature:recompute_scheduler",
+        "feature:sequence_parallelism",
+        "feature:shared_expert_dp",
+        "feature:sleep_mode_npu",
+        "feature:weight_prefetch",
+        "feature:xlite_graph",
+        "feature:async_scheduling",
+        "feature:chunked_prefill",
+        "feature:continuous_batching"
+      ]
+    },
+    {
+      "batch_id": "B004",
+      "name": "feature_config_design-4",
+      "task_family": "deployment+performance+design",
+      "categories": [
+        "features/vllm",
+        "quantization"
+      ],
+      "status": "ready",
+      "entry_count": 18,
+      "completed_entries": 18,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-upstream/features/vllm/cuda_graph.json",
+        "vllm-upstream/features/vllm/fused_moe.json",
+        "vllm-upstream/features/vllm/kv_transfer.json",
+        "vllm-upstream/features/vllm/lora.json",
+        "vllm-upstream/features/vllm/multi_modal.json",
+        "vllm-upstream/features/vllm/paged_attention.json",
+        "vllm-upstream/features/vllm/prefix_caching.json",
+        "vllm-upstream/features/vllm/quantization.json",
+        "vllm-upstream/features/vllm/sleep_mode.json",
+        "vllm-upstream/features/vllm/speculative_decoding.json",
+        "vllm-ascend-core/quantization/w4a16.json",
+        "vllm-ascend-core/quantization/w4a4_flatquant.json",
+        "vllm-ascend-core/quantization/w4a4_laos_dynamic.json",
+        "vllm-ascend-core/quantization/w4a8.json",
+        "vllm-ascend-core/quantization/w8a16.json",
+        "vllm-ascend-core/quantization/w8a8_dynamic.json",
+        "vllm-ascend-core/quantization/w8a8_mxfp8.json",
+        "integration-core/quantization/w8a8_pdmix.json"
+      ],
+      "source_ids": [
+        "feature:cuda_graph",
+        "feature:fused_moe",
+        "feature:kv_transfer",
+        "feature:lora",
+        "feature:multi_modal",
+        "feature:paged_attention",
+        "feature:prefix_caching",
+        "feature:quantization",
+        "feature:sleep_mode",
+        "feature:speculative_decoding",
+        "quantization:w4_a16",
+        "quantization:w4_a4_flatquant",
+        "quantization:w4_a4_laos_dynamic",
+        "quantization:w4_a8",
+        "quantization:w8_a16",
+        "quantization:w8_a8_dynamic",
+        "quantization:w8_a8_mxfp8",
+        "quantization:w8_a8_pdmix"
+      ],
+      "design_analysis_entries": [
+        "feature:cuda_graph",
+        "feature:fused_moe",
+        "feature:kv_transfer",
+        "feature:lora",
+        "feature:multi_modal",
+        "feature:paged_attention",
+        "feature:prefix_caching",
+        "feature:quantization",
+        "feature:sleep_mode",
+        "feature:speculative_decoding",
+        "quantization:w4_a16",
+        "quantization:w4_a4_flatquant",
+        "quantization:w4_a4_laos_dynamic",
+        "quantization:w4_a8",
+        "quantization:w8_a16",
+        "quantization:w8_a8_dynamic",
+        "quantization:w8_a8_mxfp8",
+        "quantization:w8_a8_pdmix"
+      ]
+    },
+    {
+      "batch_id": "B005",
+      "name": "feature_config_design-5",
+      "task_family": "deployment+performance+design",
+      "categories": [
+        "quantization"
+      ],
+      "status": "ready",
+      "entry_count": 1,
+      "completed_entries": 1,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/quantization/w8a8_static.json"
+      ],
+      "source_ids": [
+        "quantization:w8_a8"
+      ],
+      "design_analysis_entries": [
+        "quantization:w8_a8"
+      ]
+    },
+    {
+      "batch_id": "B006",
+      "name": "api_architecture-1",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/apis/A5DeviceAdaptor.json",
+        "integration-core/apis/ACLGraphWrapper.json",
+        "vllm-ascend-core/apis/AllGatherMethod.json",
+        "vllm-ascend-core/apis/AllToAllMethod.json",
+        "integration-core/apis/AscendAttentionBackend.json",
+        "vllm-ascend-core/apis/AscendColumnParallelLinear.json",
+        "vllm-ascend-core/apis/AscendDeepseekScalingRotaryEmbedding.json",
+        "integration-core/apis/AscendEagleProposer.json",
+        "integration-core/apis/AscendFusedMoE.json",
+        "vllm-ascend-core/apis/AscendMLABackend.json"
+      ],
+      "source_ids": [
+        "api:a5_device_adaptor",
+        "api:aclgraph_wrapper",
+        "api:all_gather_method",
+        "api:all_to_all_method",
+        "api:ascend_attention_backend",
+        "api:ascend_column_parallel_linear",
+        "api:ascend_deepseek_scaling_rotary_embedding",
+        "api:ascend_eagle_proposer",
+        "api:ascend_fused_mo_e",
+        "api:ascend_mlabackend"
+      ],
+      "design_analysis_entries": [
+        "api:a5_device_adaptor",
+        "api:aclgraph_wrapper",
+        "api:all_gather_method",
+        "api:all_to_all_method",
+        "api:ascend_attention_backend",
+        "api:ascend_column_parallel_linear",
+        "api:ascend_deepseek_scaling_rotary_embedding",
+        "api:ascend_eagle_proposer",
+        "api:ascend_fused_mo_e",
+        "api:ascend_mlabackend"
+      ]
+    },
+    {
+      "batch_id": "B007",
+      "name": "api_architecture-2",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/apis/AscendMLAImpl.json",
+        "vllm-ascend-core/apis/AscendMRotaryEmbedding.json",
+        "integration-core/apis/AscendMedusaProposer.json",
+        "vllm-ascend-core/apis/AscendMergedColumnParallelLinear.json",
+        "vllm-ascend-core/apis/AscendMultiHeadLatentAttention.json",
+        "integration-core/apis/AscendNgramProposer.json",
+        "vllm-ascend-core/apis/AscendQKVParallelLinear.json",
+        "vllm-ascend-core/apis/AscendReplicatedLinear.json",
+        "vllm-ascend-core/apis/AscendRotaryEmbedding.json",
+        "vllm-ascend-core/apis/AscendRowParallelLinear.json"
+      ],
+      "source_ids": [
+        "api:ascend_mlaimpl",
+        "api:ascend_mrotary_embedding",
+        "api:ascend_medusa_proposer",
+        "api:ascend_merged_column_parallel_linear",
+        "api:ascend_multi_head_latent_attention",
+        "api:ascend_ngram_proposer",
+        "api:ascend_qkvparallel_linear",
+        "api:ascend_replicated_linear",
+        "api:ascend_rotary_embedding",
+        "api:ascend_row_parallel_linear"
+      ],
+      "design_analysis_entries": [
+        "api:ascend_mlaimpl",
+        "api:ascend_mrotary_embedding",
+        "api:ascend_medusa_proposer",
+        "api:ascend_merged_column_parallel_linear",
+        "api:ascend_multi_head_latent_attention",
+        "api:ascend_ngram_proposer",
+        "api:ascend_qkvparallel_linear",
+        "api:ascend_replicated_linear",
+        "api:ascend_rotary_embedding",
+        "api:ascend_row_parallel_linear"
+      ]
+    },
+    {
+      "batch_id": "B008",
+      "name": "api_architecture-3",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/apis/AscendSFABackend.json",
+        "vllm-ascend-core/apis/AscendSFAImpl.json",
+        "vllm-ascend-core/apis/AscendSFAMetadataBuilder.json",
+        "vllm-ascend-core/apis/AscendSampler.json",
+        "integration-core/apis/AscendSuffixDecodingProposer.json",
+        "integration-core/apis/AscendW4A16FusedMoEMethod.json",
+        "integration-core/apis/AscendW8A8DynamicFusedMoEMethod.json",
+        "integration-core/apis/AscendW8A8DynamicLinearMethod.json",
+        "integration-core/apis/AscendW8A8LinearMethod.json",
+        "vllm-ascend-core/apis/AscendYaRNRotaryEmbedding.json"
+      ],
+      "source_ids": [
+        "api:ascend_sfabackend",
+        "api:ascend_sfaimpl",
+        "api:ascend_sfametadata_builder",
+        "api:ascend_sampler",
+        "api:ascend_suffix_decoding_proposer",
+        "api:ascend_w4_a16_fused_mo_emethod",
+        "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+        "api:ascend_w8_a8_dynamic_linear_method",
+        "api:ascend_w8_a8_linear_method",
+        "api:ascend_ya_rnrotary_embedding"
+      ],
+      "design_analysis_entries": [
+        "api:ascend_sfabackend",
+        "api:ascend_sfaimpl",
+        "api:ascend_sfametadata_builder",
+        "api:ascend_sampler",
+        "api:ascend_suffix_decoding_proposer",
+        "api:ascend_w4_a16_fused_mo_emethod",
+        "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+        "api:ascend_w8_a8_dynamic_linear_method",
+        "api:ascend_w8_a8_linear_method",
+        "api:ascend_ya_rnrotary_embedding"
+      ]
+    },
+    {
+      "batch_id": "B009",
+      "name": "api_architecture-4",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-upstream/apis/AsyncLLM.json",
+        "vllm-upstream/apis/AsyncLLMEngine.json",
+        "vllm-ascend-core/apis/BaseDeviceAdaptor.json",
+        "integration-core/apis/CaMemAllocator.json",
+        "vllm-ascend-core/apis/DeviceOperator.json",
+        "vllm-ascend-core/apis/EplbUpdator.json",
+        "vllm-ascend-core/apis/FlashCommon3Context.json",
+        "integration-core/apis/FusedMC2Method.json",
+        "vllm-upstream/apis/GPUWorker.json",
+        "vllm-ascend-core/apis/IndexerWrapper.json"
+      ],
+      "source_ids": [
+        "api:async_llm",
+        "api:async_llmengine",
+        "api:base_device_adaptor",
+        "api:ca_mem_allocator",
+        "api:device_operator",
+        "api:eplb_updator",
+        "api:flash_common3_context",
+        "api:fused_mc2_method",
+        "api:gpuworker",
+        "api:indexer_wrapper"
+      ],
+      "design_analysis_entries": [
+        "api:async_llm",
+        "api:async_llmengine",
+        "api:base_device_adaptor",
+        "api:ca_mem_allocator",
+        "api:device_operator",
+        "api:eplb_updator",
+        "api:flash_common3_context",
+        "api:fused_mc2_method",
+        "api:gpuworker",
+        "api:indexer_wrapper"
+      ]
+    },
+    {
+      "batch_id": "B010",
+      "name": "api_architecture-5",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-upstream/apis/LLMEngine.json",
+        "vllm-ascend-core/apis/MC2Method.json",
+        "vllm-ascend-core/apis/MoECommMethod.json",
+        "vllm-upstream/apis/ModelRunner.json",
+        "vllm-ascend-core/apis/NPUCommunicator.json",
+        "integration-core/apis/NPUInputBatch.json",
+        "integration-core/apis/NPUModelRunner.json",
+        "integration-core/apis/NPUModelRunnerV2.json",
+        "vllm-ascend-core/apis/NPUWorker.json",
+        "vllm-ascend-core/apis/PCPManager.json"
+      ],
+      "source_ids": [
+        "api:llmengine",
+        "api:mc2_method",
+        "api:mo_ecomm_method",
+        "api:model_runner",
+        "api:npucommunicator",
+        "api:npuinput_batch",
+        "api:npumodel_runner",
+        "api:npumodel_runner_v2",
+        "api:npuworker",
+        "api:pcpmanager"
+      ],
+      "design_analysis_entries": [
+        "api:llmengine",
+        "api:mc2_method",
+        "api:mo_ecomm_method",
+        "api:model_runner",
+        "api:npucommunicator",
+        "api:npuinput_batch",
+        "api:npumodel_runner",
+        "api:npumodel_runner_v2",
+        "api:npuworker",
+        "api:pcpmanager"
+      ]
+    },
+    {
+      "batch_id": "B011",
+      "name": "api_architecture-6",
+      "task_family": "model_adaptation+design+debugging",
+      "categories": [
+        "apis"
+      ],
+      "status": "ready",
+      "entry_count": 8,
+      "completed_entries": 8,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-upstream/apis/RequestOutput.json",
+        "vllm-upstream/apis/SamplingParams.json",
+        "vllm-upstream/apis/V1AsyncLLM.json",
+        "vllm-upstream/apis/V1LLMEngine.json",
+        "vllm-ascend-core/apis/VllmEplbAdaptor.json",
+        "vllm-ascend-core/apis/XliteWrapper.json",
+        "vllm-ascend-core/apis/select_moe_comm_method.json",
+        "vllm-ascend-core/apis/set_ascend_forward_context.json"
+      ],
+      "source_ids": [
+        "api:request_output",
+        "api:sampling_params",
+        "api:v1_async_llm",
+        "api:v1_llmengine",
+        "api:vllm_eplb_adaptor",
+        "api:xlite_wrapper",
+        "api:select_moe_comm_method",
+        "api:set_ascend_forward_context"
+      ],
+      "design_analysis_entries": [
+        "api:request_output",
+        "api:sampling_params",
+        "api:v1_async_llm",
+        "api:v1_llmengine",
+        "api:vllm_eplb_adaptor",
+        "api:xlite_wrapper",
+        "api:select_moe_comm_method",
+        "api:set_ascend_forward_context"
+      ]
+    },
+    {
+      "batch_id": "B012",
+      "name": "operator_perf-1",
+      "task_family": "op_development+performance+design",
+      "categories": [
+        "comm_groups"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/comm_groups/dynamic_eplb.json",
+        "vllm-ascend-core/comm_groups/embed_tp.json",
+        "integration-core/comm_groups/fc3_quant_x.json",
+        "vllm-ascend-core/comm_groups/flashcomm2_odp.json",
+        "vllm-ascend-core/comm_groups/flashcomm2_otp.json",
+        "vllm-ascend-core/comm_groups/lmtp.json",
+        "vllm-ascend-core/comm_groups/mc2.json",
+        "vllm-ascend-core/comm_groups/mlp_tp.json",
+        "vllm-ascend-core/comm_groups/otp.json",
+        "vllm-ascend-core/comm_groups/p_tp.json"
+      ],
+      "source_ids": [
+        "comm_group:dynamic_eplb",
+        "comm_group:embed_tp",
+        "comm_group:fc3_quant_x",
+        "comm_group:flashcomm2_odp",
+        "comm_group:flashcomm2_otp",
+        "comm_group:lmtp",
+        "comm_group:mc2",
+        "comm_group:mlp_tp",
+        "comm_group:otp",
+        "comm_group:p_tp"
+      ],
+      "design_analysis_entries": [
+        "comm_group:dynamic_eplb",
+        "comm_group:embed_tp",
+        "comm_group:fc3_quant_x",
+        "comm_group:flashcomm2_odp",
+        "comm_group:flashcomm2_otp",
+        "comm_group:lmtp",
+        "comm_group:mc2",
+        "comm_group:mlp_tp",
+        "comm_group:otp",
+        "comm_group:p_tp"
+      ]
+    },
+    {
+      "batch_id": "B013",
+      "name": "operator_perf-2",
+      "task_family": "op_development+performance+design",
+      "categories": [
+        "comm_groups",
+        "moe_comm_types",
+        "operators"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/comm_groups/shard_weight.json",
+        "vllm-ascend-core/moe_comm_types/allgather.json",
+        "vllm-ascend-core/moe_comm_types/alltoall.json",
+        "vllm-ascend-core/moe_comm_types/fused_mc2.json",
+        "vllm-ascend-core/moe_comm_types/mc2.json",
+        "vllm-ascend-core/operators/batch_matmul_transpose.json",
+        "vllm-ascend-core/operators/dispatch_ffn_combine.json",
+        "vllm-ascend-core/operators/dispatch_gmm_combine_decode.json",
+        "vllm-ascend-core/operators/mla_preprocess.json",
+        "integration-core/operators/npu_add_rms_norm_quant.json"
+      ],
+      "source_ids": [
+        "comm_group:shard_weight",
+        "moe_comm_type:allgather",
+        "moe_comm_type:alltoall",
+        "moe_comm_type:fused_mc2",
+        "moe_comm_type:mc2",
+        "operator:batch_matmul_transpose",
+        "operator:dispatch_ffn_combine",
+        "operator:dispatch_gmm_combine_decode",
+        "operator:mla_preprocess",
+        "operator:npu_add_rms_norm_quant"
+      ],
+      "design_analysis_entries": [
+        "comm_group:shard_weight",
+        "moe_comm_type:allgather",
+        "moe_comm_type:alltoall",
+        "moe_comm_type:fused_mc2",
+        "moe_comm_type:mc2",
+        "operator:batch_matmul_transpose",
+        "operator:dispatch_ffn_combine",
+        "operator:dispatch_gmm_combine_decode",
+        "operator:mla_preprocess",
+        "operator:npu_add_rms_norm_quant"
+      ]
+    },
+    {
+      "batch_id": "B014",
+      "name": "operator_perf-3",
+      "task_family": "op_development+performance+design",
+      "categories": [
+        "operators"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/operators/npu_convert_weight_to_int4pack.json",
+        "integration-core/operators/npu_dequant_swiglu_quant.json",
+        "vllm-ascend-core/operators/npu_dynamic_mx_quant.json",
+        "vllm-ascend-core/operators/npu_dynamic_quant.json",
+        "vllm-ascend-core/operators/npu_format_cast.json",
+        "integration-core/operators/npu_fused_infer_attention_score.json",
+        "integration-core/operators/npu_grouped_matmul.json",
+        "vllm-ascend-core/operators/npu_grouped_matmul_swiglu_quant.json",
+        "vllm-ascend-core/operators/npu_interleave_rope.json",
+        "vllm-ascend-core/operators/npu_kv_rmsnorm_rope_cache.json"
+      ],
+      "source_ids": [
+        "operator:npu_convert_weight_to_int4pack",
+        "operator:npu_dequant_swiglu_quant",
+        "operator:npu_dynamic_mx_quant",
+        "operator:npu_dynamic_quant",
+        "operator:npu_format_cast",
+        "operator:npu_fused_infer_attention_score",
+        "operator:npu_grouped_matmul",
+        "operator:npu_grouped_matmul_swiglu_quant",
+        "operator:npu_interleave_rope",
+        "operator:npu_kv_rmsnorm_rope_cache"
+      ],
+      "design_analysis_entries": [
+        "operator:npu_convert_weight_to_int4pack",
+        "operator:npu_dequant_swiglu_quant",
+        "operator:npu_dynamic_mx_quant",
+        "operator:npu_dynamic_quant",
+        "operator:npu_format_cast",
+        "operator:npu_fused_infer_attention_score",
+        "operator:npu_grouped_matmul",
+        "operator:npu_grouped_matmul_swiglu_quant",
+        "operator:npu_interleave_rope",
+        "operator:npu_kv_rmsnorm_rope_cache"
+      ]
+    },
+    {
+      "batch_id": "B015",
+      "name": "operator_perf-4",
+      "task_family": "op_development+performance+design",
+      "categories": [
+        "operators"
+      ],
+      "status": "ready",
+      "entry_count": 10,
+      "completed_entries": 10,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/operators/npu_lightning_indexer.json",
+        "vllm-ascend-core/operators/npu_moe_init_routing.json",
+        "vllm-ascend-core/operators/npu_moe_init_routing_v2.json",
+        "vllm-ascend-core/operators/npu_mrope.json",
+        "integration-core/operators/npu_paged_attention.json",
+        "vllm-ascend-core/operators/npu_quant_matmul.json",
+        "integration-core/operators/npu_reshape_and_cache.json",
+        "vllm-ascend-core/operators/npu_ring_mla.json",
+        "vllm-ascend-core/operators/npu_rotary_embedding.json",
+        "vllm-ascend-core/operators/npu_rotary_mul.json"
+      ],
+      "source_ids": [
+        "operator:npu_lightning_indexer",
+        "operator:npu_moe_init_routing",
+        "operator:npu_moe_init_routing_v2",
+        "operator:npu_mrope",
+        "operator:npu_paged_attention",
+        "operator:npu_quant_matmul",
+        "operator:npu_reshape_and_cache",
+        "operator:npu_ring_mla",
+        "operator:npu_rotary_embedding",
+        "operator:npu_rotary_mul"
+      ],
+      "design_analysis_entries": [
+        "operator:npu_lightning_indexer",
+        "operator:npu_moe_init_routing",
+        "operator:npu_moe_init_routing_v2",
+        "operator:npu_mrope",
+        "operator:npu_paged_attention",
+        "operator:npu_quant_matmul",
+        "operator:npu_reshape_and_cache",
+        "operator:npu_ring_mla",
+        "operator:npu_rotary_embedding",
+        "operator:npu_rotary_mul"
+      ]
+    },
+    {
+      "batch_id": "B016",
+      "name": "operator_perf-5",
+      "task_family": "op_development+performance+design",
+      "categories": [
+        "operators"
+      ],
+      "status": "ready",
+      "entry_count": 4,
+      "completed_entries": 4,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/operators/npu_scatter_nd_update_.json",
+        "integration-core/operators/npu_scatter_pa_kv_cache.json",
+        "vllm-ascend-core/operators/npu_sparse_flash_attention.json",
+        "vllm-ascend-core/operators/npu_swiglu.json"
+      ],
+      "source_ids": [
+        "operator:npu_scatter_nd_update",
+        "operator:npu_scatter_pa_kv_cache",
+        "operator:npu_sparse_flash_attention",
+        "operator:npu_swiglu"
+      ],
+      "design_analysis_entries": [
+        "operator:npu_scatter_nd_update",
+        "operator:npu_scatter_pa_kv_cache",
+        "operator:npu_sparse_flash_attention",
+        "operator:npu_swiglu"
+      ]
+    },
+    {
+      "batch_id": "B017",
+      "name": "env_runtime-1",
+      "task_family": "env_bootstrap+deployment+debugging",
+      "categories": [
+        "env_vars"
+      ],
+      "status": "ready",
+      "entry_count": 12,
+      "completed_entries": 12,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/env_vars/ASCEND_HOME_PATH.json",
+        "integration-core/env_vars/DYNAMIC_EPLB.json",
+        "vllm-ascend-core/env_vars/HCCL_SO_PATH.json",
+        "vllm-ascend-core/env_vars/MSMONITOR_USE_DAEMON.json",
+        "vllm-ascend-core/env_vars/SOC_VERSION.json",
+        "vllm-ascend-core/env_vars/TRITON_ALL_BLOCKS_PARALLEL.json",
+        "integration-core/env_vars/VLLM_ALLOW_EXPERT_LOAD_COLLECTING.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_BALANCE_SCHEDULING.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_CUSTOM_OP.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_FLASHCOMM1.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_FUSED_MC2.json"
+      ],
+      "source_ids": [
+        "env_var:ascend_home_path",
+        "env_var:dynamic_eplb",
+        "env_var:hccl_so_path",
+        "env_var:msmonitor_use_daemon",
+        "env_var:soc_version",
+        "env_var:triton_all_blocks_parallel",
+        "env_var:vllm_allow_expert_load_collecting",
+        "env_var:vllm_ascend_balance_scheduling",
+        "env_var:vllm_ascend_enable_context_parallel",
+        "env_var:vllm_ascend_enable_custom_op",
+        "env_var:vllm_ascend_enable_flashcomm1",
+        "env_var:vllm_ascend_enable_fused_mc2"
+      ],
+      "design_analysis_entries": [
+        "env_var:triton_all_blocks_parallel",
+        "env_var:vllm_ascend_enable_context_parallel"
+      ]
+    },
+    {
+      "batch_id": "B018",
+      "name": "env_runtime-2",
+      "task_family": "env_bootstrap+deployment+debugging",
+      "categories": [
+        "env_vars"
+      ],
+      "status": "ready",
+      "entry_count": 9,
+      "completed_entries": 9,
+      "pending_entries": 0,
+      "source_files": [
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE.json",
+        "integration-core/env_vars/VLLM_ASCEND_ENABLE_MLAPO.json",
+        "integration-core/env_vars/VLLM_ASCEND_ENABLE_NZ.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_PREFETCH_MLP_DOWN.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_ENABLE_PREFETCH_MLP_GATE_UP.json",
+        "integration-core/env_vars/VLLM_ASCEND_ENABLE_QUANT_COMM.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE.json",
+        "vllm-ascend-core/env_vars/VLLM_ASCEND_WEIGHT_PREFETCH_RATIO.json",
+        "vllm-upstream/env_vars/vllm_core_env.json"
+      ],
+      "source_ids": [
+        "env_var:vllm_ascend_enable_matmul_allreduce",
+        "env_var:vllm_ascend_enable_mlapo",
+        "env_var:vllm_ascend_enable_nz",
+        "env_var:vllm_ascend_enable_prefetch_mlp_down",
+        "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+        "env_var:vllm_ascend_enable_quant_comm",
+        "env_var:vllm_ascend_flashcomm2_parallel_size",
+        "env_var:vllm_ascend_weight_prefetch_ratio",
+        "env_var:vllm_core_env"
+      ],
+      "design_analysis_entries": [
+        "env_var:vllm_ascend_enable_quant_comm",
+        "env_var:vllm_ascend_flashcomm2_parallel_size"
+      ]
+    },
+    {
+      "batch_id": "B019",
+      "name": "relations_matrices_consistency",
+      "task_family": "global_consistency",
+      "categories": [
+        "relations",
+        "matrices"
+      ],
+      "status": "ready",
+      "entry_count": 0,
+      "completed_entries": 0,
+      "pending_entries": 0,
+      "source_files": [],
+      "source_ids": [],
+      "design_analysis_entries": [],
+      "supporting_files": [
+        "relations/combinations.json",
+        "relations/dependencies.json",
+        "relations/references.json",
+        "matrices/compatibility.json",
+        "matrices/performance.json",
+        "matrices/recommendations.json"
+      ]
+    }
+  ]
+}

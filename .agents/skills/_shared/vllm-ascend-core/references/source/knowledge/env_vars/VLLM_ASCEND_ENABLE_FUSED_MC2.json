@@ -1,0 +1,112 @@
+{
+  "id": "env_var:vllm_ascend_enable_fused_mc2",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_FUSED_MC2",
+  "summary": "控制融合MC2算子开关：0=默认ALLTOALL/MC2，1=dispatch_ffn_combine，2=dispatch_gmm_combine_decode",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "106-113"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "fused_mc2",
+    "mc2_communication",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅对MoE层有效",
+        "与W8A8量化交互",
+        "与动态EPLB互斥"
+      ],
+      "memory_impact": "融合算子可能改变内存使用模式",
+      "throughput_impact": "融合算子可减少通信开销，提升吞吐量",
+      "latency_impact": "减少通信延迟",
+      "test_cases": [
+        {
+          "name": "dispatch_ffn_combine测试",
+          "description": "验证value=1时的融合效果，需W8A8/EP<=32/非MTP/非动态EPLB",
+          "threshold": 1
+        },
+        {
+          "name": "dispatch_gmm_combine_decode测试",
+          "description": "验证value=2时的融合效果，仅用于decode节点",
+          "threshold": 2
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 MoE模型",
+        "Qwen-MoE模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_FUSED_MC2=1 或 export VLLM_ASCEND_ENABLE_FUSED_MC2=2",
+      "unsuitable_scenarios": [
+        "非W8A8量化模型(对于value=1)",
+        "EP>32的场景(对于value=1)",
+        "MTP层(对于value=1)",
+        "动态EPLB场景(对于value=1)",
+        "prefill节点(对于value=2)"
+      ],
+      "best_practices": [
+        "W8A8 MoE模型推荐尝试value=1",
+        "Decode节点可尝试value=2",
+        "验证模型输出正确性后再启用生产"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "106-113",
+          "purpose": "环境变量定义，默认值为0"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值或添加新的融合模式"
+      ],
+      "affected_features": [
+        "mc2_communication",
+        "moe_forward"
+      ]
+    },
+    "design": {
+      "principle": "融合MC2算子将dispatch、计算、combine融合为单一算子，减少通信开销和内存访问",
+      "theory_analysis": "传统MC2需要多次通信和内存访问，融合算子通过算子融合减少中间结果的存储和传输，提升效率",
+      "design_decisions": [
+        {
+          "decision": "三档配置(0/1/2)",
+          "reason": "不同融合模式适用于不同场景，提供灵活选择"
+        },
+        {
+          "decision": "value=1有严格限制",
+          "reason": "dispatch_ffn_combine算子有特定的适用条件，需要用户确认满足条件"
+        },
+        {
+          "decision": "value=2仅用于decode",
+          "reason": "dispatch_gmm_combine_decode专为decode阶段优化"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2a7d0288b3235b63eda1294de0314d3188fa042d2678f414b13143ce1cc3f540",
+  "knowledge_domain": "vllm-ascend-core"
+}

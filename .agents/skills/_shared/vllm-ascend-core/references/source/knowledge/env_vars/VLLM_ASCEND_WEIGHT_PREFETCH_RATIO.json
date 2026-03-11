@@ -1,0 +1,115 @@
+{
+  "id": "env_var:vllm_ascend_weight_prefetch_ratio",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_WEIGHT_PREFETCH_RATIO",
+  "summary": "控制权重预取比例，用于优化小并发场景的计算-通信重叠",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "346-371"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
+    "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
+    "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE"
+  ],
+  "related_apis": [
+    "WeightPrefetchConfig",
+    "set_weight_prefetch_method"
+  ],
+  "related_features": [
+    "weight_prefetch",
+    "mlp_prefetch"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与VLLM_ASCEND_ENABLE_PREFETCH_MLP交互(已弃用)",
+        "影响MLP层计算-通信重叠"
+      ],
+      "memory_impact": "预取需要额外的缓冲区内存",
+      "throughput_impact": "小并发场景可提升吞吐量",
+      "latency_impact": "减少权重加载延迟",
+      "test_cases": [
+        {
+          "name": "预取比例测试",
+          "description": "验证不同预取比例的效果",
+          "threshold": 0
+        },
+        {
+          "name": "小并发场景测试",
+          "description": "验证小并发场景的性能提升",
+          "threshold": 100
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "通过weight_prefetch_config配置，如prefetch_ratio: {attn: {qkv: 1.0, o: 1.0}, moe: {gate_up: 0.8}, mlp: {gate_up: 1, down: 1.0}}",
+      "unsuitable_scenarios": [
+        "大并发场景(计算已足够掩盖通信)",
+        "内存紧张场景"
+      ],
+      "best_practices": [
+        "小并发场景推荐启用",
+        "根据模型结构调整预取比例",
+        "监控内存使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "function": "WeightPrefetchConfig",
+          "lines": "346-371",
+          "purpose": "权重预取配置类"
+        }
+      ],
+      "modification_points": [
+        "ascend_config.py: 修改默认预取比例"
+      ],
+      "affected_features": [
+        "weight_prefetch",
+        "mlp_forward",
+        "moe_forward"
+      ]
+    },
+    "design": {
+      "principle": "在计算当前层时预取下一层权重，实现计算-通信重叠",
+      "theory_analysis": "预取比例决定预取多少权重到缓冲区，比例越大重叠效果越好但内存占用越高",
+      "design_decisions": [
+        {
+          "decision": "通过配置文件控制",
+          "reason": "不同模型结构有不同的最优预取比例，需要灵活配置"
+        },
+        {
+          "decision": "支持分层配置",
+          "reason": "不同层(attention/MLP/MoE)有不同的计算特性"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "38b6834f00e592709dd88b61b2be257046120fb695427be4bb4ee92931c7df75",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,114 @@
+{
+  "id": "api:ca_mem_allocator",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "CaMemAllocator",
+  "summary": "CANN内存分配器，管理NPU内存池，支持sleep模式的内存卸载和恢复",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device_allocator/camem.py",
+      "lines": "112-269"
+    }
+  ],
+  "related_env_vars": [
+    "PYTORCH_NPU_ALLOC_CONF"
+  ],
+  "related_apis": [
+    "AllocationData",
+    "NPUPluggableAllocator"
+  ],
+  "related_features": [
+    "sleep_mode",
+    "memory_management"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "use_memory_pool()使用内存池",
+        "sleep()休眠卸载内存",
+        "wake_up()唤醒恢复内存"
+      ],
+      "memory_impact": "管理NPU内存池，支持内存卸载到CPU",
+      "throughput_impact": "内存池管理减少碎片",
+      "latency_impact": "sleep/wake有额外开销",
+      "test_cases": [
+        {
+          "name": "内存分配测试",
+          "description": ""
+        },
+        {
+          "name": "sleep/wake测试",
+          "description": ""
+        },
+        {
+          "name": "内存池测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "单例模式，通过get_instance()获取",
+      "unsuitable_scenarios": [
+        "不支持expandable_segments"
+      ],
+      "best_practices": [
+        "使用tag管理内存类型",
+        "sleep时指定offload_tags"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/device_allocator/camem.py:112-269",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "sleep()卸载逻辑",
+        "wake_up()恢复逻辑",
+        "内存池管理"
+      ],
+      "affected_features": [
+        "内存管理",
+        "Sleep模式"
+      ]
+    },
+    "design": {
+      "principle": "单例模式管理内存池，支持内存卸载和恢复",
+      "theory_analysis": "使用CANN pluggable allocator实现内存池管理",
+      "design_decisions": [
+        {
+          "decision": "单例模式",
+          "reason": ""
+        },
+        {
+          "decision": "支持tag分类内存",
+          "reason": ""
+        },
+        {
+          "decision": "使用memcpy实现CPU-GPU数据传输",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "e778ac685017375596e3dda6b425202e01bdab930c2c28063163fcaa3258c521",
+  "knowledge_domain": "integration-core"
+}

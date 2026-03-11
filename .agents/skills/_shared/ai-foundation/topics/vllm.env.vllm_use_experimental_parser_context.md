@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1410
-- read_ref: vllm/vllm/entrypoints/openai/responses/serving.py:467, vllm/vllm/envs.py:206, vllm/vllm/envs.py:1410
-- effect_ref: vllm/vllm/entrypoints/openai/responses/serving.py:467
+- definition_ref: vllm/envs.py:1422
+- read_ref: vllm/vllm/entrypoints/openai/responses/serving.py:469, vllm/vllm/envs.py:207, vllm/vllm/envs.py:1422
+- effect_ref: vllm/vllm/entrypoints/openai/responses/serving.py:469
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

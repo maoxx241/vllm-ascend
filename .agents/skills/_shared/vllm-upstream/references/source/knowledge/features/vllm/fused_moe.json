@@ -1,0 +1,181 @@
+{
+  "id": "feature:fused_moe",
+  "type": "feature",
+  "category": "vllm",
+  "name": "FusedMoE",
+  "summary": "针对Mixture-of-Experts模型的高性能融合算子，通过Triton内核优化专家计算，支持多种量化方案和Expert Parallelism",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/fused_moe/__init__.py",
+      "lines": "1-76"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/fused_moe/config.py",
+      "lines": "100-150"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/fused_moe/config.py",
+      "lines": "152-460"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/fused_moe/layer.py",
+      "lines": "273-630"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/fused_moe/fused_moe.py",
+      "lines": "314-576"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_FUSED_MOE_CHUNK_SIZE",
+    "VLLM_MOE_DP_CHUNK_SIZE",
+    "VLLM_TUNED_CONFIG_FOLDER"
+  ],
+  "related_apis": [
+    "FusedMoE",
+    "FusedMoEConfig",
+    "FusedMoEQuantConfig",
+    "FusedMoEParallelConfig",
+    "fused_experts"
+  ],
+  "related_features": [
+    "quantization",
+    "expert_parallelism",
+    "tensor_parallelism"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Tensor Parallelism交互，专家权重在TP维度切分",
+        "与Expert Parallelism交互，专家分布在不同GPU上",
+        "与Quantization交互，支持fp8/int8/int4等多种量化方案",
+        "与CUDA Graph交互，部分MoE kernel支持CUDA Graph"
+      ],
+      "memory_impact": "MoE模型参数量大，FusedMoE通过权重切分和量化降低显存占用。Expert Parallelism进一步分摊显存到多GPU",
+      "throughput_impact": "融合kernel减少内存访问次数，Triton优化提升计算效率。典型场景相比非融合实现提升2-4x",
+      "latency_impact": "减少kernel launch开销，优化内存访问模式，显著降低MoE层延迟",
+      "test_cases": [
+        {
+          "name": "test_fused_moe_forward",
+          "description": "验证FusedMoE前向计算正确性"
+        },
+        {
+          "name": "test_fused_moe_quantization",
+          "description": "验证fp8/int8/int4量化方案的正确性和性能"
+        },
+        {
+          "name": "test_fused_moe_ep",
+          "description": "验证Expert Parallelism的正确性"
+        },
+        {
+          "name": "test_fused_moe_routing",
+          "description": "验证不同routing方法(topk/grouped_topk等)的正确性"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Mixtral系列",
+        "DeepSeek系列(DeepSeek-V2/V3)",
+        "Qwen-MoE系列",
+        "Jamba",
+        "所有使用MoE架构的模型"
+      ],
+      "enable_config": "自动检测MoE模型并启用，可通过quantization配置量化方案，通过parallel_config.enable_expert_parallel启用EP",
+      "unsuitable_scenarios": [
+        "非MoE模型（不适用）",
+        "专家数量极少的模型（融合收益有限）",
+        "使用不支持CUDA Graph的DeepEP high-throughput backend"
+      ],
+      "best_practices": [
+        "对于大模型推荐使用fp8量化降低显存占用",
+        "EP适合专家数量多、单GPU显存不足的场景",
+        "使用VLLM_TUNED_CONFIG_FOLDER指定优化的MoE配置",
+        "DeepSeek V3推荐使用block-wise量化(block_shape=[128,128])"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/model_executor/layers/fused_moe/layer.py",
+          "function": "FusedMoE",
+          "purpose": "MoE层主类，管理专家权重、路由和计算"
+        },
+        {
+          "file": "vllm/model_executor/layers/fused_moe/config.py",
+          "function": "FusedMoEConfig",
+          "purpose": "MoE配置数据类，包含专家数、topk、并行配置等"
+        },
+        {
+          "file": "vllm/model_executor/layers/fused_moe/config.py",
+          "function": "FusedMoEQuantConfig",
+          "purpose": "量化配置，支持多种量化方案"
+        },
+        {
+          "file": "vllm/model_executor/layers/fused_moe/fused_moe.py",
+          "function": "fused_moe_kernel",
+          "purpose": "Triton融合kernel实现"
+        },
+        {
+          "file": "vllm/model_executor/layers/fused_moe/layer.py",
+          "function": "determine_expert_map",
+          "purpose": "计算EP模式下专家到rank的映射"
+        }
+      ],
+      "modification_points": [
+        "添加新的量化方案需要在FusedMoEQuantConfig中扩展",
+        "修改routing逻辑需要实现新的RoutingMethodType",
+        "添加新的MoE backend需要继承FusedMoEMethodBase"
+      ],
+      "affected_features": [
+        "quantization: MoE量化方案与通用量化配置协同",
+        "tensor_parallelism: 专家权重在TP维度切分",
+        "expert_parallelism: 专家分布在不同GPU"
+      ]
+    },
+    "design": {
+      "principle": "FusedMoE将MoE计算中的gate计算、topk选择、专家计算和结果聚合融合到少量kernel中，减少内存访问和kernel launch开销。使用Triton实现可移植的高性能kernel。",
+      "theory_analysis": "MoE计算的主要瓶颈是：1) 内存带宽：需要加载大量专家权重；2) 不规则访问：不同token路由到不同专家。FusedMoE通过：1) 融合kernel减少内存访问；2) block-wise padding优化不规则访问；3) 量化减少权重体积。对于E个专家、topk选择、hidden_dim=H、intermediate_size=I的MoE层，计算量约为O(topk * H * I)，内存访问约为O(topk * H * I / efficiency)。",
+      "design_decisions": [
+        {
+          "decision": "使用Triton实现融合kernel",
+          "reason": "Triton提供Python级别的kernel编程，易于维护和优化，同时性能接近手写CUDA"
+        },
+        {
+          "decision": "支持多种量化方案",
+          "reason": "MoE模型参数量大，量化是降低显存占用的关键。fp8/int8/int4各有trade-off，需要灵活支持"
+        },
+        {
+          "decision": "实现Expert Parallelism",
+          "reason": "大MoE模型单GPU显存不足，EP允许将专家分布到多GPU，每个GPU只存储部分专家"
+        },
+        {
+          "decision": "支持block-wise量化",
+          "reason": "DeepSeek V3等模型使用block-wise量化，比per-tensor量化精度更高，需要kernel支持"
+        },
+        {
+          "decision": "预编译配置文件",
+          "reason": "不同GPU和参数组合的最优kernel配置不同，预编译配置文件避免运行时调优开销"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "933b4711b4ced8e4eacf2ffff62ae56692ccdaf36d52ed4bb088e69b9ee4ccc0",
+  "knowledge_domain": "vllm-upstream"
+}

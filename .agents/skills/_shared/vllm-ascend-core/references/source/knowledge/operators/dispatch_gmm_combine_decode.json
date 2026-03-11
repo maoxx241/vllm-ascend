@@ -1,0 +1,105 @@
+{
+  "id": "operator:dispatch_gmm_combine_decode",
+  "type": "operator",
+  "category": "moe",
+  "name": "dispatch_gmm_combine_decode",
+  "summary": "MoE分发GMM组合decode专用算子，专为decode场景优化的融合MoE计算，支持专家并行和动态负载均衡。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "375-393"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "torch.ops._C_ascend.dispatch_gmm_combine_decode"
+  ],
+  "related_features": [
+    "moe",
+    "fused_mc2",
+    "decode_optimization",
+    "expert_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与expert_map配合",
+        "与ep_rank配合专家并行"
+      ],
+      "memory_impact": "decode场景优化内存访问",
+      "throughput_impact": "decode专用优化提升吞吐",
+      "latency_impact": "单算子完成decode MoE",
+      "test_cases": [
+        {
+          "name": "VLLM_ASCEND_ENABLE_FUSED_MC2=2",
+          "description": ""
+        },
+        {
+          "name": "不同ep_rank_size",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "W8A8量化的MoE模型decode场景"
+      ],
+      "enable_config": "VLLM_ASCEND_ENABLE_FUSED_MC2=2",
+      "unsuitable_scenarios": [
+        "prefill场景",
+        "非量化MoE"
+      ],
+      "best_practices": [
+        "确保expert_map正确",
+        "global_bs配置正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "FusedMC2CommImpl.fused_experts",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "expert_smooth_scales",
+        "moe_expert_num"
+      ],
+      "affected_features": [
+        "decode MoE性能",
+        "专家并行效率"
+      ]
+    },
+    "design": {
+      "principle": "针对decode场景优化MoE计算，融合分发、GMM和组合",
+      "theory_analysis": "decode场景token数少，需要专门的优化策略",
+      "design_decisions": [
+        {
+          "decision": "仅VLLM_ASCEND_ENABLE_FUSED_MC2=2",
+          "reason": ""
+        },
+        {
+          "decision": "输出expert_tokens用于分析",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "ae1f59a52ad834b1bca9326b495e9af708e79cc2a9c2a7d64892261d683f1830",
+  "knowledge_domain": "vllm-ascend-core"
+}

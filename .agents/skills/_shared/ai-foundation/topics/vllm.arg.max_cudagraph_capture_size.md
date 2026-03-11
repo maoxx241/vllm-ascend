@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1168
-- read_ref: vllm/vllm/config/compilation.py:334, vllm/vllm/config/compilation.py:335, vllm/vllm/config/compilation.py:571
-- effect_ref: vllm/vllm/config/compilation.py:582, vllm/vllm/config/compilation.py:1138, vllm/vllm/config/compilation.py:1142
+- definition_ref: vllm/engine/arg_utils.py:1173
+- read_ref: vllm/vllm/config/compilation.py:333, vllm/vllm/config/compilation.py:334, vllm/vllm/config/compilation.py:570
+- effect_ref: vllm/vllm/config/compilation.py:581, vllm/vllm/config/compilation.py:1137, vllm/vllm/config/compilation.py:1141
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: ValueError: max_cudagraph_capture_size and compilation_config... are mutually exclusive; ValueError: customized max_cudagraph_capture_size ... should be consistent ...
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,110 @@
+{
+  "id": "api:ascend_mlaimpl",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMLAImpl",
+  "summary": "昇腾MLA实现类，提供MLA attention的具体实现，包括prefill和decode模式",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "150-400"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MLAPO"
+  ],
+  "related_apis": [
+    "AscendMLABackend",
+    "IndexerWrapper",
+    "AscendMultiHeadLatentAttention"
+  ],
+  "related_features": [
+    "mla_attention",
+    "deepseek_v2",
+    "deepseek_v3"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward_prefill() prefill模式",
+        "forward_decode() decode模式"
+      ],
+      "memory_impact": "使用压缩KV Cache，内存效率高",
+      "throughput_impact": "优化的MLA kernel提升吞吐量",
+      "latency_impact": "高效的实现降低延迟",
+      "test_cases": [
+        {
+          "name": "prefill模式测试",
+          "description": ""
+        },
+        {
+          "name": "decode模式测试",
+          "description": ""
+        },
+        {
+          "name": "长序列测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2",
+        "DeepSeek-V3",
+        "DeepSeek-V3-0324"
+      ],
+      "enable_config": "由AscendMLABackend自动使用",
+      "unsuitable_scenarios": [
+        "非MLA架构模型"
+      ],
+      "best_practices": [
+        "启用MLAPO优化性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/mla_v1.py:150-400",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward_prefill()实现",
+        "forward_decode()实现"
+      ],
+      "affected_features": [
+        "MLA计算",
+        "KV Cache"
+      ]
+    },
+    "design": {
+      "principle": "分离prefill和decode实现，优化各自场景",
+      "theory_analysis": "prefill使用并行计算，decode使用增量计算",
+      "design_decisions": [
+        {
+          "decision": "支持Indexer加速decode",
+          "reason": ""
+        },
+        {
+          "decision": "使用NPU优化的kernel",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c438ab28b81041d1c938b9359ab1adeac6ed7f6f9c83e105786109fd7a9a51c7",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1071
+- definition_ref: vllm/engine/arg_utils.py:1076
 - read_ref: vllm/vllm/config/observability.py:39, vllm/vllm/config/observability.py:82, vllm/vllm/config/observability.py:83
 - effect_ref: vllm/vllm/config/observability.py:82, vllm/vllm/config/observability.py:90, vllm/vllm/config/observability.py:148
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

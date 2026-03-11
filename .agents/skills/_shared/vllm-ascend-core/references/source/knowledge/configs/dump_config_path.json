@@ -1,0 +1,91 @@
+{
+  "id": "config:dump_config_path",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "dump_config_path",
+  "summary": "Dump/PrecisionDebugger配置路径，用于指定调试信息输出路径",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "52"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [],
+  "sub_configs": [],
+  "constraints": [],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "用于调试和问题诊断"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "启用dump可能影响性能",
+      "latency_impact": "启用dump可能增加延迟",
+      "test_cases": [
+        {
+          "name": "测试dump_config_path配置的输出",
+          "description": ""
+        },
+        {
+          "name": "验证PrecisionDebugger功能",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "additional_config: {dump_config_path: '/path/to/dump'}",
+      "unsuitable_scenarios": [
+        "生产环境不建议启用"
+      ],
+      "best_practices": [
+        "仅用于调试和问题诊断",
+        "调试完成后禁用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:52",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的dump_config_path处理"
+      ],
+      "affected_features": [
+        "调试工具",
+        "精度分析"
+      ]
+    },
+    "design": {
+      "principle": "提供调试信息输出能力，方便问题诊断",
+      "theory_analysis": "通过输出中间结果和调试信息，帮助定位问题",
+      "design_decisions": [
+        {
+          "decision": "作为可选配置，不影响正常推理",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "0cc66c095fc11eb57e8fee569cae1004d5f36a42845f6e3d4e2eb17c4bead9ba",
+  "knowledge_domain": "vllm-ascend-core"
+}

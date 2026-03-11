@@ -1,0 +1,133 @@
+{
+  "id": "quantization:w4_a4_flatquant",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W4A4_FLATQUANT",
+  "summary": "FlatQuant W4A4量化方案，使用Kronecker变换矩阵平滑激活分布，权重INT4 per-channel量化，激活INT4动态量化，通过npu_kronecker_quant实现高效量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a4_flatquant.py",
+      "lines": "1-166"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_kronecker_quant",
+    "torch_npu.npu_quant_matmul",
+    "torch_npu.npu_convert_weight_to_int4pack"
+  ],
+  "related_features": [
+    "flatquant",
+    "kronecker_transform",
+    "activation_smoothing"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "使用Kronecker变换平滑激活分布",
+        "支持batched处理应对最大batch限制"
+      ],
+      "memory_impact": "权重和激活均为INT4，内存占用减少约75%，需要存储变换矩阵和clip_ratio",
+      "throughput_impact": "Kronecker变换有计算开销，但量化后计算效率提升",
+      "latency_impact": "变换和量化有开销，但整体延迟仍可接受",
+      "test_cases": [
+        {
+          "name": "验证Kronecker变换正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch size处理",
+          "description": ""
+        },
+        {
+          "name": "验证维度分解正确性",
+          "description": ""
+        },
+        {
+          "name": "测试clip_ratio影响",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型"
+      ],
+      "enable_config": "quantization: w4a4_flatquant_dynamic",
+      "unsuitable_scenarios": [
+        "对精度要求极高的场景",
+        "input_size不能被8整除的模型"
+      ],
+      "best_practices": [
+        "确保input_size可被8整除",
+        "使用合适的clip_ratio控制量化范围",
+        "注意最大batch限制(32768)"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW4A4FlatQuantDynamicLinearMethod: FlatQuant W4A4实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_decompose_dim(): 维度分解函数",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "batched_kronecker_quant(): 批量Kronecker量化",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "pack_int4_weights(): INT4权重打包",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "get_pertensor_param(): 修改变换矩阵参数定义",
+        "apply(): 修改Kronecker变换和量化逻辑",
+        "process_weights_after_loading(): 修改权重打包和变换矩阵处理"
+      ],
+      "affected_features": [
+        "linear_layers",
+        "activation_smoothing"
+      ]
+    },
+    "design": {
+      "principle": "FlatQuant方法：使用Kronecker变换矩阵(left_trans, right_trans)平滑激活分布，使量化误差最小化；权重per-channel INT4量化，激活per-token INT4动态量化",
+      "theory_analysis": "Kronecker变换将激活分布变换为更均匀的分布，减少量化误差；INT4量化理论精度损失约3-5%，FlatQuant可减少至1-2%",
+      "design_decisions": [
+        {
+          "decision": "使用Kronecker分解将高维变换分解为两个低维变换",
+          "reason": ""
+        },
+        {
+          "decision": "支持batched处理应对NPU算子batch限制",
+          "reason": ""
+        },
+        {
+          "decision": "使用clip_ratio控制量化范围，避免异常值影响",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d1de71a4bdb71c92022e0280652d3a2e5c7cdd4c68379bcf4a19a5303b50e428",
+  "knowledge_domain": "vllm-ascend-core"
+}

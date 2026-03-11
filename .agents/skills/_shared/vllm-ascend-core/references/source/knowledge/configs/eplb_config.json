@@ -1,0 +1,155 @@
+{
+  "id": "config:eplb_config",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "eplb_config",
+  "summary": "专家并行负载均衡配置，用于动态调整专家分布以优化MoE模型性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "374-435"
+    }
+  ],
+  "related_env_vars": [
+    "DYNAMIC_EPLB",
+    "EXPERT_MAP_RECORD"
+  ],
+  "related_apis": [
+    "EplbUpdator",
+    "VllmEplbAdaptor"
+  ],
+  "related_features": [
+    "dynamic_eplb",
+    "eplb"
+  ],
+  "sub_configs": [
+    {
+      "name": "dynamic_eplb",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用动态EPLB"
+    },
+    {
+      "name": "expert_map_path",
+      "type": "str",
+      "default": null,
+      "description": "专家映射文件路径，必须是.json文件"
+    },
+    {
+      "name": "expert_heat_collection_interval",
+      "type": "int",
+      "default": 400,
+      "description": "专家热度收集间隔"
+    },
+    {
+      "name": "algorithm_execution_interval",
+      "type": "int",
+      "default": 30,
+      "description": "算法执行间隔"
+    },
+    {
+      "name": "expert_map_record_path",
+      "type": "str",
+      "default": null,
+      "description": "专家映射记录路径，设置后自动启用dynamic_eplb"
+    },
+    {
+      "name": "num_redundant_experts",
+      "type": "int",
+      "default": 0,
+      "description": "冗余专家数量"
+    },
+    {
+      "name": "eplb_policy_type",
+      "type": "int",
+      "default": 1,
+      "description": "EPLB策略类型，取值范围[0,1,2,3]"
+    }
+  ],
+  "constraints": [
+    "expert_map_path必须是.json文件且必须存在",
+    "expert_map_record_path必须是.json文件",
+    "expert_heat_collection_interval、algorithm_execution_interval、num_redundant_experts必须为非负整数",
+    "eplb_policy_type必须在[0,1,2,3]范围内",
+    "dynamic_eplb=true时需要设置环境变量DYNAMIC_EPLB=true或EXPERT_MAP_RECORD=true"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试动态负载均衡的效果",
+        "需要验证专家映射文件的正确性"
+      ],
+      "memory_impact": "冗余专家会增加内存占用",
+      "throughput_impact": "合理配置可显著提升MoE模型吞吐量",
+      "latency_impact": "负载均衡可降低尾部延迟",
+      "test_cases": [
+        {
+          "name": "测试dynamic_eplb=true时的性能提升",
+          "description": ""
+        },
+        {
+          "name": "测试不同eplb_policy_type的效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-MoE",
+        "Qwen-MoE等MoE模型"
+      ],
+      "enable_config": "additional_config: {eplb_config: {dynamic_eplb: true, num_redundant_experts: 2}}",
+      "unsuitable_scenarios": [
+        "非MoE模型不适用"
+      ],
+      "best_practices": [
+        "根据专家热度动态调整映射",
+        "设置适当的冗余专家数量"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:374-435",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "EplbConfig._validate_config方法"
+      ],
+      "affected_features": [
+        "MoE专家路由",
+        "负载均衡"
+      ]
+    },
+    "design": {
+      "principle": "通过动态调整专家分布，实现负载均衡，优化MoE模型性能",
+      "theory_analysis": "MoE模型的专家访问不均匀，动态负载均衡可以优化资源利用",
+      "design_decisions": [
+        {
+          "decision": "支持多种策略类型以适应不同场景",
+          "reason": ""
+        },
+        {
+          "decision": "提供专家热度收集机制以支持动态调整",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "faadb2b5681d31d6096b84dce06a74b39c15da7c1e882997f3480eb7f2a0eec9",
+  "knowledge_domain": "vllm-ascend-core"
+}

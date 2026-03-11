@@ -13,7 +13,7 @@ topic_kind: parameter
 - kind/scope: `arg` / `vllm`
 - stage: `startup`
 - primary_feature: `general_runtime`
-- status/confidence: `upstream_delta` / `0.68`
+- status/confidence: `aligned` / `0.88`
 - source: `code` / source_tags: code
 - semantics: 通用运行时控制项，需要结合上下文确认语义。
 - aliases: `--config`, `config`, `general_runtime`, `general runtime`, `general-runtime`
@@ -35,7 +35,7 @@ topic_kind: parameter
 
 - definition_ref: vllm/entrypoints/openai/cli_args.py:301
 - read_ref: vllm/vllm/_aiter_ops.py:1555, vllm/vllm/_aiter_ops.py:1572, vllm/vllm/_aiter_ops.py:1572
-- effect_ref: vllm/vllm/benchmarks/datasets.py:894, vllm/vllm/benchmarks/datasets.py:896, vllm/vllm/benchmarks/datasets.py:899
+- effect_ref: vllm/vllm/benchmarks/datasets.py:909, vllm/vllm/benchmarks/datasets.py:911, vllm/vllm/benchmarks/datasets.py:914
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

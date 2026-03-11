@@ -1,0 +1,104 @@
+{
+  "id": "env_var:vllm_ascend_enable_mlapo",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_MLAPO",
+  "summary": "控制MLAPO优化开关，用于DeepSeek W8A8系列模型的性能优化，默认启用但会消耗更多NPU内存",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "92-96"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "mlapo",
+    "quantization",
+    "deepseek_w8a8"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅对DeepSeek W8A8系列模型有效",
+        "与量化配置交互"
+      ],
+      "memory_impact": "启用时会消耗更多NPU内存",
+      "throughput_impact": "可显著提升DeepSeek W8A8模型性能",
+      "latency_impact": "降低推理延迟",
+      "test_cases": [
+        {
+          "name": "DeepSeek W8A8性能测试",
+          "description": "验证MLAPO对W8A8模型的性能提升",
+          "threshold": 0
+        },
+        {
+          "name": "内存消耗测试",
+          "description": "验证MLAPO启用时的额外内存消耗",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 W8A8量化版本",
+        "DeepSeek-R1 W8A8量化版本"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_MLAPO=1 (默认已启用)",
+      "unsuitable_scenarios": [
+        "NPU内存紧张的场景",
+        "非W8A8量化的模型"
+      ],
+      "best_practices": [
+        "W8A8模型默认启用即可",
+        "内存紧张时可禁用以减少内存占用",
+        "监控NPU内存使用情况"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "92-96",
+          "purpose": "环境变量定义，默认值为1(启用)"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值"
+      ],
+      "affected_features": [
+        "DeepSeek W8A8模型性能"
+      ]
+    },
+    "design": {
+      "principle": "MLAPO针对DeepSeek W8A8模型的特定优化，通过算子融合和内存布局优化提升性能",
+      "theory_analysis": "W8A8量化模型的计算模式与FP16/BF16不同，MLAPO针对其特点进行优化，但需要额外的内存存储中间结果",
+      "design_decisions": [
+        {
+          "decision": "默认启用",
+          "reason": "对W8A8模型性能提升明显，大多数用户应启用"
+        },
+        {
+          "decision": "允许禁用",
+          "reason": "内存紧张场景下提供禁用选项"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "6d79c64a19d2027cb6ec45a26ca42694054204e76d87d2cfff201f0049ff9853",
+  "knowledge_domain": "integration-core"
+}

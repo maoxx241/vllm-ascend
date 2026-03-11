@@ -1,0 +1,234 @@
+{
+  "id": "feature:prefix_caching",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Prefix Caching",
+  "summary": "基于哈希的KV缓存复用机制，缓存已计算的prefix block，新请求匹配相同prefix时直接复用，避免重复计算，显著降低首token延迟。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/cache.py",
+      "lines": "65-83"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/block_pool.py",
+      "lines": "33-127, 183-318"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/kv_cache_utils.py",
+      "lines": "33-107, 369-613"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/kv_cache_manager.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/scheduler.py",
+      "lines": "220-232"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_PREFIX_CACHING",
+    "VLLM_PREFIX_CACHING_HASH_ALGO",
+    "PYTHONHASHSEED"
+  ],
+  "related_apis": [
+    "CacheConfig.enable_prefix_caching",
+    "CacheConfig.prefix_caching_hash_algo",
+    "BlockPool.get_cached_block",
+    "BlockPool.cache_full_blocks",
+    "BlockPool.reset_prefix_cache",
+    "BlockHashToBlockMap",
+    "hash_block_tokens",
+    "generate_block_hash_extra_keys"
+  ],
+  "related_features": [
+    "paged_attention",
+    "kv_transfer",
+    "multimodal_inputs",
+    "lora",
+    "chunked_prefill"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与PagedAttention交互：依赖block结构实现缓存，block满时计算hash并缓存",
+        "与KV Transfer交互：缓存的block可通过KV Transfer共享给其他实例",
+        "与Multimodal交互：多模态输入的hash作为extra key加入block hash计算",
+        "与LoRA交互：LoRA ID作为extra key，不同LoRA的prefix隔离缓存",
+        "与Chunked Prefill交互：分块预填充时每个完整block立即缓存"
+      ],
+      "memory_impact": "增加少量内存用于存储block hash映射表。但通过复用减少总体KV cache占用。缓存命中率高的场景可节省50%以上显存。",
+      "throughput_impact": "显著提升吞吐量。prefix命中时跳过预填充计算，可提升2-10倍吞吐量（取决于prefix重复率）。高重复场景（如RAG、多轮对话）收益最大。",
+      "latency_impact": "大幅降低首token延迟。prefix命中时，首token延迟从秒级降至毫秒级。100%命中时，预填充时间接近零。",
+      "test_cases": [
+        {
+          "name": "test_prefix_cache_hit",
+          "description": "测试相同prefix的请求能命中缓存"
+        },
+        {
+          "name": "test_prefix_cache_miss",
+          "description": "测试不同prefix的请求不会错误命中"
+        },
+        {
+          "name": "test_prefix_cache_eviction",
+          "description": "测试LRU淘汰策略的正确性"
+        },
+        {
+          "name": "test_multimodal_prefix_caching",
+          "description": "测试多模态输入的prefix缓存正确性"
+        },
+        {
+          "name": "test_lora_prefix_caching",
+          "description": "测试不同LoRA的prefix缓存隔离"
+        },
+        {
+          "name": "test_cache_salt_isolation",
+          "description": "测试cache_salt实现的安全隔离"
+        },
+        {
+          "name": "test_reset_prefix_cache",
+          "description": "测试重置prefix缓存的正确性"
+        },
+        {
+          "name": "test_hash_collision",
+          "description": "测试不同hash算法的碰撞率"
+        },
+        {
+          "name": "test_duplicated_blocks",
+          "description": "测试重复block的处理逻辑"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持PagedAttention的模型",
+        "Llama系列",
+        "Qwen系列",
+        "Mistral/Mixtral",
+        "DeepSeek系列",
+        "Gemma系列",
+        "Mamba混合模型（部分支持）"
+      ],
+      "enable_config": "通过CacheConfig.enable_prefix_caching=True启用（默认启用）。通过prefix_caching_hash_algo选择hash算法：sha256(默认，安全)、sha256_cbor(可重现)、xxhash(快速但非加密安全)、xxhash_cbor。",
+      "unsuitable_scenarios": [
+        "prefix重复率极低的场景：缓存开销大于收益",
+        "多租户环境且需要严格隔离：需要使用cache_salt",
+        "实时性要求极高且prefix完全随机：缓存查找有少量开销"
+      ],
+      "best_practices": [
+        "默认启用prefix_caching，几乎所有场景都有收益",
+        "生产环境推荐sha256或sha256_cbor，避免hash碰撞风险",
+        "多租户环境使用cache_salt实现安全隔离",
+        "监控prefix cache hit rate指标，评估缓存效果",
+        "设置PYTHONHASHSEED保证cbor hash的可重现性",
+        "RAG场景优化：将文档放在prompt开头，最大化prefix复用",
+        "多轮对话场景：保持system prompt一致，复用历史KV cache"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/core/block_pool.py",
+          "function": "BlockHashToBlockMap",
+          "purpose": "block hash到block的映射缓存，支持单个和多个block映射"
+        },
+        {
+          "file": "vllm/v1/core/block_pool.py",
+          "function": "BlockPool.get_cached_block",
+          "purpose": "根据block hash查找缓存的block"
+        },
+        {
+          "file": "vllm/v1/core/block_pool.py",
+          "function": "BlockPool.cache_full_blocks",
+          "purpose": "将满block加入缓存，生成KV cache事件"
+        },
+        {
+          "file": "vllm/v1/core/kv_cache_utils.py",
+          "function": "hash_block_tokens",
+          "purpose": "计算block hash，包含parent hash、tokens和extra keys"
+        },
+        {
+          "file": "vllm/v1/core/kv_cache_utils.py",
+          "function": "generate_block_hash_extra_keys",
+          "purpose": "生成额外hash keys（MM、LoRA、cache_salt）"
+        },
+        {
+          "file": "vllm/v1/core/kv_cache_utils.py",
+          "function": "get_request_block_hasher",
+          "purpose": "为request生成所有block hash的函数"
+        },
+        {
+          "file": "vllm/config/cache.py",
+          "function": "CacheConfig",
+          "purpose": "配置prefix caching参数"
+        }
+      ],
+      "modification_points": [
+        "添加新的hash算法：实现新的hash函数并在PrefixCachingHashAlgo中注册",
+        "修改hash计算逻辑：在hash_block_tokens中添加新的extra keys",
+        "优化缓存查找：在BlockHashToBlockMap中实现更高效的数据结构",
+        "添加新的隔离机制：在generate_block_hash_extra_keys中添加新的隔离key",
+        "修改淘汰策略：在_maybe_evict_cached_block中实现不同的淘汰逻辑"
+      ],
+      "affected_features": [
+        "paged_attention：prefix caching依赖block机制",
+        "kv_transfer：缓存的block可传输",
+        "multimodal：MM hash影响block hash",
+        "lora：LoRA ID影响block hash",
+        "mamba：Mamba cache mode影响缓存行为"
+      ]
+    },
+    "design": {
+      "principle": "采用哈希链式结构，每个block的hash由parent hash、block tokens和extra keys组成。这保证了相同prefix的block具有相同hash，实现缓存复用。同时extra keys机制支持多模态、LoRA等场景的隔离。",
+      "theory_analysis": "传统方案需要完整匹配prefix才能复用，vLLM的block级hash实现了更细粒度的复用。假设block_size=16，两个请求前100个token相同，可复用6个完整block（96 tokens），仅重算最后4个token。Hash链式结构保证了hash的唯一性和可验证性。",
+      "design_decisions": [
+        {
+          "decision": "只缓存满block",
+          "reason": "部分block的hash不稳定，满block的hash唯一确定。避免缓存不一致问题。"
+        },
+        {
+          "decision": "使用链式hash（parent hash + tokens）",
+          "reason": "保证相同prefix的block具有相同hash，同时避免存储完整prefix。空间效率高，计算效率O(1)。"
+        },
+        {
+          "decision": "支持extra keys机制",
+          "reason": "多模态输入、LoRA、cache_salt等需要隔离的场景，通过extra keys实现灵活的隔离策略。"
+        },
+        {
+          "decision": "默认使用sha256",
+          "reason": "加密安全，碰撞概率极低。v0.11后默认，解决之前版本的碰撞风险。"
+        },
+        {
+          "decision": "支持cbor序列化",
+          "reason": "实现跨语言、跨版本的hash可重现性。适合生产环境的确定性缓存。"
+        },
+        {
+          "decision": "允许重复block",
+          "reason": "v1的block table是append-only，无法修改已分配block。重复block在请求结束时清理。简化实现，支持CUDA graph。"
+        },
+        {
+          "decision": "LRU淘汰策略",
+          "reason": "简单高效，适合大多数场景。free queue按使用时间排序，淘汰最久未使用的block。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "2b75794ee8ebf2a64f6b2d294f29d7c4b89f4361caa0437b94c162bb363d50db",
+  "knowledge_domain": "vllm-upstream"
+}

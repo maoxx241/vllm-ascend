@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:968
-- read_ref: vllm/vllm/config/cache.py:164, vllm/vllm/config/cache.py:166, vllm/vllm/config/vllm.py:561
-- effect_ref: vllm/vllm/config/cache.py:164, vllm/vllm/config/vllm.py:571, vllm/vllm/config/vllm.py:576
+- definition_ref: vllm/engine/arg_utils.py:970
+- read_ref: vllm/vllm/config/cache.py:175, vllm/vllm/config/cache.py:177, vllm/vllm/config/vllm.py:570
+- effect_ref: vllm/vllm/config/cache.py:175, vllm/vllm/config/vllm.py:580, vllm/vllm/config/vllm.py:585
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

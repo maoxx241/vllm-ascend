@@ -1,0 +1,113 @@
+{
+  "id": "api:ascend_w4_a16_fused_mo_emethod",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendW4A16FusedMoEMethod",
+  "summary": "昇腾W4A16融合MoE方法，实现MoE层的INT4权重量化，FP16激活",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a16.py",
+      "lines": "102-200"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendMoEScheme",
+    "pack_to_int32",
+    "unpack_from_int32"
+  ],
+  "related_features": [
+    "quantization",
+    "moe",
+    "w4a16"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "apply()执行量化MoE计算",
+        "get_weight()获取权重参数",
+        "get_dynamic_quant_param()获取量化参数"
+      ],
+      "memory_impact": "INT4权重大幅减少内存占用(4x压缩)",
+      "throughput_impact": "量化MoE提升吞吐量",
+      "latency_impact": "量化计算降低延迟",
+      "test_cases": [
+        {
+          "name": "MoE量化测试",
+          "description": ""
+        },
+        {
+          "name": "权重打包测试",
+          "description": ""
+        },
+        {
+          "name": "精度验证测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持W4A16量化的MoE模型"
+      ],
+      "enable_config": "配置quantization为W4A16",
+      "unsuitable_scenarios": [
+        "需要高精度的场景"
+      ],
+      "best_practices": [
+        "配置合理的group_size",
+        "使用packed格式存储"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/quantization/methods/w4a16.py:102-200",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()量化逻辑",
+        "权重打包/解包"
+      ],
+      "affected_features": [
+        "MoE量化",
+        "INT4权重"
+      ]
+    },
+    "design": {
+      "principle": "使用INT4权重和FP16激活，group-wise量化",
+      "theory_analysis": "INT4权重大幅减少内存，group-wise量化保持精度",
+      "design_decisions": [
+        {
+          "decision": "支持packed格式",
+          "reason": ""
+        },
+        {
+          "decision": "group_size可配置",
+          "reason": ""
+        },
+        {
+          "decision": "支持EPLB",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "3ef485d8a194e1eb7a233fa3335a9cac2feaf1b4dc55d52c002bb1a7a46aa142",
+  "knowledge_domain": "integration-core"
+}

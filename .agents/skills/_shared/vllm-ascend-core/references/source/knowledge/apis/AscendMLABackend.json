@@ -1,0 +1,111 @@
+{
+  "id": "api:ascend_mlabackend",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMLABackend",
+  "summary": "昇腾MLA(Multi-Head Latent Attention)后端，实现DeepSeek-V2/V3风格的潜在注意力机制",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "50-300"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MLAPO"
+  ],
+  "related_apis": [
+    "AscendMLAImpl",
+    "IndexerWrapper",
+    "AscendMultiHeadLatentAttention"
+  ],
+  "related_features": [
+    "mla_attention",
+    "deepseek_v2",
+    "deepseek_v3"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行MLA attention",
+        "get_impl_cls()获取实现类"
+      ],
+      "memory_impact": "使用压缩的KV Cache，显著减少内存占用",
+      "throughput_impact": "MLA压缩提升吞吐量",
+      "latency_impact": "优化的MLA kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "MLA prefill测试",
+          "description": ""
+        },
+        {
+          "name": "MLA decode测试",
+          "description": ""
+        },
+        {
+          "name": "indexer测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2",
+        "DeepSeek-V3",
+        "DeepSeek-V3-0324"
+      ],
+      "enable_config": "自动检测模型类型启用",
+      "unsuitable_scenarios": [
+        "非MLA架构模型"
+      ],
+      "best_practices": [
+        "启用MLAPO算子优化",
+        "配置合理的压缩维度"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/mla_v1.py:50-300",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()执行逻辑",
+        "MLA kernel优化"
+      ],
+      "affected_features": [
+        "MLA Attention",
+        "KV Cache压缩"
+      ]
+    },
+    "design": {
+      "principle": "实现MLA注意力机制，支持KV Cache压缩",
+      "theory_analysis": "使用潜在表示压缩KV Cache，减少内存和计算量",
+      "design_decisions": [
+        {
+          "decision": "支持Indexer加速",
+          "reason": ""
+        },
+        {
+          "decision": "集成MLAPO优化",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "709cfdcbad43e814da10519c07d87e4316e3d2c2e69bfade2efe69c955e2bb55",
+  "knowledge_domain": "vllm-ascend-core"
+}

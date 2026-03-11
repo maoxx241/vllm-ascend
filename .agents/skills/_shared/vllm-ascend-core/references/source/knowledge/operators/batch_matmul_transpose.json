@@ -1,0 +1,108 @@
+{
+  "id": "operator:batch_matmul_transpose",
+  "type": "operator",
+  "category": "other",
+  "name": "batch_matmul_transpose",
+  "summary": "批量矩阵乘法转置算子，用于SFA架构中的V上投影计算，优化BMM和转置的融合操作。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "764-782"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch.ops._C_ascend.batch_matmul_transpose",
+    "torch_npu.npu_transpose_batchmatmul"
+  ],
+  "related_features": [
+    "sfa_attention",
+    "batch_matmul",
+    "transpose_fusion"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与W_UV权重配合",
+        "与v_head_dim输出配合"
+      ],
+      "memory_impact": "融合减少中间张量",
+      "throughput_impact": "token数<=1024时使用融合版本",
+      "latency_impact": "融合降低延迟",
+      "test_cases": [
+        {
+          "name": "FP16/BF16输入",
+          "description": ""
+        },
+        {
+          "name": "token数<=1024",
+          "description": ""
+        },
+        {
+          "name": "token数>1024回退",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3.2",
+        "GLM-MoE-DSA"
+      ],
+      "enable_config": "SFA模型自动启用",
+      "unsuitable_scenarios": [
+        "非SFA模型"
+      ],
+      "best_practices": [
+        "token数控制在限制内获得最佳性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendSFAImpl._v_up_proj",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "BMM_TRANS_MAX_SUPPORTED_TOKENS限制"
+      ],
+      "affected_features": [
+        "SFA V投影效率"
+      ]
+    },
+    "design": {
+      "principle": "融合批量矩阵乘法和转置操作，减少内存访问",
+      "theory_analysis": "V上投影需要(B,N,L) x (N,L,V) -> (B,N,V)并转置",
+      "design_decisions": [
+        {
+          "decision": "token数限制1024",
+          "reason": ""
+        },
+        {
+          "decision": "支持FP16/BF16",
+          "reason": ""
+        },
+        {
+          "decision": "超出限制回退到标准BMM",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "424e14917515aedeee8fd3a16708b9892c39891448b1f4653cd7bb85cd255757",
+  "knowledge_domain": "vllm-ascend-core"
+}

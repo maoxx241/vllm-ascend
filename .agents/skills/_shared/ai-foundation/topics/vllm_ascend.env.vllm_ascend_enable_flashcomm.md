@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/utils.py:765
-- read_ref: vllm-ascend/vllm_ascend/utils.py:764, vllm-ascend/vllm_ascend/utils.py:765
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:764, vllm-ascend/vllm_ascend/utils.py:765
+- definition_ref: vllm_ascend/utils.py:737
+- read_ref: vllm-ascend/vllm_ascend/utils.py:736, vllm-ascend/vllm_ascend/utils.py:737
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:736, vllm-ascend/vllm_ascend/utils.py:737
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: 通信参数不匹配时收益不稳定或出现告警。
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

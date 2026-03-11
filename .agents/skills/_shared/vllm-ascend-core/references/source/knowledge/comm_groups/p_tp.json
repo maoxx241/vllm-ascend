@@ -1,0 +1,128 @@
+{
+  "id": "comm_group:p_tp",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_P_TP",
+  "summary": "分布式Prefill张量并行通信组，用于PD分离场景下Prefill实例的张量并行，通过pd_tp_ratio和pd_head_ratio配置组大小，支持多head副本场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "25,57-82,266-268,307-310"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_p_tp_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "pd_disaggregation",
+    "prefill",
+    "kv_producer",
+    "distributed_prefill"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与KV Transfer配合用于PD分离",
+        "支持多head副本场景"
+      ],
+      "memory_impact": "Prefill实例使用独立的TP组，可能增加显存占用",
+      "throughput_impact": "分布式Prefill可提升整体吞吐量",
+      "latency_impact": "Prefill延迟取决于P_TP组大小",
+      "test_cases": [
+        {
+          "name": "验证P_TP组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试pd_tp_ratio配置",
+          "description": ""
+        },
+        {
+          "name": "测试pd_head_ratio配置",
+          "description": ""
+        },
+        {
+          "name": "验证多head副本场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "pd_tp_ratio: N, pd_head_ratio: M, kv_transfer_config.is_kv_producer: true",
+      "unsuitable_scenarios": [
+        "非PD分离场景",
+        "Decode实例"
+      ],
+      "best_practices": [
+        "根据Prefill计算量调整pd_tp_ratio",
+        "确保pd_tp_ratio能被全局TP整除",
+        "配合KV Transfer使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_P_TP: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_p_tp_group(): 获取P_TP组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改组划分逻辑",
+        "添加多head副本支持"
+      ],
+      "affected_features": [
+        "pd_disaggregation",
+        "kv_transfer",
+        "prefill"
+      ]
+    },
+    "design": {
+      "principle": "P_TP组用于PD分离场景下Prefill实例的独立张量并行，支持与Decode实例不同的并行策略",
+      "theory_analysis": "分布式Prefill可优化Prefill和Decode的计算资源分配，提升整体效率",
+      "design_decisions": [
+        {
+          "decision": "支持pd_tp_ratio配置Prefill TP大小",
+          "reason": ""
+        },
+        {
+          "decision": "支持pd_head_ratio配置多head副本",
+          "reason": ""
+        },
+        {
+          "decision": "仅在KV producer场景创建",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "790540fc049b336a48b228c5e7b124e702a461b778f608050b185811ef8fd46c",
+  "knowledge_domain": "vllm-ascend-core"
+}

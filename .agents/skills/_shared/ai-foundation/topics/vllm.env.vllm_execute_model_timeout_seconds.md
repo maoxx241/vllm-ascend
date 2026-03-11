@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1295
-- read_ref: vllm/vllm/envs.py:178, vllm/vllm/envs.py:1295, vllm/vllm/envs.py:1296
-- effect_ref: vllm/vllm/envs.py:178, vllm/vllm/envs.py:1295, vllm/vllm/envs.py:1296
+- definition_ref: vllm/envs.py:1307
+- read_ref: vllm/vllm/envs.py:179, vllm/vllm/envs.py:1307, vllm/vllm/envs.py:1308
+- effect_ref: vllm/vllm/envs.py:179, vllm/vllm/envs.py:1307, vllm/vllm/envs.py:1308
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

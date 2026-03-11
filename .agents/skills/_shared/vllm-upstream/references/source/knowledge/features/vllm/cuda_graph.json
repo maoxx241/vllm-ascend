@@ -1,0 +1,150 @@
+{
+  "id": "feature:cuda_graph",
+  "type": "feature",
+  "category": "vllm",
+  "name": "CUDA Graph",
+  "summary": "通过捕获CUDA操作序列并重放来消除CPU启动开销，显著降低推理延迟，支持PIECEWISE和FULL两种捕获模式",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/compilation.py",
+      "lines": "51-102"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/config/compilation.py",
+      "lines": "524-605"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_COMPILE_CACHE_SAVE_FORMAT"
+  ],
+  "related_apis": [
+    "CUDAGraphMode",
+    "CompilationConfig",
+    "cudagraph_mode",
+    "cudagraph_capture_sizes"
+  ],
+  "related_features": [
+    "torch_compile",
+    "speculative_decoding",
+    "attention_backend"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与torch.compile配合使用，PIECEWISE模式需要splitting_ops分离attention",
+        "与Speculative Decoding交互，需要调整cudagraph sizes为num_speculative_tokens+1的倍数",
+        "与LoRA交互，可配置cudagraph_specialize_lora为不同LoRA状态创建独立图"
+      ],
+      "memory_impact": "每个捕获的batch size需要独立的CUDA Graph内存，FULL模式内存开销更大，PIECEWISE模式内存开销较小",
+      "throughput_impact": "消除CPU启动开销，小batch场景吞吐提升显著(可达2-3x)，大batch场景提升有限",
+      "latency_impact": "显著降低首次token延迟(TTFT)和解码延迟，典型场景降低10-50%",
+      "test_cases": [
+        {
+          "name": "test_cudagraph_modes",
+          "description": "验证NONE/PIECEWISE/FULL/FULL_DECODE_ONLY/FULL_AND_PIECEWISE模式正确切换"
+        },
+        {
+          "name": "test_cudagraph_with_spec_decode",
+          "description": "验证与Speculative Decoding的兼容性，包括size对齐"
+        },
+        {
+          "name": "test_cudagraph_capture_sizes",
+          "description": "验证自定义捕获尺寸和自动推断尺寸的正确性"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持CUDA的模型",
+        "LLaMA系列",
+        "Qwen系列",
+        "DeepSeek系列",
+        "Mixtral等MoE模型"
+      ],
+      "enable_config": "通过compilation_config.cudagraph_mode配置，可选NONE/PIECEWISE/FULL/FULL_DECODE_ONLY/FULL_AND_PIECEWISE",
+      "unsuitable_scenarios": [
+        "动态batch size变化剧烈的场景",
+        "显存受限且需要大量不同batch size的场景",
+        "使用不支持CUDA Graph的attention backend",
+        "DeepEP high-throughput backend（不兼容CUDA Graph）"
+      ],
+      "best_practices": [
+        "V1引擎默认使用FULL_AND_PIECEWISE模式，decode阶段用FULL，prefill/mixed用PIECEWISE",
+        "对于decode-only实例，使用FULL_DECODE_ONLY模式节省内存",
+        "通过cudagraph_capture_sizes自定义捕获尺寸以优化特定workload",
+        "max_cudagraph_capture_size默认为min(max_num_seqs*2, 512)，避免捕获过多大图"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/compilation.py",
+          "function": "CUDAGraphMode",
+          "purpose": "定义CUDA Graph模式枚举，包括decode_mode/mixed_mode分离逻辑"
+        },
+        {
+          "file": "vllm/config/compilation.py",
+          "function": "CompilationConfig.__post_init__",
+          "purpose": "初始化CUDA Graph配置，设置splitting_ops"
+        },
+        {
+          "file": "vllm/config/compilation.py",
+          "function": "adjust_cudagraph_sizes_for_spec_decode",
+          "purpose": "为Speculative Decoding调整捕获尺寸"
+        },
+        {
+          "file": "vllm/config/compilation.py",
+          "function": "adjust_cudagraph_sizes_for_mamba_cache",
+          "purpose": "为Mamba模型限制捕获尺寸"
+        }
+      ],
+      "modification_points": [
+        "添加新的CUDAGraphMode需要更新valid_runtime_modes()方法",
+        "修改splitting_ops逻辑会影响PIECEWISE模式的图分割",
+        "调整max_cudagraph_capture_size默认值影响内存/启动时间平衡"
+      ],
+      "affected_features": [
+        "torch_compile: CUDA Graph与编译模式协同工作",
+        "attention_backend: 需要attention支持CUDA Graph才能使用FULL模式",
+        "speculative_decoding: 需要特殊处理捕获尺寸对齐"
+      ]
+    },
+    "design": {
+      "principle": "CUDA Graph通过一次性捕获CUDA操作序列，后续执行时直接重放，消除CPU端的kernel launch开销。vLLM实现了多种模式以平衡内存开销和性能收益。",
+      "theory_analysis": "CPU启动kernel的开销约5-10μs，对于小batch推理，这部分开销占比显著。CUDA Graph将启动开销分摊到捕获阶段，运行时只需触发图重放。PIECEWISE模式将attention等不兼容操作分离，只对兼容部分使用CUDA Graph。",
+      "design_decisions": [
+        {
+          "decision": "引入FULL_AND_PIECEWISE作为V1默认模式",
+          "reason": "decode阶段batch稳定适合FULL模式获得最佳性能，prefill/mixed阶段batch变化大适合PIECEWISE模式"
+        },
+        {
+          "decision": "splitting_ops默认包含attention ops",
+          "reason": "许多attention backend不支持CUDA Graph，需要将其排除在捕获范围之外"
+        },
+        {
+          "decision": "限制max_cudagraph_capture_size为512",
+          "reason": "大batch的CUDA Graph捕获时间长且内存开销大，而大batch场景CPU开销占比低，收益有限"
+        },
+        {
+          "decision": "支持cudagraph_specialize_lora配置",
+          "reason": "LoRA会改变计算图结构，需要为不同LoRA状态创建独立图以保证正确性"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "98bbcc7c52e0227294d636cc2d17f9fbecf69e6bd645ef44d359ec6e7814974a",
+  "knowledge_domain": "vllm-upstream"
+}

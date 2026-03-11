@@ -1,0 +1,136 @@
+{
+  "id": "feature:pd_disaggregation",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "PD Disaggregation",
+  "summary": "Prefill-Decode分离部署架构，支持KV cache跨节点传输，实现计算资源独立扩展",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "90-116"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py",
+      "lines": "1-200"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "KVConnectorMetadata",
+    "KVConnectorStats"
+  ],
+  "related_features": [
+    "feature:kv_nz_format",
+    "feature:layer_sharding",
+    "feature:recompute_scheduler",
+    "feature:flashcomm2"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与KV transfer集成测试",
+        "与Mooncake connector集成测试",
+        "跨节点KV cache传输测试"
+      ],
+      "memory_impact": "Prefill节点需要存储KV cache用于传输，Decode节点需要接收KV cache",
+      "throughput_impact": "Prefill和Decode可独立扩展，整体吞吐量提升",
+      "latency_impact": "首token延迟降低（Prefill专用），decode延迟稳定",
+      "test_cases": [
+        {
+          "name": "测试P节点和D节点的TP配置差异",
+          "description": ""
+        },
+        {
+          "name": "测试KV cache传输正确性",
+          "description": ""
+        },
+        {
+          "name": "测试pd_tp_ratio和pd_head_ratio计算",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen系列"
+      ],
+      "enable_config": "kv_transfer_config配置P节点和D节点的tp_size",
+      "unsuitable_scenarios": [
+        "单节点部署",
+        "网络延迟高的环境"
+      ],
+      "best_practices": [
+        "P节点使用更大TP以加速prefill",
+        "D节点使用较小TP以节省资源",
+        "使用高速网络（RoCE）"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendConfig.pd_tp_ratio/pd_head_ratio：TP比例计算",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "KV connector：KV cache传输实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "Mooncake connector：跨节点传输实现",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多connector类型",
+        "优化KV传输性能"
+      ],
+      "affected_features": [
+        "KV cache管理",
+        "请求调度",
+        "TP/DP配置"
+      ]
+    },
+    "design": {
+      "principle": "将Prefill和Decode阶段分离到不同节点，Prefill节点计算KV cache后传输给Decode节点，实现计算资源的独立扩展和优化。",
+      "theory_analysis": "Prefill计算密集，需要大batch和大TP；Decode内存密集，需要小batch和小TP。分离后可针对各自特点优化，提升整体效率。",
+      "design_decisions": [
+        {
+          "decision": "pd_tp_ratio：P节点TP/D节点TP的比例",
+          "reason": ""
+        },
+        {
+          "decision": "pd_head_ratio：KV head复制的比例",
+          "reason": ""
+        },
+        {
+          "decision": "num_head_replica：head复制数量",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持非MLA模型：MLA有特殊处理",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "3f7d53b0c8e77fb4ddd0b566de019b4ec649e5188c04dac35cf9bf9c45d9878d",
+  "knowledge_domain": "vllm-ascend-core"
+}

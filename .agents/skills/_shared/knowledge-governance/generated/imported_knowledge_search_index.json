@@ -1,0 +1,5720 @@
+{
+  "generated_at": "2026-03-11T07:48:53+00:00",
+  "terms": {
+    "310_p": [
+      "device:310_p"
+    ],
+    "A2": [
+      "device:a2"
+    ],
+    "A3": [
+      "device:a3"
+    ],
+    "A5": [
+      "device:a5"
+    ],
+    "A5DeviceAdaptor": [
+      "api:a5_device_adaptor"
+    ],
+    "ACL Graph": [
+      "feature:acl_graph"
+    ],
+    "ACLGraphWrapper": [
+      "api:aclgraph_wrapper"
+    ],
+    "ALLGATHER": [
+      "moe_comm_type:allgather"
+    ],
+    "ALLTOALL": [
+      "moe_comm_type:alltoall"
+    ],
+    "ASCEND_HOME_PATH": [
+      "env_var:ascend_home_path"
+    ],
+    "AllGatherMethod": [
+      "api:all_gather_method"
+    ],
+    "AllToAllMethod": [
+      "api:all_to_all_method"
+    ],
+    "Ascend Speculative Decoding Methods": [
+      "feature:ascend_speculative_decoding"
+    ],
+    "AscendAttentionBackend": [
+      "api:ascend_attention_backend"
+    ],
+    "AscendColumnParallelLinear": [
+      "api:ascend_column_parallel_linear"
+    ],
+    "AscendDeepseekScalingRotaryEmbedding": [
+      "api:ascend_deepseek_scaling_rotary_embedding"
+    ],
+    "AscendEagleProposer": [
+      "api:ascend_eagle_proposer",
+      "feature:ascend_eagle_proposer"
+    ],
+    "AscendFusedMoE": [
+      "api:ascend_fused_mo_e"
+    ],
+    "AscendMLABackend": [
+      "api:ascend_mlabackend"
+    ],
+    "AscendMLAImpl": [
+      "api:ascend_mlaimpl"
+    ],
+    "AscendMRotaryEmbedding": [
+      "api:ascend_mrotary_embedding"
+    ],
+    "AscendMedusaProposer": [
+      "api:ascend_medusa_proposer"
+    ],
+    "AscendMergedColumnParallelLinear": [
+      "api:ascend_merged_column_parallel_linear"
+    ],
+    "AscendMultiHeadLatentAttention": [
+      "api:ascend_multi_head_latent_attention"
+    ],
+    "AscendNgramProposer": [
+      "api:ascend_ngram_proposer"
+    ],
+    "AscendQKVParallelLinear": [
+      "api:ascend_qkvparallel_linear"
+    ],
+    "AscendReplicatedLinear": [
+      "api:ascend_replicated_linear"
+    ],
+    "AscendRotaryEmbedding": [
+      "api:ascend_rotary_embedding"
+    ],
+    "AscendRowParallelLinear": [
+      "api:ascend_row_parallel_linear"
+    ],
+    "AscendSFABackend": [
+      "api:ascend_sfabackend"
+    ],
+    "AscendSFAImpl": [
+      "api:ascend_sfaimpl"
+    ],
+    "AscendSFAMetadataBuilder": [
+      "api:ascend_sfametadata_builder"
+    ],
+    "AscendSampler": [
+      "api:ascend_sampler"
+    ],
+    "AscendSuffixDecodingProposer": [
+      "api:ascend_suffix_decoding_proposer"
+    ],
+    "AscendW4A16FusedMoEMethod": [
+      "api:ascend_w4_a16_fused_mo_emethod"
+    ],
+    "AscendW8A8DynamicFusedMoEMethod": [
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod"
+    ],
+    "AscendW8A8DynamicLinearMethod": [
+      "api:ascend_w8_a8_dynamic_linear_method"
+    ],
+    "AscendW8A8LinearMethod": [
+      "api:ascend_w8_a8_linear_method"
+    ],
+    "AscendYaRNRotaryEmbedding": [
+      "api:ascend_ya_rnrotary_embedding"
+    ],
+    "Async Scheduling": [
+      "feature:async_scheduling"
+    ],
+    "AsyncLLM": [
+      "api:async_llm"
+    ],
+    "AsyncLLMEngine": [
+      "api:async_llmengine"
+    ],
+    "Balance Scheduling": [
+      "feature:balance_scheduling"
+    ],
+    "BaseDeviceAdaptor": [
+      "api:base_device_adaptor"
+    ],
+    "Batch Invariant": [
+      "feature:batch_invariant"
+    ],
+    "CUDA Graph": [
+      "feature:cuda_graph"
+    ],
+    "CaMemAllocator": [
+      "api:ca_mem_allocator"
+    ],
+    "Chunked Prefill": [
+      "feature:chunked_prefill"
+    ],
+    "Context Parallel": [
+      "feature:context_parallel"
+    ],
+    "Continuous Batching": [
+      "feature:continuous_batching"
+    ],
+    "DSA-CP": [
+      "feature:dsa_cp"
+    ],
+    "DYNAMIC_EPLB": [
+      "env_var:dynamic_eplb"
+    ],
+    "Device Adaptor": [
+      "feature:device_adaptor"
+    ],
+    "DeviceOperator": [
+      "api:device_operator"
+    ],
+    "Dynamic Batch Scheduler": [
+      "feature:dynamic_batch_scheduler"
+    ],
+    "Dynamic EPLB": [
+      "feature:dynamic_eplb"
+    ],
+    "EPLB": [
+      "feature:eplb"
+    ],
+    "EplbUpdator": [
+      "api:eplb_updator"
+    ],
+    "FUSED_MC2": [
+      "moe_comm_type:fused_mc2"
+    ],
+    "Finegrained TP": [
+      "feature:finegrained_tp"
+    ],
+    "FlashComm1": [
+      "feature:flashcomm1"
+    ],
+    "FlashComm2": [
+      "feature:flashcomm2"
+    ],
+    "FlashCommon3Context": [
+      "api:flash_common3_context"
+    ],
+    "Fused MC2": [
+      "feature:fused_mc2"
+    ],
+    "FusedMC2Method": [
+      "api:fused_mc2_method"
+    ],
+    "FusedMoE": [
+      "feature:fused_moe"
+    ],
+    "GPUModelRunner": [
+      "api:model_runner"
+    ],
+    "GPUWorker": [
+      "api:gpuworker"
+    ],
+    "Graph Fusion Passes": [
+      "feature:graph_fusion_passes"
+    ],
+    "HCCL_SO_PATH": [
+      "env_var:hccl_so_path"
+    ],
+    "IndexerWrapper": [
+      "api:indexer_wrapper"
+    ],
+    "KV NZ Format": [
+      "feature:kv_nz_format"
+    ],
+    "KV Transfer": [
+      "feature:kv_transfer"
+    ],
+    "KV Transfer (Ascend)": [
+      "feature:kv_transfer_ascend"
+    ],
+    "LLMEngine": [
+      "api:llmengine"
+    ],
+    "Layer Sharding": [
+      "feature:layer_sharding"
+    ],
+    "LoRA": [
+      "feature:lora"
+    ],
+    "LoRA (Ascend)": [
+      "feature:lora_ascend"
+    ],
+    "MC2": [
+      "moe_comm_type:mc2"
+    ],
+    "MC2Method": [
+      "api:mc2_method"
+    ],
+    "MC2通信": [
+      "feature:mc2_communication"
+    ],
+    "MLAPO": [
+      "feature:mlapo"
+    ],
+    "MSMONITOR_USE_DAEMON": [
+      "env_var:msmonitor_use_daemon"
+    ],
+    "MatmulAllReduce Fusion": [
+      "feature:matmul_allreduce"
+    ],
+    "MoECommMethod": [
+      "api:mo_ecomm_method"
+    ],
+    "ModelRunner": [
+      "api:model_runner"
+    ],
+    "Multi-Modal": [
+      "feature:multi_modal"
+    ],
+    "Multistream Overlap": [
+      "feature:multistream_overlap"
+    ],
+    "NPUCommunicator": [
+      "api:npucommunicator"
+    ],
+    "NPUInputBatch": [
+      "api:npuinput_batch"
+    ],
+    "NPUModelRunner": [
+      "api:npumodel_runner"
+    ],
+    "NPUModelRunnerV2": [
+      "api:npumodel_runner_v2"
+    ],
+    "NPUWorker": [
+      "api:npuworker"
+    ],
+    "PCPManager": [
+      "api:pcpmanager"
+    ],
+    "PD Disaggregation": [
+      "feature:pd_disaggregation"
+    ],
+    "PagedAttention": [
+      "feature:paged_attention"
+    ],
+    "Prefix Caching": [
+      "feature:prefix_caching"
+    ],
+    "Quantization": [
+      "feature:quantization"
+    ],
+    "Recompute Scheduler": [
+      "feature:recompute_scheduler"
+    ],
+    "RequestOutput": [
+      "api:request_output"
+    ],
+    "SOC_VERSION": [
+      "env_var:soc_version"
+    ],
+    "SamplingParams": [
+      "api:sampling_params"
+    ],
+    "Sequence Parallelism": [
+      "feature:sequence_parallelism"
+    ],
+    "Shared Expert DP": [
+      "feature:shared_expert_dp"
+    ],
+    "Sleep Mode": [
+      "feature:sleep_mode"
+    ],
+    "Sleep Mode (NPU)": [
+      "feature:sleep_mode_npu"
+    ],
+    "Speculative Decoding": [
+      "feature:speculative_decoding"
+    ],
+    "TRITON_ALL_BLOCKS_PARALLEL": [
+      "env_var:triton_all_blocks_parallel"
+    ],
+    "V1 AsyncLLM": [
+      "api:v1_async_llm"
+    ],
+    "V1 LLMEngine": [
+      "api:v1_llmengine"
+    ],
+    "V1AsyncLLM": [
+      "api:v1_async_llm"
+    ],
+    "V1LLMEngine": [
+      "api:v1_llmengine"
+    ],
+    "VLLM_ALLOW_EXPERT_LOAD_COLLECTING": [
+      "env_var:vllm_allow_expert_load_collecting"
+    ],
+    "VLLM_ASCEND_BALANCE_SCHEDULING": [
+      "env_var:vllm_ascend_balance_scheduling"
+    ],
+    "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL": [
+      "env_var:vllm_ascend_enable_context_parallel"
+    ],
+    "VLLM_ASCEND_ENABLE_CUSTOM_OP": [
+      "env_var:vllm_ascend_enable_custom_op"
+    ],
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1": [
+      "env_var:vllm_ascend_enable_flashcomm1"
+    ],
+    "VLLM_ASCEND_ENABLE_FUSED_MC2": [
+      "env_var:vllm_ascend_enable_fused_mc2"
+    ],
+    "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE": [
+      "env_var:vllm_ascend_enable_matmul_allreduce"
+    ],
+    "VLLM_ASCEND_ENABLE_MLAPO": [
+      "env_var:vllm_ascend_enable_mlapo"
+    ],
+    "VLLM_ASCEND_ENABLE_NZ": [
+      "env_var:vllm_ascend_enable_nz"
+    ],
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP_DOWN": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_down"
+    ],
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP_GATE_UP": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up"
+    ],
+    "VLLM_ASCEND_ENABLE_QUANT_COMM": [
+      "env_var:vllm_ascend_enable_quant_comm"
+    ],
+    "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE": [
+      "env_var:vllm_ascend_flashcomm2_parallel_size"
+    ],
+    "VLLM_ASCEND_WEIGHT_PREFETCH_RATIO": [
+      "env_var:vllm_ascend_weight_prefetch_ratio"
+    ],
+    "VllmEplbAdaptor": [
+      "api:vllm_eplb_adaptor"
+    ],
+    "W4A16": [
+      "quantization:w4_a16"
+    ],
+    "W4A4_FLATQUANT": [
+      "quantization:w4_a4_flatquant"
+    ],
+    "W4A4_LAOS_DYNAMIC": [
+      "quantization:w4_a4_laos_dynamic"
+    ],
+    "W4A8": [
+      "quantization:w4_a8"
+    ],
+    "W8A16": [
+      "quantization:w8_a16"
+    ],
+    "W8A8": [
+      "quantization:w8_a8"
+    ],
+    "W8A8_DYNAMIC": [
+      "quantization:w8_a8_dynamic"
+    ],
+    "W8A8_MXFP8": [
+      "quantization:w8_a8_mxfp8"
+    ],
+    "W8A8_PDMIX": [
+      "quantization:w8_a8_pdmix"
+    ],
+    "Weight Prefetch": [
+      "feature:weight_prefetch"
+    ],
+    "Worker (GPU)": [
+      "api:gpuworker"
+    ],
+    "XliteGraph": [
+      "feature:xlite_graph"
+    ],
+    "XliteWrapper": [
+      "api:xlite_wrapper"
+    ],
+    "_310P": [
+      "device:310_p"
+    ],
+    "_DYNAMIC_EPLB": [
+      "comm_group:dynamic_eplb"
+    ],
+    "_EMBED_TP": [
+      "comm_group:embed_tp"
+    ],
+    "_FC3_QUANT_X": [
+      "comm_group:fc3_quant_x"
+    ],
+    "_FLASHCOMM2_ODP": [
+      "comm_group:flashcomm2_odp"
+    ],
+    "_FLASHCOMM2_OTP": [
+      "comm_group:flashcomm2_otp"
+    ],
+    "_LMTP": [
+      "comm_group:lmtp"
+    ],
+    "_MC2": [
+      "comm_group:mc2"
+    ],
+    "_MLP_TP": [
+      "comm_group:mlp_tp"
+    ],
+    "_OTP": [
+      "comm_group:otp"
+    ],
+    "_P_TP": [
+      "comm_group:p_tp"
+    ],
+    "_SHARD_WEIGHT": [
+      "comm_group:shard_weight"
+    ],
+    "a2": [
+      "device:a2"
+    ],
+    "a3": [
+      "device:a3"
+    ],
+    "a5": [
+      "device:a5"
+    ],
+    "a5_device_adaptor": [
+      "api:a5_device_adaptor"
+    ],
+    "acl_graph": [
+      "feature:acl_graph"
+    ],
+    "aclgraph_wrapper": [
+      "api:aclgraph_wrapper"
+    ],
+    "all_gather_method": [
+      "api:all_gather_method"
+    ],
+    "all_to_all_method": [
+      "api:all_to_all_method"
+    ],
+    "allgather": [
+      "moe_comm_type:allgather"
+    ],
+    "alltoall": [
+      "moe_comm_type:alltoall"
+    ],
+    "api:a5_device_adaptor": [
+      "api:a5_device_adaptor"
+    ],
+    "api:aclgraph_wrapper": [
+      "api:aclgraph_wrapper"
+    ],
+    "api:all_gather_method": [
+      "api:all_gather_method"
+    ],
+    "api:all_to_all_method": [
+      "api:all_to_all_method"
+    ],
+    "api:ascend_attention_backend": [
+      "api:ascend_attention_backend"
+    ],
+    "api:ascend_column_parallel_linear": [
+      "api:ascend_column_parallel_linear"
+    ],
+    "api:ascend_deepseek_scaling_rotary_embedding": [
+      "api:ascend_deepseek_scaling_rotary_embedding"
+    ],
+    "api:ascend_eagle_proposer": [
+      "api:ascend_eagle_proposer"
+    ],
+    "api:ascend_fused_mo_e": [
+      "api:ascend_fused_mo_e"
+    ],
+    "api:ascend_medusa_proposer": [
+      "api:ascend_medusa_proposer"
+    ],
+    "api:ascend_merged_column_parallel_linear": [
+      "api:ascend_merged_column_parallel_linear"
+    ],
+    "api:ascend_mlabackend": [
+      "api:ascend_mlabackend"
+    ],
+    "api:ascend_mlaimpl": [
+      "api:ascend_mlaimpl"
+    ],
+    "api:ascend_mrotary_embedding": [
+      "api:ascend_mrotary_embedding"
+    ],
+    "api:ascend_multi_head_latent_attention": [
+      "api:ascend_multi_head_latent_attention"
+    ],
+    "api:ascend_ngram_proposer": [
+      "api:ascend_ngram_proposer"
+    ],
+    "api:ascend_qkvparallel_linear": [
+      "api:ascend_qkvparallel_linear"
+    ],
+    "api:ascend_replicated_linear": [
+      "api:ascend_replicated_linear"
+    ],
+    "api:ascend_rotary_embedding": [
+      "api:ascend_rotary_embedding"
+    ],
+    "api:ascend_row_parallel_linear": [
+      "api:ascend_row_parallel_linear"
+    ],
+    "api:ascend_sampler": [
+      "api:ascend_sampler"
+    ],
+    "api:ascend_sfabackend": [
+      "api:ascend_sfabackend"
+    ],
+    "api:ascend_sfaimpl": [
+      "api:ascend_sfaimpl"
+    ],
+    "api:ascend_sfametadata_builder": [
+      "api:ascend_sfametadata_builder"
+    ],
+    "api:ascend_suffix_decoding_proposer": [
+      "api:ascend_suffix_decoding_proposer"
+    ],
+    "api:ascend_w4_a16_fused_mo_emethod": [
+      "api:ascend_w4_a16_fused_mo_emethod"
+    ],
+    "api:ascend_w8_a8_dynamic_fused_mo_emethod": [
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod"
+    ],
+    "api:ascend_w8_a8_dynamic_linear_method": [
+      "api:ascend_w8_a8_dynamic_linear_method"
+    ],
+    "api:ascend_w8_a8_linear_method": [
+      "api:ascend_w8_a8_linear_method"
+    ],
+    "api:ascend_ya_rnrotary_embedding": [
+      "api:ascend_ya_rnrotary_embedding"
+    ],
+    "api:async_llm": [
+      "api:async_llm"
+    ],
+    "api:async_llmengine": [
+      "api:async_llmengine"
+    ],
+    "api:base_device_adaptor": [
+      "api:base_device_adaptor"
+    ],
+    "api:ca_mem_allocator": [
+      "api:ca_mem_allocator"
+    ],
+    "api:device_operator": [
+      "api:device_operator"
+    ],
+    "api:eplb_updator": [
+      "api:eplb_updator"
+    ],
+    "api:flash_common3_context": [
+      "api:flash_common3_context"
+    ],
+    "api:fused_mc2_method": [
+      "api:fused_mc2_method"
+    ],
+    "api:gpuworker": [
+      "api:gpuworker"
+    ],
+    "api:indexer_wrapper": [
+      "api:indexer_wrapper"
+    ],
+    "api:llmengine": [
+      "api:llmengine"
+    ],
+    "api:mc2_method": [
+      "api:mc2_method"
+    ],
+    "api:mo_ecomm_method": [
+      "api:mo_ecomm_method"
+    ],
+    "api:model_runner": [
+      "api:model_runner"
+    ],
+    "api:npucommunicator": [
+      "api:npucommunicator"
+    ],
+    "api:npuinput_batch": [
+      "api:npuinput_batch"
+    ],
+    "api:npumodel_runner": [
+      "api:npumodel_runner"
+    ],
+    "api:npumodel_runner_v2": [
+      "api:npumodel_runner_v2"
+    ],
+    "api:npuworker": [
+      "api:npuworker"
+    ],
+    "api:pcpmanager": [
+      "api:pcpmanager"
+    ],
+    "api:request_output": [
+      "api:request_output"
+    ],
+    "api:sampling_params": [
+      "api:sampling_params"
+    ],
+    "api:select_moe_comm_method": [
+      "api:select_moe_comm_method"
+    ],
+    "api:set_ascend_forward_context": [
+      "api:set_ascend_forward_context"
+    ],
+    "api:v1_async_llm": [
+      "api:v1_async_llm"
+    ],
+    "api:v1_llmengine": [
+      "api:v1_llmengine"
+    ],
+    "api:vllm_eplb_adaptor": [
+      "api:vllm_eplb_adaptor"
+    ],
+    "api:xlite_wrapper": [
+      "api:xlite_wrapper"
+    ],
+    "ascend_attention_backend": [
+      "api:ascend_attention_backend"
+    ],
+    "ascend_column_parallel_linear": [
+      "api:ascend_column_parallel_linear"
+    ],
+    "ascend_compilation_config": [
+      "config:ascend_compilation_config"
+    ],
+    "ascend_deepseek_scaling_rotary_embedding": [
+      "api:ascend_deepseek_scaling_rotary_embedding"
+    ],
+    "ascend_eagle_proposer": [
+      "api:ascend_eagle_proposer",
+      "feature:ascend_eagle_proposer"
+    ],
+    "ascend_fused_mo_e": [
+      "api:ascend_fused_mo_e"
+    ],
+    "ascend_home_path": [
+      "env_var:ascend_home_path"
+    ],
+    "ascend_medusa_proposer": [
+      "api:ascend_medusa_proposer"
+    ],
+    "ascend_merged_column_parallel_linear": [
+      "api:ascend_merged_column_parallel_linear"
+    ],
+    "ascend_mlabackend": [
+      "api:ascend_mlabackend"
+    ],
+    "ascend_mlaimpl": [
+      "api:ascend_mlaimpl"
+    ],
+    "ascend_mrotary_embedding": [
+      "api:ascend_mrotary_embedding"
+    ],
+    "ascend_multi_head_latent_attention": [
+      "api:ascend_multi_head_latent_attention"
+    ],
+    "ascend_ngram_proposer": [
+      "api:ascend_ngram_proposer"
+    ],
+    "ascend_qkvparallel_linear": [
+      "api:ascend_qkvparallel_linear"
+    ],
+    "ascend_replicated_linear": [
+      "api:ascend_replicated_linear"
+    ],
+    "ascend_rotary_embedding": [
+      "api:ascend_rotary_embedding"
+    ],
+    "ascend_row_parallel_linear": [
+      "api:ascend_row_parallel_linear"
+    ],
+    "ascend_sampler": [
+      "api:ascend_sampler"
+    ],
+    "ascend_sfabackend": [
+      "api:ascend_sfabackend"
+    ],
+    "ascend_sfaimpl": [
+      "api:ascend_sfaimpl"
+    ],
+    "ascend_sfametadata_builder": [
+      "api:ascend_sfametadata_builder"
+    ],
+    "ascend_speculative_decoding": [
+      "feature:ascend_speculative_decoding"
+    ],
+    "ascend_speculative_decoding_methods": [
+      "feature:ascend_speculative_decoding"
+    ],
+    "ascend_suffix_decoding_proposer": [
+      "api:ascend_suffix_decoding_proposer"
+    ],
+    "ascend_w4_a16_fused_mo_emethod": [
+      "api:ascend_w4_a16_fused_mo_emethod"
+    ],
+    "ascend_w8_a8_dynamic_fused_mo_emethod": [
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod"
+    ],
+    "ascend_w8_a8_dynamic_linear_method": [
+      "api:ascend_w8_a8_dynamic_linear_method"
+    ],
+    "ascend_w8_a8_linear_method": [
+      "api:ascend_w8_a8_linear_method"
+    ],
+    "ascend_ya_rnrotary_embedding": [
+      "api:ascend_ya_rnrotary_embedding"
+    ],
+    "async_llm": [
+      "api:async_llm"
+    ],
+    "async_llmengine": [
+      "api:async_llmengine"
+    ],
+    "async_scheduling": [
+      "feature:async_scheduling"
+    ],
+    "balance_scheduling": [
+      "feature:balance_scheduling"
+    ],
+    "base_device_adaptor": [
+      "api:base_device_adaptor"
+    ],
+    "batch_invariant": [
+      "feature:batch_invariant"
+    ],
+    "batch_matmul_transpose": [
+      "operator:batch_matmul_transpose"
+    ],
+    "ca_mem_allocator": [
+      "api:ca_mem_allocator"
+    ],
+    "chunked_prefill": [
+      "feature:chunked_prefill"
+    ],
+    "comm_group:dynamic_eplb": [
+      "comm_group:dynamic_eplb"
+    ],
+    "comm_group:embed_tp": [
+      "comm_group:embed_tp"
+    ],
+    "comm_group:fc3_quant_x": [
+      "comm_group:fc3_quant_x"
+    ],
+    "comm_group:flashcomm2_odp": [
+      "comm_group:flashcomm2_odp"
+    ],
+    "comm_group:flashcomm2_otp": [
+      "comm_group:flashcomm2_otp"
+    ],
+    "comm_group:lmtp": [
+      "comm_group:lmtp"
+    ],
+    "comm_group:mc2": [
+      "comm_group:mc2"
+    ],
+    "comm_group:mlp_tp": [
+      "comm_group:mlp_tp"
+    ],
+    "comm_group:otp": [
+      "comm_group:otp"
+    ],
+    "comm_group:p_tp": [
+      "comm_group:p_tp"
+    ],
+    "comm_group:shard_weight": [
+      "comm_group:shard_weight"
+    ],
+    "config:ascend_compilation_config": [
+      "config:ascend_compilation_config"
+    ],
+    "config:config_compatibility_matrix": [
+      "config:config_compatibility_matrix"
+    ],
+    "config:dump_config_path": [
+      "config:dump_config_path"
+    ],
+    "config:enable_kv_nz": [
+      "config:enable_kv_nz"
+    ],
+    "config:enable_shared_expert_dp": [
+      "config:enable_shared_expert_dp"
+    ],
+    "config:eplb_config": [
+      "config:eplb_config"
+    ],
+    "config:finegrained_tp_config": [
+      "config:finegrained_tp_config"
+    ],
+    "config:layer_sharding": [
+      "config:layer_sharding"
+    ],
+    "config:multistream_overlap_gate": [
+      "config:multistream_overlap_gate"
+    ],
+    "config:multistream_overlap_shared_expert": [
+      "config:multistream_overlap_shared_expert"
+    ],
+    "config:num_head_replica": [
+      "config:num_head_replica"
+    ],
+    "config:pd_head_ratio": [
+      "config:pd_head_ratio"
+    ],
+    "config:pd_tp_ratio": [
+      "config:pd_tp_ratio"
+    ],
+    "config:recompute_scheduler_enable": [
+      "config:recompute_scheduler_enable"
+    ],
+    "config:weight_prefetch_config": [
+      "config:weight_prefetch_config"
+    ],
+    "config:xlite_graph_config": [
+      "config:xlite_graph_config"
+    ],
+    "config_compatibility_matrix": [
+      "config:config_compatibility_matrix"
+    ],
+    "context_parallel": [
+      "feature:context_parallel"
+    ],
+    "continuous_batching": [
+      "feature:continuous_batching"
+    ],
+    "cuda_graph": [
+      "feature:cuda_graph"
+    ],
+    "device:310_p": [
+      "device:310_p"
+    ],
+    "device:a2": [
+      "device:a2"
+    ],
+    "device:a3": [
+      "device:a3"
+    ],
+    "device:a5": [
+      "device:a5"
+    ],
+    "device_adaptor": [
+      "feature:device_adaptor"
+    ],
+    "device_operator": [
+      "api:device_operator"
+    ],
+    "dispatch_ffn_combine": [
+      "operator:dispatch_ffn_combine"
+    ],
+    "dispatch_gmm_combine_decode": [
+      "operator:dispatch_gmm_combine_decode"
+    ],
+    "dsa_cp": [
+      "feature:dsa_cp"
+    ],
+    "dump_config_path": [
+      "config:dump_config_path"
+    ],
+    "dynamic_batch_scheduler": [
+      "feature:dynamic_batch_scheduler"
+    ],
+    "dynamic_eplb": [
+      "comm_group:dynamic_eplb",
+      "env_var:dynamic_eplb",
+      "feature:dynamic_eplb"
+    ],
+    "embed_tp": [
+      "comm_group:embed_tp"
+    ],
+    "enable_kv_nz": [
+      "config:enable_kv_nz"
+    ],
+    "enable_shared_expert_dp": [
+      "config:enable_shared_expert_dp"
+    ],
+    "env_var:ascend_home_path": [
+      "env_var:ascend_home_path"
+    ],
+    "env_var:dynamic_eplb": [
+      "env_var:dynamic_eplb"
+    ],
+    "env_var:hccl_so_path": [
+      "env_var:hccl_so_path"
+    ],
+    "env_var:msmonitor_use_daemon": [
+      "env_var:msmonitor_use_daemon"
+    ],
+    "env_var:soc_version": [
+      "env_var:soc_version"
+    ],
+    "env_var:triton_all_blocks_parallel": [
+      "env_var:triton_all_blocks_parallel"
+    ],
+    "env_var:vllm_allow_expert_load_collecting": [
+      "env_var:vllm_allow_expert_load_collecting"
+    ],
+    "env_var:vllm_ascend_balance_scheduling": [
+      "env_var:vllm_ascend_balance_scheduling"
+    ],
+    "env_var:vllm_ascend_enable_context_parallel": [
+      "env_var:vllm_ascend_enable_context_parallel"
+    ],
+    "env_var:vllm_ascend_enable_custom_op": [
+      "env_var:vllm_ascend_enable_custom_op"
+    ],
+    "env_var:vllm_ascend_enable_flashcomm1": [
+      "env_var:vllm_ascend_enable_flashcomm1"
+    ],
+    "env_var:vllm_ascend_enable_fused_mc2": [
+      "env_var:vllm_ascend_enable_fused_mc2"
+    ],
+    "env_var:vllm_ascend_enable_matmul_allreduce": [
+      "env_var:vllm_ascend_enable_matmul_allreduce"
+    ],
+    "env_var:vllm_ascend_enable_mlapo": [
+      "env_var:vllm_ascend_enable_mlapo"
+    ],
+    "env_var:vllm_ascend_enable_nz": [
+      "env_var:vllm_ascend_enable_nz"
+    ],
+    "env_var:vllm_ascend_enable_prefetch_mlp_down": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_down"
+    ],
+    "env_var:vllm_ascend_enable_prefetch_mlp_gate_up": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up"
+    ],
+    "env_var:vllm_ascend_enable_quant_comm": [
+      "env_var:vllm_ascend_enable_quant_comm"
+    ],
+    "env_var:vllm_ascend_flashcomm2_parallel_size": [
+      "env_var:vllm_ascend_flashcomm2_parallel_size"
+    ],
+    "env_var:vllm_ascend_weight_prefetch_ratio": [
+      "env_var:vllm_ascend_weight_prefetch_ratio"
+    ],
+    "env_var:vllm_core_env": [
+      "env_var:vllm_core_env"
+    ],
+    "eplb": [
+      "feature:eplb"
+    ],
+    "eplb_config": [
+      "config:eplb_config"
+    ],
+    "eplb_updator": [
+      "api:eplb_updator"
+    ],
+    "fc3_quant_x": [
+      "comm_group:fc3_quant_x"
+    ],
+    "feature:acl_graph": [
+      "feature:acl_graph"
+    ],
+    "feature:ascend_eagle_proposer": [
+      "feature:ascend_eagle_proposer"
+    ],
+    "feature:ascend_speculative_decoding": [
+      "feature:ascend_speculative_decoding"
+    ],
+    "feature:async_scheduling": [
+      "feature:async_scheduling"
+    ],
+    "feature:balance_scheduling": [
+      "feature:balance_scheduling"
+    ],
+    "feature:batch_invariant": [
+      "feature:batch_invariant"
+    ],
+    "feature:chunked_prefill": [
+      "feature:chunked_prefill"
+    ],
+    "feature:context_parallel": [
+      "feature:context_parallel"
+    ],
+    "feature:continuous_batching": [
+      "feature:continuous_batching"
+    ],
+    "feature:cuda_graph": [
+      "feature:cuda_graph"
+    ],
+    "feature:device_adaptor": [
+      "feature:device_adaptor"
+    ],
+    "feature:dsa_cp": [
+      "feature:dsa_cp"
+    ],
+    "feature:dynamic_batch_scheduler": [
+      "feature:dynamic_batch_scheduler"
+    ],
+    "feature:dynamic_eplb": [
+      "feature:dynamic_eplb"
+    ],
+    "feature:eplb": [
+      "feature:eplb"
+    ],
+    "feature:finegrained_tp": [
+      "feature:finegrained_tp"
+    ],
+    "feature:flashcomm1": [
+      "feature:flashcomm1"
+    ],
+    "feature:flashcomm2": [
+      "feature:flashcomm2"
+    ],
+    "feature:fused_mc2": [
+      "feature:fused_mc2"
+    ],
+    "feature:fused_moe": [
+      "feature:fused_moe"
+    ],
+    "feature:graph_fusion_passes": [
+      "feature:graph_fusion_passes"
+    ],
+    "feature:kv_nz_format": [
+      "feature:kv_nz_format"
+    ],
+    "feature:kv_transfer": [
+      "feature:kv_transfer"
+    ],
+    "feature:kv_transfer_ascend": [
+      "feature:kv_transfer_ascend"
+    ],
+    "feature:layer_sharding": [
+      "feature:layer_sharding"
+    ],
+    "feature:lora": [
+      "feature:lora"
+    ],
+    "feature:lora_ascend": [
+      "feature:lora_ascend"
+    ],
+    "feature:matmul_allreduce": [
+      "feature:matmul_allreduce"
+    ],
+    "feature:mc2_communication": [
+      "feature:mc2_communication"
+    ],
+    "feature:mlapo": [
+      "feature:mlapo"
+    ],
+    "feature:multi_modal": [
+      "feature:multi_modal"
+    ],
+    "feature:multistream_overlap": [
+      "feature:multistream_overlap"
+    ],
+    "feature:paged_attention": [
+      "feature:paged_attention"
+    ],
+    "feature:pd_disaggregation": [
+      "feature:pd_disaggregation"
+    ],
+    "feature:prefix_caching": [
+      "feature:prefix_caching"
+    ],
+    "feature:quantization": [
+      "feature:quantization"
+    ],
+    "feature:recompute_scheduler": [
+      "feature:recompute_scheduler"
+    ],
+    "feature:sequence_parallelism": [
+      "feature:sequence_parallelism"
+    ],
+    "feature:shared_expert_dp": [
+      "feature:shared_expert_dp"
+    ],
+    "feature:sleep_mode": [
+      "feature:sleep_mode"
+    ],
+    "feature:sleep_mode_npu": [
+      "feature:sleep_mode_npu"
+    ],
+    "feature:speculative_decoding": [
+      "feature:speculative_decoding"
+    ],
+    "feature:weight_prefetch": [
+      "feature:weight_prefetch"
+    ],
+    "feature:xlite_graph": [
+      "feature:xlite_graph"
+    ],
+    "finegrained_tp": [
+      "feature:finegrained_tp"
+    ],
+    "finegrained_tp_config": [
+      "config:finegrained_tp_config"
+    ],
+    "flash_comm1": [
+      "feature:flashcomm1"
+    ],
+    "flash_comm2": [
+      "feature:flashcomm2"
+    ],
+    "flash_common3_context": [
+      "api:flash_common3_context"
+    ],
+    "flashcomm1": [
+      "feature:flashcomm1"
+    ],
+    "flashcomm2": [
+      "feature:flashcomm2"
+    ],
+    "flashcomm2_odp": [
+      "comm_group:flashcomm2_odp"
+    ],
+    "flashcomm2_otp": [
+      "comm_group:flashcomm2_otp"
+    ],
+    "fused_mc2": [
+      "feature:fused_mc2",
+      "moe_comm_type:fused_mc2"
+    ],
+    "fused_mc2_method": [
+      "api:fused_mc2_method"
+    ],
+    "fused_mo_e": [
+      "feature:fused_moe"
+    ],
+    "fused_moe": [
+      "feature:fused_moe"
+    ],
+    "gpumodel_runner": [
+      "api:model_runner"
+    ],
+    "graph_fusion_passes": [
+      "feature:graph_fusion_passes"
+    ],
+    "hccl_so_path": [
+      "env_var:hccl_so_path"
+    ],
+    "indexer_wrapper": [
+      "api:indexer_wrapper"
+    ],
+    "kv_nz_format": [
+      "feature:kv_nz_format"
+    ],
+    "kv_transfer": [
+      "feature:kv_transfer"
+    ],
+    "kv_transfer_ascend": [
+      "feature:kv_transfer_ascend"
+    ],
+    "layer_sharding": [
+      "config:layer_sharding",
+      "feature:layer_sharding"
+    ],
+    "llmengine": [
+      "api:llmengine"
+    ],
+    "lmtp": [
+      "comm_group:lmtp"
+    ],
+    "lo_ra": [
+      "feature:lora"
+    ],
+    "lo_ra_ascend": [
+      "feature:lora_ascend"
+    ],
+    "lora": [
+      "feature:lora"
+    ],
+    "lora_ascend": [
+      "feature:lora_ascend"
+    ],
+    "matmul_all_reduce_fusion": [
+      "feature:matmul_allreduce"
+    ],
+    "matmul_allreduce": [
+      "feature:matmul_allreduce"
+    ],
+    "mc2": [
+      "comm_group:mc2",
+      "feature:mc2_communication",
+      "moe_comm_type:mc2"
+    ],
+    "mc2_communication": [
+      "feature:mc2_communication"
+    ],
+    "mc2_method": [
+      "api:mc2_method"
+    ],
+    "mla_preprocess": [
+      "operator:mla_preprocess"
+    ],
+    "mlapo": [
+      "feature:mlapo"
+    ],
+    "mlp_tp": [
+      "comm_group:mlp_tp"
+    ],
+    "mo_ecomm_method": [
+      "api:mo_ecomm_method"
+    ],
+    "moe_comm_type:allgather": [
+      "moe_comm_type:allgather"
+    ],
+    "moe_comm_type:alltoall": [
+      "moe_comm_type:alltoall"
+    ],
+    "moe_comm_type:fused_mc2": [
+      "moe_comm_type:fused_mc2"
+    ],
+    "moe_comm_type:mc2": [
+      "moe_comm_type:mc2"
+    ],
+    "msmonitor_use_daemon": [
+      "env_var:msmonitor_use_daemon"
+    ],
+    "multi_modal": [
+      "feature:multi_modal"
+    ],
+    "multistream_overlap": [
+      "feature:multistream_overlap"
+    ],
+    "multistream_overlap_gate": [
+      "config:multistream_overlap_gate"
+    ],
+    "multistream_overlap_shared_expert": [
+      "config:multistream_overlap_shared_expert"
+    ],
+    "npu_add_rms_norm_quant": [
+      "operator:npu_add_rms_norm_quant"
+    ],
+    "npu_convert_weight_to_int4pack": [
+      "operator:npu_convert_weight_to_int4pack"
+    ],
+    "npu_dequant_swiglu_quant": [
+      "operator:npu_dequant_swiglu_quant"
+    ],
+    "npu_dynamic_mx_quant": [
+      "operator:npu_dynamic_mx_quant"
+    ],
+    "npu_dynamic_quant": [
+      "operator:npu_dynamic_quant"
+    ],
+    "npu_format_cast": [
+      "operator:npu_format_cast"
+    ],
+    "npu_fused_infer_attention_score": [
+      "operator:npu_fused_infer_attention_score"
+    ],
+    "npu_grouped_matmul": [
+      "operator:npu_grouped_matmul"
+    ],
+    "npu_grouped_matmul_swiglu_quant": [
+      "operator:npu_grouped_matmul_swiglu_quant"
+    ],
+    "npu_interleave_rope": [
+      "operator:npu_interleave_rope"
+    ],
+    "npu_kv_rmsnorm_rope_cache": [
+      "operator:npu_kv_rmsnorm_rope_cache"
+    ],
+    "npu_lightning_indexer": [
+      "operator:npu_lightning_indexer"
+    ],
+    "npu_moe_init_routing": [
+      "operator:npu_moe_init_routing"
+    ],
+    "npu_moe_init_routing_v2": [
+      "operator:npu_moe_init_routing_v2"
+    ],
+    "npu_mrope": [
+      "operator:npu_mrope"
+    ],
+    "npu_paged_attention": [
+      "operator:npu_paged_attention"
+    ],
+    "npu_quant_matmul": [
+      "operator:npu_quant_matmul"
+    ],
+    "npu_reshape_and_cache": [
+      "operator:npu_reshape_and_cache"
+    ],
+    "npu_ring_mla": [
+      "operator:npu_ring_mla"
+    ],
+    "npu_rotary_embedding": [
+      "operator:npu_rotary_embedding"
+    ],
+    "npu_rotary_mul": [
+      "operator:npu_rotary_mul"
+    ],
+    "npu_scatter_nd_update": [
+      "operator:npu_scatter_nd_update"
+    ],
+    "npu_scatter_nd_update_": [
+      "operator:npu_scatter_nd_update"
+    ],
+    "npu_scatter_pa_kv_cache": [
+      "operator:npu_scatter_pa_kv_cache"
+    ],
+    "npu_sparse_flash_attention": [
+      "operator:npu_sparse_flash_attention"
+    ],
+    "npu_swiglu": [
+      "operator:npu_swiglu"
+    ],
+    "npucommunicator": [
+      "api:npucommunicator"
+    ],
+    "npuinput_batch": [
+      "api:npuinput_batch"
+    ],
+    "npumodel_runner": [
+      "api:npumodel_runner"
+    ],
+    "npumodel_runner_v2": [
+      "api:npumodel_runner_v2"
+    ],
+    "npuworker": [
+      "api:npuworker"
+    ],
+    "num_head_replica": [
+      "config:num_head_replica"
+    ],
+    "operator:batch_matmul_transpose": [
+      "operator:batch_matmul_transpose"
+    ],
+    "operator:dispatch_ffn_combine": [
+      "operator:dispatch_ffn_combine"
+    ],
+    "operator:dispatch_gmm_combine_decode": [
+      "operator:dispatch_gmm_combine_decode"
+    ],
+    "operator:mla_preprocess": [
+      "operator:mla_preprocess"
+    ],
+    "operator:npu_add_rms_norm_quant": [
+      "operator:npu_add_rms_norm_quant"
+    ],
+    "operator:npu_convert_weight_to_int4pack": [
+      "operator:npu_convert_weight_to_int4pack"
+    ],
+    "operator:npu_dequant_swiglu_quant": [
+      "operator:npu_dequant_swiglu_quant"
+    ],
+    "operator:npu_dynamic_mx_quant": [
+      "operator:npu_dynamic_mx_quant"
+    ],
+    "operator:npu_dynamic_quant": [
+      "operator:npu_dynamic_quant"
+    ],
+    "operator:npu_format_cast": [
+      "operator:npu_format_cast"
+    ],
+    "operator:npu_fused_infer_attention_score": [
+      "operator:npu_fused_infer_attention_score"
+    ],
+    "operator:npu_grouped_matmul": [
+      "operator:npu_grouped_matmul"
+    ],
+    "operator:npu_grouped_matmul_swiglu_quant": [
+      "operator:npu_grouped_matmul_swiglu_quant"
+    ],
+    "operator:npu_interleave_rope": [
+      "operator:npu_interleave_rope"
+    ],
+    "operator:npu_kv_rmsnorm_rope_cache": [
+      "operator:npu_kv_rmsnorm_rope_cache"
+    ],
+    "operator:npu_lightning_indexer": [
+      "operator:npu_lightning_indexer"
+    ],
+    "operator:npu_moe_init_routing": [
+      "operator:npu_moe_init_routing"
+    ],
+    "operator:npu_moe_init_routing_v2": [
+      "operator:npu_moe_init_routing_v2"
+    ],
+    "operator:npu_mrope": [
+      "operator:npu_mrope"
+    ],
+    "operator:npu_paged_attention": [
+      "operator:npu_paged_attention"
+    ],
+    "operator:npu_quant_matmul": [
+      "operator:npu_quant_matmul"
+    ],
+    "operator:npu_reshape_and_cache": [
+      "operator:npu_reshape_and_cache"
+    ],
+    "operator:npu_ring_mla": [
+      "operator:npu_ring_mla"
+    ],
+    "operator:npu_rotary_embedding": [
+      "operator:npu_rotary_embedding"
+    ],
+    "operator:npu_rotary_mul": [
+      "operator:npu_rotary_mul"
+    ],
+    "operator:npu_scatter_nd_update": [
+      "operator:npu_scatter_nd_update"
+    ],
+    "operator:npu_scatter_pa_kv_cache": [
+      "operator:npu_scatter_pa_kv_cache"
+    ],
+    "operator:npu_sparse_flash_attention": [
+      "operator:npu_sparse_flash_attention"
+    ],
+    "operator:npu_swiglu": [
+      "operator:npu_swiglu"
+    ],
+    "otp": [
+      "comm_group:otp"
+    ],
+    "p_tp": [
+      "comm_group:p_tp"
+    ],
+    "paged_attention": [
+      "feature:paged_attention"
+    ],
+    "pcpmanager": [
+      "api:pcpmanager"
+    ],
+    "pd_disaggregation": [
+      "feature:pd_disaggregation"
+    ],
+    "pd_head_ratio": [
+      "config:pd_head_ratio"
+    ],
+    "pd_tp_ratio": [
+      "config:pd_tp_ratio"
+    ],
+    "prefix_caching": [
+      "feature:prefix_caching"
+    ],
+    "quantization": [
+      "feature:quantization"
+    ],
+    "quantization:w4_a16": [
+      "quantization:w4_a16"
+    ],
+    "quantization:w4_a4_flatquant": [
+      "quantization:w4_a4_flatquant"
+    ],
+    "quantization:w4_a4_laos_dynamic": [
+      "quantization:w4_a4_laos_dynamic"
+    ],
+    "quantization:w4_a8": [
+      "quantization:w4_a8"
+    ],
+    "quantization:w8_a16": [
+      "quantization:w8_a16"
+    ],
+    "quantization:w8_a8": [
+      "quantization:w8_a8"
+    ],
+    "quantization:w8_a8_dynamic": [
+      "quantization:w8_a8_dynamic"
+    ],
+    "quantization:w8_a8_mxfp8": [
+      "quantization:w8_a8_mxfp8"
+    ],
+    "quantization:w8_a8_pdmix": [
+      "quantization:w8_a8_pdmix"
+    ],
+    "recompute_scheduler": [
+      "feature:recompute_scheduler"
+    ],
+    "recompute_scheduler_enable": [
+      "config:recompute_scheduler_enable"
+    ],
+    "request_output": [
+      "api:request_output"
+    ],
+    "sampling_params": [
+      "api:sampling_params"
+    ],
+    "select_moe_comm_method": [
+      "api:select_moe_comm_method"
+    ],
+    "sequence_parallelism": [
+      "feature:sequence_parallelism"
+    ],
+    "set_ascend_forward_context": [
+      "api:set_ascend_forward_context"
+    ],
+    "shard_weight": [
+      "comm_group:shard_weight"
+    ],
+    "shared_expert_dp": [
+      "feature:shared_expert_dp"
+    ],
+    "sleep_mode": [
+      "feature:sleep_mode"
+    ],
+    "sleep_mode_npu": [
+      "feature:sleep_mode_npu"
+    ],
+    "soc_version": [
+      "env_var:soc_version"
+    ],
+    "speculative_decoding": [
+      "feature:speculative_decoding"
+    ],
+    "triton_all_blocks_parallel": [
+      "env_var:triton_all_blocks_parallel"
+    ],
+    "v1_async_llm": [
+      "api:v1_async_llm"
+    ],
+    "v1_llmengine": [
+      "api:v1_llmengine"
+    ],
+    "vLLM Core Environment Variables": [
+      "env_var:vllm_core_env"
+    ],
+    "v_llm_core_environment_variables": [
+      "env_var:vllm_core_env"
+    ],
+    "vllm_allow_expert_load_collecting": [
+      "env_var:vllm_allow_expert_load_collecting"
+    ],
+    "vllm_ascend_balance_scheduling": [
+      "env_var:vllm_ascend_balance_scheduling"
+    ],
+    "vllm_ascend_enable_context_parallel": [
+      "env_var:vllm_ascend_enable_context_parallel"
+    ],
+    "vllm_ascend_enable_custom_op": [
+      "env_var:vllm_ascend_enable_custom_op"
+    ],
+    "vllm_ascend_enable_flashcomm1": [
+      "env_var:vllm_ascend_enable_flashcomm1"
+    ],
+    "vllm_ascend_enable_fused_mc2": [
+      "env_var:vllm_ascend_enable_fused_mc2"
+    ],
+    "vllm_ascend_enable_matmul_allreduce": [
+      "env_var:vllm_ascend_enable_matmul_allreduce"
+    ],
+    "vllm_ascend_enable_mlapo": [
+      "env_var:vllm_ascend_enable_mlapo"
+    ],
+    "vllm_ascend_enable_nz": [
+      "env_var:vllm_ascend_enable_nz"
+    ],
+    "vllm_ascend_enable_prefetch_mlp_down": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_down"
+    ],
+    "vllm_ascend_enable_prefetch_mlp_gate_up": [
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up"
+    ],
+    "vllm_ascend_enable_quant_comm": [
+      "env_var:vllm_ascend_enable_quant_comm"
+    ],
+    "vllm_ascend_flashcomm2_parallel_size": [
+      "env_var:vllm_ascend_flashcomm2_parallel_size"
+    ],
+    "vllm_ascend_weight_prefetch_ratio": [
+      "env_var:vllm_ascend_weight_prefetch_ratio"
+    ],
+    "vllm_core_env": [
+      "env_var:vllm_core_env"
+    ],
+    "vllm_eplb_adaptor": [
+      "api:vllm_eplb_adaptor"
+    ],
+    "w4_a16": [
+      "quantization:w4_a16"
+    ],
+    "w4_a4_flatquant": [
+      "quantization:w4_a4_flatquant"
+    ],
+    "w4_a4_laos_dynamic": [
+      "quantization:w4_a4_laos_dynamic"
+    ],
+    "w4_a8": [
+      "quantization:w4_a8"
+    ],
+    "w4a16": [
+      "quantization:w4_a16"
+    ],
+    "w4a4_flatquant": [
+      "quantization:w4_a4_flatquant"
+    ],
+    "w4a4_laos_dynamic": [
+      "quantization:w4_a4_laos_dynamic"
+    ],
+    "w4a8": [
+      "quantization:w4_a8"
+    ],
+    "w8_a16": [
+      "quantization:w8_a16"
+    ],
+    "w8_a8": [
+      "quantization:w8_a8"
+    ],
+    "w8_a8_dynamic": [
+      "quantization:w8_a8_dynamic"
+    ],
+    "w8_a8_mxfp8": [
+      "quantization:w8_a8_mxfp8"
+    ],
+    "w8_a8_pdmix": [
+      "quantization:w8_a8_pdmix"
+    ],
+    "w8a16": [
+      "quantization:w8_a16"
+    ],
+    "w8a8_dynamic": [
+      "quantization:w8_a8_dynamic"
+    ],
+    "w8a8_mxfp8": [
+      "quantization:w8_a8_mxfp8"
+    ],
+    "w8a8_pdmix": [
+      "quantization:w8_a8_pdmix"
+    ],
+    "w8a8_static": [
+      "quantization:w8_a8"
+    ],
+    "weight_prefetch": [
+      "feature:weight_prefetch"
+    ],
+    "weight_prefetch_config": [
+      "config:weight_prefetch_config"
+    ],
+    "worker_gpu": [
+      "api:gpuworker"
+    ],
+    "xlite_graph": [
+      "feature:xlite_graph"
+    ],
+    "xlite_graph_config": [
+      "config:xlite_graph_config"
+    ],
+    "xlite_wrapper": [
+      "api:xlite_wrapper"
+    ]
+  },
+  "by_task_type": {
+    "debugging": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "deployment": [
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "design_analysis": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "env_bootstrap": [
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env"
+    ],
+    "model_adaptation": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:mc2",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "op_development": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "performance_analysis": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "release_analysis": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "upstream_sync": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ]
+  },
+  "by_skill": {
+    "attention-kv-designer": [
+      "api:ascend_attention_backend",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:indexer_wrapper",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "comm_group:otp",
+      "config:enable_kv_nz",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "feature:context_parallel",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:mlapo",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:recompute_scheduler",
+      "feature:sleep_mode",
+      "operator:batch_matmul_transpose",
+      "operator:mla_preprocess",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "quantization:w8_a8_pdmix"
+    ],
+    "ci-gatekeeper": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "compatibility-checker": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "crash-rooter": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "custom-model-integrator": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:mc2",
+      "feature:device_adaptor",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "debug-assistant": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "deployment-assistant": [
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "developer-assistant": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "docs-compliance-checker": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "env-bootstrap": [
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env"
+    ],
+    "graph-analyzer": [
+      "api:aclgraph_wrapper",
+      "api:gpuworker",
+      "api:npuworker",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:xlite_graph_config",
+      "feature:acl_graph",
+      "feature:cuda_graph",
+      "feature:graph_fusion_passes",
+      "feature:lora_ascend",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "knowledge-index-maintainer": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "log-analyzer": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "model-adapter": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:mc2",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "op-developer": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "parallelism-planner": [
+      "api:all_to_all_method",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_row_parallel_linear",
+      "api:eplb_updator",
+      "api:fused_mc2_method",
+      "api:mc2_method",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:vllm_eplb_adaptor",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:pd_tp_ratio",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:context_parallel",
+      "feature:cuda_graph",
+      "feature:dsa_cp",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode_npu",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:dispatch_ffn_combine"
+    ],
+    "perf-assistant": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "perf-hunter": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "precision-validator": [
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:dump_config_path",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "feature:fused_mc2",
+      "feature:graph_fusion_passes",
+      "feature:mlapo",
+      "feature:quantization",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ],
+    "release-assistant": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "release-commit-analyzer": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "release-notes-composer": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "repo-state-auditor": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "scheduler-feature-designer": [
+      "api:npuinput_batch",
+      "comm_group:p_tp",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:continuous_batching",
+      "feature:dynamic_batch_scheduler",
+      "feature:kv_nz_format",
+      "feature:layer_sharding",
+      "feature:pd_disaggregation",
+      "feature:recompute_scheduler",
+      "operator:batch_matmul_transpose",
+      "quantization:w4_a8",
+      "quantization:w8_a16"
+    ],
+    "sync-coordinator": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "config:config_compatibility_matrix",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "test-matrix-planner": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env",
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:async_scheduling",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:chunked_prefill",
+      "feature:context_parallel",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:fused_moe",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multi_modal",
+      "feature:multistream_overlap",
+      "feature:paged_attention",
+      "feature:pd_disaggregation",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode",
+      "feature:sleep_mode_npu",
+      "feature:speculative_decoding",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ]
+  },
+  "by_category": {
+    "apis": [
+      "api:a5_device_adaptor",
+      "api:aclgraph_wrapper",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_attention_backend",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_ngram_proposer",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:base_device_adaptor",
+      "api:ca_mem_allocator",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:fused_mc2_method",
+      "api:gpuworker",
+      "api:indexer_wrapper",
+      "api:llmengine",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:model_runner",
+      "api:npucommunicator",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:request_output",
+      "api:sampling_params",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper"
+    ],
+    "comm_groups": [
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:fc3_quant_x",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight"
+    ],
+    "configs": [
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config"
+    ],
+    "devices": [
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5"
+    ],
+    "env_vars": [
+      "env_var:ascend_home_path",
+      "env_var:dynamic_eplb",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "env_var:vllm_core_env"
+    ],
+    "features/ascend": [
+      "feature:acl_graph",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:context_parallel",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:dynamic_eplb",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:kv_transfer_ascend",
+      "feature:layer_sharding",
+      "feature:lora_ascend",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multistream_overlap",
+      "feature:pd_disaggregation",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode_npu",
+      "feature:weight_prefetch",
+      "feature:xlite_graph"
+    ],
+    "features/vllm": [
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "moe_comm_types": [
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2"
+    ],
+    "operators": [
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_paged_attention",
+      "operator:npu_quant_matmul",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_scatter_pa_kv_cache",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu"
+    ],
+    "quantization": [
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8",
+      "quantization:w8_a8_pdmix"
+    ]
+  },
+  "by_domain_scope": {
+    "both": [
+      "api:aclgraph_wrapper",
+      "api:ascend_attention_backend",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_ngram_proposer",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ca_mem_allocator",
+      "api:fused_mc2_method",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "comm_group:fc3_quant_x",
+      "env_var:dynamic_eplb",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:context_parallel",
+      "feature:dynamic_eplb",
+      "feature:kv_transfer_ascend",
+      "feature:lora_ascend",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_paged_attention",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_scatter_pa_kv_cache",
+      "quantization:w8_a8_pdmix"
+    ],
+    "vllm": [
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:gpuworker",
+      "api:llmengine",
+      "api:model_runner",
+      "api:request_output",
+      "api:sampling_params",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "env_var:vllm_core_env",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ],
+    "vllm-ascend": [
+      "api:a5_device_adaptor",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:base_device_adaptor",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:indexer_wrapper",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:npucommunicator",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "feature:acl_graph",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:layer_sharding",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multistream_overlap",
+      "feature:pd_disaggregation",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode_npu",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_quant_matmul",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8"
+    ]
+  },
+  "by_knowledge_domain": {
+    "integration-core": [
+      "api:aclgraph_wrapper",
+      "api:ascend_attention_backend",
+      "api:ascend_eagle_proposer",
+      "api:ascend_fused_mo_e",
+      "api:ascend_medusa_proposer",
+      "api:ascend_ngram_proposer",
+      "api:ascend_suffix_decoding_proposer",
+      "api:ascend_w4_a16_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "api:ascend_w8_a8_dynamic_linear_method",
+      "api:ascend_w8_a8_linear_method",
+      "api:ca_mem_allocator",
+      "api:fused_mc2_method",
+      "api:npuinput_batch",
+      "api:npumodel_runner",
+      "api:npumodel_runner_v2",
+      "comm_group:fc3_quant_x",
+      "env_var:dynamic_eplb",
+      "env_var:vllm_allow_expert_load_collecting",
+      "env_var:vllm_ascend_enable_mlapo",
+      "env_var:vllm_ascend_enable_nz",
+      "env_var:vllm_ascend_enable_quant_comm",
+      "feature:ascend_eagle_proposer",
+      "feature:ascend_speculative_decoding",
+      "feature:context_parallel",
+      "feature:dynamic_eplb",
+      "feature:kv_transfer_ascend",
+      "feature:lora_ascend",
+      "operator:npu_add_rms_norm_quant",
+      "operator:npu_dequant_swiglu_quant",
+      "operator:npu_fused_infer_attention_score",
+      "operator:npu_grouped_matmul",
+      "operator:npu_paged_attention",
+      "operator:npu_reshape_and_cache",
+      "operator:npu_scatter_pa_kv_cache",
+      "quantization:w8_a8_pdmix"
+    ],
+    "vllm-ascend-core": [
+      "api:a5_device_adaptor",
+      "api:all_gather_method",
+      "api:all_to_all_method",
+      "api:ascend_column_parallel_linear",
+      "api:ascend_deepseek_scaling_rotary_embedding",
+      "api:ascend_merged_column_parallel_linear",
+      "api:ascend_mlabackend",
+      "api:ascend_mlaimpl",
+      "api:ascend_mrotary_embedding",
+      "api:ascend_multi_head_latent_attention",
+      "api:ascend_qkvparallel_linear",
+      "api:ascend_replicated_linear",
+      "api:ascend_rotary_embedding",
+      "api:ascend_row_parallel_linear",
+      "api:ascend_sampler",
+      "api:ascend_sfabackend",
+      "api:ascend_sfaimpl",
+      "api:ascend_sfametadata_builder",
+      "api:ascend_ya_rnrotary_embedding",
+      "api:base_device_adaptor",
+      "api:device_operator",
+      "api:eplb_updator",
+      "api:flash_common3_context",
+      "api:indexer_wrapper",
+      "api:mc2_method",
+      "api:mo_ecomm_method",
+      "api:npucommunicator",
+      "api:npuworker",
+      "api:pcpmanager",
+      "api:select_moe_comm_method",
+      "api:set_ascend_forward_context",
+      "api:vllm_eplb_adaptor",
+      "api:xlite_wrapper",
+      "comm_group:dynamic_eplb",
+      "comm_group:embed_tp",
+      "comm_group:flashcomm2_odp",
+      "comm_group:flashcomm2_otp",
+      "comm_group:lmtp",
+      "comm_group:mc2",
+      "comm_group:mlp_tp",
+      "comm_group:otp",
+      "comm_group:p_tp",
+      "comm_group:shard_weight",
+      "config:ascend_compilation_config",
+      "config:config_compatibility_matrix",
+      "config:dump_config_path",
+      "config:enable_kv_nz",
+      "config:enable_shared_expert_dp",
+      "config:eplb_config",
+      "config:finegrained_tp_config",
+      "config:layer_sharding",
+      "config:multistream_overlap_gate",
+      "config:multistream_overlap_shared_expert",
+      "config:num_head_replica",
+      "config:pd_head_ratio",
+      "config:pd_tp_ratio",
+      "config:recompute_scheduler_enable",
+      "config:weight_prefetch_config",
+      "config:xlite_graph_config",
+      "device:310_p",
+      "device:a2",
+      "device:a3",
+      "device:a5",
+      "env_var:ascend_home_path",
+      "env_var:hccl_so_path",
+      "env_var:msmonitor_use_daemon",
+      "env_var:soc_version",
+      "env_var:triton_all_blocks_parallel",
+      "env_var:vllm_ascend_balance_scheduling",
+      "env_var:vllm_ascend_enable_context_parallel",
+      "env_var:vllm_ascend_enable_custom_op",
+      "env_var:vllm_ascend_enable_flashcomm1",
+      "env_var:vllm_ascend_enable_fused_mc2",
+      "env_var:vllm_ascend_enable_matmul_allreduce",
+      "env_var:vllm_ascend_enable_prefetch_mlp_down",
+      "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+      "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "env_var:vllm_ascend_weight_prefetch_ratio",
+      "feature:acl_graph",
+      "feature:balance_scheduling",
+      "feature:batch_invariant",
+      "feature:device_adaptor",
+      "feature:dsa_cp",
+      "feature:dynamic_batch_scheduler",
+      "feature:eplb",
+      "feature:finegrained_tp",
+      "feature:flashcomm1",
+      "feature:flashcomm2",
+      "feature:fused_mc2",
+      "feature:graph_fusion_passes",
+      "feature:kv_nz_format",
+      "feature:layer_sharding",
+      "feature:matmul_allreduce",
+      "feature:mc2_communication",
+      "feature:mlapo",
+      "feature:multistream_overlap",
+      "feature:pd_disaggregation",
+      "feature:recompute_scheduler",
+      "feature:sequence_parallelism",
+      "feature:shared_expert_dp",
+      "feature:sleep_mode_npu",
+      "feature:weight_prefetch",
+      "feature:xlite_graph",
+      "moe_comm_type:allgather",
+      "moe_comm_type:alltoall",
+      "moe_comm_type:fused_mc2",
+      "moe_comm_type:mc2",
+      "operator:batch_matmul_transpose",
+      "operator:dispatch_ffn_combine",
+      "operator:dispatch_gmm_combine_decode",
+      "operator:mla_preprocess",
+      "operator:npu_convert_weight_to_int4pack",
+      "operator:npu_dynamic_mx_quant",
+      "operator:npu_dynamic_quant",
+      "operator:npu_format_cast",
+      "operator:npu_grouped_matmul_swiglu_quant",
+      "operator:npu_interleave_rope",
+      "operator:npu_kv_rmsnorm_rope_cache",
+      "operator:npu_lightning_indexer",
+      "operator:npu_moe_init_routing",
+      "operator:npu_moe_init_routing_v2",
+      "operator:npu_mrope",
+      "operator:npu_quant_matmul",
+      "operator:npu_ring_mla",
+      "operator:npu_rotary_embedding",
+      "operator:npu_rotary_mul",
+      "operator:npu_scatter_nd_update",
+      "operator:npu_sparse_flash_attention",
+      "operator:npu_swiglu",
+      "quantization:w4_a16",
+      "quantization:w4_a4_flatquant",
+      "quantization:w4_a4_laos_dynamic",
+      "quantization:w4_a8",
+      "quantization:w8_a16",
+      "quantization:w8_a8",
+      "quantization:w8_a8_dynamic",
+      "quantization:w8_a8_mxfp8"
+    ],
+    "vllm-upstream": [
+      "api:async_llm",
+      "api:async_llmengine",
+      "api:gpuworker",
+      "api:llmengine",
+      "api:model_runner",
+      "api:request_output",
+      "api:sampling_params",
+      "api:v1_async_llm",
+      "api:v1_llmengine",
+      "env_var:vllm_core_env",
+      "feature:async_scheduling",
+      "feature:chunked_prefill",
+      "feature:continuous_batching",
+      "feature:cuda_graph",
+      "feature:fused_moe",
+      "feature:kv_transfer",
+      "feature:lora",
+      "feature:multi_modal",
+      "feature:paged_attention",
+      "feature:prefix_caching",
+      "feature:quantization",
+      "feature:sleep_mode",
+      "feature:speculative_decoding"
+    ]
+  }
+}

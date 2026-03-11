@@ -1,0 +1,130 @@
+{
+  "id": "comm_group:mc2",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_MC2",
+  "summary": "MC2通信组，用于MoE专家并行的dispatch和combine通信，包含所有EP组内的rank，通过init_model_parallel_group初始化，是MoE模型核心通信组",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "9,84-88,227-229,283-285"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_mc2_group",
+    "init_model_parallel_group",
+    "GroupCoordinator"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "mc2_communication",
+    "fused_mc2"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与EP组配合实现专家并行",
+        "支持MC2和FUSED_MC2通信模式"
+      ],
+      "memory_impact": "需要HCCL通信缓冲区，buffer大小由HCCL_BUFFSIZE控制",
+      "throughput_impact": "MC2通信是MoE性能关键，优化通信可显著提升吞吐量",
+      "latency_impact": "MC2通信延迟直接影响MoE层延迟",
+      "test_cases": [
+        {
+          "name": "验证MC2组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同EP size下的通信性能",
+          "description": ""
+        },
+        {
+          "name": "验证dispatch/combine正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "enable_expert_parallel: true",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "EP=1场景（无意义）"
+      ],
+      "best_practices": [
+        "设置HCCL_INTRA_PCIE_ENABLE=1优化A2通信",
+        "合理设置mc2_tokens_capacity",
+        "配合FUSED_MC2使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_MC2: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_mc2_group(): 获取MC2组",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "destroy_ascend_model_parallel(): 销毁逻辑",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改组成员划分逻辑",
+        "get_mc2_group(): 添加错误处理"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts",
+        "mc2_mask"
+      ]
+    },
+    "design": {
+      "principle": "MC2组包含所有参与专家并行的rank，用于MoE的dispatch(分发token到专家)和combine(收集专家输出)通信",
+      "theory_analysis": "MC2通信模式相比AllGather可减少通信量，适合专家并行场景；通信复杂度O(N*E)，N为token数，E为专家数",
+      "design_decisions": [
+        {
+          "decision": "MC2组独立于TP组，支持EP与TP正交",
+          "reason": ""
+        },
+        {
+          "decision": "使用HCCL通信后端，支持多机通信",
+          "reason": ""
+        },
+        {
+          "decision": "MC2组不使用pg_options避免内存对齐问题",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f9127255ec818a237a4e61db79008b42a87d6ff2d0159978f6018ab777484507",
+  "knowledge_domain": "vllm-ascend-core"
+}

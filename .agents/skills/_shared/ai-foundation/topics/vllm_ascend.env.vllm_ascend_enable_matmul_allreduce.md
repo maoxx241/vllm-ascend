@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/batch_invariant.py:82, vllm_ascend/envs.py:71
-- read_ref: vllm-ascend/vllm_ascend/batch_invariant.py:82, vllm-ascend/vllm_ascend/envs.py:71, vllm-ascend/vllm_ascend/envs.py:71
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:747
+- definition_ref: vllm_ascend/envs.py:71
+- read_ref: vllm-ascend/vllm_ascend/envs.py:71, vllm-ascend/vllm_ascend/envs.py:71, vllm-ascend/vllm_ascend/utils.py:719
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:719
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: HCCL/NCCL 初始化失败; 跨卡通信超时
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

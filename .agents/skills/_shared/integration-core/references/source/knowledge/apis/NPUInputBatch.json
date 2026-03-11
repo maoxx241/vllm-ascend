@@ -1,0 +1,107 @@
+{
+  "id": "api:npuinput_batch",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "NPUInputBatch",
+  "summary": "NPU输入批次类，管理推理请求的输入数据，包括token IDs、位置编码、attention mask等",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/npu_input_batch.py",
+      "lines": "50-350"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "InputBatch",
+    "CachedRequestState",
+    "AscendAttentionMetadata"
+  ],
+  "related_features": [
+    "continuous_batching",
+    "prefix_caching"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "add_request()添加请求",
+        "remove_request()移除请求",
+        "refresh()刷新状态"
+      ],
+      "memory_impact": "管理输入缓冲区，支持pin_memory优化",
+      "throughput_impact": "高效的批次管理提升吞吐量",
+      "latency_impact": "优化的内存布局减少延迟",
+      "test_cases": [
+        {
+          "name": "请求添加测试",
+          "description": ""
+        },
+        {
+          "name": "请求移除测试",
+          "description": ""
+        },
+        {
+          "name": "批次刷新测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有昇腾NPU支持的模型"
+      ],
+      "enable_config": "由ModelRunner创建",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "使用pin_memory优化数据传输",
+        "合理设置max_num_reqs"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/npu_input_batch.py:50-350",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "add_request()添加逻辑",
+        "remove_request()移除逻辑",
+        "新增输入字段"
+      ],
+      "affected_features": [
+        "批次管理",
+        "输入处理"
+      ]
+    },
+    "design": {
+      "principle": "继承InputBatch，适配NPU特性",
+      "theory_analysis": "高效的批次管理，支持动态添加和移除请求",
+      "design_decisions": [
+        {
+          "decision": "支持pin_memory",
+          "reason": ""
+        },
+        {
+          "decision": "管理attention相关元数据",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "4548c49f0bcba6cf033be06c48a62d3e7ecb5da446e93d6978efe70d31bf977f",
+  "knowledge_domain": "integration-core"
+}

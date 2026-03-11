@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1187
-- read_ref: vllm/vllm/envs.py:163, vllm/vllm/envs.py:1187, vllm/vllm/envs.py:1188
-- effect_ref: vllm/vllm/envs.py:163, vllm/vllm/envs.py:1187, vllm/vllm/envs.py:1188
+- definition_ref: vllm/envs.py:1199
+- read_ref: vllm/vllm/envs.py:164, vllm/vllm/envs.py:1199, vllm/vllm/envs.py:1200
+- effect_ref: vllm/vllm/envs.py:164, vllm/vllm/envs.py:1199, vllm/vllm/envs.py:1200
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动时报不支持量化类型; 精度/稳定性异常
 - value_failure_signals: 启动时报不支持量化类型; 精度/稳定性异常
 - recommendation: 演示环境下先确认 profile 支持矩阵，再启用 int4。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

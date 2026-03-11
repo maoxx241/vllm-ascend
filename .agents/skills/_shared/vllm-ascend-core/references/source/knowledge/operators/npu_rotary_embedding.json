@@ -1,0 +1,125 @@
+{
+  "id": "operator:npu_rotary_embedding",
+  "type": "operator",
+  "category": "rope",
+  "name": "npu_rotary_embedding",
+  "summary": "NPU旋转位置编码算子，实现标准RoPE位置编码，支持Neox风格和GPT-NeoX风格，用于query和key的位置编码。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "153-213, 232-249, 447-464"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu._npu_rotary_embedding",
+    "torch.ops.vllm.npu_rotary_embedding"
+  ],
+  "related_features": [
+    "rope",
+    "position_embedding",
+    "attention"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与cos_sin_cache配合",
+        "与positions配合"
+      ],
+      "memory_impact": "使用预计算的cos_sin_cache",
+      "throughput_impact": "专用硬件实现提升吞吐",
+      "latency_impact": "单算子完成位置编码",
+      "test_cases": [
+        {
+          "name": "Neox风格",
+          "description": ""
+        },
+        {
+          "name": "非Neox风格",
+          "description": ""
+        },
+        {
+          "name": "partial_rotary",
+          "description": ""
+        },
+        {
+          "name": "full_rotary",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用RoPE的模型"
+      ],
+      "enable_config": "自动启用",
+      "unsuitable_scenarios": [
+        "使用ALiBi的模型",
+        "无位置编码模型"
+      ],
+      "best_practices": [
+        "预计算cos_sin_cache",
+        "rotary_dim正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "rope_forward_oot",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendRotaryEmbedding.forward_oot",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendDeepseekScalingRotaryEmbedding.forward",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "is_neox_style配置",
+        "rotary_dim设置"
+      ],
+      "affected_features": [
+        "位置编码精度",
+        "长序列处理"
+      ]
+    },
+    "design": {
+      "principle": "RoPE通过旋转矩阵将位置信息编码到query和key中",
+      "theory_analysis": "RoPE使注意力分数包含相对位置信息，支持外推",
+      "design_decisions": [
+        {
+          "decision": "支持Neox和非Neox风格",
+          "reason": ""
+        },
+        {
+          "decision": "支持partial rotary",
+          "reason": ""
+        },
+        {
+          "decision": "支持YaRN缩放",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "0d0cda3c9f0e8d60661014e9f3c16c2377f7935986c360a421ff9ecc21a99ee9",
+  "knowledge_domain": "vllm-ascend-core"
+}

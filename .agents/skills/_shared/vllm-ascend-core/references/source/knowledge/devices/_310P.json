@@ -1,0 +1,205 @@
+{
+  "id": "device:310_p",
+  "type": "device",
+  "category": "vllm_ascend",
+  "name": "_310P",
+  "summary": "Ascend 310P推理芯片，soc_version范围200-205，属于推理系列，有专用的算子实现",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "77-78"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "137-166"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "656-681"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "is_310p",
+    "maybe_trans_nz",
+    "aligned_16",
+    "register_ascend_customop"
+  ],
+  "related_features": [],
+  "device_specs": {
+    "soc_version_range": "200-205",
+    "device_type_enum": "AscendDeviceType._310P",
+    "series": "SOC_VERSION_INFERENCE_SERIES"
+  },
+  "specialized_operators": [
+    {
+      "name": "AscendSiluAndMul310",
+      "path": "vllm_ascend/_310p/ops/activation.py",
+      "description": "310P专用的SiluAndMul算子"
+    },
+    {
+      "name": "AscendRotaryEmbedding310",
+      "path": "vllm_ascend/_310p/ops/rotary_embedding.py",
+      "description": "310P专用的RotaryEmbedding算子"
+    },
+    {
+      "name": "AscendRMSNorm310",
+      "path": "vllm_ascend/_310p/ops/layernorm.py",
+      "description": "310P专用的RMSNorm算子"
+    },
+    {
+      "name": "AscendGemmaRMSNorm310",
+      "path": "vllm_ascend/_310p/ops/layernorm.py",
+      "description": "310P专用的GemmaRMSNorm算子"
+    },
+    {
+      "name": "AscendFusedMoE310",
+      "path": "vllm_ascend/_310p/fused_moe/fused_moe.py",
+      "description": "310P专用的FusedMoE算子"
+    },
+    {
+      "name": "AscendSharedFusedMoE310",
+      "path": "vllm_ascend/_310p/fused_moe/fused_moe.py",
+      "description": "310P专用的SharedFusedMoE算子"
+    },
+    {
+      "name": "AscendParallelLMHead310",
+      "path": "vllm_ascend/_310p/ops/vocab_parallel_embedding.py",
+      "description": "310P专用的ParallelLMHead算子"
+    },
+    {
+      "name": "AscendVocabParallelEmbedding310",
+      "path": "vllm_ascend/_310p/ops/vocab_parallel_embedding.py",
+      "description": "310P专用的VocabParallelEmbedding算子"
+    }
+  ],
+  "optimization_strategies": [
+    {
+      "name": "NZ格式转换",
+      "description": "310P总是将支持的权重转换为FRACTAL_NZ格式",
+      "impact": "优化内存访问模式，提升性能"
+    },
+    {
+      "name": "16对齐",
+      "description": "使用aligned_16函数确保张量16对齐",
+      "impact": "满足310P的硬件对齐要求"
+    },
+    {
+      "name": "专用算子",
+      "description": "使用310P专用的算子实现",
+      "impact": "针对310P硬件特性优化，提升性能"
+    }
+  ],
+  "constraints": [
+    "FP32不支持NZ格式转换",
+    "MRotaryEmbedding在310P上不可用",
+    "权重总是转换为NZ格式（除FP32外）"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试NZ格式转换的正确性",
+        "需要验证专用算子的性能"
+      ],
+      "memory_impact": "NZ格式可能改变内存布局",
+      "throughput_impact": "专用算子可提升吞吐量",
+      "latency_impact": "优化算子可降低延迟",
+      "test_cases": [
+        {
+          "name": "测试NZ格式转换的性能",
+          "description": ""
+        },
+        {
+          "name": "测试专用算子与通用算子的性能对比",
+          "description": ""
+        },
+        {
+          "name": "测试16对齐的正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM-Ascend支持的模型（除MRotaryEmbedding外）"
+      ],
+      "enable_config": "自动检测设备类型并启用专用算子",
+      "unsuitable_scenarios": [
+        "使用MRotaryEmbedding的模型"
+      ],
+      "best_practices": [
+        "确保权重格式兼容NZ转换",
+        "监控内存布局变化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py:77-78",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:137-166",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:656-681",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/_310p/",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "register_ascend_customop中的310P算子注册",
+        "_should_trans_nz中的NZ转换逻辑"
+      ],
+      "affected_features": [
+        "权重格式",
+        "算子实现",
+        "内存对齐"
+      ]
+    },
+    "design": {
+      "principle": "310P芯片有特殊的硬件特性，需要专用的算子实现和格式转换",
+      "theory_analysis": "310P的内存访问模式更适合NZ格式，专用算子可以充分利用硬件特性",
+      "design_decisions": [
+        {
+          "decision": "强制NZ格式转换（除FP32）",
+          "reason": ""
+        },
+        {
+          "decision": "使用专用算子替代通用算子",
+          "reason": ""
+        },
+        {
+          "decision": "不支持MRotaryEmbedding",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "fca0b6171762523dc18746b8f8d62937ba15dcea7c5a8ff36a97b5be20393933",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,108 @@
+{
+  "id": "device:a5",
+  "type": "device",
+  "category": "vllm_ascend",
+  "name": "A5",
+  "summary": "Ascend A5推理芯片，soc_version为260，新一代高性能推理芯片",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "689-727"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_ascend_device_type",
+    "check_ascend_device_type"
+  ],
+  "related_features": [
+    "acl_graph"
+  ],
+  "device_specs": {
+    "soc_version": "260",
+    "device_type_enum": "AscendDeviceType.A5",
+    "series": "inference_series"
+  },
+  "specialized_operators": [],
+  "optimization_strategies": [],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试A5的性能特性",
+        "需要验证与现有功能的兼容性"
+      ],
+      "memory_impact": "待测试验证",
+      "throughput_impact": "预期有更高的吞吐量",
+      "latency_impact": "预期有更低的延迟",
+      "test_cases": [
+        {
+          "name": "测试A5的基础性能",
+          "description": ""
+        },
+        {
+          "name": "测试与A2/A3的性能对比",
+          "description": ""
+        },
+        {
+          "name": "测试ACL graph支持",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM-Ascend支持的模型"
+      ],
+      "enable_config": "使用默认配置即可",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "参考A2/A3的部署经验",
+        "根据实际测试调整配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py:689-727",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "可能需要添加A5特定的优化逻辑"
+      ],
+      "affected_features": [
+        "ACL Graph",
+        "HCCL通信"
+      ]
+    },
+    "design": {
+      "principle": "A5作为新一代推理芯片，预期有更好的性能和能效",
+      "theory_analysis": "A5芯片的硬件特性需要进一步测试和优化",
+      "design_decisions": [
+        {
+          "decision": "目前作为独立设备类型支持",
+          "reason": ""
+        },
+        {
+          "decision": "后续可能需要添加特定优化",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "112db250d022082f272331d1487cbc44f0a6cf5c1b3476b07a64b18dfea1725e",
+  "knowledge_domain": "vllm-ascend-core"
+}

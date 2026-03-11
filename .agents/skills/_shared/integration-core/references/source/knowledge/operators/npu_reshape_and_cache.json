@@ -1,0 +1,111 @@
+{
+  "id": "operator:npu_reshape_and_cache",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_reshape_and_cache",
+  "summary": "NPU重塑和缓存算子，将key/value张量重塑并写入KV缓存，用于PagedAttention的KV缓存管理。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "30-34"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/attention_v1.py",
+      "lines": "897-924"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu._npu_reshape_and_cache"
+  ],
+  "related_features": [
+    "kv_cache",
+    "paged_attention"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与slot_mapping配合",
+        "与key_cache/value_cache配合"
+      ],
+      "memory_impact": "直接写入缓存减少中间张量",
+      "throughput_impact": "融合reshape和cache写入提升吞吐",
+      "latency_impact": "单算子完成KV缓存更新",
+      "test_cases": [
+        {
+          "name": "标准PA场景",
+          "description": ""
+        },
+        {
+          "name": "不同block_size",
+          "description": ""
+        },
+        {
+          "name": "encoder-decoder场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用PagedAttention的模型"
+      ],
+      "enable_config": "自动启用(非A5设备)",
+      "unsuitable_scenarios": [
+        "A5设备使用npu_scatter_pa_kv_cache"
+      ],
+      "best_practices": [
+        "slot_mapping使用int64",
+        "确保缓存shape正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "BaseDeviceAdaptor.reshape_and_cache",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendAttentionBackendImpl.reshape_and_cache",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "KV缓存管理效率"
+      ]
+    },
+    "design": {
+      "principle": "将key/value张量reshape为缓存格式并写入指定slot位置",
+      "theory_analysis": "PagedAttention使用slot_mapping实现非连续内存访问",
+      "design_decisions": [
+        {
+          "decision": "支持slot_indices索引",
+          "reason": ""
+        },
+        {
+          "decision": "A5使用不同实现",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "1bf2b7553b257525d02a3bc0853a2dc705338cd1ee82259e011fc4f60a53f678",
+  "knowledge_domain": "integration-core"
+}

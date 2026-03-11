@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:891
-- read_ref: vllm/vllm/config/parallel.py:185, vllm/vllm/config/parallel.py:298, vllm/vllm/config/vllm.py:694
-- effect_ref: vllm/vllm/config/vllm.py:694, vllm/vllm/v1/worker/dp_utils.py:29, vllm/vllm/engine/arg_utils.py:892
+- definition_ref: vllm/engine/arg_utils.py:890
+- read_ref: vllm/vllm/config/parallel.py:185, vllm/vllm/config/parallel.py:298, vllm/vllm/config/vllm.py:703
+- effect_ref: vllm/vllm/config/vllm.py:703, vllm/vllm/v1/worker/dp_utils.py:29, vllm/vllm/engine/arg_utils.py:891
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: 通信栈不匹配时可能出现同步性能下降或超时。
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

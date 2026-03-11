@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:272, docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:331, docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:390
-- read_ref: vllm-ascend/vllm_ascend/cpu_binding.py:17, vllm-ascend/vllm_ascend/cpu_binding.py:17, vllm-ascend/vllm_ascend/cpu_binding.py:116
-- effect_ref: vllm-ascend/vllm_ascend/cpu_binding.py:116
+- read_ref: vllm-ascend/vllm_ascend/cpu_binding.py:16, vllm-ascend/vllm_ascend/cpu_binding.py:16, vllm-ascend/vllm_ascend/cpu_binding.py:90
+- effect_ref: vllm-ascend/vllm_ascend/cpu_binding.py:90
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

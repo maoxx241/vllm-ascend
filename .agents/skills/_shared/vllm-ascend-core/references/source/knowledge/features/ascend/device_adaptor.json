@@ -1,0 +1,136 @@
+{
+  "id": "feature:device_adaptor",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Device Adaptor",
+  "summary": "NPU设备适配层，抽象不同Ascend芯片(A2/A3/A5/310P)的硬件差异，提供统一的算子接口",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "1-368"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "689-733"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "DeviceOperator",
+    "BaseDeviceAdaptor",
+    "A5DeviceAdaptor"
+  ],
+  "related_features": [
+    "feature:kv_nz_format",
+    "feature:matmul_allreduce",
+    "feature:weight_prefetch"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "不同芯片型号的功能测试",
+        "MXFP量化兼容性测试",
+        "KV cache操作正确性测试"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "针对不同芯片优化，发挥硬件最大性能",
+      "latency_impact": "使用最优kernel实现",
+      "test_cases": [
+        {
+          "name": "测试A2/A3/A5/310P的reshape_and_cache正确性",
+          "description": ""
+        },
+        {
+          "name": "测试MXFP量化在A5上的正确性",
+          "description": ""
+        },
+        {
+          "name": "测试npu_moe_init_routing在不同芯片上的行为差异",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "自动检测芯片型号，无需配置",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "确保安装正确版本的vllm-ascend包",
+        "检查芯片型号与编译版本匹配"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "BaseDeviceAdaptor：基础适配器，A2/A3/310P使用",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "A5DeviceAdaptor：A5专用适配器",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_device_adaptor()：适配器选择逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendDeviceType：芯片类型枚举",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "添加新芯片适配器",
+        "扩展算子接口",
+        "优化特定芯片实现"
+      ],
+      "affected_features": [
+        "所有NPU算子调用",
+        "量化实现",
+        "KV cache操作"
+      ]
+    },
+    "design": {
+      "principle": "通过适配器模式抽象不同芯片的硬件差异，上层代码使用统一接口，底层根据芯片型号选择最优实现。",
+      "theory_analysis": "不同Ascend芯片有不同的硬件特性和支持的算子：\n- A2(910B2): 基础算子支持，使用_npu_reshape_and_cache\n- A3(910B3): 同A2，通信优化方式不同\n- A5(910B5): 支持MXFP量化，使用npu_scatter_pa_kv_cache，npu_moe_init_routing_v2\n- 310P: 推理系列芯片，NZ格式强制转换，特殊算子实现",
+      "design_decisions": [
+        {
+          "decision": "运行时检测：通过soc_version确定芯片型号",
+          "reason": ""
+        },
+        {
+          "decision": "继承体系：BaseDeviceAdaptor作为基类，A5DeviceAdaptor覆盖特定方法",
+          "reason": ""
+        },
+        {
+          "decision": "MXFP支持：仅A5支持MXFP8量化，其他芯片抛出错误",
+          "reason": ""
+        },
+        {
+          "decision": "310P特殊处理：强制NZ格式，覆盖部分算子实现",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "3eadf7ee85185fbc8f4d04110eaf022159a380f24aabd74be90fc5db4c1f7878",
+  "knowledge_domain": "vllm-ascend-core"
+}

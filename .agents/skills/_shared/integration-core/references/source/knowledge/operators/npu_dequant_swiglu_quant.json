@@ -1,0 +1,107 @@
+{
+  "id": "operator:npu_dequant_swiglu_quant",
+  "type": "operator",
+  "category": "moe",
+  "name": "npu_dequant_swiglu_quant",
+  "summary": "NPU反量化SwiGLU量化融合算子，将INT32中间结果反量化、SwiGLU激活和再量化融合为单一操作。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_mlp.py",
+      "lines": "189-200"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_dequant_swiglu_quant"
+  ],
+  "related_features": [
+    "moe",
+    "swiglu",
+    "quantization",
+    "fusion"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_grouped_matmul输出的INT32配合",
+        "与weight_scale和activation_scale配合"
+      ],
+      "memory_impact": "融合减少中间张量",
+      "throughput_impact": "融合三个操作提升吞吐",
+      "latency_impact": "单算子完成反量化、激活、量化",
+      "test_cases": [
+        {
+          "name": "不同quant_mode",
+          "description": ""
+        },
+        {
+          "name": "有/无quant_scale",
+          "description": ""
+        },
+        {
+          "name": "有/无quant_offset",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "W8A8量化的MoE模型"
+      ],
+      "enable_config": "quantization=W8A8_DYNAMIC且非融合模式",
+      "unsuitable_scenarios": [
+        "使用npu_grouped_matmul_swiglu_quant时不需要"
+      ],
+      "best_practices": [
+        "group_index正确配置",
+        "activate_left=True"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "quant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "quant_mode配置",
+        "quant_scale/quant_offset设置"
+      ],
+      "affected_features": [
+        "MoE激活精度",
+        "量化效率"
+      ]
+    },
+    "design": {
+      "principle": "将INT32反量化、SwiGLU激活和INT8量化融合，减少内存访问",
+      "theory_analysis": "MoE计算中间结果为INT32，需要反量化后激活再量化",
+      "design_decisions": [
+        {
+          "decision": "quant_mode=1用于标准量化",
+          "reason": ""
+        },
+        {
+          "decision": "支持group_index分组",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "4d8175a4936368b1744931fee860bcb0ae014df57a2c4d8bf0964c46a7cbf227",
+  "knowledge_domain": "integration-core"
+}

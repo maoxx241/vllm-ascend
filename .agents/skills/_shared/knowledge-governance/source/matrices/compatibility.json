@@ -1,0 +1,234 @@
+{
+  "matrix_type": "compatibility",
+  "version": "1.0.0",
+  "created_at": "2026-03-10T00:00:00Z",
+  "description": "特性兼容性矩阵，分析所有特性两两组合的兼容性关系",
+  "legend": {
+    "compatible": "完全兼容，可同时启用",
+    "incompatible": "不兼容，不能同时启用",
+    "conditional": "有条件兼容，需满足特定条件",
+    "dependency": "依赖关系，一个特性依赖另一个特性"
+  },
+  "combinations": [
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:eplb",
+      "compatibility": "compatible",
+      "notes": "推荐同时启用。EPLB优化专家负载均衡，FlashComm1优化TP通信，两者协同可提升MoE模型性能",
+      "performance_synergy": "高并发场景下吞吐量提升20-40%"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:dynamic_eplb",
+      "compatibility": "compatible",
+      "notes": "兼容。FlashComm1优化通信，Dynamic EPLB动态调整专家分布，可同时启用",
+      "performance_synergy": "动态负载均衡场景下效果更佳"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:mlapo",
+      "compatibility": "incompatible",
+      "notes": "互斥关系。MLAPO与FlashComm通信模式不兼容，启用CP时自动禁用MLAPO",
+      "conflict_reason": "FlashComm需要特殊的通信模式，与MLAPO的融合算子不兼容"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:weight_prefetch",
+      "compatibility": "compatible",
+      "notes": "兼容。FlashComm优化通信，权重预取隐藏权重加载延迟，可协同工作",
+      "performance_synergy": "小批量场景下延迟降低更明显"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:flashcomm2",
+      "compatibility": "compatible",
+      "notes": "推荐同时启用。FlashComm1优化整体TP通信，FlashComm2优化O-proj层特定通信",
+      "performance_synergy": "P场景(Prefill)下吞吐量提升20-40%"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:dsa_cp",
+      "compatibility": "dependency",
+      "notes": "DSA-CP依赖FlashComm1。启用DSA-CP必须先启用FlashComm1(enable_sp=True)",
+      "dependency_condition": "VLLM_ASCEND_ENABLE_FLASHCOMM1=1"
+    },
+    {
+      "feature1": "feature:flashcomm1",
+      "feature2": "feature:context_parallel",
+      "compatibility": "compatible",
+      "notes": "兼容。FlashComm1优化TP通信，Context Parallel在序列维度分片，可同时启用",
+      "performance_synergy": "长序列场景下TTFT显著降低"
+    },
+    {
+      "feature1": "feature:mlapo",
+      "feature2": "feature:flashcomm2",
+      "compatibility": "incompatible",
+      "notes": "互斥关系。MLAPO与FlashComm系列通信模式不兼容",
+      "conflict_reason": "FlashComm2同样依赖FlashComm1的通信模式"
+    },
+    {
+      "feature1": "feature:mlapo",
+      "feature2": "feature:quantization",
+      "compatibility": "conditional",
+      "notes": "仅支持W8A8量化。MLAPO融合算子针对W8A8量化优化，其他量化方法自动禁用MLAPO",
+      "condition": "仅W8A8量化模型支持"
+    },
+    {
+      "feature1": "feature:xlite_graph",
+      "feature2": "feature:speculative_decoding",
+      "compatibility": "incompatible",
+      "notes": "互斥关系。XliteGraph的图执行模式与Speculative Decoding的特殊forward逻辑不兼容",
+      "conflict_reason": "Speculative decoding需要特殊的forward逻辑，与xlite的图执行模式不兼容"
+    },
+    {
+      "feature1": "feature:xlite_graph",
+      "feature2": "feature:ascend_speculative_decoding",
+      "compatibility": "incompatible",
+      "notes": "互斥关系。同上，XliteGraph与所有推测解码方法互斥",
+      "conflict_reason": "图执行模式与推测解码的动态验证逻辑冲突"
+    },
+    {
+      "feature1": "feature:xlite_graph",
+      "feature2": "feature:cuda_graph",
+      "compatibility": "compatible",
+      "notes": "兼容但互补。XliteGraph专注Decode优化，ACL Graph覆盖更广，可协调使用",
+      "recommendation": "高并发decode场景使用XliteGraph，其他场景使用ACL Graph"
+    },
+    {
+      "feature1": "feature:context_parallel",
+      "feature2": "feature:speculative_decoding",
+      "compatibility": "compatible",
+      "notes": "兼容。支持MTP等推测解码方法与Context Parallel同时使用",
+      "performance_synergy": "DeepSeek-V3等模型可同时受益"
+    },
+    {
+      "feature1": "feature:context_parallel",
+      "feature2": "feature:pd_disaggregation",
+      "compatibility": "compatible",
+      "notes": "兼容。PCP/DCP与PD分离可同时启用，支持KV传输场景",
+      "condition": "需设置cp_kv_cache_interleave_size=block_size"
+    },
+    {
+      "feature1": "feature:context_parallel",
+      "feature2": "feature:chunked_prefill",
+      "compatibility": "compatible",
+      "notes": "兼容。Chunked Prefill在CP模式下正常工作",
+      "performance_synergy": "长序列场景下协同优化"
+    },
+    {
+      "feature1": "feature:eplb",
+      "feature2": "feature:dynamic_eplb",
+      "compatibility": "conditional",
+      "notes": "Dynamic EPLB继承静态EPLB配置，两者共享策略框架",
+      "condition": "Dynamic EPLB需要先配置静态EPLB参数"
+    },
+    {
+      "feature1": "feature:chunked_prefill",
+      "feature2": "feature:async_scheduling",
+      "compatibility": "compatible",
+      "notes": "兼容且协同效应强。Chunked Prefill是Async Scheduling的基础",
+      "performance_synergy": "显著提升吞吐量，消除GPU空闲间隙"
+    },
+    {
+      "feature1": "feature:async_scheduling",
+      "feature2": "feature:speculative_decoding",
+      "compatibility": "compatible",
+      "notes": "深度集成。Async Scheduling是Speculative Decoding高效运行的前提",
+      "performance_synergy": "Speculative Decoding场景下必须启用Async Scheduling"
+    },
+    {
+      "feature1": "feature:cuda_graph",
+      "feature2": "feature:speculative_decoding",
+      "compatibility": "conditional",
+      "notes": "兼容但需调整。需要调整cudagraph_capture_sizes为(num_speculative_tokens+1)的倍数",
+      "condition": "捕获尺寸需对齐speculative tokens数量"
+    },
+    {
+      "feature1": "feature:quantization",
+      "feature2": "feature:flashcomm1",
+      "compatibility": "compatible",
+      "notes": "兼容。量化场景下FlashComm1收益更大，通信量减半",
+      "performance_synergy": "INT8量化下通信量减半，额外收益"
+    },
+    {
+      "feature1": "feature:quantization",
+      "feature2": "feature:eplb",
+      "compatibility": "compatible",
+      "notes": "兼容。量化权重与EPLB负载均衡可同时启用",
+      "performance_synergy": "MoE模型量化收益更大"
+    },
+    {
+      "feature1": "feature:quantization",
+      "feature2": "feature:cuda_graph",
+      "compatibility": "conditional",
+      "notes": "部分量化方法不支持CUDA Graph。AWQ Marlin和FP8支持，bitsandbytes 8-bit不支持",
+      "condition": "需检查量化方法是否支持CUDA Graph"
+    },
+    {
+      "feature1": "feature:pd_disaggregation",
+      "feature2": "feature:layer_sharding",
+      "compatibility": "compatible",
+      "notes": "兼容。Layer Sharding专为PD disaggregation场景设计",
+      "performance_synergy": "Decode节点显存占用显著降低"
+    },
+    {
+      "feature1": "feature:pd_disaggregation",
+      "feature2": "feature:flashcomm2",
+      "compatibility": "conditional",
+      "notes": "兼容但场景受限。FlashComm2主要面向P场景，D场景可能性能下降",
+      "condition": "P节点推荐启用，D节点不推荐"
+    },
+    {
+      "feature1": "feature:weight_prefetch",
+      "feature2": "feature:multistream_overlap",
+      "compatibility": "compatible",
+      "notes": "兼容。两者都利用NPU多流能力，可协同工作",
+      "performance_synergy": "计算-通信-预取三重重叠"
+    },
+    {
+      "feature1": "feature:dsa_cp",
+      "feature2": "feature:layer_sharding",
+      "compatibility": "compatible",
+      "notes": "兼容且推荐组合。DSA-CP与Layer Sharding协同优化DeepSeek V3.2",
+      "performance_synergy": "P节点启用Layer Sharding，权重广播与计算重叠"
+    },
+    {
+      "feature1": "feature:dsa_cp",
+      "feature2": "feature:mlapo",
+      "compatibility": "compatible",
+      "notes": "兼容。DSA-CP与MLAPO可同时启用",
+      "condition": "DeepSeek V3.2 W8A8量化模型"
+    },
+    {
+      "feature1": "feature:multistream_overlap",
+      "feature2": "feature:shared_expert_dp",
+      "compatibility": "compatible",
+      "notes": "兼容且推荐组合。多流重叠与共享专家数据并行协同优化",
+      "performance_synergy": "MoE模型吞吐量提升10-20%"
+    }
+  ],
+  "feature_groups": {
+    "communication_optimization": ["feature:flashcomm1", "feature:flashcomm2", "feature:dsa_cp"],
+    "load_balancing": ["feature:eplb", "feature:dynamic_eplb"],
+    "memory_optimization": ["feature:layer_sharding", "feature:context_parallel", "feature:weight_prefetch"],
+    "scheduling": ["feature:chunked_prefill", "feature:async_scheduling"],
+    "speculative": ["feature:speculative_decoding", "feature:ascend_speculative_decoding"],
+    "graph_optimization": ["feature:cuda_graph", "feature:xlite_graph"],
+    "quantization": ["feature:quantization"],
+    "attention_optimization": ["feature:mlapo"]
+  },
+  "mutual_exclusion_groups": [
+    {
+      "features": ["feature:mlapo", "feature:flashcomm1"],
+      "reason": "MLAPO与FlashComm通信模式不兼容"
+    },
+    {
+      "features": ["feature:xlite_graph", "feature:speculative_decoding"],
+      "reason": "图执行模式与推测解码动态验证逻辑冲突"
+    },
+    {
+      "features": ["feature:xlite_graph", "feature:ascend_speculative_decoding"],
+      "reason": "同上"
+    }
+  ]
+}

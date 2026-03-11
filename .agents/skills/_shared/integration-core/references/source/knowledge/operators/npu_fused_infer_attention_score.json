@@ -1,0 +1,125 @@
+{
+  "id": "operator:npu_fused_infer_attention_score",
+  "type": "operator",
+  "category": "attention",
+  "name": "npu_fused_infer_attention_score",
+  "summary": "NPU融合推理注意力算子，支持TND/BSH布局，用于prefill和decode阶段的注意力计算，支持PagedAttention KV缓存和稀疏注意力掩码。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/attention_v1.py",
+      "lines": "500-836"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_fused_infer_attention_score",
+    "torch_npu.npu_fused_infer_attention_score_v2"
+  ],
+  "related_features": [
+    "attention",
+    "paged_attention",
+    "chunked_prefill",
+    "speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_reshape_and_cache配合进行KV缓存管理",
+        "与attention_mask配合处理因果掩码"
+      ],
+      "memory_impact": "需要workspace内存，大小通过_npu_fused_infer_attention_score_get_max_workspace获取",
+      "throughput_impact": "TND布局优化变长序列处理，支持sparse_mode=3因果掩码",
+      "latency_impact": "融合算子减少kernel启动开销",
+      "test_cases": [
+        {
+          "name": "prefill无缓存场景",
+          "description": ""
+        },
+        {
+          "name": "prefill缓存命中场景",
+          "description": ""
+        },
+        {
+          "name": "decode场景",
+          "description": ""
+        },
+        {
+          "name": "chunked_prefill场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有标准Transformer模型",
+        "GQA模型",
+        "MQA模型"
+      ],
+      "enable_config": "自动启用，无需配置",
+      "unsuitable_scenarios": [
+        "decode阶段token数>16时使用npu_paged_attention"
+      ],
+      "best_practices": [
+        "使用TND布局处理变长序列",
+        "预分配workspace避免动态分配"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendAttentionBackendImpl.forward_fused_infer_attention",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendAttentionBackendImpl.full_graph_fia",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "sparse_mode参数调整",
+        "input_layout选择",
+        "sliding_window支持"
+      ],
+      "affected_features": [
+        "注意力计算精度",
+        "图捕获模式",
+        "推测解码"
+      ]
+    },
+    "design": {
+      "principle": "融合QK计算、softmax、V加权为单一算子，减少内存访问和kernel启动开销",
+      "theory_analysis": "使用TND(Time-Head-Dim)布局优化变长序列处理，避免padding开销",
+      "design_decisions": [
+        {
+          "decision": "支持block_table实现PagedAttention",
+          "reason": ""
+        },
+        {
+          "decision": "sparse_mode=3用于因果掩码",
+          "reason": ""
+        },
+        {
+          "decision": "支持learnable_sink",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "9f265737b7f4acb388d446f3f08d72496b86b3e79b0923491592b017e7e4c5f2",
+  "knowledge_domain": "integration-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1112
-- read_ref: vllm/vllm/benchmarks/sweep/serve.py:410, vllm/vllm/config/compilation.py:582, vllm/vllm/config/compilation.py:584
-- effect_ref: vllm/vllm/config/compilation.py:582, vllm/vllm/config/scheduler.py:258, vllm/vllm/config/scheduler.py:265
+- definition_ref: vllm/engine/arg_utils.py:1117
+- read_ref: vllm/vllm/benchmarks/sweep/serve.py:410, vllm/vllm/config/compilation.py:581, vllm/vllm/config/compilation.py:583
+- effect_ref: vllm/vllm/config/compilation.py:581, vllm/vllm/config/scheduler.py:258, vllm/vllm/config/scheduler.py:265
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: ValueError: max_num_batched_tokens must be >= max_num_seqs
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

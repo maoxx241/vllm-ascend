@@ -1,0 +1,119 @@
+{
+  "id": "moe_comm_type:alltoall",
+  "type": "moe_comm_type",
+  "category": "vllm_ascend",
+  "name": "ALLTOALL",
+  "summary": "AllToAll MoE通信类型，用于大规模token场景的专家并行通信，当token数超过mc2_tokens_capacity时使用，通过AllToAll实现token分发和收集",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "24-28,256-262,269"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "MoECommType.ALLTOALL",
+    "select_moe_comm_method"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "alltoall",
+    "large_batch"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "用于大规模token场景",
+        "在A3/A5设备上当token数超过capacity时使用"
+      ],
+      "memory_impact": "需要AllToAll通信缓冲区，显存占用较大",
+      "throughput_impact": "适合大规模batch，吞吐量稳定",
+      "latency_impact": "AllToAll延迟取决于EP大小",
+      "test_cases": [
+        {
+          "name": "验证AllToAll通信正确性",
+          "description": ""
+        },
+        {
+          "name": "测试大规模token场景性能",
+          "description": ""
+        },
+        {
+          "name": "验证A3/A5设备选择逻辑",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "enable_expert_parallel: true",
+      "unsuitable_scenarios": [
+        "小规模token场景",
+        "A2设备"
+      ],
+      "best_practices": [
+        "用于大规模batch场景",
+        "确保EP大小合理",
+        "监控通信性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MoECommType.ALLTOALL: 枚举定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "select_moe_comm_method(): 选择逻辑",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "select_moe_comm_method(): 修改选择条件"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts"
+      ]
+    },
+    "design": {
+      "principle": "AllToAll通信类型通过AllToAll操作实现token分发和收集，适合大规模token场景",
+      "theory_analysis": "AllToAll通信复杂度O(N*E/EP)，N为token数，E为专家数，EP为专家并行度；适合大规模batch",
+      "design_decisions": [
+        {
+          "decision": "在A3设备上当token数>capacity且不满足FUSED_MC2条件时选择",
+          "reason": ""
+        },
+        {
+          "decision": "在A5设备上当token数>capacity或DP=1时选择",
+          "reason": ""
+        },
+        {
+          "decision": "不用于A2设备",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "ab603474bec7988ab464142a0ed511b5bebd072307ddedccd0c84ec55604ec03",
+  "knowledge_domain": "vllm-ascend-core"
+}

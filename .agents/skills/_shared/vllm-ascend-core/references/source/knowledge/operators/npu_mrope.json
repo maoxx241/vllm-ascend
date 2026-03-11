@@ -1,0 +1,110 @@
+{
+  "id": "operator:npu_mrope",
+  "type": "operator",
+  "category": "rope",
+  "name": "npu_mrope",
+  "summary": "NPU多模态RoPE算子，实现多模态位置编码(mRoPE)，支持多维度位置编码用于视觉语言模型。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "467-549"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_mrope"
+  ],
+  "related_features": [
+    "mrope",
+    "multimodal",
+    "vision_language_model"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与mrope_section配合",
+        "与cos_sin_cache配合"
+      ],
+      "memory_impact": "使用预计算缓存",
+      "throughput_impact": "专用实现提升多模态吞吐",
+      "latency_impact": "单算子完成多模态位置编码",
+      "test_cases": [
+        {
+          "name": "2D positions",
+          "description": ""
+        },
+        {
+          "name": "mrope_section=[16,24,24]",
+          "description": ""
+        },
+        {
+          "name": "A5设备",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen2-VL",
+        "Qwen2.5-Omni",
+        "其他多模态模型"
+      ],
+      "enable_config": "多模态模型自动启用",
+      "unsuitable_scenarios": [
+        "纯文本模型"
+      ],
+      "best_practices": [
+        "positions为2D张量",
+        "mrope_section正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendMRotaryEmbedding.forward_oot",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "mrope_section配置",
+        "rotary_mode设置"
+      ],
+      "affected_features": [
+        "多模态位置编码精度"
+      ]
+    },
+    "design": {
+      "principle": "mRoPE为不同模态(如时间、高度、宽度)分配不同的位置编码维度",
+      "theory_analysis": "多模态输入需要区分不同维度的位置信息",
+      "design_decisions": [
+        {
+          "decision": "支持mrope_section配置",
+          "reason": ""
+        },
+        {
+          "decision": "支持interleaved模式",
+          "reason": ""
+        },
+        {
+          "decision": "A5有特殊处理",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "7ad76ae6ec2628b64b3a9c42650b9818444da4717362a34fdb70f909728788e7",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:671
-- read_ref: vllm/vllm/config/model.py:192, vllm/vllm/config/model.py:943, vllm/vllm/engine/arg_utils.py:454
-- effect_ref: vllm/vllm/config/model.py:943, vllm/vllm/config/model.py:953, vllm/vllm/engine/arg_utils.py:672
+- definition_ref: vllm/engine/arg_utils.py:673
+- read_ref: vllm/vllm/config/model.py:192, vllm/vllm/config/model.py:947, vllm/vllm/engine/arg_utils.py:455
+- effect_ref: vllm/vllm/config/model.py:947, vllm/vllm/config/model.py:957, vllm/vllm/engine/arg_utils.py:674
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: ValueError: quantization method is deprecated ... set --allow-deprecated-quantization
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

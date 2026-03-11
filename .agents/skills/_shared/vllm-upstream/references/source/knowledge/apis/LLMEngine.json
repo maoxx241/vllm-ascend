@@ -1,0 +1,141 @@
+{
+  "id": "api:llmengine",
+  "type": "api",
+  "category": "vllm",
+  "name": "LLMEngine",
+  "summary": "vLLM核心引擎类，提供同步推理接口，管理模型加载、请求调度和输出生成的完整生命周期",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/engine/llm_engine.py",
+      "lines": "1-7"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/engine/llm_engine.py",
+      "lines": "48-430"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_V1_MULTIPROCESSING",
+    "VLLM_LOG_STATS_INTERVAL"
+  ],
+  "related_apis": [
+    "AsyncLLM",
+    "EngineCoreClient",
+    "InputProcessor",
+    "OutputProcessor",
+    "SamplingParams",
+    "RequestOutput"
+  ],
+  "related_features": [
+    "continuous_batching",
+    "chunked_prefill",
+    "cuda_graph",
+    "lora",
+    "sleep_mode"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "add_request()添加请求",
+        "step()执行推理",
+        "abort_request()取消请求",
+        "get_num_unfinished_requests()查询状态"
+      ],
+      "memory_impact": "管理KV Cache和模型权重内存，支持sleep/wake模式释放显存",
+      "throughput_impact": "支持continuous batching，可动态调整batch size优化吞吐量",
+      "latency_impact": "CUDA Graph可降低首token延迟，chunked prefill平衡首token延迟与吞吐量",
+      "test_cases": [
+        {
+          "name": "单请求推理测试",
+          "description": ""
+        },
+        {
+          "name": "多请求并发测试",
+          "description": ""
+        },
+        {
+          "name": "请求取消测试",
+          "description": ""
+        },
+        {
+          "name": "sleep/wake模式测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有HuggingFace transformers模型",
+        "多模态模型",
+        "MoE模型"
+      ],
+      "enable_config": "from_engine_args()或from_vllm_config()创建实例",
+      "unsuitable_scenarios": [
+        "需要异步接口的在线服务(推荐使用AsyncLLM)",
+        "多进程分布式推理"
+      ],
+      "best_practices": [
+        "使用multiprocess_mode=True启用多进程模式",
+        "合理设置gpu_memory_utilization",
+        "启用prefix caching优化长上下文"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/engine/llm_engine.py:48-430",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm/engine/llm_engine.py:1-7",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "__init__()初始化流程",
+        "step()执行逻辑",
+        "add_request()请求处理"
+      ],
+      "affected_features": [
+        "调度策略",
+        "内存管理",
+        "输出处理"
+      ]
+    },
+    "design": {
+      "principle": "采用生产者-消费者模式，EngineCore作为核心计算引擎，InputProcessor处理输入，OutputProcessor处理输出",
+      "theory_analysis": "基于PagedAttention的内存管理，支持continuous batching实现高效推理",
+      "design_decisions": [
+        {
+          "decision": "V1架构统一同步/异步引擎",
+          "reason": ""
+        },
+        {
+          "decision": "支持多进程模式隔离计算",
+          "reason": ""
+        },
+        {
+          "decision": "模块化设计便于扩展",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "bacf370f02152c50aa8f895d508b4e150aed19eacd183173bdd1a9c4839920b4",
+  "knowledge_domain": "vllm-upstream"
+}

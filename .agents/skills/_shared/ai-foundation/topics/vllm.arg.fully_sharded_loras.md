@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1043
-- read_ref: vllm/vllm/config/lora.py:36, vllm/vllm/config/lora.py:84, vllm/vllm/engine/arg_utils.py:486
+- definition_ref: vllm/engine/arg_utils.py:1048
+- read_ref: vllm/vllm/config/lora.py:36, vllm/vllm/config/lora.py:84, vllm/vllm/engine/arg_utils.py:488
 - effect_ref: vllm/vllm/lora/layers/base_linear.py:50, vllm/vllm/lora/layers/base_linear.py:59, vllm/vllm/lora/layers/column_parallel_linear.py:210
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

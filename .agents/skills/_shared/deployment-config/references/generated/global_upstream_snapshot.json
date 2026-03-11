@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-03-06T00:35:29.369018+00:00",
+  "fetched_at": "2026-03-11T07:50:09.487629+00:00",
   "urls": {
     "vllm_env": "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/envs.py",
     "vllm_arg_utils": "https://raw.githubusercontent.com/vllm-project/vllm/main/vllm/engine/arg_utils.py",
@@ -9,7 +9,7 @@
   "available": {
     "vllm_env": true,
     "vllm_arg_utils": true,
-    "vllm_cli_args": false,
+    "vllm_cli_args": true,
     "ascend_env": true
   },
   "vllm_args": [
@@ -19,6 +19,7 @@
     "--allow-deprecated-quantization",
     "--allowed-local-media-path",
     "--allowed-media-domains",
+    "--api-server-count",
     "--async-scheduling",
     "--attention-backend",
     "--attention-config",
@@ -27,6 +28,7 @@
     "--code-revision",
     "--collect-detailed-traces",
     "--compilation-config",
+    "--config",
     "--config-format",
     "--convert",
     "--cp-kv-cache-interleave-size",
@@ -57,6 +59,7 @@
     "--disable-nccl-for-dp-synchronization",
     "--disable-sliding-window",
     "--distributed-executor-backend",
+    "--distributed-timeout-seconds",
     "--download-dir",
     "--dtype",
     "--ec-transfer-config",
@@ -84,6 +87,7 @@
     "--fully-sharded-loras",
     "--generation-config",
     "--gpu-memory-utilization",
+    "--headless",
     "--hf-config-path",
     "--hf-overrides",
     "--hf-token",
@@ -173,7 +177,6 @@
     "--speculative-config",
     "--stream-interval",
     "--structured-outputs-config",
-    "--swap-space",
     "--tensor-parallel-size",
     "--tokenizer",
     "--tokenizer-mode",
@@ -299,6 +302,7 @@
     "VLLM_MEDIA_CONNECTOR",
     "VLLM_MEDIA_LOADING_THREAD_COUNT",
     "VLLM_MEDIA_URL_ALLOW_REDIRECTS",
+    "VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS",
     "VLLM_MLA_DISABLE",
     "VLLM_MM_HASHER_ALGORITHM",
     "VLLM_MODEL_REDIRECT_PATH",

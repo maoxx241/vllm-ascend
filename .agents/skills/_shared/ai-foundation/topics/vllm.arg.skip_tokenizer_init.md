@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:688
-- read_ref: vllm/vllm/config/model.py:224, vllm/vllm/config/model.py:339, vllm/vllm/config/vllm.py:1446
-- effect_ref: vllm/vllm/engine/arg_utils.py:1612, vllm/vllm/entrypoints/llm.py:115, vllm/vllm/multimodal/processing/processor.py:98
+- definition_ref: vllm/engine/arg_utils.py:690
+- read_ref: vllm/vllm/benchmarks/serve.py:1609, vllm/vllm/config/model.py:224, vllm/vllm/config/model.py:336
+- effect_ref: vllm/vllm/benchmarks/serve.py:1609, vllm/vllm/engine/arg_utils.py:1628, vllm/vllm/entrypoints/llm.py:115
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

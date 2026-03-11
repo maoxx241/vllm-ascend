@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/tutorials/models/DeepSeek-R1.md:154, docs/source/tutorials/models/DeepSeek-R1.md:200, docs/source/tutorials/models/DeepSeek-V3.1.md:174
-- read_ref: vllm-ascend/vllm_ascend/ops/fused_moe/token_dispatcher.py:110, vllm-ascend/vllm_ascend/utils.py:956, vllm-ascend/vllm_ascend/utils.py:959
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:959
+- read_ref: vllm-ascend/vllm_ascend/ops/fused_moe/token_dispatcher.py:110, vllm-ascend/vllm_ascend/utils.py:928, vllm-ascend/vllm_ascend/utils.py:931
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:931
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: HCCL init failed; Communication timeout
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

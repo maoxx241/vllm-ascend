@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1356
-- read_ref: vllm/vllm/envs.py:197, vllm/vllm/envs.py:1356, vllm/vllm/envs.py:1357
+- definition_ref: vllm/envs.py:1368
+- read_ref: vllm/vllm/envs.py:198, vllm/vllm/envs.py:1368, vllm/vllm/envs.py:1369
 - effect_ref: vllm/vllm/model_executor/layers/quantization/utils/nvfp4_utils.py:57
 - web_refs: 2
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

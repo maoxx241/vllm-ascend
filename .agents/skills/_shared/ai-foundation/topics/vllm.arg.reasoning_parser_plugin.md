@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:774
-- read_ref: vllm/vllm/config/structured_outputs.py:40, vllm/vllm/engine/arg_utils.py:508, vllm/vllm/engine/arg_utils.py:776
-- effect_ref: vllm/vllm/engine/arg_utils.py:1756, vllm/vllm/entrypoints/openai/api_server.py:416, vllm/vllm/entrypoints/openai/api_server.py:416
+- definition_ref: vllm/engine/arg_utils.py:773
+- read_ref: vllm/vllm/config/structured_outputs.py:40, vllm/vllm/engine/arg_utils.py:510, vllm/vllm/engine/arg_utils.py:775
+- effect_ref: vllm/vllm/engine/arg_utils.py:1772, vllm/vllm/entrypoints/openai/api_server.py:430, vllm/vllm/entrypoints/openai/api_server.py:430
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

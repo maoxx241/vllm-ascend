@@ -1,0 +1,120 @@
+{
+  "id": "api:ascend_fused_mo_e",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendFusedMoE",
+  "summary": "昇腾融合MoE层，实现Mixture of Experts的高效计算，支持多种通信方法和量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/fused_moe.py",
+      "lines": "50-300"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2",
+    "VLLM_ASCEND_MC2_QUANT_MODE"
+  ],
+  "related_apis": [
+    "MoECommMethod",
+    "FusedMoEConfig",
+    "TokenDispatcher"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "quantization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行MoE计算",
+        "prepare()准备通信",
+        "finalize()完成通信"
+      ],
+      "memory_impact": "管理expert权重和通信缓冲区",
+      "throughput_impact": "融合计算和通信优化提升吞吐量",
+      "latency_impact": "优化的kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "MoE计算测试",
+          "description": ""
+        },
+        {
+          "name": "expert并行测试",
+          "description": ""
+        },
+        {
+          "name": "量化测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Mixtral",
+        "DeepSeek-V2/V3",
+        "Qwen2-MoE",
+        "其他MoE模型"
+      ],
+      "enable_config": "自动检测MoE模型启用",
+      "unsuitable_scenarios": [
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "选择合适的通信方法",
+        "启用量化优化性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/fused_moe/fused_moe.py:50-300",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()计算逻辑",
+        "通信方法选择",
+        "量化支持"
+      ],
+      "affected_features": [
+        "MoE计算",
+        "Expert并行"
+      ]
+    },
+    "design": {
+      "principle": "融合token分发、expert计算、结果合并",
+      "theory_analysis": "使用MC2等方法优化通信和计算并行",
+      "design_decisions": [
+        {
+          "decision": "支持多种通信方法",
+          "reason": ""
+        },
+        {
+          "decision": "支持量化",
+          "reason": ""
+        },
+        {
+          "decision": "支持动态EPLB",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "7e1f4a72b18c1b4601ee09721457443dd2aebb3b6b2409260c6f8767bfd5efdb",
+  "knowledge_domain": "integration-core"
+}

@@ -1,0 +1,104 @@
+{
+  "id": "config:num_head_replica",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "num_head_replica",
+  "summary": "KV head副本数量配置，用于PD分离场景中优化KV head的复制策略",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "92-103"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "pd_disaggregation"
+  ],
+  "sub_configs": [],
+  "constraints": [
+    "仅在有kv_transfer_config且非DeepSeek-MLA模型时生效",
+    "需要模型配置有num_key_value_heads属性",
+    "prefill_tp_size >= num_kv_head时，num_head_replica = prefill_tp_size // num_kv_head"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试不同副本数量的性能影响",
+        "需要验证KV head复制的正确性"
+      ],
+      "memory_impact": "增加副本会增加内存占用",
+      "throughput_impact": "合理配置可优化吞吐量",
+      "latency_impact": "影响KV transfer的效率",
+      "test_cases": [
+        {
+          "name": "测试num_head_replica=2时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试与pd_tp_ratio的组合效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen等支持PD分离的非MLA模型"
+      ],
+      "enable_config": "根据prefill_tp_size和num_kv_head自动计算",
+      "unsuitable_scenarios": [
+        "DeepSeek-MLA模型",
+        "非PD分离场景"
+      ],
+      "best_practices": [
+        "根据P节点的TP大小自动调整",
+        "监控内存占用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:92-103",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的num_head_replica计算"
+      ],
+      "affected_features": [
+        "PD分离",
+        "KV head复制",
+        "KV transfer"
+      ]
+    },
+    "design": {
+      "principle": "当P节点TP大于KV head数量时，复制KV head以充分利用并行资源",
+      "theory_analysis": "KV head复制可以在TP大于KV head时保持负载均衡",
+      "design_decisions": [
+        {
+          "decision": "自动计算副本数量",
+          "reason": ""
+        },
+        {
+          "decision": "仅当prefill_tp_size >= num_kv_head时启用",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f2375d51f89ec07041836e0994fc20f3b4fc25460ec8b0a5a491881267b8ba35",
+  "knowledge_domain": "vllm-ascend-core"
+}

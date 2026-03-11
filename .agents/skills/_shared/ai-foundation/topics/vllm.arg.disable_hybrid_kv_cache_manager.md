@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1148
-- read_ref: vllm/vllm/config/scheduler.py:123, vllm/vllm/config/vllm.py:1070, vllm/vllm/config/vllm.py:1085
-- effect_ref: vllm/vllm/config/vllm.py:1070, vllm/vllm/config/vllm.py:1099, vllm/vllm/v1/core/kv_cache_utils.py:1223
+- definition_ref: vllm/engine/arg_utils.py:1153
+- read_ref: vllm/vllm/config/scheduler.py:123, vllm/vllm/config/vllm.py:1079, vllm/vllm/config/vllm.py:1094
+- effect_ref: vllm/vllm/config/vllm.py:1079, vllm/vllm/config/vllm.py:1108, vllm/vllm/v1/core/kv_cache_utils.py:1224
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

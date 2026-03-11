@@ -1,0 +1,117 @@
+{
+  "id": "quantization:w8_a16",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W8A16",
+  "summary": "INT8权重量化方案，权重使用per-channel INT8量化，激活值保持FP16/BF16精度，通过npu_weight_quant_batchmatmul实现高效反量化计算，适合精度敏感场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a16.py",
+      "lines": "1-78"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_weight_quant_batchmatmul"
+  ],
+  "related_features": [
+    "linear",
+    "weight_compression"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持Linear层，不支持MoE层"
+      ],
+      "memory_impact": "权重存储为INT8，内存占用减少约50%，激活值保持原精度",
+      "throughput_impact": "权重压缩减少显存带宽压力，吞吐量提升中等",
+      "latency_impact": "反量化计算有开销，但显存优化带来整体延迟降低",
+      "test_cases": [
+        {
+          "name": "验证per-channel scale计算正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同模型精度损失",
+          "description": ""
+        },
+        {
+          "name": "验证NZ格式转换正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型"
+      ],
+      "enable_config": "quantization: w8a16",
+      "unsuitable_scenarios": [
+        "MoE模型（不支持）",
+        "对精度要求极高的场景"
+      ],
+      "best_practices": [
+        "配合NZ格式优化矩阵乘法性能",
+        "适用于内存受限场景"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A16LinearMethod: W8A16 Linear层实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_weight(): 权重参数定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_perchannel_param(): per-channel参数定义",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply(): 修改npu_weight_quant_batchmatmul调用参数",
+        "process_weights_after_loading(): 修改权重后处理逻辑"
+      ],
+      "affected_features": [
+        "linear_layers"
+      ]
+    },
+    "design": {
+      "principle": "权重INT8量化：将FP16/BF16权重量化为INT8，每行权重独立scale和offset；激活值保持高精度",
+      "theory_analysis": "INT8权重量化理论精度损失约0.1-0.3%，per-channel量化保持较高精度",
+      "design_decisions": [
+        {
+          "decision": "选择W8A16而非W8A8，保持激活值精度",
+          "reason": ""
+        },
+        {
+          "decision": "使用npu_weight_quant_batchmatmul融合反量化与矩阵乘法",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持Linear层，MoE层使用其他量化方案",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "9f68a1ead2c3f318d697369085e9337454a032911944ef336e42a47e72223aae",
+  "knowledge_domain": "vllm-ascend-core"
+}

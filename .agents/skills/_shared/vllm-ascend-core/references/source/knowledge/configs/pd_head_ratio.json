@@ -1,0 +1,104 @@
+{
+  "id": "config:pd_head_ratio",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "pd_head_ratio",
+  "summary": "Prefill/Decode节点head比例配置，表示P节点与D节点的KV head数量比值",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "91-106"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "pd_disaggregation"
+  ],
+  "sub_configs": [],
+  "constraints": [
+    "仅在有kv_transfer_config且非DeepSeek-MLA模型时生效",
+    "需要模型配置有num_key_value_heads属性",
+    "prefill_tp_size和decode_tp_size会被限制为不超过num_kv_head"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试不同head比例的性能影响",
+        "需要验证KV head的正确分布"
+      ],
+      "memory_impact": "影响KV缓存的内存分布",
+      "throughput_impact": "合理配置可优化整体吞吐量",
+      "latency_impact": "影响KV transfer的效率",
+      "test_cases": [
+        {
+          "name": "测试pd_head_ratio=2时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试与pd_tp_ratio的组合效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen等支持PD分离的非MLA模型"
+      ],
+      "enable_config": "通过kv_transfer_config间接配置",
+      "unsuitable_scenarios": [
+        "DeepSeek-MLA模型",
+        "非PD分离场景"
+      ],
+      "best_practices": [
+        "根据模型的KV head数量配置",
+        "确保head比例与TP比例匹配"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:91-106",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的pd_head_ratio计算"
+      ],
+      "affected_features": [
+        "PD分离",
+        "KV head分布",
+        "KV transfer"
+      ]
+    },
+    "design": {
+      "principle": "根据P/D节点的TP大小调整KV head分布，优化KV transfer效率",
+      "theory_analysis": "KV head数量影响KV缓存的分布，合理配置可以优化通信",
+      "design_decisions": [
+        {
+          "decision": "TP大小不超过KV head数量",
+          "reason": ""
+        },
+        {
+          "decision": "根据模型配置自动计算",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "fb2790a7720a7dc03d1b15445d1913e3174fb8aa8103629bd668fb76162ed751",
+  "knowledge_domain": "vllm-ascend-core"
+}

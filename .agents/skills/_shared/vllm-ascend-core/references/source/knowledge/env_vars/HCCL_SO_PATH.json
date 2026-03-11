@@ -1,0 +1,116 @@
+{
+  "id": "env_var:hccl_so_path",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "HCCL_SO_PATH",
+  "summary": "指定HCCL库文件路径，用于pyhccl通信后端",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "59-61"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "290-308"
+    }
+  ],
+  "related_env_vars": [
+    "ASCEND_HOME_PATH"
+  ],
+  "related_apis": [
+    "find_hccl_library"
+  ],
+  "related_features": [
+    "distributed_inference",
+    "tensor_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "影响分布式通信初始化",
+        "与TP/EP配置交互"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "正确的HCCL库确保通信效率",
+      "latency_impact": "正确的HCCL库确保通信效率",
+      "test_cases": [
+        {
+          "name": "HCCL库加载测试",
+          "description": "验证HCCL库正确加载",
+          "threshold": 0
+        },
+        {
+          "name": "自定义路径测试",
+          "description": "验证自定义HCCL_SO_PATH的正确加载",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export HCCL_SO_PATH=/path/to/libhccl.so",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "默认使用libhccl.so即可",
+        "某些环境可能需要显式指定路径",
+        "确保HCCL版本与CANN版本匹配"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "59-61",
+          "purpose": "环境变量定义，默认值为None"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "find_hccl_library",
+          "lines": "290-308",
+          "purpose": "查找HCCL库文件"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值",
+        "utils.py: 修改查找逻辑"
+      ],
+      "affected_features": [
+        "distributed_inference",
+        "tensor_parallel",
+        "expert_parallel"
+      ]
+    },
+    "design": {
+      "principle": "HCCL是Ascend的集合通信库，类似于NCCL，用于多卡通信",
+      "theory_analysis": "HCCL提供AllReduce、AllGather等集合通信原语，是TP/EP的基础",
+      "design_decisions": [
+        {
+          "decision": "支持自定义路径",
+          "reason": "某些环境HCCL库不在标准路径"
+        },
+        {
+          "decision": "默认使用libhccl.so",
+          "reason": "ctypes可以自动查找标准库路径"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "266bce55958408dce341e504bda8e83f5cecc9eac8d4b71360a95f369156408a",
+  "knowledge_domain": "vllm-ascend-core"
+}

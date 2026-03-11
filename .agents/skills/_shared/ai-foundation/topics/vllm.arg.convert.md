@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:649
-- read_ref: vllm/vllm/assets/video.py:63, vllm/vllm/benchmarks/datasets.py:2004, vllm/vllm/benchmarks/datasets.py:2017
-- effect_ref: vllm/vllm/config/model.py:627, vllm/vllm/config/model.py:846, vllm/vllm/config/model.py:847
+- definition_ref: vllm/engine/arg_utils.py:651
+- read_ref: vllm/vllm/assets/video.py:63, vllm/vllm/benchmarks/datasets.py:2043, vllm/vllm/benchmarks/datasets.py:2056
+- effect_ref: vllm/vllm/config/model.py:631, vllm/vllm/config/model.py:850, vllm/vllm/config/model.py:851
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

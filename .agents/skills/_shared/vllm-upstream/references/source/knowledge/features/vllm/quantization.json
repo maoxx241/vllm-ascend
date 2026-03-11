@@ -1,0 +1,193 @@
+{
+  "id": "feature:quantization",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Quantization",
+  "summary": "模型量化支持，包括AWQ、GPTQ、FP8、GGUF等多种量化方法，通过降低权重精度减少显存占用和加速推理，支持在线量化和离线量化检查点加载。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/quantization/__init__.py",
+      "lines": "1-174"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/quantization/awq.py",
+      "lines": "1-278"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/quantization/gptq.py",
+      "lines": "1-393"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/model_executor/layers/quantization/fp8.py",
+      "lines": "1-1247"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/config/model.py",
+      "lines": "188-194,864-957"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_TEST_FORCE_FP8_MARLIN",
+    "VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS"
+  ],
+  "related_apis": [
+    "QuantizationConfig",
+    "AWQConfig",
+    "GPTQConfig",
+    "Fp8Config",
+    "AWQLinearMethod",
+    "GPTQLinearMethod",
+    "Fp8LinearMethod"
+  ],
+  "related_features": [
+    "feature:tensor_parallel",
+    "feature:cuda_graph",
+    "feature:moe",
+    "feature:kv_cache"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Tensor Parallel交互：量化权重需要按TP维度正确分片，group_size必须能被TP size整除",
+        "与CUDA Graph交互：部分量化方法(如bitsandbytes 8-bit)不支持CUDA Graph，需回退到eager模式",
+        "与MoE交互：FP8和AWQ支持MoE专家权重量化，使用专门的MoE量化内核",
+        "与KV Cache交互：FP8支持KV Cache量化，通过Fp8KVCacheMethod实现"
+      ],
+      "memory_impact": "AWQ/GPTQ 4-bit量化将权重显存减少约75%(FP16→INT4)。FP8减少50%(FP16→FP8)。量化还影响激活内存，block-wise量化需要额外的scale tensor。MoE模型量化收益更大，因为专家权重占主导。",
+      "throughput_impact": "AWQ Marlin内核在A100上可达2-3x加速。FP8利用H100的FP8 Tensor Core，吞吐量接近FP16的2x。GPTQ性能略低于AWQ，但支持更多bits配置。在线量化(Fp8OnlineLinearMethod)在加载时量化，增加启动时间但无需预量化模型。",
+      "latency_impact": "量化模型的首token延迟降低20-50%，主要受益于更少的显存访问。解码延迟降低更明显，因为权重访问是瓶颈。FP8在H100上延迟最低，AWQ Marlin在A100上最优。",
+      "test_cases": [
+        {
+          "name": "test_awq_4bit_accuracy",
+          "description": "验证AWQ 4-bit量化模型的精度损失在可接受范围内"
+        },
+        {
+          "name": "test_gptq_act_order",
+          "description": "测试GPTQ的desc_act(act-order)特性正确性"
+        },
+        {
+          "name": "test_fp8_dynamic_vs_static",
+          "description": "对比FP8动态和静态激活量化的性能和精度"
+        },
+        {
+          "name": "test_quantization_tp_compatibility",
+          "description": "验证量化权重在TP场景下的正确分片"
+        },
+        {
+          "name": "test_moe_fp8_quantization",
+          "description": "测试MoE专家权重的FP8量化支持"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "AWQ: Llama、Qwen、Mistral、Vicuna等主流模型",
+        "GPTQ: 支持GPTQModel量化的所有模型",
+        "FP8: 所有支持FP8的模型(H100/A100推荐)",
+        "GGUF: llama.cpp兼容的量化模型",
+        "BitsAndBytes: NF4/FP4量化模型",
+        "Compressed-Tensors: Neural Magic格式"
+      ],
+      "enable_config": "通过--quantization指定量化方法(awq/gptq/fp8/gguf等)。AWQ推荐--dtype half。FP8支持--quantization fp8配合activation_scheme dynamic/static。GPTQ支持desc_act和dynamic配置。部分量化方法自动检测模型配置中的量化信息。",
+      "unsuitable_scenarios": [
+        "精度敏感任务(量化可能损失精度)",
+        "小batch推理(量化收益有限)",
+        "非NVIDIA GPU(部分量化内核仅支持CUDA)",
+        "需要微调的场景(量化权重难以微调)"
+      ],
+      "best_practices": [
+        "AWQ推荐使用Marlin内核(vllm自动选择)，性能最优",
+        "FP8推荐在H100/H200上使用，充分利用FP8 Tensor Core",
+        "GPTQ使用act-order(desc_act)可提升精度，但影响TP兼容性",
+        "MoE模型优先考虑FP8量化，专家权重收益最大",
+        "使用--kv-cache-dtype fp8进一步减少KV Cache显存"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/model_executor/layers/quantization/base_config.py",
+          "function": "QuantizationConfig",
+          "purpose": "量化配置基类，定义量化方法的接口"
+        },
+        {
+          "file": "vllm/model_executor/layers/quantization/awq.py",
+          "function": "AWQLinearMethod.apply",
+          "purpose": "AWQ量化的前向传播实现"
+        },
+        {
+          "file": "vllm/model_executor/layers/quantization/fp8.py",
+          "function": "Fp8LinearMethod.apply",
+          "purpose": "FP8量化的前向传播，支持Marlin和原生FP8"
+        },
+        {
+          "file": "vllm/model_executor/layers/quantization/gptq.py",
+          "function": "GPTQLinearMethod.apply",
+          "purpose": "GPTQ量化的前向传播，支持Exllama内核"
+        },
+        {
+          "file": "vllm/model_executor/layers/quantization/fp8.py",
+          "function": "Fp8MoEMethod",
+          "purpose": "MoE专家权重的FP8量化支持"
+        }
+      ],
+      "modification_points": [
+        "在QuantizationMethods中添加新的量化方法类型",
+        "实现新的QuantizationConfig子类定义量化参数",
+        "创建LinearMethodBase子类实现量化前向传播",
+        "添加新的权重参数类型(如PackedvLLMParameter)",
+        "扩展MoE量化支持新的专家权重格式"
+      ],
+      "affected_features": [
+        "Tensor Parallel: 量化权重的分片策略影响TP实现",
+        "CUDA Graph: 部分量化方法不支持CUDA Graph",
+        "Memory Profiling: 量化减少显存占用，影响内存规划",
+        "Model Loading: 量化权重需要特殊的加载逻辑"
+      ]
+    },
+    "design": {
+      "principle": "量化通过降低权重和激活的数值精度来减少内存占用和加速计算。权重量化将FP16/BF16权重压缩到INT4/INT8/FP8，激活量化在推理时动态或静态地量化激活值。vLLM采用分层量化策略，不同层可选择不同精度，并利用专用内核(Marlin、Exllama、Cutlass)实现高效反量化计算。",
+      "theory_analysis": "量化的核心挑战是在精度损失和压缩率之间取得平衡。AWQ基于激活感知权重量化，保护重要权重通道；GPTQ使用二阶信息(Hessian)进行最优量化；FP8利用硬件FP8支持实现无损压缩。数学上，量化可表示为Q(x) = clamp(round(x/scale), -127, 127) × scale，scale的选择决定了量化误差。Block-wise量化将权重分组量化，每组独立scale，提升精度但增加scale tensor开销。",
+      "design_decisions": [
+        {
+          "decision": "AWQ使用Marlin内核而非原生AWQ内核",
+          "reason": "Marlin内核针对INT4优化，在A100+GPU上性能更优，且支持更高效的内存布局"
+        },
+        {
+          "decision": "FP8支持block-wise量化",
+          "reason": "Block-wise量化(如128x128块)比per-tensor量化精度更高，适合大模型，DeepSeek V3等模型采用此方案"
+        },
+        {
+          "decision": "GPTQ支持act-order(desc_act)",
+          "reason": "Act-order根据激活重要性重排权重，提升量化精度，但增加TP实现复杂度"
+        },
+        {
+          "decision": "在线量化支持FP8",
+          "reason": "允许加载FP16/BF16模型并在推理时量化，无需预量化模型，提升灵活性"
+        },
+        {
+          "decision": "量化方法自动检测和覆盖",
+          "reason": "通过override_quantization_method机制，自动识别GPTQ-Marlin等优化格式，简化用户配置"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "49ab4c9d1acc23917d205616d81fc1ed44702408beb8a82358fd92d06681fbda",
+  "knowledge_domain": "vllm-upstream"
+}

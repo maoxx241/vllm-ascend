@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:967
+- definition_ref: vllm/envs.py:979
 - read_ref: vllm/vllm/_aiter_ops.py:907, vllm/vllm/_aiter_ops.py:935, vllm/vllm/envs.py:118
 - effect_ref: vllm/vllm/_aiter_ops.py:907, vllm/vllm/_aiter_ops.py:935, vllm/vllm/envs.py:118
 - web_refs: 2
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

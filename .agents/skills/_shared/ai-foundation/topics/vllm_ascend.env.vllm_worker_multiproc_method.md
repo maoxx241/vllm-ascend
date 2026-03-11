@@ -34,7 +34,7 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/offline_data_parallel.py:68, examples/offline_external_launcher.py:77, examples/offline_weight_load.py:78
-- read_ref: vllm/vllm/config/vllm.py:879, vllm/vllm/config/vllm.py:884, vllm/vllm/entrypoints/openai/api_server.py:77
+- read_ref: vllm/vllm/config/vllm.py:888, vllm/vllm/config/vllm.py:893, vllm/vllm/entrypoints/openai/api_server.py:77
 - effect_ref: vllm/vllm/entrypoints/openai/api_server.py:77, vllm/vllm/entrypoints/utils.py:170, vllm/vllm/utils/system_utils.py:118
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: warning: Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'; warning: Whisper is known to have issues with forked workers
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

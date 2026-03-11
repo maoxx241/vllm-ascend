@@ -1,0 +1,127 @@
+{
+  "id": "api:model_runner",
+  "type": "api",
+  "category": "vllm",
+  "name": "GPUModelRunner",
+  "summary": "GPU模型运行器，负责GPU上的模型加载、推理执行、采样和输出处理",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/gpu/model_runner.py",
+      "lines": "102-500"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_USE_V2_MODEL_RUNNER"
+  ],
+  "related_apis": [
+    "GPUWorker",
+    "InputBatch",
+    "Sampler",
+    "RequestState"
+  ],
+  "related_features": [
+    "cuda_graph",
+    "speculative_decoding",
+    "lora",
+    "multimodal"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "execute_model()执行模型推理",
+        "load_model()加载模型",
+        "capture_model()捕获CUDA Graph",
+        "sample()采样"
+      ],
+      "memory_impact": "管理模型权重、KV Cache、中间激活",
+      "throughput_impact": "CUDA Graph优化提升吞吐量",
+      "latency_impact": "优化的执行流程降低延迟",
+      "test_cases": [
+        {
+          "name": "模型执行测试",
+          "description": ""
+        },
+        {
+          "name": "CUDA Graph测试",
+          "description": ""
+        },
+        {
+          "name": "采样测试",
+          "description": ""
+        },
+        {
+          "name": "多模态测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有CUDA支持的模型"
+      ],
+      "enable_config": "由GPUWorker自动创建",
+      "unsuitable_scenarios": [
+        "非CUDA设备"
+      ],
+      "best_practices": [
+        "启用CUDA Graph优化",
+        "合理配置max_num_tokens"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/worker/gpu/model_runner.py:102-500",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "execute_model()执行逻辑",
+        "load_model()加载逻辑",
+        "采样逻辑"
+      ],
+      "affected_features": [
+        "模型执行",
+        "采样",
+        "多模态"
+      ]
+    },
+    "design": {
+      "principle": "共享模型运行器，支持所有模型类型",
+      "theory_analysis": "统一的模型执行流程，支持文本和多模态",
+      "design_decisions": [
+        {
+          "decision": "支持Pipeline Parallel",
+          "reason": ""
+        },
+        {
+          "decision": "支持Data Parallel",
+          "reason": ""
+        },
+        {
+          "decision": "支持Context Parallel",
+          "reason": ""
+        },
+        {
+          "decision": "支持推测解码",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "792ddd1f7a1591f5b794ba9916ef11929446f1cbaf964938bc3ad5ec5abc4534",
+  "knowledge_domain": "vllm-upstream"
+}

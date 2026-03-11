@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:841
-- read_ref: vllm/vllm/engine/arg_utils.py:404, vllm/vllm/engine/arg_utils.py:1586, vllm/vllm/engine/arg_utils.py:1592
-- effect_ref: vllm/vllm/engine/arg_utils.py:1586
+- definition_ref: vllm/engine/arg_utils.py:840
+- read_ref: vllm/vllm/engine/arg_utils.py:404, vllm/vllm/engine/arg_utils.py:1602, vllm/vllm/engine/arg_utils.py:1608
+- effect_ref: vllm/vllm/engine/arg_utils.py:1602
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: RPC 连接失败; 请求分发不均衡
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

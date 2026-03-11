@@ -1,0 +1,116 @@
+{
+  "id": "api:v1_async_llm",
+  "type": "api",
+  "category": "vllm",
+  "name": "V1 AsyncLLM",
+  "summary": "vLLM V1架构的异步引擎核心类，提供异步推理、流式输出和弹性扩展",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/engine/async_llm.py",
+      "lines": "71-1072"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_V1_MULTIPROCESSING",
+    "VLLM_V1_OUTPUT_PROC_CHUNK_SIZE"
+  ],
+  "related_apis": [
+    "LLMEngine",
+    "EngineCoreClient",
+    "RequestOutputCollector"
+  ],
+  "related_features": [
+    "async_scheduling",
+    "continuous_batching",
+    "elastic_ep"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "generate()异步生成",
+        "encode()编码请求",
+        "abort()取消请求",
+        "scale_elastic_ep()弹性扩展"
+      ],
+      "memory_impact": "支持sleep/wake模式管理内存",
+      "throughput_impact": "异步调度优化吞吐量",
+      "latency_impact": "流式输出降低首token延迟",
+      "test_cases": [
+        {
+          "name": "异步生成测试",
+          "description": ""
+        },
+        {
+          "name": "流式输出测试",
+          "description": ""
+        },
+        {
+          "name": "弹性扩展测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有HuggingFace transformers模型"
+      ],
+      "enable_config": "from_engine_args()创建实例",
+      "unsuitable_scenarios": [
+        "需要同步接口的离线批处理"
+      ],
+      "best_practices": [
+        "使用async_scheduling优化",
+        "合理设置stream_interval"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/engine/async_llm.py:71-1072",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "generate()生成逻辑",
+        "异步调度逻辑"
+      ],
+      "affected_features": [
+        "异步推理",
+        "流式输出"
+      ]
+    },
+    "design": {
+      "principle": "基于asyncio的异步架构",
+      "theory_analysis": "后台output_handler任务持续处理输出",
+      "design_decisions": [
+        {
+          "decision": "支持流式输入",
+          "reason": ""
+        },
+        {
+          "decision": "支持弹性扩展",
+          "reason": ""
+        },
+        {
+          "decision": "支持多进程模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "d5041ea63862e92647dbaf4b4b9198c5827f1d8224d54878ff5ca9096b505742",
+  "knowledge_domain": "vllm-upstream"
+}

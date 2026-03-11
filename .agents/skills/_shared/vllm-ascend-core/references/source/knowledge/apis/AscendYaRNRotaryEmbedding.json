@@ -1,0 +1,104 @@
+{
+  "id": "api:ascend_ya_rnrotary_embedding",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendYaRNRotaryEmbedding",
+  "summary": "昇腾YaRN旋转位置编码，实现扩展上下文长度的YaRN方法",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "200-250"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "YaRNScalingRotaryEmbedding",
+    "AscendRotaryEmbedding"
+  ],
+  "related_features": [
+    "rope",
+    "long_context",
+    "yarn"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行YaRN RoPE计算"
+      ],
+      "memory_impact": "管理扩展的cos/sin缓存",
+      "throughput_impact": "支持更长上下文",
+      "latency_impact": "额外计算略微增加延迟",
+      "test_cases": [
+        {
+          "name": "YaRN RoPE测试",
+          "description": ""
+        },
+        {
+          "name": "长序列测试",
+          "description": ""
+        },
+        {
+          "name": "缩放测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持YaRN的模型"
+      ],
+      "enable_config": "配置rope_scaling启用",
+      "unsuitable_scenarios": [
+        "不需要扩展上下文的场景"
+      ],
+      "best_practices": [
+        "配置合理的缩放因子"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/rotary_embedding.py:200-250",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "缩放逻辑",
+        "cos/sin计算"
+      ],
+      "affected_features": [
+        "长上下文",
+        "RoPE缩放"
+      ]
+    },
+    "design": {
+      "principle": "继承YaRNScalingRotaryEmbedding，适配NPU",
+      "theory_analysis": "使用YaRN方法扩展上下文长度",
+      "design_decisions": [
+        {
+          "decision": "支持动态缩放",
+          "reason": ""
+        },
+        {
+          "decision": "优化长序列计算",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "1437a174aeb77d37350d3d908f7872b966c21617ac41b33177d2c8258ecb5107",
+  "knowledge_domain": "vllm-ascend-core"
+}

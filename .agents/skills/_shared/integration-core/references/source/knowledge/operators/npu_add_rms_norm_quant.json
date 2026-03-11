@@ -1,0 +1,123 @@
+{
+  "id": "operator:npu_add_rms_norm_quant",
+  "type": "operator",
+  "category": "quantization",
+  "name": "npu_add_rms_norm_quant",
+  "summary": "NPU融合Add RMSNorm量化算子，将残差加法、RMSNorm归一化和量化融合为单一操作，用于量化模型的残差连接优化。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/norm_quant_fusion_pass.py",
+      "lines": "67-86, 129-149"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch.ops.npu.npu_add_rms_norm_quant",
+    "torch.ops.npu.npu_add_rms_norm_dynamic_quant"
+  ],
+  "related_features": [
+    "rmsnorm",
+    "quantization",
+    "fusion_pass",
+    "residual_connection"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与残差连接配合",
+        "与量化层配合"
+      ],
+      "memory_impact": "减少中间张量存储",
+      "throughput_impact": "融合三个操作提升吞吐",
+      "latency_impact": "单算子完成全流程",
+      "test_cases": [
+        {
+          "name": "无bias模式",
+          "description": ""
+        },
+        {
+          "name": "有bias模式",
+          "description": ""
+        },
+        {
+          "name": "动态量化模式",
+          "description": ""
+        },
+        {
+          "name": "SP(Sequence Parallel)模式",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用RMSNorm和量化的模型"
+      ],
+      "enable_config": "图编译模式下自动融合",
+      "unsuitable_scenarios": [
+        "非量化模型",
+        "非RMSNorm模型"
+      ],
+      "best_practices": [
+        "确保epsilon参数匹配",
+        "scale和offset正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AddRMSNormQuantPattern",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AddRMSNormDynamicQuantPattern",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "epsilon参数",
+        "bias支持",
+        "SP模式支持"
+      ],
+      "affected_features": [
+        "残差连接精度",
+        "量化融合效率"
+      ]
+    },
+    "design": {
+      "principle": "通过图匹配将Add RMSNorm和Quantize三个操作融合为单一算子",
+      "theory_analysis": "融合减少内存访问次数，提升计算效率",
+      "design_decisions": [
+        {
+          "decision": "支持动态量化模式",
+          "reason": ""
+        },
+        {
+          "decision": "支持bias输入",
+          "reason": ""
+        },
+        {
+          "decision": "支持SP模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "68e2d3d24465632684c15398a09a051447b4985cc3dfb20ed7182905167715b4",
+  "knowledge_domain": "integration-core"
+}

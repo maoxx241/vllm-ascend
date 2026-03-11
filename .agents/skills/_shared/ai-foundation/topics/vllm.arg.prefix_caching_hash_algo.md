@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:943
-- read_ref: vllm/vllm/config/cache.py:78, vllm/vllm/config/cache.py:190, vllm/vllm/engine/arg_utils.py:430
-- effect_ref: vllm/vllm/config/cache.py:78, vllm/vllm/config/cache.py:190, vllm/vllm/engine/arg_utils.py:430
+- definition_ref: vllm/engine/arg_utils.py:942
+- read_ref: vllm/vllm/config/cache.py:78, vllm/vllm/config/cache.py:201, vllm/vllm/engine/arg_utils.py:430
+- effect_ref: vllm/vllm/config/cache.py:78, vllm/vllm/config/cache.py:201, vllm/vllm/engine/arg_utils.py:430
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - value_failure_signals: 缺少 xxhash 依赖时启用 xxhash 系列会失败。
 - recommendation: 结合业务前缀分布评估收益，保留回退开关。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

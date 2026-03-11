@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1398
-- read_ref: vllm/vllm/entrypoints/openai/responses/serving.py:238, vllm/vllm/entrypoints/openai/responses/serving.py:241, vllm/vllm/entrypoints/openai/responses/serving.py:331
-- effect_ref: vllm/vllm/entrypoints/openai/responses/serving.py:238, vllm/vllm/entrypoints/openai/responses/serving.py:241, vllm/vllm/entrypoints/openai/responses/serving.py:331
+- definition_ref: vllm/envs.py:1410
+- read_ref: vllm/vllm/entrypoints/openai/responses/serving.py:238, vllm/vllm/entrypoints/openai/responses/serving.py:241, vllm/vllm/entrypoints/openai/responses/serving.py:333
+- effect_ref: vllm/vllm/entrypoints/openai/responses/serving.py:238, vllm/vllm/entrypoints/openai/responses/serving.py:241, vllm/vllm/entrypoints/openai/responses/serving.py:333
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

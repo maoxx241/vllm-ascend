@@ -1,0 +1,128 @@
+{
+  "id": "quantization:w8_a8_dynamic",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W8A8_DYNAMIC",
+  "summary": "INT8动态量化方案，激活值使用per-token动态量化，权重使用per-channel静态量化，支持Linear层和MoE层，通过npu_dynamic_quant和npu_quant_matmul实现高效推理",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "1-313"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "torch_npu.npu_dynamic_quant",
+    "torch_npu.npu_quant_matmul",
+    "torch_npu.npu_format_cast"
+  ],
+  "related_features": [
+    "fused_mc2",
+    "dynamic_eplb",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FUSED_MC2配合使用可提升MoE通信效率",
+        "支持dynamic_eplb动态专家负载均衡"
+      ],
+      "memory_impact": "权重存储为INT8，内存占用减少约50%，激活值动态量化无额外存储开销",
+      "throughput_impact": "动态量化避免静态校准，吞吐量提升显著，适合变长输入场景",
+      "latency_impact": "运行时动态量化有少量计算开销，但整体延迟仍优于FP16",
+      "test_cases": [
+        {
+          "name": "验证per-token scale计算正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch size下的精度损失",
+          "description": ""
+        },
+        {
+          "name": "验证MoE专家权重NZ格式转换",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型",
+        "支持MoE模型如DeepSeek、Qwen-MoE"
+      ],
+      "enable_config": "quantization: w8a8_dynamic",
+      "unsuitable_scenarios": [
+        "对精度要求极高的场景",
+        "极小batch size场景（动态量化开销占比高）"
+      ],
+      "best_practices": [
+        "配合FUSED_MC2使用以获得最佳MoE性能",
+        "启用NZ格式以加速矩阵乘法",
+        "合理设置mc2_tokens_capacity"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8DynamicLinearMethod: Linear层量化实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendW8A8DynamicFusedMoEMethod: MoE层量化实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "scale_from_float_to_int64: FUSED_MC2 scale转换",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()方法: 修改量化/反量化逻辑",
+        "process_weights_after_loading(): 修改权重后处理逻辑",
+        "get_weight()/get_dynamic_quant_param(): 修改参数定义"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts",
+        "aclgraph"
+      ]
+    },
+    "design": {
+      "principle": "激活值per-token动态量化：每个token独立计算scale，适应输入分布变化；权重per-channel量化：每行权重共享scale，保持精度",
+      "theory_analysis": "INT8量化理论精度损失约0.1-0.5%，动态量化避免了静态校准的分布偏移问题，NZ格式优化NPU矩阵乘法访存",
+      "design_decisions": [
+        {
+          "decision": "选择per-token动态量化而非per-tensor静态量化，避免校准开销",
+          "reason": ""
+        },
+        {
+          "decision": "权重使用NZ格式存储，优化NPU矩阵乘法性能",
+          "reason": ""
+        },
+        {
+          "decision": "MoE支持FUSED_MC2，融合通信与计算",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "b1f5db681ca1bd5cf0954bd3a44fbb144337957761ca8abe7a5006a44e522049",
+  "knowledge_domain": "vllm-ascend-core"
+}

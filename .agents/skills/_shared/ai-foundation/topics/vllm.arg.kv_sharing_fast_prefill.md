@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:950
-- read_ref: vllm/vllm/config/cache.py:141, vllm/vllm/config/cache.py:197, vllm/vllm/config/vllm.py:857
-- effect_ref: vllm/vllm/config/vllm.py:857, vllm/vllm/v1/worker/gpu_model_runner.py:644, vllm/vllm/v1/worker/gpu_model_runner.py:1776
+- definition_ref: vllm/engine/arg_utils.py:952
+- read_ref: vllm/vllm/config/cache.py:152, vllm/vllm/config/cache.py:208, vllm/vllm/config/vllm.py:866
+- effect_ref: vllm/vllm/config/vllm.py:866, vllm/vllm/v1/worker/gpu_model_runner.py:648, vllm/vllm/v1/worker/gpu_model_runner.py:1780
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: connector 超时; P/D 节点路由异常
 - value_failure_signals: connector 超时; P/D 节点路由异常
 - recommendation: 先验证连接器与地址，再调并行参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

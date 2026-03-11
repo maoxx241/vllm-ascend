@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/offline_data_parallel.py:86, examples/offline_external_launcher.py:119, examples/offline_weight_load.py:128
-- read_ref: vllm/vllm/config/parallel.py:227, vllm/vllm/config/parallel.py:526, vllm/vllm/distributed/parallel_state.py:1221
-- effect_ref: vllm/vllm/config/parallel.py:227, vllm/vllm/config/parallel.py:526, vllm/vllm/distributed/parallel_state.py:1221
+- read_ref: vllm/vllm/config/parallel.py:227, vllm/vllm/config/parallel.py:526, vllm/vllm/distributed/parallel_state.py:1294
+- effect_ref: vllm/vllm/config/parallel.py:227, vllm/vllm/config/parallel.py:526, vllm/vllm/distributed/parallel_state.py:1294
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

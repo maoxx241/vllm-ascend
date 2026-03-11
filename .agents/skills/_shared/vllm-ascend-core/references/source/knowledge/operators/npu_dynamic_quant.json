@@ -1,0 +1,115 @@
+{
+  "id": "operator:npu_dynamic_quant",
+  "type": "operator",
+  "category": "quantization",
+  "name": "npu_dynamic_quant",
+  "summary": "NPU动态量化算子，将FP16/BF16激活动态量化为INT8，输出量化结果和per-token scale。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "81-86"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "62-75"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_dynamic_quant"
+  ],
+  "related_features": [
+    "w8a8_quantization",
+    "dynamic_quantization",
+    "activation_quantization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_quant_matmul配合",
+        "与npu_grouped_matmul配合"
+      ],
+      "memory_impact": "输出INT8张量和scale",
+      "throughput_impact": "动态量化减少精度损失",
+      "latency_impact": "单算子完成量化",
+      "test_cases": [
+        {
+          "name": "FP16输入",
+          "description": ""
+        },
+        {
+          "name": "BF16输入",
+          "description": ""
+        },
+        {
+          "name": "不同shape输入",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持W8A8量化的模型"
+      ],
+      "enable_config": "quantization=W8A8_DYNAMIC",
+      "unsuitable_scenarios": [
+        "非量化模型"
+      ],
+      "best_practices": [
+        "输入需要contiguous",
+        "scale用于后续反量化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8DynamicLinearMethod.apply",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "quant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "act_quant_type配置(A5)",
+        "use_mxfp_quant模式(A5)"
+      ],
+      "affected_features": [
+        "量化精度",
+        "激活量化效率"
+      ]
+    },
+    "design": {
+      "principle": "根据每个token的最大绝对值动态计算scale，实现per-token量化",
+      "theory_analysis": "动态量化相比静态量化能更好保留激活信息",
+      "design_decisions": [
+        {
+          "decision": "输出量化张量和scale",
+          "reason": ""
+        },
+        {
+          "decision": "A5支持MXFP8量化",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "621fa4a24ee2e3d57a2096d9f1e6ab5691667868fe343f477f3daf24dabc441e",
+  "knowledge_domain": "vllm-ascend-core"
+}

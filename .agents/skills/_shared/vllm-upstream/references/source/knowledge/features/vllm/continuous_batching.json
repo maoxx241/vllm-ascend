@@ -1,0 +1,147 @@
+{
+  "id": "feature:continuous_batching",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Continuous Batching",
+  "summary": "迭代级批处理，每个iteration动态调整batch组成，prefill和decode请求混合执行，最大化GPU利用率。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/scheduler.py",
+      "lines": "42-67"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/interface.py",
+      "lines": "50-74"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/scheduler.py",
+      "lines": "322-420"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SchedulerConfig.max_num_batched_tokens",
+    "SchedulerConfig.max_num_seqs",
+    "Scheduler.schedule",
+    "SchedulerOutput"
+  ],
+  "related_features": [
+    "feature:chunked_prefill",
+    "feature:paged_attention",
+    "feature:prefix_caching"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与paged attention紧密配合：continuous batching需要高效的KV cache管理",
+        "与chunked prefill协同：chunked prefill是continuous batching的增强",
+        "与prefix caching交互：cached tokens减少batch中的计算量"
+      ],
+      "memory_impact": "需要精细的KV cache管理，paged attention允许按需分配，避免静态预分配浪费",
+      "throughput_impact": "显著提升吞吐量，避免传统batching中等待所有请求完成的空闲时间",
+      "latency_impact": "降低平均延迟，请求完成后立即释放资源给新请求",
+      "test_cases": [
+        {
+          "name": "test_schedule_basic",
+          "description": "验证基本的continuous batching调度逻辑"
+        },
+        {
+          "name": "test_schedule_multimodal_requests",
+          "description": "测试多模态请求的batching"
+        },
+        {
+          "name": "test_schedule_partial_requests",
+          "description": "验证encoder budget约束下的partial scheduling"
+        },
+        {
+          "name": "test_batch_invariance",
+          "description": "验证不同batch组合产生相同输出"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM支持的模型",
+        "decoder-only和encoder-decoder模型",
+        "多模态模型"
+      ],
+      "enable_config": "vLLM v1默认使用continuous batching，无需额外配置。通过--max-num-seqs控制最大并发请求数，--max-num-batched-tokens控制每次iteration的最大token数。",
+      "unsuitable_scenarios": [
+        "需要静态batch的场景（vLLM不适用）",
+        "极低延迟要求的场景可能需要调整batch size"
+      ],
+      "best_practices": [
+        "根据GPU显存调整max_num_seqs，平衡吞吐和延迟",
+        "设置max_num_batched_tokens为隐藏层维度的倍数优化计算效率",
+        "监控GPU利用率，调整batch参数以最大化利用率"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler.schedule",
+          "purpose": "核心调度循环，实现iteration-level batching"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler._update_after_schedule",
+          "purpose": "调度后更新请求状态"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler.update_from_output",
+          "purpose": "处理模型输出，检查完成请求"
+        }
+      ],
+      "modification_points": [
+        "修改schedule方法中的token_budget分配策略",
+        "调整RUNNING和WAITING队列的处理顺序",
+        "在update_from_output中添加新的完成条件检查"
+      ],
+      "affected_features": [
+        "KV cache manager：需要支持动态分配和释放",
+        "Model runner：需要处理变长batch",
+        "Attention backend：需要支持混合prefill/decode attention"
+      ]
+    },
+    "design": {
+      "principle": "传统static batching中，batch在所有请求完成后才释放资源。Continuous batching在每个iteration结束后检查请求状态，完成的请求立即移出batch，新请求可以加入。这消除了'batch tail'问题，即等待最慢请求完成的时间浪费。",
+      "theory_analysis": "设batch size为B，请求完成时间分布为T_i。Static batching的总时间为max(T_i)，而continuous batching的平均batch利用率为sum(T_i)/(B * max(T_i))。当请求长度差异大时，static batching效率急剧下降。Continuous batching通过动态调整batch组成，始终保持高GPU利用率。",
+      "design_decisions": [
+        {
+          "decision": "iteration-level而非request-level scheduling",
+          "reason": "每个iteration重新决策，最大化灵活性，支持chunked prefill、spec decoding等特性"
+        },
+        {
+          "decision": "使用token_budget而非request_budget",
+          "reason": "token数量直接对应计算量，更容易预测和控制GPU负载"
+        },
+        {
+          "decision": "先调度RUNNING请求再调度WAITING请求",
+          "reason": "优先保证正在执行的请求，避免饥饿，同时允许新请求加入"
+        },
+        {
+          "decision": "没有明确的prefill/decode phase区分",
+          "reason": "统一抽象为num_computed_tokens追赶num_tokens_with_spec，简化调度逻辑，支持所有场景"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "30bb43e405e93e28cbeaa6add192fc3a3eff690df73caa3c025c13d09605e37c",
+  "knowledge_domain": "vllm-upstream"
+}

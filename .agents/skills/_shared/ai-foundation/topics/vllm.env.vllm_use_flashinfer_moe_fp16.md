@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1175
-- read_ref: vllm/vllm/envs.py:160, vllm/vllm/envs.py:1175, vllm/vllm/envs.py:1176
-- effect_ref: vllm/vllm/model_executor/layers/fused_moe/oracle/unquantized.py:102, vllm/vllm/model_executor/layers/fused_moe/oracle/unquantized.py:113
+- definition_ref: vllm/envs.py:1187
+- read_ref: vllm/vllm/envs.py:161, vllm/vllm/envs.py:1187, vllm/vllm/envs.py:1188
+- effect_ref: vllm/vllm/model_executor/layers/fused_moe/oracle/unquantized.py:112, vllm/vllm/model_executor/layers/fused_moe/oracle/unquantized.py:124
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

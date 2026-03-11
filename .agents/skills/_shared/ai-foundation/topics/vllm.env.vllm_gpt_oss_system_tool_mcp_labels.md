@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1419
-- read_ref: vllm/vllm/entrypoints/openai/responses/utils.py:232, vllm/vllm/entrypoints/openai/responses/utils.py:233, vllm/vllm/envs.py:205
+- definition_ref: vllm/envs.py:1431
+- read_ref: vllm/vllm/entrypoints/openai/responses/utils.py:232, vllm/vllm/entrypoints/openai/responses/utils.py:233, vllm/vllm/envs.py:206
 - effect_ref: vllm/vllm/entrypoints/openai/responses/utils.py:233
 - web_refs: 2
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

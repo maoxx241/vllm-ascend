@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: TTFT/TPOT 退化; OOM
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

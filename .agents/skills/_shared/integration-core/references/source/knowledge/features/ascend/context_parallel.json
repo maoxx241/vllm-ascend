@@ -1,0 +1,176 @@
+{
+  "id": "feature:context_parallel",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Context Parallel",
+  "summary": "包含PCP（Prefill Context Parallel）和DCP（Decode Context Parallel），通过序列维度分片加速长序列推理，减少KV Cache冗余存储。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "102-103"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/pcp_utils.py",
+      "lines": "34-1037"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/context_parallel/common_cp.py",
+      "lines": "1-147"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "786-788"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL"
+  ],
+  "related_apis": [
+    "PCPManager",
+    "AscendPCPMetadata",
+    "CPChunkedContextMetadata",
+    "prefill_context_parallel_size",
+    "decode_context_parallel_size"
+  ],
+  "related_features": [
+    "feature:flashcomm1",
+    "feature:pd_disaggregation",
+    "feature:speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "PCP与DCP可同时启用，总CP size = PCP size × DCP size",
+        "与Speculative Decoding兼容：支持MTP等推测解码方法",
+        "与PD分离兼容：支持KV传输场景",
+        "与Prefix Cache、Chunked Prefill兼容"
+      ],
+      "memory_impact": "PCP：KV Cache在sequence维度分片存储，每设备存储1/pcp_size。DCP：消除TP域内KV Cache冗余副本，内存节省(tp_size/dcp_size)倍。",
+      "throughput_impact": "PCP加速长序列Prefill，TTFT降低。DCP减少KV Cache占用，可增大batch size提升吞吐。实验显示DeepSeek-R1 128k输入TTFT从73.2s降至46.0s。",
+      "latency_impact": "PCP通过并行计算降低长序列Prefill延迟。DCP对Decode延迟影响小，主要收益在内存优化。",
+      "test_cases": [
+        {
+          "name": "测试PCP Head-Tail分片策略的正确性",
+          "description": ""
+        },
+        {
+          "name": "验证DCP与TP的约束关系（MLA: TP>=DCP, TP%DCP==0）",
+          "description": ""
+        },
+        {
+          "name": "测试PCP+DCP组合场景的KV Cache分片",
+          "description": ""
+        },
+        {
+          "name": "验证Speculative Decoding与CP的兼容性",
+          "description": ""
+        },
+        {
+          "name": "测试Chunked Prefill在CP模式下的行为",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3/R1系列（MLA架构）",
+        "Qwen3-235B（GQA架构）",
+        "通用Transformer模型"
+      ],
+      "enable_config": "通过命令行参数启用：--prefill-context-parallel-size 2 --decode-context-parallel-size 2。总world_size = TP × PCP。",
+      "unsuitable_scenarios": [
+        "短序列场景（PCP收益有限）",
+        "TP size不满足DCP约束的场景",
+        "KV传输场景需要设置cp_kv_cache_interleave_size=block_size"
+      ],
+      "best_practices": [
+        "长序列场景优先启用PCP，建议输入长度>32k",
+        "DCP用于减少KV Cache冗余，适用于大batch Decode场景",
+        "MLA模型：TP >= DCP, TP % DCP == 0",
+        "GQA模型：(TP // num_kv_heads) >= DCP, (TP // num_kv_heads) % DCP == 0",
+        "PD分离场景设置cp_kv_cache_interleave_size=128以简化KV传输"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/pcp_utils.py",
+          "class": "PCPManager",
+          "description": "PCP元数据和缓冲区管理，实现DualChunkSwap分片策略"
+        },
+        {
+          "file": "vllm_ascend/attention/context_parallel/common_cp.py",
+          "class": "AscendPCPMetadata",
+          "description": "PCP注意力计算所需的索引张量元数据"
+        },
+        {
+          "file": "vllm_ascend/attention/context_parallel/common_cp.py",
+          "function": "_process_attn_out_lse",
+          "description": "处理注意力输出和LSE的AllGather/All2All通信"
+        },
+        {
+          "file": "vllm_ascend/attention/context_parallel/mla_cp.py",
+          "description": "MLA架构的CP实现"
+        },
+        {
+          "file": "vllm_ascend/attention/context_parallel/sfa_cp.py",
+          "description": "SFA架构的CP实现"
+        }
+      ],
+      "modification_points": [
+        "PCPManager.update_tokens_for_pcp：修改序列分片策略",
+        "_process_attn_out_lse：调整PCP/DCP通信模式",
+        "_get_cp_local_seq_lens：修改KV Cache分片计算逻辑"
+      ],
+      "affected_features": [
+        "Block Table：虚拟block概念，block_size扩展为block_size × cp_size",
+        "Slot Mapping：需要考虑CP分片的偏移计算",
+        "Attention Backend：MLA和GQA需要不同的CP处理逻辑"
+      ]
+    },
+    "design": {
+      "principle": "PCP在Prefill阶段将长序列分片到多个设备并行计算，使用Head-Tail交错分片平衡负载。DCP在Decode阶段复用TP通信域，消除KV Cache冗余存储。",
+      "theory_analysis": "1. PCP Head-Tail分片：序列分为2×pcp_size个chunk，rank i处理第i个head chunk和第(2×pcp_size-1-i)个tail chunk，实现负载均衡。2. DCP KV Cache分片：TP域内各rank原本存储完整KV Cache副本，DCP使其各存储1/dcp_size，内存节省(tp_size/dcp_size-1)倍。3. 虚拟Block：KV Cache按token交错存储，block_size扩展为virtual_block_size = block_size × cp_size。",
+      "design_decisions": [
+        {
+          "decision": "PCP使用独立通信域：避免与TP通信冲突，需要额外设备",
+          "reason": ""
+        },
+        {
+          "decision": "DCP复用TP通信域：不需要额外设备，仅优化内存布局",
+          "reason": ""
+        },
+        {
+          "decision": "DualChunkSwap分片策略：相比Ring Attention实现更简单，通信开销可接受",
+          "reason": ""
+        },
+        {
+          "decision": "AllGather KV实现：相比Ring Attention开发复杂度低，计算通信重叠收益有限",
+          "reason": ""
+        },
+        {
+          "decision": "支持Hybrid Attention：Qwen3-Next等模型使用特殊的hybrid attention模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "c75413f13e9c1c842a8f3c1fa76a8345e7bad7c5753f569158a4045b885b04af",
+  "knowledge_domain": "integration-core"
+}

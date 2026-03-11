@@ -1,0 +1,184 @@
+{
+  "id": "feature:lora",
+  "type": "feature",
+  "category": "vllm",
+  "name": "LoRA",
+  "summary": "低秩适配器(Low-Rank Adaptation)支持，允许在单个vLLM实例中动态加载和切换多个LoRA适配器，实现模型个性化而无需加载多个基础模型。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/lora.py",
+      "lines": "1-107"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/lora/lora_model.py",
+      "lines": "1-243"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/lora/model_manager.py",
+      "lines": "1-905"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/lora_model_runner_mixin.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "LoRAConfig",
+    "LoRAModel",
+    "LoRAModelManager",
+    "LRUCacheLoRAModelManager",
+    "LoRARequest"
+  ],
+  "related_features": [
+    "feature:tensor_parallel",
+    "feature:multimodal",
+    "feature:speculative_decoding",
+    "feature:prefix_caching"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Tensor Parallel交互：LoRA权重需要按TP维度分片，支持fully_sharded_loras选项控制分片策略",
+        "与Multi-Modal交互：支持多模态模型的tower和connector LoRA，通过enable_tower_connector_lora启用",
+        "与CUDA Graph交互：specialize_active_lora选项可针对不同活跃LoRA数量捕获独立CUDA Graph",
+        "与Prefix Caching交互：LoRA适配器ID作为缓存键的一部分，确保不同LoRA的KV Cache隔离"
+      ],
+      "memory_impact": "每个LoRA适配器占用rank×(input_dim+output_dim)×dtype_size的显存。max_loras控制GPU上同时活跃的适配器数量，max_cpu_loras控制CPU缓存容量。启用fully_sharded_loras会增加通信开销但减少显存碎片。",
+      "throughput_impact": "批量处理多个LoRA请求时，Punica内核实现高效的批处理GEMM，吞吐量接近无LoRA场景。当活跃LoRA数量超过max_loras时，需要动态切换导致性能下降。",
+      "latency_impact": "首次激活LoRA需要从CPU加载权重到GPU，增加约10-50ms延迟。后续请求使用已激活LoRA时，延迟增加可忽略(<1ms)。",
+      "test_cases": [
+        {
+          "name": "test_lora_basic_loading",
+          "description": "测试单个LoRA加载、推理、卸载的完整流程"
+        },
+        {
+          "name": "test_lora_multi_adapter_batch",
+          "description": "测试批量处理不同LoRA适配器的请求"
+        },
+        {
+          "name": "test_lora_lru_eviction",
+          "description": "测试LRU缓存淘汰机制，验证max_loras限制"
+        },
+        {
+          "name": "test_lora_tensor_parallel",
+          "description": "测试TP场景下LoRA权重的正确分片"
+        },
+        {
+          "name": "test_lora_multimodal_tower",
+          "description": "测试多模态模型的vision encoder LoRA支持"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Llama系列(Llama-2, Llama-3, CodeLlama等)",
+        "Qwen系列(Qwen-7B, Qwen-72B等)",
+        "Mistral/Mixtral",
+        "Baichuan",
+        "ChatGLM",
+        "Yi",
+        "所有支持SupportsLoRA接口的模型"
+      ],
+      "enable_config": "通过--enable-lora启用，使用--max-lora-rank设置最大rank(1/8/16/32/64/128/256/320/512)，--max-loras设置GPU上同时活跃的LoRA数量，--max-cpu-loras设置CPU缓存容量。API请求时通过lora参数指定适配器。",
+      "unsuitable_scenarios": [
+        "需要极低延迟的场景(首次激活LoRA有额外开销)",
+        "LoRA数量远超GPU内存容量的场景(频繁切换)",
+        "需要同时使用多个不同基础模型的LoRA",
+        "对量化模型使用LoRA时需注意兼容性"
+      ],
+      "best_practices": [
+        "根据实际并发LoRA数量设置max_loras，避免过度分配GPU内存",
+        "对于高TP场景，考虑启用fully_sharded_loras以减少显存碎片",
+        "使用LRUCacheLoRAModelManager自动管理适配器生命周期",
+        "为常用LoRA调用pin_lora避免被淘汰",
+        "多模态模型启用enable_tower_connector_lora时注意实验性警告"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/lora.py",
+          "function": "LoRAConfig",
+          "purpose": "LoRA配置类，定义max_lora_rank、max_loras等核心参数"
+        },
+        {
+          "file": "vllm/lora/lora_model.py",
+          "function": "LoRAModel.from_local_checkpoint",
+          "purpose": "从本地checkpoint加载LoRA权重"
+        },
+        {
+          "file": "vllm/lora/model_manager.py",
+          "function": "LoRAModelManager.activate_adapter",
+          "purpose": "激活LoRA适配器，将权重加载到GPU"
+        },
+        {
+          "file": "vllm/lora/model_manager.py",
+          "function": "_create_lora_modules",
+          "purpose": "动态替换模型层为支持LoRA的层"
+        },
+        {
+          "file": "vllm/lora/layers/base_linear.py",
+          "function": "BaseLayerWithLoRA",
+          "purpose": "LoRA层基类，实现权重注入和前向传播"
+        }
+      ],
+      "modification_points": [
+        "扩展LoRAConfig添加新的量化支持选项",
+        "修改PunicaWrapper实现自定义的批处理GEMM内核",
+        "在BaseLayerWithLoRA子类中添加新的层类型支持",
+        "扩展LoRAModelManager支持新的缓存策略",
+        "添加新的LoRA权重格式解析器"
+      ],
+      "affected_features": [
+        "Tensor Parallel: LoRA权重分片策略影响TP通信模式",
+        "CUDA Graph: LoRA切换可能触发CUDA Graph重捕获",
+        "Multi-Modal: vision encoder LoRA需要独立的PunicaWrapper",
+        "Memory Management: LoRA缓存占用影响KV Cache可用内存"
+      ]
+    },
+    "design": {
+      "principle": "LoRA采用低秩分解原理，将权重更新ΔW分解为两个低秩矩阵的乘积：ΔW = B×A，其中B∈R^(d×r)，A∈R^(r×k)，r<<min(d,k)。这种分解将参数量从O(dk)降至O(r(d+k))，大幅减少存储和计算开销。vLLM通过Punica内核实现批量处理不同LoRA适配器的请求，避免为每个适配器维护独立的模型副本。",
+      "theory_analysis": "LoRA的理论基础是假设模型适应过程中的权重更新位于低维子空间。数学上，对于预训练权重W₀，微调后的权重W = W₀ + ΔW。LoRA假设ΔW的秩r远小于min(d,k)，因此可以用BA近似。这种近似在保持性能的同时，将可训练参数减少到原来的r/min(d,k)。vLLM的实现进一步优化了推理时的批处理，通过set_lora机制动态切换适配器。",
+      "design_decisions": [
+        {
+          "decision": "使用Punica内核而非朴素实现",
+          "reason": "Punica内核支持批量处理不同LoRA适配器的请求，避免序列化处理，提升吞吐量"
+        },
+        {
+          "decision": "实现LRU缓存管理适配器",
+          "reason": "GPU内存有限，无法同时容纳所有LoRA，LRU策略在内存效率和访问局部性间取得平衡"
+        },
+        {
+          "decision": "支持fully_sharded_loras选项",
+          "reason": "高TP场景下，完全分片可减少显存碎片，但增加通信开销，提供选项让用户权衡"
+        },
+        {
+          "decision": "多模态LoRA独立管理",
+          "reason": "Vision encoder和Language model的token预算不同，需要独立的PunicaWrapper避免内存浪费"
+        },
+        {
+          "decision": "LoRA权重延迟加载",
+          "reason": "仅在首次使用时加载到GPU，减少启动时间和内存占用"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "d2828bc50357461ee03f2a9dc1ea19b8c85b192118ed0a3f0ef8aca8b5af61f9",
+  "knowledge_domain": "vllm-upstream"
+}

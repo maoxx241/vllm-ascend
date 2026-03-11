@@ -1,0 +1,120 @@
+{
+  "id": "comm_group:fc3_quant_x",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_FC3_QUANT_X",
+  "summary": "FlashComm3量化X通信组，用于multistream_overlap_gate特性的量化激活通信，与MC2组相同成员，支持量化激活的并行通信",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "20,214-220,271-273,327-330"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_fc3_quant_x_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "multistream_overlap",
+    "quantization",
+    "flashcomm3"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与multistream_overlap_gate配合",
+        "用于量化激活通信"
+      ],
+      "memory_impact": "需要额外的通信缓冲区",
+      "throughput_impact": "多流重叠可提升吞吐量",
+      "latency_impact": "通信计算重叠减少延迟",
+      "test_cases": [
+        {
+          "name": "验证FC3_QUANT_X组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试multistream_overlap_gate功能",
+          "description": ""
+        },
+        {
+          "name": "验证量化激活通信正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "multistream_overlap_gate: true",
+      "unsuitable_scenarios": [
+        "不支持多流的设备"
+      ],
+      "best_practices": [
+        "配合量化方案使用",
+        "确保设备支持多流"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_FC3_QUANT_X: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_fc3_quant_x_group(): 获取FC3_QUANT_X组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改初始化条件"
+      ],
+      "affected_features": [
+        "multistream_overlap_gate",
+        "quantization"
+      ]
+    },
+    "design": {
+      "principle": "FC3_QUANT_X组用于量化激活的并行通信，支持多流重叠优化",
+      "theory_analysis": "多流重叠可将通信与计算并行执行，提升整体效率",
+      "design_decisions": [
+        {
+          "decision": "与MC2组相同成员",
+          "reason": ""
+        },
+        {
+          "decision": "仅在multistream_overlap_gate启用时创建",
+          "reason": ""
+        },
+        {
+          "decision": "支持量化激活通信",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "4be1ff8ec441aae46c64a2fd132e4700b18a60c7f490068bd05690f46b7e5bcb",
+  "knowledge_domain": "integration-core"
+}

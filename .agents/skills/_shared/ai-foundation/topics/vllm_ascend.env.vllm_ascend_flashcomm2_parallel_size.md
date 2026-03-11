@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/user_guide/feature_guide/layer_sharding.md:53, vllm_ascend/envs.py:79
-- read_ref: vllm-ascend/vllm_ascend/envs.py:79, vllm-ascend/vllm_ascend/envs.py:79, vllm-ascend/vllm_ascend/utils.py:973
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:973
+- read_ref: vllm-ascend/vllm_ascend/envs.py:79, vllm-ascend/vllm_ascend/envs.py:79, vllm-ascend/vllm_ascend/utils.py:945
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:945
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: TTFT/TPOT 退化; OOM
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -35,7 +35,7 @@ topic_kind: parameter
 
 - definition_ref: examples/external_online_dp/launch_online_dp.py:11, examples/offline_data_parallel.py:82, examples/offline_external_launcher.py:114
 - read_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:82, vllm/vllm/benchmarks/sweep/plot_pareto.py:86, vllm/vllm/benchmarks/sweep/plot_pareto.py:87
-- effect_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:86, vllm/vllm/compilation/passes/fusion/allreduce_rms_fusion.py:701, vllm/vllm/compilation/passes/fusion/collective_fusion.py:418
+- effect_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:86, vllm/vllm/compilation/passes/fusion/allreduce_rms_fusion.py:687, vllm/vllm/compilation/passes/fusion/collective_fusion.py:418
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: HCCL/NCCL 初始化失败; 跨卡通信超时
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

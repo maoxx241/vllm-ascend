@@ -1,0 +1,1222 @@
+{
+  "generated_at": "2026-03-11T07:48:53+00:00",
+  "scenario_count": 16,
+  "status": "pass",
+  "task_type_coverage": {
+    "deployment": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "deployment_single_node_qwen3_w8a8"
+      ]
+    },
+    "env_bootstrap": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "env_bootstrap_a3_cann"
+      ]
+    },
+    "debugging": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "debug_hccl_startup_crash",
+        "debug_acl_graph_shape_drift"
+      ]
+    },
+    "model_adaptation": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "model_adapter_new_runner_surface",
+        "model_adapter_attention_rope_path"
+      ]
+    },
+    "upstream_sync": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "upstream_sync_runner_delta",
+        "upstream_sync_spec_decode_delta"
+      ]
+    },
+    "release_analysis": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "release_feature_rollup",
+        "release_quantization_gate"
+      ]
+    },
+    "op_development": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "op_development_quant_matmul",
+        "op_development_paged_attention"
+      ]
+    },
+    "performance_analysis": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "performance_acl_graph_regression",
+        "performance_parallelism_tradeoff"
+      ]
+    },
+    "design_analysis": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "design_kv_transfer_surface",
+        "design_mla_precision_surface"
+      ]
+    }
+  },
+  "composer_coverage": {
+    "model-adapter": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "model_adapter_new_runner_surface",
+        "model_adapter_attention_rope_path"
+      ],
+      "meets_minimum_two": true
+    },
+    "sync-coordinator": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "upstream_sync_runner_delta",
+        "upstream_sync_spec_decode_delta"
+      ],
+      "meets_minimum_two": true
+    },
+    "debug-assistant": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "debug_hccl_startup_crash",
+        "debug_acl_graph_shape_drift"
+      ],
+      "meets_minimum_two": true
+    },
+    "release-assistant": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "release_feature_rollup",
+        "release_quantization_gate"
+      ],
+      "meets_minimum_two": true
+    },
+    "op-developer": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "op_development_quant_matmul",
+        "op_development_paged_attention"
+      ],
+      "meets_minimum_two": true
+    },
+    "perf-assistant": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "performance_acl_graph_regression",
+        "performance_parallelism_tradeoff"
+      ],
+      "meets_minimum_two": true
+    }
+  },
+  "atomic_skill_coverage": {
+    "env-bootstrap": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "env_bootstrap_a3_cann"
+      ],
+      "covered": true
+    },
+    "compatibility-checker": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "deployment_single_node_qwen3_w8a8",
+        "upstream_sync_runner_delta"
+      ],
+      "covered": true
+    },
+    "repo-state-auditor": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "upstream_sync_runner_delta",
+        "upstream_sync_spec_decode_delta"
+      ],
+      "covered": true
+    },
+    "log-analyzer": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "debug_hccl_startup_crash",
+        "debug_acl_graph_shape_drift"
+      ],
+      "covered": true
+    },
+    "crash-rooter": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "debug_hccl_startup_crash"
+      ],
+      "covered": true
+    },
+    "perf-hunter": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "performance_acl_graph_regression",
+        "performance_parallelism_tradeoff"
+      ],
+      "covered": true
+    },
+    "graph-analyzer": {
+      "scenario_count": 3,
+      "scenario_ids": [
+        "debug_acl_graph_shape_drift",
+        "op_development_quant_matmul",
+        "performance_acl_graph_regression"
+      ],
+      "covered": true
+    },
+    "parallelism-planner": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "performance_parallelism_tradeoff",
+        "design_kv_transfer_surface"
+      ],
+      "covered": true
+    },
+    "scheduler-feature-designer": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "performance_parallelism_tradeoff"
+      ],
+      "covered": true
+    },
+    "attention-kv-designer": {
+      "scenario_count": 5,
+      "scenario_ids": [
+        "deployment_single_node_qwen3_w8a8",
+        "model_adapter_attention_rope_path",
+        "op_development_paged_attention",
+        "design_kv_transfer_surface",
+        "design_mla_precision_surface"
+      ],
+      "covered": true
+    },
+    "custom-model-integrator": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "model_adapter_new_runner_surface",
+        "model_adapter_attention_rope_path"
+      ],
+      "covered": true
+    },
+    "precision-validator": {
+      "scenario_count": 4,
+      "scenario_ids": [
+        "model_adapter_new_runner_surface",
+        "op_development_quant_matmul",
+        "op_development_paged_attention",
+        "design_mla_precision_surface"
+      ],
+      "covered": true
+    },
+    "release-commit-analyzer": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "release_feature_rollup",
+        "release_quantization_gate"
+      ],
+      "covered": true
+    },
+    "release-notes-composer": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "release_feature_rollup",
+        "release_quantization_gate"
+      ],
+      "covered": true
+    },
+    "docs-compliance-checker": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "release_feature_rollup"
+      ],
+      "covered": true
+    },
+    "test-matrix-planner": {
+      "scenario_count": 1,
+      "scenario_ids": [
+        "performance_acl_graph_regression"
+      ],
+      "covered": true
+    },
+    "ci-gatekeeper": {
+      "scenario_count": 3,
+      "scenario_ids": [
+        "upstream_sync_spec_decode_delta",
+        "release_quantization_gate",
+        "op_development_quant_matmul"
+      ],
+      "covered": true
+    },
+    "knowledge-index-maintainer": {
+      "scenario_count": 2,
+      "scenario_ids": [
+        "upstream_sync_runner_delta",
+        "upstream_sync_spec_decode_delta"
+      ],
+      "covered": true
+    }
+  },
+  "scenarios": [
+    {
+      "id": "deployment_single_node_qwen3_w8a8",
+      "title": "Single-node deployment with graph and KV checks",
+      "task_type": "deployment",
+      "query": "Deploy Qwen3-32B W8A8 on a single Ascend node and verify graph mode, KV layout, and compatibility constraints.",
+      "entry_skill": "deployment-assistant",
+      "composer_skill": null,
+      "atomic_skills": [
+        "compatibility-checker",
+        "attention-kv-designer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "deployment-config/procedures/deployment-playbook.md",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "device:A3",
+        "feature:acl_graph",
+        "feature:kv_nz_format",
+        "quantization:W8A8"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "compatibility-checker": [
+          "config:ascend_compilation_config",
+          "config:config_compatibility_matrix",
+          "config:dump_config_path",
+          "config:enable_kv_nz",
+          "config:enable_shared_expert_dp",
+          "config:eplb_config",
+          "config:finegrained_tp_config",
+          "config:layer_sharding",
+          "config:multistream_overlap_gate",
+          "config:multistream_overlap_shared_expert",
+          "config:num_head_replica",
+          "config:pd_head_ratio"
+        ],
+        "attention-kv-designer": [
+          "config:enable_kv_nz",
+          "config:num_head_replica",
+          "config:pd_head_ratio",
+          "feature:context_parallel",
+          "feature:graph_fusion_passes",
+          "feature:kv_nz_format",
+          "feature:kv_transfer",
+          "feature:kv_transfer_ascend",
+          "feature:mlapo",
+          "feature:paged_attention",
+          "feature:pd_disaggregation",
+          "feature:prefix_caching"
+        ]
+      }
+    },
+    {
+      "id": "env_bootstrap_a3_cann",
+      "title": "Bootstrap an Ascend runtime environment",
+      "task_type": "env_bootstrap",
+      "query": "Bootstrap a local A3 environment, check core env vars, and confirm the runtime baseline before any deployment.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": null,
+      "atomic_skills": [
+        "env-bootstrap"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "ascend-foundation/procedures/env-bootstrap-baseline.md"
+      ],
+      "evidence_entry_ids": [
+        "device:A3",
+        "env_var:ASCEND_HOME_PATH",
+        "env_var:SOC_VERSION"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "env-bootstrap": [
+          "device:310_p",
+          "device:a2",
+          "device:a3",
+          "device:a5",
+          "env_var:ascend_home_path",
+          "env_var:dynamic_eplb",
+          "env_var:hccl_so_path",
+          "env_var:msmonitor_use_daemon",
+          "env_var:soc_version",
+          "env_var:triton_all_blocks_parallel",
+          "env_var:vllm_allow_expert_load_collecting",
+          "env_var:vllm_ascend_balance_scheduling"
+        ]
+      }
+    },
+    {
+      "id": "debug_hccl_startup_crash",
+      "title": "Startup crash with distributed runtime signals",
+      "task_type": "debugging",
+      "query": "Debug a startup failure that mentions HCCL setup, missing runtime libraries, and worker initialization errors.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "debug-assistant",
+      "atomic_skills": [
+        "log-analyzer",
+        "crash-rooter"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/task_skill_index.json",
+        "knowledge-governance/generated/imported_knowledge_report.json"
+      ],
+      "evidence_entry_ids": [
+        "env_var:HCCL_SO_PATH",
+        "api:NPUWorker",
+        "api:NPUCommunicator"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "log-analyzer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "crash-rooter": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "debug_acl_graph_shape_drift",
+      "title": "ACL graph capture failure or shape drift",
+      "task_type": "debugging",
+      "query": "Investigate ACL graph capture failures, shape drift, or graph replay mismatches in a serving path.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "debug-assistant",
+      "atomic_skills": [
+        "graph-analyzer",
+        "log-analyzer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:acl_graph",
+        "api:ACLGraphWrapper",
+        "feature:batch_invariant"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "graph-analyzer": [
+          "api:aclgraph_wrapper",
+          "api:gpuworker",
+          "api:npuworker",
+          "api:xlite_wrapper",
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp"
+        ],
+        "log-analyzer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "model_adapter_new_runner_surface",
+      "title": "Adapt a model to a new runner/runtime surface",
+      "task_type": "model_adaptation",
+      "query": "Adapt a model to the Ascend runner stack and validate runtime entrypoints, worker wiring, and integration touchpoints.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "model-adapter",
+      "atomic_skills": [
+        "custom-model-integrator",
+        "precision-validator"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_manifest.json",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "api:NPUModelRunner",
+        "api:NPUModelRunnerV2",
+        "api:set_ascend_forward_context"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "custom-model-integrator": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "precision-validator": [
+          "api:ascend_w4_a16_fused_mo_emethod",
+          "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+          "api:ascend_w8_a8_dynamic_linear_method",
+          "api:ascend_w8_a8_linear_method",
+          "comm_group:mc2",
+          "quantization:w4_a16",
+          "quantization:w4_a4_flatquant",
+          "quantization:w4_a4_laos_dynamic",
+          "quantization:w4_a8",
+          "quantization:w8_a16",
+          "quantization:w8_a8",
+          "quantization:w8_a8_dynamic"
+        ]
+      }
+    },
+    {
+      "id": "model_adapter_attention_rope_path",
+      "title": "Adapt a model with custom attention or rope behavior",
+      "task_type": "model_adaptation",
+      "query": "Assess how to integrate a model with custom attention, rope, or MLA behavior on the Ascend stack.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "model-adapter",
+      "atomic_skills": [
+        "custom-model-integrator",
+        "attention-kv-designer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "api:AscendAttentionBackend",
+        "api:AscendRotaryEmbedding",
+        "api:AscendMLABackend"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "custom-model-integrator": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "attention-kv-designer": [
+          "api:ascend_attention_backend",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_mlabackend",
+          "api:ascend_mlaimpl",
+          "api:ascend_mrotary_embedding",
+          "api:ascend_multi_head_latent_attention",
+          "api:ascend_qkvparallel_linear",
+          "api:ascend_rotary_embedding",
+          "api:ascend_sfabackend",
+          "api:ascend_sfaimpl",
+          "api:ascend_sfametadata_builder",
+          "api:indexer_wrapper"
+        ]
+      }
+    },
+    {
+      "id": "upstream_sync_runner_delta",
+      "title": "Assess upstream runner and engine deltas",
+      "task_type": "upstream_sync",
+      "query": "Compare upstream runner and engine changes against the local Ascend adaptation and scope the required follow-up work.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "sync-coordinator",
+      "atomic_skills": [
+        "repo-state-auditor",
+        "compatibility-checker",
+        "knowledge-index-maintainer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_report.json",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "api:ModelRunner",
+        "api:NPUModelRunnerV2",
+        "api:LLMEngine"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "repo-state-auditor": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "compatibility-checker": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "knowledge-index-maintainer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "upstream_sync_spec_decode_delta",
+      "title": "Assess upstream speculative decoding changes",
+      "task_type": "upstream_sync",
+      "query": "Review speculative decoding changes from upstream and determine compatibility, gating, and index updates for Ascend.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "sync-coordinator",
+      "atomic_skills": [
+        "repo-state-auditor",
+        "ci-gatekeeper",
+        "knowledge-index-maintainer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_report.json",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:ascend_speculative_decoding",
+        "api:AscendEagleProposer",
+        "api:AscendMedusaProposer"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "repo-state-auditor": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "ci-gatekeeper": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "knowledge-index-maintainer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "release_feature_rollup",
+      "title": "Compose a feature-focused release summary",
+      "task_type": "release_analysis",
+      "query": "Summarize user-visible feature changes for a release and organize them into adoption, compatibility, and migration notes.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "release-assistant",
+      "atomic_skills": [
+        "release-commit-analyzer",
+        "release-notes-composer",
+        "docs-compliance-checker"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_report.json",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:flashcomm2",
+        "feature:dynamic_eplb",
+        "feature:weight_prefetch"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "release-commit-analyzer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "release-notes-composer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "docs-compliance-checker": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "release_quantization_gate",
+      "title": "Compose a quantization-focused release gate summary",
+      "task_type": "release_analysis",
+      "query": "Prepare release notes for quantization-related changes and identify what needs CI or docs gating before publication.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "release-assistant",
+      "atomic_skills": [
+        "release-commit-analyzer",
+        "release-notes-composer",
+        "ci-gatekeeper"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_report.json",
+        "knowledge-governance/generated/task_skill_index.json"
+      ],
+      "evidence_entry_ids": [
+        "quantization:W4A16",
+        "quantization:W8A8_DYNAMIC",
+        "feature:mlapo"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "release-commit-analyzer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "release-notes-composer": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ],
+        "ci-gatekeeper": [
+          "api:a5_device_adaptor",
+          "api:aclgraph_wrapper",
+          "api:all_gather_method",
+          "api:all_to_all_method",
+          "api:ascend_attention_backend",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_eagle_proposer",
+          "api:ascend_fused_mo_e",
+          "api:ascend_medusa_proposer",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_mlabackend"
+        ]
+      }
+    },
+    {
+      "id": "op_development_quant_matmul",
+      "title": "Implement or audit a quantized matmul operator path",
+      "task_type": "op_development",
+      "query": "Develop or audit an Ascend quantized matmul operator and verify graph, precision, and integration boundaries.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "op-developer",
+      "atomic_skills": [
+        "graph-analyzer",
+        "precision-validator",
+        "ci-gatekeeper"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/imported_knowledge_manifest.json"
+      ],
+      "evidence_entry_ids": [
+        "operator:npu_quant_matmul",
+        "quantization:W8A8",
+        "api:AscendW8A8LinearMethod"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "graph-analyzer": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "moe_comm_type:allgather"
+        ],
+        "precision-validator": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "moe_comm_type:allgather"
+        ],
+        "ci-gatekeeper": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "moe_comm_type:allgather"
+        ]
+      }
+    },
+    {
+      "id": "op_development_paged_attention",
+      "title": "Implement or debug a paged-attention operator path",
+      "task_type": "op_development",
+      "query": "Work on a paged-attention operator path and verify attention layout, KV cache behavior, and numerical correctness.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "op-developer",
+      "atomic_skills": [
+        "attention-kv-designer",
+        "precision-validator"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "operator:npu_paged_attention",
+        "feature:paged_attention",
+        "feature:prefix_caching"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "attention-kv-designer": [
+          "comm_group:otp",
+          "operator:batch_matmul_transpose",
+          "operator:mla_preprocess",
+          "operator:npu_fused_infer_attention_score",
+          "operator:npu_interleave_rope",
+          "operator:npu_kv_rmsnorm_rope_cache",
+          "operator:npu_lightning_indexer",
+          "operator:npu_mrope",
+          "operator:npu_paged_attention",
+          "operator:npu_reshape_and_cache",
+          "operator:npu_ring_mla",
+          "operator:npu_rotary_embedding"
+        ],
+        "precision-validator": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "moe_comm_type:allgather"
+        ]
+      }
+    },
+    {
+      "id": "performance_acl_graph_regression",
+      "title": "Investigate graph-capture throughput regression",
+      "task_type": "performance_analysis",
+      "query": "Analyze a throughput regression around ACL graph capture, batch invariance, and serving-path replay overhead.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "perf-assistant",
+      "atomic_skills": [
+        "perf-hunter",
+        "graph-analyzer",
+        "test-matrix-planner"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/imported_knowledge_report.json",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:acl_graph",
+        "feature:batch_invariant",
+        "feature:balance_scheduling"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "perf-hunter": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "config:ascend_compilation_config"
+        ],
+        "graph-analyzer": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "config:xlite_graph_config"
+        ],
+        "test-matrix-planner": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "config:ascend_compilation_config"
+        ]
+      }
+    },
+    {
+      "id": "performance_parallelism_tradeoff",
+      "title": "Investigate scheduling and parallelism tradeoffs",
+      "task_type": "performance_analysis",
+      "query": "Analyze a performance tradeoff across dynamic batching, context parallelism, and expert load balancing.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": "perf-assistant",
+      "atomic_skills": [
+        "perf-hunter",
+        "parallelism-planner",
+        "scheduler-feature-designer"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "knowledge-governance/generated/task_skill_index.json",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:dynamic_batch_scheduler",
+        "feature:context_parallel",
+        "feature:eplb"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "perf-hunter": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "config:ascend_compilation_config"
+        ],
+        "parallelism-planner": [
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp",
+          "comm_group:otp",
+          "comm_group:p_tp",
+          "comm_group:shard_weight",
+          "config:enable_shared_expert_dp"
+        ],
+        "scheduler-feature-designer": [
+          "comm_group:p_tp",
+          "config:pd_head_ratio",
+          "config:pd_tp_ratio",
+          "config:recompute_scheduler_enable",
+          "feature:balance_scheduling",
+          "feature:batch_invariant",
+          "feature:continuous_batching",
+          "feature:dynamic_batch_scheduler",
+          "feature:kv_nz_format",
+          "feature:layer_sharding",
+          "feature:pd_disaggregation",
+          "feature:recompute_scheduler"
+        ]
+      }
+    },
+    {
+      "id": "design_kv_transfer_surface",
+      "title": "Analyze KV transfer and disaggregated prefill design",
+      "task_type": "design_analysis",
+      "query": "Analyze the design of KV transfer, paged KV management, and disaggregated prefill across nodes.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": null,
+      "atomic_skills": [
+        "attention-kv-designer",
+        "parallelism-planner"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:kv_transfer_ascend",
+        "feature:paged_attention",
+        "feature:pd_disaggregation"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "attention-kv-designer": [
+          "api:ascend_attention_backend",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_mlabackend",
+          "api:ascend_mlaimpl",
+          "api:ascend_mrotary_embedding",
+          "api:ascend_multi_head_latent_attention",
+          "api:ascend_qkvparallel_linear",
+          "api:ascend_rotary_embedding",
+          "api:ascend_sfabackend",
+          "api:ascend_sfaimpl",
+          "api:ascend_sfametadata_builder",
+          "api:indexer_wrapper"
+        ],
+        "parallelism-planner": [
+          "api:all_to_all_method",
+          "api:ascend_column_parallel_linear",
+          "api:ascend_merged_column_parallel_linear",
+          "api:ascend_qkvparallel_linear",
+          "api:ascend_row_parallel_linear",
+          "api:eplb_updator",
+          "api:fused_mc2_method",
+          "api:mc2_method",
+          "api:pcpmanager",
+          "api:request_output",
+          "api:vllm_eplb_adaptor",
+          "comm_group:dynamic_eplb"
+        ]
+      }
+    },
+    {
+      "id": "design_mla_precision_surface",
+      "title": "Analyze MLA, precision, and prefetch design",
+      "task_type": "design_analysis",
+      "query": "Analyze MLA-related execution, precision, and weight-prefetch design surfaces for the Ascend stack.",
+      "entry_skill": "developer-assistant",
+      "composer_skill": null,
+      "atomic_skills": [
+        "attention-kv-designer",
+        "precision-validator"
+      ],
+      "required_docs": [
+        "task-index.md",
+        "code-knowledge-map.md",
+        "knowledge-governance/generated/design_analysis_index.json"
+      ],
+      "evidence_entry_ids": [
+        "feature:mlapo",
+        "env_var:VLLM_ASCEND_ENABLE_MLAPO",
+        "config:weight_prefetch_config"
+      ],
+      "status": "covered",
+      "issues": [],
+      "matched_atomic_skills": {
+        "attention-kv-designer": [
+          "api:ascend_attention_backend",
+          "api:ascend_deepseek_scaling_rotary_embedding",
+          "api:ascend_mlabackend",
+          "api:ascend_mlaimpl",
+          "api:ascend_mrotary_embedding",
+          "api:ascend_multi_head_latent_attention",
+          "api:ascend_qkvparallel_linear",
+          "api:ascend_rotary_embedding",
+          "api:ascend_sfabackend",
+          "api:ascend_sfaimpl",
+          "api:ascend_sfametadata_builder",
+          "api:indexer_wrapper"
+        ],
+        "precision-validator": [
+          "api:ascend_w4_a16_fused_mo_emethod",
+          "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+          "api:ascend_w8_a8_dynamic_linear_method",
+          "api:ascend_w8_a8_linear_method",
+          "comm_group:dynamic_eplb",
+          "comm_group:embed_tp",
+          "comm_group:fc3_quant_x",
+          "comm_group:flashcomm2_odp",
+          "comm_group:flashcomm2_otp",
+          "comm_group:lmtp",
+          "comm_group:mc2",
+          "comm_group:mlp_tp"
+        ]
+      }
+    }
+  ]
+}

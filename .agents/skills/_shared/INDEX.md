@@ -15,6 +15,12 @@ This index is optimized for weak-reasoning models. Always resolve user language 
 | "这个参数/环境变量是干什么的" | [ai-foundation index](ai-foundation/INDEX.md) | [topic index](ai-foundation/indexes/topic-index.json) | `vllm-ascend-deployment-assistant` |
 | "这个参数结论靠谱吗" / evidence check | [verification report](deployment-config/references/global-parameter-verification-report.md) | [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) | `vllm-ascend-deployment-assistant` |
 | "这个特性能不能开" / compatibility | [compatibility matrix](vllm-ascend-core/concepts/model-feature-compatibility-matrix.md) | [unsupported cases](troubleshooting/procedures/unsupported-feature-cases.md) | `vllm-ascend-deployment-assistant` |
+| "做研发分析/设计分析/架构分析" | [task-index.md](task-index.md) | [design-analysis index](knowledge-governance/generated/design_analysis_index.json) | `vllm-ascend-developer-assistant` |
+| "模型适配/接口分析/接入新模型" | [task-index.md](task-index.md) | [imported knowledge manifest](knowledge-governance/generated/imported_knowledge_manifest.json) | `vllm-ascend-developer-assistant` |
+| "调试日志/崩溃/行为异常" | [task-index.md](task-index.md) | [task-skill index](knowledge-governance/generated/task_skill_index.json) | `vllm-ascend-developer-assistant` |
+| "上游同步/接口影响评估" | [task-index.md](task-index.md) | [imported knowledge report](knowledge-governance/generated/imported_knowledge_report.json) | `vllm-ascend-developer-assistant` |
+| "发布分析/变更归类" | [task-index.md](task-index.md) | [task-skill index](knowledge-governance/generated/task_skill_index.json) | `vllm-ascend-developer-assistant` |
+| "知识维护/索引漂移/导入新知识" | [task-index.md](task-index.md) | [verification handoff](knowledge-governance/provenance/verification_handoff.md) | `vllm-ascend-developer-assistant -> vllm-ascend-knowledge-index-maintainer` |
 | Runtime error / startup fail | [error-index.md](error-index.md) | [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `vllm-ascend-deployment-assistant` |
 
 ## Weak Model Guardrails
@@ -28,5 +34,9 @@ This index is optimized for weak-reasoning models. Always resolve user language 
 - [error-index.md](error-index.md)
 - [task-index.md](task-index.md)
 - [code-knowledge-map.md](code-knowledge-map.md)
+- [skill-scenario coverage](knowledge-governance/generated/skill_scenario_coverage.json)
+- [knowledge provenance](knowledge-governance/provenance/verification_handoff.md)
 - [repo-full-knowledge-map](vllm-ascend-core/references/repo-full-knowledge-map.md)
+- [imported knowledge manifest](knowledge-governance/generated/imported_knowledge_manifest.json)
+- [design-analysis index](knowledge-governance/generated/design_analysis_index.json)
 - [ai-foundation](ai-foundation/INDEX.md)

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:781
-- read_ref: vllm/vllm/envs.py:73, vllm/vllm/envs.py:781, vllm/vllm/envs.py:782
-- effect_ref: vllm/vllm/envs.py:73, vllm/vllm/envs.py:781, vllm/vllm/envs.py:782
+- definition_ref: vllm/envs.py:793
+- read_ref: vllm/vllm/envs.py:73, vllm/vllm/envs.py:793, vllm/vllm/envs.py:794
+- effect_ref: vllm/vllm/envs.py:73, vllm/vllm/envs.py:793, vllm/vllm/envs.py:794
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

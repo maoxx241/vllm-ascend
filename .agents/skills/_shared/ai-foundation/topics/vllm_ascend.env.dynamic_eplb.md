@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/ascend_config.py:429, vllm_ascend/envs.py:105, vllm_ascend/patch/platform/__init__.py:23
-- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:429, vllm-ascend/vllm_ascend/ascend_config.py:431, vllm-ascend/vllm_ascend/envs.py:105
+- definition_ref: vllm_ascend/ascend_config.py:422, vllm_ascend/envs.py:105, vllm_ascend/patch/platform/__init__.py:23
+- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:422, vllm-ascend/vllm_ascend/ascend_config.py:424, vllm-ascend/vllm_ascend/envs.py:105
 - effect_ref: vllm-ascend/vllm_ascend/patch/platform/__init__.py:23
 - web_refs: 4
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

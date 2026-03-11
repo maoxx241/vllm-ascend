@@ -1,0 +1,142 @@
+{
+  "id": "feature:weight_prefetch",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Weight Prefetch",
+  "summary": "通过异步预取权重到NPU缓存，隐藏权重加载延迟，提升小批量推理性能的关键优化技术",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/weight_prefetch.py",
+      "lines": "1-227"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "346-372"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
+    "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
+    "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE"
+  ],
+  "related_apis": [
+    "torch.ops.vllm.prefetch_preprocess",
+    "torch.ops.vllm.prefetch_postprocess",
+    "torch_npu.npu_prefetch"
+  ],
+  "related_features": [
+    "feature:matmul_allreduce",
+    "feature:multistream_overlap",
+    "feature:graph_fusion_passes"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与MLP层计算重叠测试",
+        "与Attention层权重预取测试",
+        "MoE模型expert权重预取测试"
+      ],
+      "memory_impact": "增加约18MB预取缓冲区内存占用(MAX_PREFETCH_WEIGHT_SIZE)，但减少权重加载延迟",
+      "throughput_impact": "小批量场景(token<500)吞吐量提升10-30%，大批量场景效果不明显",
+      "latency_impact": "首token延迟降低，权重加载延迟被计算时间隐藏",
+      "test_cases": [
+        {
+          "name": "测试prefetch_ratio配置对性能的影响",
+          "description": ""
+        },
+        {
+          "name": "测试MOE_PREFETCH_TOKEN_THRESHOLD=96的边界条件",
+          "description": ""
+        },
+        {
+          "name": "测试多stream场景下的预取正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有Dense模型",
+        "MoE模型(DeepSeek-V3, Qwen-MoE)",
+        "MLA模型(DeepSeek-MLA)"
+      ],
+      "enable_config": "additional_config: {weight_prefetch_config: {enabled: true, prefetch_ratio: {attn: {qkv: 1.0, o: 1.0}, mlp: {gate_up: 1.0, down: 1.0}}}}",
+      "unsuitable_scenarios": [
+        "大批量推理场景(token>500)",
+        "内存紧张场景",
+        "eager模式下的某些模型"
+      ],
+      "best_practices": [
+        "小批量场景启用，prefetch_ratio根据模型调整",
+        "MoE模型设置gate_up比例为0.8以平衡内存和性能",
+        "配合graph模式使用效果更佳"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "WeightPrefetchMethod类：统一权重预取方法入口",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "ModuleWeightPrefetchConfig：模块级预取配置",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "maybe_npu_prefetch：底层NPU预取接口",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "SUPPORTED_MODULES列表：扩展支持的模块类型",
+        "MOE_PREFETCH_TOKEN_THRESHOLD：调整MoE预取阈值",
+        "prefetch_ratio：调整各层预取比例"
+      ],
+      "affected_features": [
+        "MLP层前向计算流程",
+        "Attention层前向计算流程",
+        "MoE expert计算流程"
+      ]
+    },
+    "design": {
+      "principle": "利用NPU的多stream能力，在计算当前层时异步预取下一层权重，通过计算-通信重叠隐藏权重加载延迟",
+      "theory_analysis": "基于存储层次结构优化：权重从HBM加载到L2 cache需要时间，通过prefetch提前触发加载，使得计算开始时权重已在cache中。关键参数prefetch_ratio控制预取数据量，避免过度预取导致cache污染。",
+      "design_decisions": [
+        {
+          "decision": "使用dependency tensor作为预取同步点，确保预取完成后再使用权重",
+          "reason": ""
+        },
+        {
+          "decision": "区分attn/mlp/moe三种模块，各有独立的预取策略",
+          "reason": ""
+        },
+        {
+          "decision": "MoE场景设置token阈值(96)，避免小批量时预取开销大于收益",
+          "reason": ""
+        },
+        {
+          "decision": "最大预取大小限制为18MB，平衡内存占用和预取效果",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2210af00009c3c960e2b0ca03e049dff6ee5ebc32a7ea58697819c73761d9c88",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,103 @@
+{
+  "id": "operator:npu_moe_init_routing_v2",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_moe_init_routing_v2",
+  "summary": "NPU MoE初始化路由V2算子(A5专用)，A5设备优化的MoE路由预处理，性能优于V1版本。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "164-187"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_moe_init_routing_v2"
+  ],
+  "related_features": [
+    "moe",
+    "token_dispatch",
+    "a5_optimization"
+  ],
+  "device_specific": "A5",
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与topk_ids配合",
+        "与hidden_states配合"
+      ],
+      "memory_impact": "A5优化内存访问",
+      "throughput_impact": "A5专用优化提升吞吐",
+      "latency_impact": "V2版本延迟更低",
+      "test_cases": [
+        {
+          "name": "A5设备",
+          "description": ""
+        },
+        {
+          "name": "不同expert_num",
+          "description": ""
+        },
+        {
+          "name": "量化模式",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "A5设备上的所有MoE模型"
+      ],
+      "enable_config": "A5设备自动启用",
+      "unsuitable_scenarios": [
+        "非A5设备"
+      ],
+      "best_practices": [
+        "仅在A5设备使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "A5DeviceAdaptor.npu_moe_init_routing",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "quant_mode配置"
+      ],
+      "affected_features": [
+        "A5 MoE性能"
+      ]
+    },
+    "design": {
+      "principle": "A5硬件优化的MoE路由预处理，利用A5特性提升性能",
+      "theory_analysis": "A5有专用硬件支持MoE计算，V2版本充分利用",
+      "design_decisions": [
+        {
+          "decision": "仅A5设备可用",
+          "reason": ""
+        },
+        {
+          "decision": "接口与V1兼容",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "b3c276afdc86c0e5f6ff2a18bb0be6587ca30f5cd024987708fb882da0f7552b",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1078
+- definition_ref: vllm/engine/arg_utils.py:1083
 - read_ref: vllm/vllm/config/observability.py:53, vllm/vllm/engine/arg_utils.py:522, vllm/vllm/engine/arg_utils.py:523
 - effect_ref: vllm/vllm/config/observability.py:53, vllm/vllm/engine/arg_utils.py:522, vllm/vllm/engine/arg_utils.py:523
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

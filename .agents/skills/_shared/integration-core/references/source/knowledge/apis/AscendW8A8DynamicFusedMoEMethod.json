@@ -1,0 +1,117 @@
+{
+  "id": "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendW8A8DynamicFusedMoEMethod",
+  "summary": "昇腾W8A8动态量化融合MoE方法，实现MoE层的INT8动态量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "108-250"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_EPLB"
+  ],
+  "related_apis": [
+    "AscendMoEScheme",
+    "MoECommMethod",
+    "select_experts"
+  ],
+  "related_features": [
+    "quantization",
+    "moe",
+    "w8a8",
+    "dynamic_eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "apply()执行量化MoE计算",
+        "get_weight()获取权重参数",
+        "get_dynamic_quant_param()获取量化参数"
+      ],
+      "memory_impact": "INT8权重显著减少内存占用",
+      "throughput_impact": "量化MoE提升吞吐量",
+      "latency_impact": "量化计算降低延迟",
+      "test_cases": [
+        {
+          "name": "MoE量化测试",
+          "description": ""
+        },
+        {
+          "name": "EPLB测试",
+          "description": ""
+        },
+        {
+          "name": "多流overlap测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持W8A8量化的MoE模型"
+      ],
+      "enable_config": "配置quantization为W8A8_DYNAMIC",
+      "unsuitable_scenarios": [
+        "需要高精度的场景"
+      ],
+      "best_practices": [
+        "启用multistream_overlap_gate",
+        "启用dynamic_eplb"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/quantization/methods/w8a8_dynamic.py:108-250",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()量化逻辑",
+        "EPLB集成",
+        "通信方法选择"
+      ],
+      "affected_features": [
+        "MoE量化",
+        "负载均衡"
+      ]
+    },
+    "design": {
+      "principle": "使用INT8权重和动态量化激活",
+      "theory_analysis": "动态量化适应不同token分布，EPLB优化负载均衡",
+      "design_decisions": [
+        {
+          "decision": "支持ACL Graph",
+          "reason": ""
+        },
+        {
+          "decision": "支持多流overlap",
+          "reason": ""
+        },
+        {
+          "decision": "支持EPLB",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "35813aea447bd8c02e40d02620c5b0f34532663c890dcccbb6a01b7d94085d0e",
+  "knowledge_domain": "integration-core"
+}

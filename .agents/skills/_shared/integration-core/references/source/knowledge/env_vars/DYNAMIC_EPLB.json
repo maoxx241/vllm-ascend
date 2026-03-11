@@ -1,0 +1,132 @@
+{
+  "id": "env_var:dynamic_eplb",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "DYNAMIC_EPLB",
+  "summary": "控制动态EPLB开关，启用运行时专家负载均衡动态调整",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "104-105"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/eplb_updator.py",
+      "lines": "55-61"
+    }
+  ],
+  "related_env_vars": [
+    "EXPERT_MAP_RECORD",
+    "VLLM_ALLOW_EXPERT_LOAD_COLLECTING"
+  ],
+  "related_apis": [
+    "EplbUpdator",
+    "EplbProcess"
+  ],
+  "related_features": [
+    "dynamic_eplb",
+    "eplb",
+    "expert_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与eplb_config配置交互",
+        "需要VLLM_ALLOW_EXPERT_LOAD_COLLECTING支持",
+        "与静态EPLB共享策略框架"
+      ],
+      "memory_impact": "需要额外共享内存存储专家映射和负载信息",
+      "throughput_impact": "良好的动态均衡可提升吞吐量30-50%",
+      "latency_impact": "动态调整可显著降低P99延迟",
+      "test_cases": [
+        {
+          "name": "动态均衡测试",
+          "description": "验证专家负载动态调整效果",
+          "threshold": 0
+        },
+        {
+          "name": "D2D传输测试",
+          "description": "验证专家权重D2D迁移正确性",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 MoE模型",
+        "Qwen-MoE模型"
+      ],
+      "enable_config": "export DYNAMIC_EPLB=true",
+      "unsuitable_scenarios": [
+        "负载模式非常稳定的场景",
+        "显存紧张无法支持专家迁移的场景",
+        "单GPU环境"
+      ],
+      "best_practices": [
+        "配合eplb_config配置监控周期",
+        "生产环境启用expert_map_record_path记录",
+        "预热阶段禁用动态调整"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "104-105",
+          "purpose": "环境变量定义，默认值为false"
+        },
+        {
+          "file": "vllm_ascend/eplb/eplb_updator.py",
+          "function": "init_eplb",
+          "lines": "47-72",
+          "purpose": "初始化EPLB，检查DYNAMIC_EPLB环境变量"
+        },
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "function": "EplbConfig._validate_config",
+          "lines": "427-431",
+          "purpose": "验证DYNAMIC_EPLB环境变量设置"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值",
+        "eplb_updator.py: 修改初始化逻辑"
+      ],
+      "affected_features": [
+        "eplb",
+        "expert_parallel",
+        "moe_forward"
+      ]
+    },
+    "design": {
+      "principle": "动态EPLB采用生产者-消费者模式，主进程收集负载信息，子进程计算均衡策略并执行专家迁移",
+      "theory_analysis": "动态负载均衡可建模为在线装箱问题，EPLB采用周期性重平衡策略，通过贪心算法最小化迁移成本",
+      "design_decisions": [
+        {
+          "decision": "默认禁用",
+          "reason": "动态EPLB需要特定场景和配置，避免误用"
+        },
+        {
+          "decision": "异步子进程设计",
+          "reason": "负载均衡计算和专家迁移是计算密集型操作，异步执行避免阻塞主推理流程"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "ee3e7227e264fcfb510bb5b8fc03e2be696a70cfc1adbc718ba634aa56205a79",
+  "knowledge_domain": "integration-core"
+}

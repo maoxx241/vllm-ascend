@@ -1,0 +1,106 @@
+{
+  "id": "operator:npu_moe_init_routing",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_moe_init_routing",
+  "summary": "NPU MoE初始化路由算子，用于MoE token分发预处理，计算expert_tokens_num和排序后的hidden_states。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "36-59"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch.ops._C_ascend.npu_moe_init_routing_custom"
+  ],
+  "related_features": [
+    "moe",
+    "token_dispatch",
+    "expert_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与topk_ids配合",
+        "与hidden_states配合"
+      ],
+      "memory_impact": "输出排序后的张量",
+      "throughput_impact": "预处理提升后续计算效率",
+      "latency_impact": "单算子完成路由初始化",
+      "test_cases": [
+        {
+          "name": "不同expert_num",
+          "description": ""
+        },
+        {
+          "name": "不同active_num",
+          "description": ""
+        },
+        {
+          "name": "有/无scale",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "MoE模型自动启用(非A5设备)",
+      "unsuitable_scenarios": [
+        "A5设备使用npu_moe_init_routing_v2"
+      ],
+      "best_practices": [
+        "expert_tokens_num_type正确配置",
+        "active_expert_range正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "BaseDeviceAdaptor.npu_moe_init_routing",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "expert_tokens_num_type",
+        "expert_tokens_num_flag",
+        "quant_mode"
+      ],
+      "affected_features": [
+        "MoE路由效率",
+        "token分发"
+      ]
+    },
+    "design": {
+      "principle": "根据topk_ids对hidden_states排序，计算每个专家的token数量",
+      "theory_analysis": "预处理将token按专家分组，便于后续并行计算",
+      "design_decisions": [
+        {
+          "decision": "支持量化模式",
+          "reason": ""
+        },
+        {
+          "decision": "支持active_expert_range限制",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d172c8623839ea56f36749cfd3c71afa0e6d636a846de317407ce0dfb0e7f29d",
+  "knowledge_domain": "vllm-ascend-core"
+}

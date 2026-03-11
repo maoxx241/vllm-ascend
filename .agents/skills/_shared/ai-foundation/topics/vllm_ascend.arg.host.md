@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/disaggregated_encoder/disagg_epd_proxy.py:698, examples/disaggregated_prefill_v1/load_balance_proxy_layerwise_server_example.py:261, examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py:509
-- read_ref: vllm/vllm/_aiter_ops.py:19, vllm/vllm/benchmarks/serve.py:1182, vllm/vllm/benchmarks/serve.py:1185
-- effect_ref: vllm/vllm/benchmarks/serve.py:1182, vllm/vllm/benchmarks/sweep/server.py:96, vllm/vllm/config/parallel.py:207
+- read_ref: vllm/vllm/_aiter_ops.py:19, vllm/vllm/benchmarks/serve.py:1206, vllm/vllm/benchmarks/serve.py:1209
+- effect_ref: vllm/vllm/benchmarks/serve.py:1206, vllm/vllm/benchmarks/sweep/server.py:96, vllm/vllm/config/parallel.py:207
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

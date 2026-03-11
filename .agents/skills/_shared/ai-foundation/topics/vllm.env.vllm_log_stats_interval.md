@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:657
-- read_ref: vllm/vllm/entrypoints/openai/server_utils.py:363, vllm/vllm/envs.py:46, vllm/vllm/envs.py:657
-- effect_ref: vllm/vllm/envs.py:658, vllm/vllm/v1/engine/llm_engine.py:387
+- definition_ref: vllm/envs.py:669
+- read_ref: vllm/vllm/entrypoints/openai/server_utils.py:363, vllm/vllm/envs.py:46, vllm/vllm/envs.py:669
+- effect_ref: vllm/vllm/envs.py:670, vllm/vllm/v1/engine/llm_engine.py:390
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

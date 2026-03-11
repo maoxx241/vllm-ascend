@@ -1,0 +1,198 @@
+{
+  "id": "feature:lora_ascend",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "LoRA (Ascend)",
+  "summary": "vLLM-Ascend的LoRA适配器支持，提供AscendC优化的bgmv/sgmv算子，支持多LoRA并发服务，兼容ACLGraph图模式加速，实现高效的参数高效微调推理。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/lora/__init__.py",
+      "lines": "1"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/lora/lora_ops.py",
+      "lines": "1-122"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/lora/punica_npu.py",
+      "lines": "1-357"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/lora/utils.py",
+      "lines": "1"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "csrc/kernels/bgmv_expand.cpp",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "csrc/kernels/bgmv_shrink.cpp",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "csrc/kernels/sgmv_expand.cpp",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "csrc/kernels/sgmv_shrink.cpp",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "PunicaWrapperNPU",
+    "bgmv_shrink",
+    "bgmv_expand",
+    "bgmv_expand_slice",
+    "sgmv_shrink",
+    "sgmv_expand",
+    "sgmv_expand_slice",
+    "add_lora_linear",
+    "add_lora_embedding",
+    "add_lora_logits"
+  ],
+  "related_features": [
+    "lora",
+    "acl_graph",
+    "multi_lora_serving"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与vLLM LoRAManager交互管理LoRA适配器",
+        "与PagedAttention交互在注意力层应用LoRA",
+        "与ACLGraph交互支持图模式LoRA推理"
+      ],
+      "memory_impact": "每个LoRA适配器需要额外存储lora_a和lora_b权重，内存占用约为base模型的0.1%-1%",
+      "throughput_impact": "LoRA开销约为5-15%，取决于LoRA rank和batch size；多LoRA并发时开销略有增加",
+      "latency_impact": "单请求延迟增加约5-10ms，主要来自额外的GEMM操作",
+      "test_cases": [
+        {
+          "name": "test_ilama_lora.py: iLlama模型LoRA测试",
+          "description": ""
+        },
+        {
+          "name": "test_llama32_lora.py: Llama3.2模型LoRA测试",
+          "description": ""
+        },
+        {
+          "name": "test_qwen3_multi_loras.py: Qwen3多LoRA并发测试",
+          "description": ""
+        },
+        {
+          "name": "bgmv/sgmv算子正确性和性能测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Llama系列 (Llama-2, Llama-3, Llama-3.2)",
+        "Qwen系列 (Qwen2, Qwen2.5, Qwen3)",
+        "iLlama系列",
+        "其他vLLM支持的LoRA模型"
+      ],
+      "enable_config": "--enable-lora --lora-modules='{\"name\": \"lora-name\", \"path\": \"/path/to/lora\"}'",
+      "unsuitable_scenarios": [
+        "LoRA rank过大(>128)时310P设备性能下降",
+        "需要极高throughput且无LoRA需求的场景",
+        "LoRA权重与base模型不兼容的场景"
+      ],
+      "best_practices": [
+        "推荐LoRA rank <= 64以获得最佳性能",
+        "多LoRA场景使用max_loras参数控制同时加载的LoRA数量",
+        "配合ACLGraph使用以获得最佳性能",
+        "使用max_lora_rank参数预分配内存避免动态分配开销",
+        "310P设备或rank>=128时自动回退到PyTorch原生实现"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "punica_npu.py",
+          "function": "PunicaWrapperNPU.__init__",
+          "purpose": "根据设备类型选择算子实现"
+        },
+        {
+          "file": "punica_npu.py",
+          "function": "add_shrink/add_expand",
+          "purpose": "执行LoRA A/B矩阵乘法"
+        },
+        {
+          "file": "lora_ops.py",
+          "function": "bgmv_shrink/expand",
+          "purpose": "Decode阶段的批量GEMV"
+        },
+        {
+          "file": "lora_ops.py",
+          "function": "sgmv_shrink/expand",
+          "purpose": "Prefill阶段的批量GEMV"
+        },
+        {
+          "file": "csrc/kernels/",
+          "function": "bgmv/sgmv算子",
+          "purpose": "AscendC优化的底层kernel"
+        }
+      ],
+      "modification_points": [
+        "新增算子优化: 在csrc/kernels/中添加新的AscendC kernel",
+        "扩展LoRA类型: 在PunicaWrapperNPU中添加新的apply方法",
+        "优化内存布局: 修改lora_a/b_stacked的内存布局",
+        "支持新模型: 在vLLM侧注册新的LoRA支持模型"
+      ],
+      "affected_features": [
+        "ACLGraph: LoRA算子需要支持图模式捕获",
+        "Multi-LoRA: 需要正确处理lora_indices映射",
+        "Attention: LoRA需要在注意力层正确插入"
+      ]
+    },
+    "design": {
+      "principle": "LoRA通过低秩分解将权重更新分解为两个小矩阵的乘积：W' = W + BA，其中B和A是低秩矩阵。推理时将LoRA输出加到base模型输出上，实现参数高效的模型适配。",
+      "theory_analysis": "LoRA的计算开销 = 2 * hidden_size * rank * num_tokens。当rank << hidden_size时，开销远小于全量微调。bgmv用于Decode(单token)，sgmv用于Prefill(多token)，两者分别针对不同场景优化。",
+      "design_decisions": [
+        {
+          "decision": "使用AscendC实现bgmv/sgmv算子",
+          "reason": "AscendC可以充分利用NPU硬件特性，相比PyTorch原生实现有2-3x性能提升"
+        },
+        {
+          "decision": "310P和rank>=128时回退PyTorch实现",
+          "reason": "310P设备AscendC支持有限，高rank场景PyTorch实现更稳定"
+        },
+        {
+          "decision": "Prefill使用sgmv，Decode使用bgmv",
+          "reason": "Prefill处理多token序列，sgmv可以批量处理；Decode处理单token，bgmv更高效"
+        },
+        {
+          "decision": "支持ACLGraph模式",
+          "reason": "图模式可以消除Python开销，对于高频调用的LoRA算子尤为重要"
+        },
+        {
+          "decision": "lora_a_stacked/lora_b_stacked预分配内存",
+          "reason": "避免动态内存分配，支持多LoRA并发时的快速切换"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "c0b540b7fe381df89e6344e57b6755a9a5cde7378d7f4338618882062f35285c",
+  "knowledge_domain": "integration-core"
+}

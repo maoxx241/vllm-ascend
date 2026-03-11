@@ -1,0 +1,172 @@
+{
+  "id": "feature:xlite_graph",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "XliteGraph",
+  "summary": "基于xlite库的高性能图执行引擎，通过预编译计算图和张量池优化，实现低延迟推理，特别优化Decode阶段的性能。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/xlite/xlite.py",
+      "lines": "1-320"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "322-344"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "XliteWrapper",
+    "XliteModel",
+    "LlamaXliteModel",
+    "QwenMoeXliteModel",
+    "xlite_model_init"
+  ],
+  "related_features": [
+    "acl_graph",
+    "tensor_parallel",
+    "data_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与ACL Graph互补，XliteGraph专注于Decode优化，ACL Graph覆盖更广",
+        "依赖xlite C++库(通过pybind11绑定)",
+        "与Tensor Parallel和Data Parallel协同工作"
+      ],
+      "memory_impact": "需要预分配tensor_pool，大小由模型决定(rt_pool_size MB)；full_mode会为prefill和decode都编译图，内存占用更大；非full_mode只在decode时使用图，内存更省",
+      "throughput_impact": "Decode阶段吞吐量可提升2-3倍；Prefill阶段提升有限(非full_mode)；整体吞吐量提升取决于decode/prefill比例",
+      "latency_impact": "Decode延迟降低50-70%；首token延迟不受影响(非full_mode)；full_mode下prefill延迟也有优化",
+      "test_cases": [
+        {
+          "name": "测试full_mode和非full_mode的性能差异",
+          "description": ""
+        },
+        {
+          "name": "验证block_size=128的强制约束",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch_size下的性能表现",
+          "description": ""
+        },
+        {
+          "name": "验证与speculative decoding的互斥性",
+          "description": ""
+        },
+        {
+          "name": "测试DP场景下的正确性",
+          "description": ""
+        },
+        {
+          "name": "对比XliteGraph与ACL Graph的性能",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "LlamaForCausalLM",
+        "Qwen2ForCausalLM",
+        "Qwen3ForCausalLM",
+        "Qwen3VLForConditionalGeneration",
+        "Qwen3MoeForCausalLM"
+      ],
+      "enable_config": "通过additional_config配置: xlite_graph_config: {enabled: true, full_mode: false}",
+      "unsuitable_scenarios": [
+        "block_size != 128的场景(强制要求)",
+        "使用speculative decoding的场景(互斥)",
+        "pipeline_parallel_size > 1的场景(不支持)",
+        "不支持xlite C++库的环境"
+      ],
+      "best_practices": [
+        "生产环境建议使用非full_mode，平衡性能和内存",
+        "确保block_size设置为128",
+        "监控tensor_pool内存占用，必要时调整max_num_batched_tokens",
+        "高并发decode场景收益最大",
+        "结合ACL Graph使用，覆盖不同场景"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/xlite/xlite.py",
+          "description": "XliteWrapper主类，封装图执行逻辑",
+          "key_methods": [
+            "__init__",
+            "__call__",
+            "register_kv_caches"
+          ]
+        },
+        {
+          "file": "vllm_ascend/xlite/xlite.py",
+          "description": "XliteModel及其子类，负责模型初始化和权重绑定",
+          "key_methods": [
+            "initialize",
+            "_build_model_config",
+            "_build_model"
+          ]
+        },
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "description": "XliteGraphConfig配置类",
+          "key_methods": [
+            "__init__"
+          ]
+        }
+      ],
+      "modification_points": [
+        "添加新模型支持：创建新的XliteModel子类，实现initialize和_build_model",
+        "调整tensor_pool大小：修改get_tensor_pool_size返回值",
+        "扩展attention类型：在_build_model_config中设置config.attn_type",
+        "优化权重布局：修改_build_model中的权重绑定逻辑"
+      ],
+      "affected_features": [
+        "acl_graph: 两者为互补关系，需协调使用场景",
+        "attention: 需要适配ModelAttnMeta格式",
+        "kv_cache: 需要通过register_kv_caches注册"
+      ]
+    },
+    "design": {
+      "principle": "XliteGraph基于xlite C++库，通过预编译计算图和张量池实现高性能推理。核心思想：1)离线编译计算图，消除运行时overhead 2)预分配张量池，避免动态内存分配 3)优化内存布局，提升缓存命中率 4)针对Decode场景的特殊优化(如KV Cache访问模式)",
+      "theory_analysis": "图执行引擎的核心优势在于消除Python解释器overhead和动态图调度开销。XliteGraph通过C++实现核心路径，Python仅作为接口层。张量池预分配避免了内存碎片和分配延迟。针对Decode场景的优化包括：1)固定shape避免动态shape开销 2)优化的KV Cache访问模式 3)融合算子减少kernel launch开销。",
+      "design_decisions": [
+        {
+          "decision": "full_mode vs 非full_mode",
+          "rationale": "full_mode为prefill和decode都编译图，性能最优但内存占用大；非full_mode只为decode编译图，平衡性能和内存。用户可根据场景选择"
+        },
+        {
+          "decision": "block_size=128强制约束",
+          "rationale": "xlite库内部针对block_size=128进行了深度优化，其他值会导致性能下降或功能异常。这是硬件和算法协同优化的结果"
+        },
+        {
+          "decision": "与speculative decoding互斥",
+          "rationale": "speculative decoding需要特殊的forward逻辑，与xlite的图执行模式不兼容。未来可能支持，但当前设计选择互斥"
+        },
+        {
+          "decision": "DP场景的特殊处理",
+          "rationale": "在DP场景下，通过num_tokens和num_reqs判断是否使用xlite图：num_tokens <= num_reqs表示decode场景，使用图；否则使用eager模式"
+        },
+        {
+          "decision": "策略模式支持多模型",
+          "rationale": "通过strategy_map和XliteModel子类，支持不同模型架构。每种模型有特定的权重绑定和配置逻辑，保持代码清晰和可扩展"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d444f1d0b6cabad507b495e24a2ced2863406cd8223ed5e78d5ca4784105dce7",
+  "knowledge_domain": "vllm-ascend-core"
+}

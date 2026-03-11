@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:876
-- read_ref: vllm/vllm/envs.py:98, vllm/vllm/envs.py:876, vllm/vllm/envs.py:877
-- effect_ref: vllm/vllm/envs.py:877, vllm/vllm/envs.py:878, vllm/vllm/model_executor/layers/quantization/kernels/mixed_precision/__init__.py:92
+- definition_ref: vllm/envs.py:888
+- read_ref: vllm/vllm/envs.py:98, vllm/vllm/envs.py:888, vllm/vllm/envs.py:889
+- effect_ref: vllm/vllm/envs.py:889, vllm/vllm/envs.py:890, vllm/vllm/model_executor/layers/quantization/kernels/mixed_precision/__init__.py:92
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,138 @@
+{
+  "id": "moe_comm_type:fused_mc2",
+  "type": "moe_comm_type",
+  "category": "vllm_ascend",
+  "name": "FUSED_MC2",
+  "summary": "Fused MC2 MoE通信类型，融合MC2通信与专家计算，仅支持A3设备和W8A8_DYNAMIC量化，通过VLLM_ASCEND_ENABLE_FUSED_MC2启用，实现通信计算重叠",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "24-28,247-262"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "MoECommType.FUSED_MC2",
+    "select_moe_comm_method"
+  ],
+  "related_features": [
+    "fused_mc2",
+    "moe",
+    "w8a8_dynamic",
+    "a3_device",
+    "communication_compute_overlap"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持A3设备",
+        "仅支持W8A8_DYNAMIC量化",
+        "支持decode和prefill两种模式"
+      ],
+      "memory_impact": "融合通信减少中间存储，显存占用较低",
+      "throughput_impact": "通信计算重叠显著提升吞吐量",
+      "latency_impact": "融合操作减少延迟",
+      "test_cases": [
+        {
+          "name": "验证FUSED_MC2通信正确性",
+          "description": ""
+        },
+        {
+          "name": "测试A3设备兼容性",
+          "description": ""
+        },
+        {
+          "name": "验证W8A8_DYNAMIC量化要求",
+          "description": ""
+        },
+        {
+          "name": "测试decode/prefill模式",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "使用W8A8_DYNAMIC量化的MoE模型"
+      ],
+      "enable_config": "VLLM_ASCEND_ENABLE_FUSED_MC2: 1 或 2, quantization: w8a8_dynamic",
+      "unsuitable_scenarios": [
+        "非A3设备",
+        "非W8A8_DYNAMIC量化",
+        "MTP模式",
+        "dynamic_eplb启用"
+      ],
+      "best_practices": [
+        "仅在A3设备上启用",
+        "配合W8A8_DYNAMIC量化使用",
+        "设置VLLM_ASCEND_ENABLE_FUSED_MC2=1用于decode",
+        "设置VLLM_ASCEND_ENABLE_FUSED_MC2=2用于prefill"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MoECommType.FUSED_MC2: 枚举定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "select_moe_comm_method(): 选择逻辑",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "select_moe_comm_method(): 修改选择条件和模式判断"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts",
+        "dispatch_ffn_combine",
+        "dispatch_gmm_combine_decode"
+      ]
+    },
+    "design": {
+      "principle": "FUSED_MC2融合MC2通信与专家计算，通过dispatch_ffn_combine和dispatch_gmm_combine_decode算子实现通信计算重叠",
+      "theory_analysis": "融合通信计算可减少50%以上的通信开销，显著提升MoE性能",
+      "design_decisions": [
+        {
+          "decision": "仅支持A3设备，利用专用硬件加速",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持W8A8_DYNAMIC量化，确保scale格式兼容",
+          "reason": ""
+        },
+        {
+          "decision": "VLLM_ASCEND_ENABLE_FUSED_MC2=1用于decode模式",
+          "reason": ""
+        },
+        {
+          "decision": "VLLM_ASCEND_ENABLE_FUSED_MC2=2用于prefill模式",
+          "reason": ""
+        },
+        {
+          "decision": "不支持MTP模式和dynamic_eplb",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f05368152529735282f8a252e4d0b2b7b26c776980d737f303fd83755fe5ce8c",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:936
-- read_ref: vllm/vllm/benchmarks/latency.py:77, vllm/vllm/config/cache.py:76, vllm/vllm/config/cache.py:189
-- effect_ref: vllm/vllm/config/vllm.py:1482, vllm/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py:264, vllm/vllm/engine/arg_utils.py:1967
+- definition_ref: vllm/engine/arg_utils.py:935
+- read_ref: vllm/vllm/benchmarks/latency.py:77, vllm/vllm/config/cache.py:76, vllm/vllm/config/cache.py:200
+- effect_ref: vllm/vllm/config/vllm.py:1500, vllm/vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py:264, vllm/vllm/engine/arg_utils.py:1980
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - value_failure_signals: warning: model does not officially support prefix caching; ValueError: --mamba-block-size can only be set with --enable-prefix-caching
 - recommendation: 结合业务前缀分布评估收益，保留回退开关。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,104 @@
+{
+  "id": "api:flash_common3_context",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "FlashCommon3Context",
+  "summary": "Flash Common3上下文管理器，管理NPU上的共享上下文和通信",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/flash_common3_context.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASH_COMMON"
+  ],
+  "related_apis": [
+    "ForwardContext",
+    "set_ascend_forward_context"
+  ],
+  "related_features": [
+    "flash_common",
+    "context_management"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "set_context()设置上下文",
+        "get_context()获取上下文",
+        "clear_context()清除上下文"
+      ],
+      "memory_impact": "管理共享上下文内存",
+      "throughput_impact": "共享上下文减少重复计算",
+      "latency_impact": "上下文管理开销小",
+      "test_cases": [
+        {
+          "name": "上下文设置测试",
+          "description": ""
+        },
+        {
+          "name": "上下文获取测试",
+          "description": ""
+        },
+        {
+          "name": "上下文清除测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "通过环境变量启用",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "合理管理上下文生命周期"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/flash_common3_context.py:1-100",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "上下文管理逻辑"
+      ],
+      "affected_features": [
+        "上下文管理",
+        "通信优化"
+      ]
+    },
+    "design": {
+      "principle": "管理NPU共享上下文，优化通信",
+      "theory_analysis": "使用共享上下文减少通信开销",
+      "design_decisions": [
+        {
+          "decision": "支持上下文缓存",
+          "reason": ""
+        },
+        {
+          "decision": "支持多线程安全",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "81c8d7ce8f78bfa55cb7fd0e044be326f40e655e9e101afda8b035454b4fd941",
+  "knowledge_domain": "vllm-ascend-core"
+}

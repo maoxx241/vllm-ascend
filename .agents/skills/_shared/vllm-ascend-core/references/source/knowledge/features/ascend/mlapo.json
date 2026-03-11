@@ -1,0 +1,179 @@
+{
+  "id": "feature:mlapo",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "MLAPO",
+  "summary": "MLA Pre-Processing Optimization (MLA预处理优化)，针对DeepSeek W8A8量化模型的MLA注意力机制优化，通过融合算子提升性能，但有token数量限制(≤1024)。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "92-96"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "398-410, 489-512, 784-841, 1006-1014"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "59-63, 946-957, 1512-1520"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MLAPO=1"
+  ],
+  "related_apis": [
+    "AscendSFAImpl._process_weights_for_fused_mlapo",
+    "AscendSFAImpl._sfa_preprocess_with_mlapo",
+    "AscendMLAImpl._process_weights_for_fused_mlapo",
+    "torch.ops._C_ascend.mla_preprocess"
+  ],
+  "related_features": [
+    "w8a8_quantization",
+    "mla_attention",
+    "deepseek_dsa"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持W8A8量化模型，其他量化方法自动禁用",
+        "与FlashComm(DSA-CP)冲突，启用CP时自动禁用MLAPO",
+        "仅在KV Consumer(Decode节点)场景下可释放原始权重节省内存"
+      ],
+      "memory_impact": "MLAPO需要额外的融合权重(wd_qkv, wu_q等)，增加显存占用约10-20%；但在KV Consumer场景下可释放原始权重，净增约5-10%；MLAPO_MAX_SUPPORTED_TOKENS=1024限制了最大batch size",
+      "throughput_impact": "MLAPO可提升吞吐量20-40%，通过算子融合减少kernel launch开销；但token数超过1024时回退到原生实现，性能下降；W8A8量化本身也有性能提升",
+      "latency_impact": "MLAPO可降低延迟15-30%，通过融合算子减少内存访问；token数限制确保了稳定的低延迟；超过限制时延迟会突然增加(回退)",
+      "test_cases": [
+        {
+          "name": "测试VLLM_ASCEND_ENABLE_MLAPO=0和1的性能差异",
+          "description": ""
+        },
+        {
+          "name": "验证MLAPO_MAX_SUPPORTED_TOKENS=1024的限制正确性",
+          "description": ""
+        },
+        {
+          "name": "测试token数=1024和1025的性能跳变",
+          "description": ""
+        },
+        {
+          "name": "验证W8A8量化的正确性",
+          "description": ""
+        },
+        {
+          "name": "测试与FlashComm的互斥性",
+          "description": ""
+        },
+        {
+          "name": "验证KV Consumer场景下的内存释放",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch_size下的性能表现",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 W8A8量化模型",
+        "DeepSeek-V3.1 DSA(Dynamic Sparse Attention)模型"
+      ],
+      "enable_config": "环境变量: VLLM_ASCEND_ENABLE_MLAPO=1(默认启用)；要求: W8A8量化 + 无FlashComm + max_num_batched_tokens <= 1024",
+      "unsuitable_scenarios": [
+        "非W8A8量化的模型",
+        "启用FlashComm(DSA-CP)的场景",
+        "max_num_batched_tokens > 1024的场景",
+        "显存紧张无法容纳融合权重的场景"
+      ],
+      "best_practices": [
+        "生产环境建议启用MLAPO(默认)，除非显存紧张",
+        "确保max_num_batched_tokens <= 1024，避免回退",
+        "KV Consumer场景下MLAPO收益最大(可释放原始权重)",
+        "监控显存占用，必要时禁用MLAPO",
+        "结合W8A8量化使用，获得最佳性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "description": "VLLM_ASCEND_ENABLE_MLAPO环境变量定义",
+          "key_line": "VLLM_ASCEND_ENABLE_MLAPO: lambda: bool(int(os.getenv('VLLM_ASCEND_ENABLE_MLAPO', '1')))"
+        },
+        {
+          "file": "vllm_ascend/attention/sfa_v1.py",
+          "description": "SFA(Sparse Flash Attention)中的MLAPO实现",
+          "key_methods": [
+            "_process_weights_for_fused_mlapo",
+            "_sfa_preprocess_with_mlapo"
+          ]
+        },
+        {
+          "file": "vllm_ascend/attention/mla_v1.py",
+          "description": "MLA(Multi-Head Latent Attention)中的MLAPO实现和MLAPO_MAX_SUPPORTED_TOKENS定义",
+          "key_constants": [
+            "MLAPO_MAX_SUPPORTED_TOKENS = 1024"
+          ]
+        }
+      ],
+      "modification_points": [
+        "调整MLAPO_MAX_SUPPORTED_TOKENS：修改mla_v1.py中的常量(需硬件支持)",
+        "扩展融合算子：在_process_weights_for_fused_mlapo中添加新的权重处理",
+        "添加新的量化支持：修改enable_mlapo的判断条件",
+        "优化权重布局：调整trans_rope_weight和transdata的实现"
+      ],
+      "affected_features": [
+        "w8a8_quantization: MLAPO依赖W8A8量化",
+        "mla_attention: MLAPO优化MLA的前处理步骤",
+        "deepseek_dsa: DSA模型使用SFA，MLAPO优化SFA前处理",
+        "flashcomm: 与MLAPO互斥，需协调使用"
+      ]
+    },
+    "design": {
+      "principle": "MLAPO通过融合MLA注意力的前处理步骤(QKV投影、RoPE、LayerNorm等)为单一算子，减少kernel launch和内存访问开销。核心思想：1)离线预处理权重布局 2)运行时调用融合算子 3)避免中间结果的显存存储 4)针对W8A8量化优化。MLAPO_MAX_SUPPORTED_TOKENS限制来自底层算子的实现约束。",
+      "theory_analysis": "MLA注意力的前处理包括多个步骤：1)QKV投影(矩阵乘法) 2)LayerNorm 3)RoPE位置编码 4)量化/反量化。原生实现需要多次kernel launch和中间结果存储。MLAPO将这些步骤融合为单一算子，理论上可减少50%的kernel launch和30%的内存访问。代价是增加了权重预处理开销和显存占用。token数限制来自融合算子的共享内存和寄存器分配约束。",
+      "design_decisions": [
+        {
+          "decision": "默认启用MLAPO",
+          "rationale": "MLAPO在大多数场景下都有性能提升，默认启用简化用户配置。用户可通过环境变量禁用"
+        },
+        {
+          "decision": "MLAPO_MAX_SUPPORTED_TOKENS=1024",
+          "rationale": "融合算子的共享内存和寄存器分配有上限，超过1024 tokens会导致资源不足。这是硬件约束，无法通过软件优化突破"
+        },
+        {
+          "decision": "与FlashComm互斥",
+          "rationale": "FlashComm需要特殊的通信模式，与MLAPO的融合算子不兼容。未来可能支持，但当前设计选择互斥"
+        },
+        {
+          "decision": "仅支持W8A8量化",
+          "rationale": "MLAPO的融合算子针对W8A8量化优化，其他量化方法需要不同的融合策略。未来可能扩展支持"
+        },
+        {
+          "decision": "KV Consumer场景释放原始权重",
+          "rationale": "在KV Consumer(Decode节点)场景下，MLAPO使用融合权重，原始权重不再需要。释放可节省显存，但需要确保max_num_batched_tokens <= MLAPO_MAX_SUPPORTED_TOKENS"
+        },
+        {
+          "decision": "权重布局预处理",
+          "rationale": "MLAPO需要特殊的权重布局(trans_rope_weight, transdata)，在模型加载时预处理。这增加了加载时间，但避免了运行时开销"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "8b16d603d761398959d9d1d17ba59e2c5d7274cd8e43f955b0c292699810d5ce",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1166
-- read_ref: vllm/vllm/envs.py:158, vllm/vllm/envs.py:1166, vllm/vllm/envs.py:1167
-- effect_ref: vllm/vllm/envs.py:158, vllm/vllm/envs.py:1166, vllm/vllm/envs.py:1167
+- definition_ref: vllm/envs.py:1178
+- read_ref: vllm/vllm/envs.py:159, vllm/vllm/envs.py:1178, vllm/vllm/envs.py:1179
+- effect_ref: vllm/vllm/envs.py:159, vllm/vllm/envs.py:1178, vllm/vllm/envs.py:1179
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

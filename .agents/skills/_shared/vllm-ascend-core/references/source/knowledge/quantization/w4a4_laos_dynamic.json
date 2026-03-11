@@ -1,0 +1,122 @@
+{
+  "id": "quantization:w4_a4_laos_dynamic",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W4A4_LAOS_DYNAMIC",
+  "summary": "LAOS W4A4动态量化方案，权重INT4 per-channel量化，激活INT4 per-token动态量化，通过npu_dynamic_quant实现高效量化，适合极致压缩场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a4_laos_dynamic.py",
+      "lines": "1-75"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_dynamic_quant",
+    "torch_npu.npu_quant_matmul",
+    "torch_npu.npu_convert_weight_to_int4pack"
+  ],
+  "related_features": [
+    "w4a4",
+    "dynamic_quantization",
+    "weight_compression"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持Linear层",
+        "使用quint4x2格式存储量化激活"
+      ],
+      "memory_impact": "权重和激活均为INT4，内存占用减少约75%",
+      "throughput_impact": "极致压缩带来最高吞吐量提升",
+      "latency_impact": "动态量化有开销，但计算效率最高",
+      "test_cases": [
+        {
+          "name": "验证INT4动态量化正确性",
+          "description": ""
+        },
+        {
+          "name": "测试per-token scale计算",
+          "description": ""
+        },
+        {
+          "name": "验证权重转置和打包正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型"
+      ],
+      "enable_config": "quantization: w4a4_dynamic",
+      "unsuitable_scenarios": [
+        "对精度要求较高的场景",
+        "MoE模型（不支持）"
+      ],
+      "best_practices": [
+        "适用于内存极度受限场景",
+        "配合NZ格式优化性能",
+        "注意精度损失较大"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW4A4LaosDynamicLinearMethod: LAOS W4A4实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_weight(): 权重参数定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_perchannel_param(): per-channel参数定义",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply(): 修改npu_dynamic_quant和npu_quant_matmul调用",
+        "process_weights_after_loading(): 修改权重转置和打包逻辑"
+      ],
+      "affected_features": [
+        "linear_layers"
+      ]
+    },
+    "design": {
+      "principle": "LAOS方法：权重per-channel INT4量化，激活per-token INT4动态量化，使用quint4x2格式存储",
+      "theory_analysis": "INT4量化理论精度损失约3-5%，LAOS方法通过per-token动态量化减少精度损失",
+      "design_decisions": [
+        {
+          "decision": "选择最激进的W4A4量化以获得最高压缩率",
+          "reason": ""
+        },
+        {
+          "decision": "使用quint4x2格式存储量化激活",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持Linear层，保持实现简洁",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "830e14878fdcdd951879d8befed1a57513c23d271e23b6be5dbd937ff3c97c7f",
+  "knowledge_domain": "vllm-ascend-core"
+}

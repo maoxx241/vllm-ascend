@@ -1,0 +1,117 @@
+{
+  "id": "operator:npu_ring_mla",
+  "type": "operator",
+  "category": "attention",
+  "name": "npu_ring_mla",
+  "summary": "NPU Ring MLA算子，用于MLA(Multi-Latent Attention)架构的注意力计算，支持高精度kernel和环形计算模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "978-1093"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.atb.npu_ring_mla"
+  ],
+  "related_features": [
+    "mla_attention",
+    "deepseek_v3",
+    "chunked_context"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_paged_cache_load配合加载KV缓存",
+        "与kv_b_proj配合处理latent KV"
+      ],
+      "memory_impact": "需要pre_out和prev_lse用于累积计算",
+      "throughput_impact": "支持kernel_type_high_precision高精度模式",
+      "latency_impact": "环形计算支持分块处理长上下文",
+      "test_cases": [
+        {
+          "name": "prefill首环计算",
+          "description": ""
+        },
+        {
+          "name": "chunked_context累积计算",
+          "description": ""
+        },
+        {
+          "name": "不同mask_type配置",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "其他MLA架构模型"
+      ],
+      "enable_config": "MLA模型自动启用",
+      "unsuitable_scenarios": [
+        "非MLA架构模型"
+      ],
+      "best_practices": [
+        "使用kernel_type_high_precision保证精度",
+        "合理设置chunk大小"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendMLAImpl._forward_prefill",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendMLAImpl._compute_prefill_context",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "kernel_type选择",
+        "mask_type配置",
+        "input_layout设置"
+      ],
+      "affected_features": [
+        "MLA注意力精度",
+        "长上下文处理"
+      ]
+    },
+    "design": {
+      "principle": "将MLA的q_nope、q_rope、k_nope、k_rope分离处理，支持环形累积计算",
+      "theory_analysis": "MLA使用latent KV压缩，需要分离rope和非rope部分",
+      "design_decisions": [
+        {
+          "decision": "支持type_bsnd布局",
+          "reason": ""
+        },
+        {
+          "decision": "mask_type_triu用于因果掩码",
+          "reason": ""
+        },
+        {
+          "decision": "calc_type_first_ring用于首环",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "9dd1bba2c64277b97fe97e00b92d9ad803df90e9230fb3df5a38cfcf891d86b8",
+  "knowledge_domain": "vllm-ascend-core"
+}

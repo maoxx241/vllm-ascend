@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:741
+- definition_ref: vllm/engine/arg_utils.py:740
 - read_ref: vllm/vllm/config/load.py:54, vllm/vllm/engine/arg_utils.py:370, vllm/vllm/engine/arg_utils.py:370
-- effect_ref: vllm/vllm/model_executor/model_loader/weight_utils.py:693, vllm/vllm/model_executor/model_loader/weight_utils.py:703, vllm/vllm/model_executor/model_loader/weight_utils.py:707
+- effect_ref: vllm/vllm/model_executor/model_loader/weight_utils.py:694, vllm/vllm/model_executor/model_loader/weight_utils.py:704, vllm/vllm/model_executor/model_loader/weight_utils.py:708
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:896
+- definition_ref: vllm/engine/arg_utils.py:895
 - read_ref: vllm/vllm/config/parallel.py:139, vllm/vllm/config/parallel.py:339, vllm/vllm/config/parallel.py:342
-- effect_ref: vllm/vllm/config/parallel.py:339, vllm/vllm/engine/arg_utils.py:605, vllm/vllm/model_executor/models/exaone_moe.py:107
+- effect_ref: vllm/vllm/config/parallel.py:339, vllm/vllm/engine/arg_utils.py:607, vllm/vllm/model_executor/models/exaone_moe.py:107
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: ValueError: Async EPLB is only supported with the default policy.; ValueError: num_redundant_experts ... but EPLB is not enabled
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -3,7 +3,7 @@ knowledge_id: vllm-ascend-core.inputs-and-envs-global
 domain: vllm-ascend-core
 knowledge_type: reference
 summary: Code-truth inventory of vLLM-Ascend deployment arguments and environment variables with evidence refs.
-last_verified: "2026-03-06"
+last_verified: "2026-03-11"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---
@@ -11,7 +11,7 @@ freshness: "fresh"
 # vLLM-Ascend Global Inputs and Envs (Code Truth)
 
 - vLLM-Ascend deployment args: **37**
-- vLLM-Ascend env vars: **71**
+- vLLM-Ascend env vars: **68**
 
 ## vLLM-Ascend Deployment Args
 
@@ -63,22 +63,21 @@ freshness: "fresh"
 | `ASCEND_A3_ENABLE` | string | docs/source/tutorials/models/DeepSeek-V3.2.md:528, docs/source/tutorials/models/DeepSeek-V3.2.md:603 |
 | `ASCEND_AGGREGATE_ENABLE` | string | docs/source/tutorials/models/DeepSeek-V3.2.md:525, docs/source/tutorials/models/DeepSeek-V3.2.md:600 |
 | `ASCEND_BUFFER_POOL` | string | docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md:221, docs/source/tutorials/models/DeepSeek-V3.1.md:299 |
-| `ASCEND_CONNECT_TIMEOUT` | string | docs/source/user_guide/feature_guide/kv_pool.md:157, docs/source/user_guide/feature_guide/kv_pool.md:224 |
+| `ASCEND_CONNECT_TIMEOUT` | string | docs/source/user_guide/feature_guide/kv_pool.md:148, docs/source/user_guide/feature_guide/kv_pool.md:215 |
 | `ASCEND_CUSTOM_OPP_PATH` | string | vllm_ascend/platform.py:471, vllm_ascend/platform.py:473 |
-| `ASCEND_ENABLE_USE_FABRIC_MEM` | string | docs/source/user_guide/feature_guide/kv_pool.md:90, vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39 |
-| `ASCEND_HOME_PATH` | string | vllm_ascend/envs.py:58, vllm_ascend/worker/worker.py:166 |
+| `ASCEND_HOME_PATH` | string | vllm_ascend/envs.py:58, vllm_ascend/worker/worker.py:164 |
 | `ASCEND_RT_VISIBLE_DEVICES` | string | docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:272, docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md:331 |
-| `ASCEND_TRANSFER_TIMEOUT` | string | docs/source/user_guide/feature_guide/kv_pool.md:160, docs/source/user_guide/feature_guide/kv_pool.md:225 |
+| `ASCEND_TRANSFER_TIMEOUT` | string | docs/source/user_guide/feature_guide/kv_pool.md:151, docs/source/user_guide/feature_guide/kv_pool.md:216 |
 | `ASCEND_TRANSPORT_PRINT` | string | docs/source/tutorials/models/DeepSeek-V3.2.md:526, docs/source/tutorials/models/DeepSeek-V3.2.md:601 |
 | `CMAKE_BUILD_TYPE` | string | vllm_ascend/envs.py:37 |
 | `COMPILE_CUSTOM_KERNELS` | int | vllm_ascend/envs.py:43 |
 | `CXX_COMPILER` | string | vllm_ascend/envs.py:46 |
 | `C_COMPILER` | string | vllm_ascend/envs.py:49 |
-| `DYNAMIC_EPLB` | string | vllm_ascend/ascend_config.py:429, vllm_ascend/envs.py:105 |
-| `EXPERT_MAP_RECORD` | string | vllm_ascend/ascend_config.py:430, vllm_ascend/patch/platform/__init__.py:23 |
+| `DYNAMIC_EPLB` | string | vllm_ascend/ascend_config.py:422, vllm_ascend/envs.py:105 |
+| `EXPERT_MAP_RECORD` | string | vllm_ascend/ascend_config.py:423, vllm_ascend/patch/platform/__init__.py:23 |
 | `HCCL_BUFFSIZE` | string | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:153, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:220 |
 | `HCCL_CONNECT_TIMEOUT` | string | docs/source/tutorials/models/DeepSeek-V3.1.md:289, docs/source/tutorials/models/DeepSeek-V3.1.md:366 |
-| `HCCL_DETERMINISTIC` | string | docs/source/faqs.md:199, vllm_ascend/batch_invariant.py:85 |
+| `HCCL_DETERMINISTIC` | string | docs/source/faqs.md:199, vllm_ascend/batch_invariant.py:53 |
 | `HCCL_EXEC_TIMEOUT` | string | docs/source/tutorials/models/DeepSeek-V3.1.md:288, docs/source/tutorials/models/DeepSeek-V3.1.md:365 |
 | `HCCL_IF_IP` | string | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:149, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:216 |
 | `HCCL_INTRA_PCIE_ENABLE` | string | docs/source/tutorials/models/DeepSeek-R1.md:153, docs/source/tutorials/models/DeepSeek-R1.md:199 |
@@ -88,37 +87,35 @@ freshness: "fresh"
 | `HCCL_RDMA_TIMEOUT` | string | vllm_ascend/distributed/kv_transfer/utils/utils.py:55 |
 | `HCCL_SOCKET_IFNAME` | string | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:152, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:219 |
 | `HCCL_SO_PATH` | string | vllm_ascend/envs.py:61 |
-| `LCCL_DETERMINISTIC` | string | vllm_ascend/batch_invariant.py:86 |
+| `LCCL_DETERMINISTIC` | string | vllm_ascend/batch_invariant.py:54 |
 | `LOCAL_RANK` | string | examples/offline_external_launcher.py:176, examples/offline_weight_load.py:177 |
 | `MASTER_ADDR` | string | examples/offline_external_launcher.py:173, examples/offline_weight_load.py:174 |
 | `MASTER_PORT` | string | examples/offline_external_launcher.py:174, examples/offline_weight_load.py:175 |
 | `MAX_JOBS` | string | vllm_ascend/envs.py:34 |
-| `MOONCAKE_CONFIG_PATH` | string | vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:125 |
+| `MOONCAKE_CONFIG_PATH` | string | vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:121 |
 | `MSMONITOR_USE_DAEMON` | int | vllm_ascend/envs.py:91 |
 | `OMP_PROC_BIND` | string | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:154, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:221 |
 | `OPENAI_API_KEY` | string | examples/disaggregated_encoder/disagg_epd_proxy.py:650 |
-| `PAGED_ATTENTION_MASK_LEN` | string | tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:12 |
 | `PYTORCH_NPU_ALLOC_CONF` | string | docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:149, docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:152 |
 | `RANK` | string | examples/offline_external_launcher.py:175, examples/offline_weight_load.py:176 |
-| `SERVER_PORT` | string | tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:11, tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:10 |
 | `SOC_VERSION` | string | vllm_ascend/envs.py:53 |
 | `TASK_QUEUE_ENABLE` | string | docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:160, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:160 |
-| `TRITON_ALL_BLOCKS_PARALLEL` | string | vllm_ascend/ops/rotary_embedding.py:497 |
+| `TRITON_ALL_BLOCKS_PARALLEL` | string | vllm_ascend/ops/rotary_embedding.py:489 |
 | `VERBOSE` | int | vllm_ascend/envs.py:55 |
 | `VLLM_ASCEND_BALANCE_SCHEDULING` | int | docs/source/tutorials/models/DeepSeek-R1.md:152, docs/source/tutorials/models/DeepSeek-R1.md:198 |
 | `VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL` | int | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:161, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:227 |
-| `VLLM_ASCEND_ENABLE_FLASHCOMM` | string | vllm_ascend/utils.py:765 |
+| `VLLM_ASCEND_ENABLE_FLASHCOMM` | string | vllm_ascend/utils.py:737 |
 | `VLLM_ASCEND_ENABLE_FLASHCOMM1` | int | docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:155, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:320 |
 | `VLLM_ASCEND_ENABLE_FUSED_MC2` | int | docs/source/tutorials/models/Qwen3-235B-A22B.md:346, docs/source/tutorials/models/Qwen3-235B-A22B.md:392 |
-| `VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE` | int | vllm_ascend/batch_invariant.py:82, vllm_ascend/envs.py:71 |
+| `VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE` | int | vllm_ascend/envs.py:71 |
 | `VLLM_ASCEND_ENABLE_MLAPO` | int | docs/source/tutorials/models/DeepSeek-V3.2.md:141, docs/source/tutorials/models/DeepSeek-V3.2.md:200 |
-| `VLLM_ASCEND_ENABLE_NZ` | int | docs/source/user_guide/feature_guide/sleep_mode.md:81, tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:10 |
-| `VLLM_ASCEND_ENABLE_PREFETCH_MLP` | int | docs/source/tutorials/features/suffix_speculative_decoding.md:84, vllm_ascend/ascend_config.py:150 |
+| `VLLM_ASCEND_ENABLE_NZ` | int | docs/source/user_guide/feature_guide/sleep_mode.md:81, vllm_ascend/batch_invariant.py:50 |
+| `VLLM_ASCEND_ENABLE_PREFETCH_MLP` | int | docs/source/tutorials/features/suffix_speculative_decoding.md:84, vllm_ascend/ascend_config.py:143 |
 | `VLLM_ASCEND_EXTERNAL_DP_LB_ENABLED` | string | docs/source/user_guide/feature_guide/large_scale_ep.md:141, docs/source/user_guide/feature_guide/large_scale_ep.md:208 |
 | `VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE` | int | docs/source/user_guide/feature_guide/layer_sharding.md:53, vllm_ascend/envs.py:79 |
 | `VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK` | int | vllm_ascend/envs.py:117, vllm_ascend/envs.py:118 |
-| `VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE` | int | vllm_ascend/ascend_config.py:153, vllm_ascend/envs.py:87 |
-| `VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE` | int | vllm_ascend/ascend_config.py:152, vllm_ascend/envs.py:83 |
+| `VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE` | int | vllm_ascend/ascend_config.py:146, vllm_ascend/envs.py:87 |
+| `VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE` | int | vllm_ascend/ascend_config.py:145, vllm_ascend/envs.py:83 |
 | `VLLM_DISABLE_SHARED_EXPERTS_STREAM` | string | vllm_ascend/platform.py:31 |
 | `VLLM_DP_MASTER_IP` | string | examples/offline_data_parallel.py:123 |
 | `VLLM_DP_MASTER_PORT` | string | examples/offline_data_parallel.py:124 |

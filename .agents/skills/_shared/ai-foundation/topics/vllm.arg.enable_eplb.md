@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:895
-- read_ref: vllm/vllm/config/parallel.py:137, vllm/vllm/config/parallel.py:324, vllm/vllm/engine/arg_utils.py:419
-- effect_ref: vllm/vllm/config/parallel.py:324, vllm/vllm/engine/arg_utils.py:895, vllm/vllm/model_executor/layers/fused_moe/config.py:884
+- definition_ref: vllm/engine/arg_utils.py:894
+- read_ref: vllm/vllm/config/parallel.py:137, vllm/vllm/config/parallel.py:324, vllm/vllm/distributed/eplb/eplb_utils.py:21
+- effect_ref: vllm/vllm/config/parallel.py:324, vllm/vllm/engine/arg_utils.py:894, vllm/vllm/model_executor/layers/fused_moe/config.py:921
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: ValueError: enable_expert_parallel must be True to use EPLB.; ValueError: EPLB requires tensor_parallel_size or data_parallel_size to be greater than 1.
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

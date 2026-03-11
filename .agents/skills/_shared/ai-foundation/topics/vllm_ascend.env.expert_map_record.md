@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/ascend_config.py:430, vllm_ascend/patch/platform/__init__.py:23
-- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:430, vllm-ascend/vllm_ascend/ascend_config.py:431, vllm-ascend/vllm_ascend/patch/platform/__init__.py:23
+- definition_ref: vllm_ascend/ascend_config.py:423, vllm_ascend/patch/platform/__init__.py:23
+- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:423, vllm-ascend/vllm_ascend/ascend_config.py:424, vllm-ascend/vllm_ascend/patch/platform/__init__.py:23
 - effect_ref: vllm-ascend/vllm_ascend/patch/platform/__init__.py:23
 - web_refs: 3
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

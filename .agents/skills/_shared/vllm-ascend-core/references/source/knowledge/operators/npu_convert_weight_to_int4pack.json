@@ -1,0 +1,98 @@
+{
+  "id": "operator:npu_convert_weight_to_int4pack",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_convert_weight_to_int4pack",
+  "summary": "NPU权重INT4打包算子，将INT4权重打包为INT32格式存储，用于W4A16量化模型的权重压缩存储。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a16.py",
+      "lines": "80-99"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_convert_weight_to_int4pack"
+  ],
+  "related_features": [
+    "w4a16_quantization",
+    "weight_compression",
+    "int4_packing"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与unpack_from_int32配合解包",
+        "与W4A16 MoE配合"
+      ],
+      "memory_impact": "INT4打包减少75%存储",
+      "throughput_impact": "压缩存储减少内存带宽压力",
+      "latency_impact": "需要解包开销",
+      "test_cases": [
+        {
+          "name": "不同shape权重",
+          "description": ""
+        },
+        {
+          "name": "pack_factor=8验证",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "W4A16量化的模型"
+      ],
+      "enable_config": "quantization=W4A16",
+      "unsuitable_scenarios": [
+        "非INT4量化模型"
+      ],
+      "best_practices": [
+        "权重最后一维需被8整除",
+        "打包后transpose处理"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "pack_to_int32",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "W4A16存储效率",
+        "权重加载"
+      ]
+    },
+    "design": {
+      "principle": "将8个INT4值打包到1个INT32中，减少存储空间",
+      "theory_analysis": "INT4范围[-8,7]，打包因子为8(32/4)",
+      "design_decisions": [
+        {
+          "decision": "使用INT32存储",
+          "reason": ""
+        },
+        {
+          "decision": "支持transpose后打包",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "fde65b931f9d2675ca4e9baf3b357ee65b84cb3239ff33d66cada01feffb2d73",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:798
+- definition_ref: vllm/engine/arg_utils.py:797
 - read_ref: vllm/vllm/benchmarks/lib/utils.py:81, vllm/vllm/benchmarks/lib/utils.py:82, vllm/vllm/benchmarks/lib/utils.py:83
-- effect_ref: vllm/vllm/benchmarks/lib/utils.py:82, vllm/vllm/benchmarks/lib/utils.py:83, vllm/vllm/config/compilation.py:1115
+- effect_ref: vllm/vllm/benchmarks/lib/utils.py:82, vllm/vllm/benchmarks/lib/utils.py:83, vllm/vllm/config/compilation.py:1114
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: ValueError: Total number of attention heads ... must be divisible by tensor parallel size; ValueError: tp_size must be divisible by dcp_size
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

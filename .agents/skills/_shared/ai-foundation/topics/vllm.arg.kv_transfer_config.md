@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1197
-- read_ref: vllm/vllm/config/vllm.py:254, vllm/vllm/config/vllm.py:352, vllm/vllm/config/vllm.py:353
-- effect_ref: vllm/vllm/config/vllm.py:352, vllm/vllm/config/vllm.py:564, vllm/vllm/config/vllm.py:1072
+- definition_ref: vllm/engine/arg_utils.py:1202
+- read_ref: vllm/vllm/config/vllm.py:263, vllm/vllm/config/vllm.py:361, vllm/vllm/config/vllm.py:362
+- effect_ref: vllm/vllm/config/vllm.py:361, vllm/vllm/config/vllm.py:573, vllm/vllm/config/vllm.py:1081
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: connector 超时; P/D 节点路由异常
 - value_failure_signals: connector 超时; P/D 节点路由异常
 - recommendation: 先验证连接器与地址，再调并行参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

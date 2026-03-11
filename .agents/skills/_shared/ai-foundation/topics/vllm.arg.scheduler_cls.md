@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1145
+- definition_ref: vllm/engine/arg_utils.py:1150
 - read_ref: vllm/vllm/config/scheduler.py:118, vllm/vllm/config/scheduler.py:154, vllm/vllm/config/scheduler.py:169
 - effect_ref: vllm/vllm/config/scheduler.py:154, vllm/vllm/config/scheduler.py:171, vllm/vllm/config/scheduler.py:172
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: TTFT/TPOT 退化; OOM
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

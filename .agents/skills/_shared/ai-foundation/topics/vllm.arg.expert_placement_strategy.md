@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:897
+- definition_ref: vllm/engine/arg_utils.py:896
 - read_ref: vllm/vllm/config/parallel.py:141, vllm/vllm/engine/arg_utils.py:420, vllm/vllm/engine/arg_utils.py:421
-- effect_ref: vllm/vllm/model_executor/layers/fused_moe/layer.py:126, vllm/vllm/model_executor/layers/fused_moe/layer.py:131, vllm/vllm/model_executor/layers/fused_moe/layer.py:174
+- effect_ref: vllm/vllm/model_executor/layers/fused_moe/layer.py:115, vllm/vllm/model_executor/layers/fused_moe/layer.py:120, vllm/vllm/model_executor/layers/fused_moe/layer.py:163
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 非法枚举值会在配置解析阶段报错。
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

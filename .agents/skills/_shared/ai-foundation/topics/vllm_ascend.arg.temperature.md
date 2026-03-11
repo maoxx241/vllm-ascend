@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/offline_external_launcher.py:126, examples/offline_weight_load.py:135
-- read_ref: vllm/vllm/benchmarks/latency.py:98, vllm/vllm/benchmarks/mm_processor.py:172, vllm/vllm/benchmarks/serve.py:1418
-- effect_ref: vllm/vllm/benchmarks/serve.py:1635, vllm/vllm/config/model.py:267, vllm/vllm/entrypoints/grpc_server.py:287
+- read_ref: vllm/vllm/benchmarks/latency.py:98, vllm/vllm/benchmarks/mm_processor.py:172, vllm/vllm/benchmarks/serve.py:1437
+- effect_ref: vllm/vllm/benchmarks/serve.py:1683, vllm/vllm/config/model.py:263, vllm/vllm/entrypoints/grpc_server.py:287
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

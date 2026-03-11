@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:789
-- read_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:83, vllm/vllm/benchmarks/sweep/plot_pareto.py:357, vllm/vllm/config/model.py:1059
-- effect_ref: vllm/vllm/config/model.py:1060, vllm/vllm/config/parallel.py:205, vllm/vllm/config/vllm.py:964
+- definition_ref: vllm/engine/arg_utils.py:788
+- read_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:83, vllm/vllm/benchmarks/sweep/plot_pareto.py:357, vllm/vllm/config/model.py:1063
+- effect_ref: vllm/vllm/config/model.py:1064, vllm/vllm/config/parallel.py:205, vllm/vllm/config/vllm.py:973
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: NotImplementedError: Pipeline parallelism is not supported for this model; unsupported: Pipeline Parallelism without Ray/mp/external launcher
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

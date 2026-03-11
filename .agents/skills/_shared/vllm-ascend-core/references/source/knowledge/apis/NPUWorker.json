@@ -1,0 +1,126 @@
+{
+  "id": "api:npuworker",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "NPUWorker",
+  "summary": "NPU Worker类，负责华为昇腾NPU设备上的模型加载、内存管理、推理执行和ACL Graph捕获",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/worker.py",
+      "lines": "76-663"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ",
+    "VLLM_USE_V2_MODEL_RUNNER",
+    "COMPILE_CUSTOM_KERNELS"
+  ],
+  "related_apis": [
+    "NPUModelRunner",
+    "CaMemAllocator",
+    "AscendConfig",
+    "NPUCommunicator"
+  ],
+  "related_features": [
+    "acl_graph",
+    "sleep_mode_npu",
+    "context_parallel",
+    "eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "init_device()初始化NPU设备",
+        "load_model()加载模型",
+        "execute_model()执行推理",
+        "sleep()/wake_up()休眠唤醒"
+      ],
+      "memory_impact": "使用CaMemAllocator管理内存，支持sleep mode释放显存",
+      "throughput_impact": "ACL Graph优化提升吞吐量，支持Context Parallel扩展",
+      "latency_impact": "ACL Graph降低kernel launch开销",
+      "test_cases": [
+        {
+          "name": "NPU设备初始化测试",
+          "description": ""
+        },
+        {
+          "name": "模型加载测试",
+          "description": ""
+        },
+        {
+          "name": "ACL Graph捕获测试",
+          "description": ""
+        },
+        {
+          "name": "sleep/wake测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有昇腾NPU支持的模型"
+      ],
+      "enable_config": "由Executor自动创建，通过HCCL通信连接",
+      "unsuitable_scenarios": [
+        "非昇腾NPU设备"
+      ],
+      "best_practices": [
+        "启用ACL Graph优化性能",
+        "使用CaMemAllocator支持sleep mode",
+        "配置CPU binding优化性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/worker.py:76-663",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "_init_device()设备初始化",
+        "determine_available_memory()内存计算",
+        "execute_model()执行逻辑"
+      ],
+      "affected_features": [
+        "NPU内存管理",
+        "ACL Graph",
+        "分布式推理"
+      ]
+    },
+    "design": {
+      "principle": "适配华为昇腾NPU架构，使用HCCL通信和ACL Graph优化",
+      "theory_analysis": "使用CaMemAllocator实现CANN内存池管理，支持权重卸载",
+      "design_decisions": [
+        {
+          "decision": "支持V1/V2 Model Runner",
+          "reason": ""
+        },
+        {
+          "decision": "集成ACL Graph捕获",
+          "reason": ""
+        },
+        {
+          "decision": "支持Context Parallel",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "31b0743ed5a59d8c78c6efc75f1511afa9b6533fa1fcbb487a670134108c4807",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1236
-- read_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1263, vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1298, vllm/vllm/envs.py:173
-- effect_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1263, vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1298, vllm/vllm/envs.py:173
+- definition_ref: vllm/envs.py:1248
+- read_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1263, vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1298, vllm/vllm/envs.py:174
+- effect_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1263, vllm/vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_connector.py:1298, vllm/vllm/envs.py:174
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

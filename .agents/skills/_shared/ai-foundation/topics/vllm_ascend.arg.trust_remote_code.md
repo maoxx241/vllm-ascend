@@ -34,7 +34,7 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/offline_data_parallel.py:88, examples/offline_external_launcher.py:121, examples/offline_weight_load.py:130
-- read_ref: vllm/vllm/benchmarks/serve.py:1571, vllm/vllm/benchmarks/serve.py:1571, vllm/vllm/benchmarks/throughput.py:257
+- read_ref: vllm/vllm/benchmarks/datasets.py:1888, vllm/vllm/benchmarks/datasets.py:1888, vllm/vllm/benchmarks/datasets.py:2453
 - effect_ref: vllm/vllm/model_executor/models/nemotron_vl.py:430, vllm/vllm/model_executor/models/transformers/utils.py:228, vllm/vllm/tokenizers/hf.py:97
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 401/403; TLS 握手失败
 - value_failure_signals: 401/403; TLS 握手失败
 - recommendation: 生产默认开启鉴权并最小化 CORS 白名单。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

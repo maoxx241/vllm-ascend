@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1232
-- read_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/nixl_connector.py:524, vllm/vllm/envs.py:172, vllm/vllm/envs.py:1232
-- effect_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/nixl_connector.py:524, vllm/vllm/envs.py:172, vllm/vllm/envs.py:1232
+- definition_ref: vllm/envs.py:1244
+- read_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/nixl_connector.py:524, vllm/vllm/envs.py:173, vllm/vllm/envs.py:1244
+- effect_ref: vllm/vllm/distributed/kv_transfer/kv_connector/v1/nixl_connector.py:524, vllm/vllm/envs.py:173, vllm/vllm/envs.py:1244
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

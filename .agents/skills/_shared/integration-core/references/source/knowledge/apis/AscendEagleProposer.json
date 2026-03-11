@@ -1,0 +1,117 @@
+{
+  "id": "api:ascend_eagle_proposer",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendEagleProposer",
+  "summary": "昇腾Eagle推测解码提议器，实现Eagle/Eagle3方法的投机采样",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/spec_decode/eagle_proposer.py",
+      "lines": "83-200"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "EagleProposer",
+    "ACLGraphWrapper",
+    "AttentionMaskBuilder"
+  ],
+  "related_features": [
+    "speculative_decoding",
+    "eagle",
+    "acl_graph"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "propose()生成推测token",
+        "load_model()加载draft模型",
+        "dummy_run()预热运行"
+      ],
+      "memory_impact": "管理draft模型和推测token缓冲区",
+      "throughput_impact": "推测解码提升吞吐量",
+      "latency_impact": "减少解码迭代次数",
+      "test_cases": [
+        {
+          "name": "Eagle推测测试",
+          "description": ""
+        },
+        {
+          "name": "Eagle3推测测试",
+          "description": ""
+        },
+        {
+          "name": "MTP模式测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "LLaMA系列(支持Eagle)",
+        "Qwen系列(支持Eagle)"
+      ],
+      "enable_config": "配置speculative_config启用",
+      "unsuitable_scenarios": [
+        "不支持Eagle的模型"
+      ],
+      "best_practices": [
+        "使用ACL Graph优化",
+        "配置合理的speculative tokens数"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/spec_decode/eagle_proposer.py:83-200",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "__init__()初始化",
+        "load_model()模型加载",
+        "推测逻辑"
+      ],
+      "affected_features": [
+        "推测解码",
+        "Eagle方法"
+      ]
+    },
+    "design": {
+      "principle": "继承EagleProposer，适配NPU特性",
+      "theory_analysis": "使用draft模型快速生成候选token，target模型验证",
+      "design_decisions": [
+        {
+          "decision": "支持ACL Graph",
+          "reason": ""
+        },
+        {
+          "decision": "支持PCP/DCP",
+          "reason": ""
+        },
+        {
+          "decision": "支持MTP模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "4c4bd51b4cbd79fe31a3a20b170f7a19ee6dca2e5f0766d94840ea01aa98097f",
+  "knowledge_domain": "integration-core"
+}

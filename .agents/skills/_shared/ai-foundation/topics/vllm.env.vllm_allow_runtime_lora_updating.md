@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:861
-- read_ref: vllm/vllm/entrypoints/cli/serve.py:234, vllm/vllm/entrypoints/cli/serve.py:236, vllm/vllm/entrypoints/openai/engine/serving.py:752
-- effect_ref: vllm/vllm/entrypoints/cli/serve.py:234, vllm/vllm/entrypoints/serve/lora/api_router.py:27
+- definition_ref: vllm/envs.py:873
+- read_ref: vllm/vllm/entrypoints/cli/serve.py:235, vllm/vllm/entrypoints/cli/serve.py:237, vllm/vllm/entrypoints/openai/engine/serving.py:751
+- effect_ref: vllm/vllm/entrypoints/cli/serve.py:235, vllm/vllm/entrypoints/serve/lora/api_router.py:27
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: ValueError: VLLM_ALLOW_RUNTIME_LORA_UPDATING cannot be used with api_server_count > 1; warning: LoRA dynamic loading & unloading is enabled ... ONLY be used for local development
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

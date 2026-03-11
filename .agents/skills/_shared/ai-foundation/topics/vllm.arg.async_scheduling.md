@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1152
+- definition_ref: vllm/engine/arg_utils.py:1157
 - read_ref: vllm/vllm/config/scheduler.py:131, vllm/vllm/config/scheduler.py:155, vllm/vllm/config/scheduler.py:203
-- effect_ref: vllm/vllm/config/scheduler.py:155, vllm/vllm/config/vllm.py:618, vllm/vllm/config/vllm.py:647
+- effect_ref: vllm/vllm/config/scheduler.py:155, vllm/vllm/config/vllm.py:627, vllm/vllm/config/vllm.py:656
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: ValueError: async scheduling only supports mp/uni/external_launcher; ValueError: not compatible with disable_padded_drafter_batch=True
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,99 @@
+{
+  "id": "operator:npu_scatter_pa_kv_cache",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_scatter_pa_kv_cache",
+  "summary": "NPU分散PA KV缓存算子(A5专用)，A5设备优化的KV缓存写入操作，用于PagedAttention场景。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "158-162"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_scatter_pa_kv_cache"
+  ],
+  "related_features": [
+    "kv_cache",
+    "paged_attention",
+    "a5_optimization"
+  ],
+  "device_specific": "A5",
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与slot_mapping配合",
+        "与key_cache/value_cache配合"
+      ],
+      "memory_impact": "A5优化内存访问模式",
+      "throughput_impact": "A5专用优化提升KV缓存写入吞吐",
+      "latency_impact": "专用硬件实现低延迟",
+      "test_cases": [
+        {
+          "name": "A5设备decode场景",
+          "description": ""
+        },
+        {
+          "name": "不同block_size",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "A5设备上的所有模型"
+      ],
+      "enable_config": "A5设备自动启用",
+      "unsuitable_scenarios": [
+        "非A5设备"
+      ],
+      "best_practices": [
+        "value需要contiguous",
+        "slot_mapping正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "A5DeviceAdaptor.reshape_and_cache",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "A5 KV缓存效率"
+      ]
+    },
+    "design": {
+      "principle": "A5硬件优化的scatter操作，用于非连续KV缓存写入",
+      "theory_analysis": "PagedAttention需要非连续内存访问，A5有专用优化",
+      "design_decisions": [
+        {
+          "decision": "仅A5设备使用",
+          "reason": ""
+        },
+        {
+          "decision": "替代_npu_reshape_and_cache",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "fd24c94ce78b9e21810f86f84a23eac94a2b04edff18c0bc4822fc2bf42efed2",
+  "knowledge_domain": "integration-core"
+}

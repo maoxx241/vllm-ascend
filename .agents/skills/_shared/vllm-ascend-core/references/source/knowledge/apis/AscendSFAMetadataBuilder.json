@@ -1,0 +1,100 @@
+{
+  "id": "api:ascend_sfametadata_builder",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendSFAMetadataBuilder",
+  "summary": "昇腾SFA元数据构建器，构建稀疏attention所需的元数据，包括稀疏模式和块信息",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "30-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendSFABackend",
+    "AscendSFAImpl",
+    "AttentionMetadataBuilder"
+  ],
+  "related_features": [
+    "sparse_attention",
+    "long_context"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "build()构建元数据",
+        "reuse()重用元数据"
+      ],
+      "memory_impact": "轻量级元数据对象",
+      "throughput_impact": "高效的元数据构建减少开销",
+      "latency_impact": "优化的构建流程降低延迟",
+      "test_cases": [
+        {
+          "name": "元数据构建测试",
+          "description": ""
+        },
+        {
+          "name": "元数据重用测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持稀疏attention的模型"
+      ],
+      "enable_config": "由AscendSFABackend自动使用",
+      "unsuitable_scenarios": [
+        "非稀疏场景"
+      ],
+      "best_practices": [
+        "合理配置稀疏块大小"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/sfa_v1.py:30-100",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "build()构建逻辑",
+        "新增元数据字段"
+      ],
+      "affected_features": [
+        "稀疏Attention元数据"
+      ]
+    },
+    "design": {
+      "principle": "实现AttentionMetadataBuilder接口，构建SFA所需元数据",
+      "theory_analysis": "根据请求特征构建最优的稀疏模式",
+      "design_decisions": [
+        {
+          "decision": "支持元数据重用",
+          "reason": ""
+        },
+        {
+          "decision": "优化构建效率",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "bf6b3cdc3c6f5f1f072fe1777c0601bf6c845f131c9df6f49fcd9937420c146e",
+  "knowledge_domain": "vllm-ascend-core"
+}

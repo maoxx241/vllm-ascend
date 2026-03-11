@@ -1,0 +1,235 @@
+{
+  "id": "feature:mc2_communication",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "MC2通信",
+  "summary": "MoE模型专家并行通信优化，支持ALLGATHER/MC2/ALLTOALL/FUSED_MC2四种模式，根据设备类型、EP配置、token数量和量化类型自动选择最优通信方式",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "24-29"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "198-272"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "43-55"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "228-318"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "select_moe_comm_method",
+    "get_moe_comm_method",
+    "setup_moe_comm_method"
+  ],
+  "related_features": [
+    "FlashComm1",
+    "FusedMC2",
+    "EPLB",
+    "ExpertParallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "FlashComm1",
+        "FusedMC2",
+        "EPLB动态负载均衡",
+        "ExpertParallel",
+        "量化配置"
+      ],
+      "memory_impact": "ALLGATHER: 每个rank持有完整expert副本，显存最高；MC2/ALLTOALL: 按EP分片，显存适中；FUSED_MC2: 融合算子，显存最优",
+      "throughput_impact": "A2设备: MC2相比ALLGATHER提升20-30%；A3设备: FUSED_MC2相比MC2再提升10-15%；A5设备: MC2相比ALLTOALL提升15-25%",
+      "latency_impact": "小token场景MC2可能略高于ALLGATHER；大token场景MC2/ALLTOALL延迟显著降低",
+      "test_cases": [
+        {
+          "name": "A2设备通信选择测试",
+          "description": "验证A2设备上ALLGATHER/MC2的选择逻辑（token<=capacity且DP>=16时选MC2）",
+          "threshold": 0
+        },
+        {
+          "name": "A3设备通信选择测试",
+          "description": "验证A3设备上MC2/ALLTOALL/FUSED_MC2的选择逻辑",
+          "threshold": 0
+        },
+        {
+          "name": "A5设备通信选择测试",
+          "description": "验证A5设备上MC2/ALLTOALL的选择逻辑",
+          "threshold": 0
+        },
+        {
+          "name": "mc2_tokens_capacity边界测试",
+          "description": "验证token数量超过mc2_tokens_capacity时的回退行为",
+          "threshold": 0
+        },
+        {
+          "name": "量化类型兼容性测试",
+          "description": "验证w8a8_dynamic量化下FUSED_MC2的启用条件",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen3-MoE",
+        "Mixtral"
+      ],
+      "enable_config": "自动选择，无需手动配置；可通过VLLM_ASCEND_ENABLE_FUSED_MC2控制FUSED_MC2模式",
+      "unsuitable_scenarios": [
+        "310P设备仅支持ALLGATHER",
+        "EP=1时回退到ALLGATHER",
+        "非w8a8_dynamic量化无法使用FUSED_MC2"
+      ],
+      "best_practices": [
+        "A2设备建议EP配置使world_size_across_dp/PP >= 16以启用MC2",
+        "A3设备推荐使用w8a8_dynamic量化以启用FUSED_MC2",
+        "A5设备建议配置DP>1以启用MC2",
+        "大token场景优先使用MC2/ALLTOALL",
+        "小token场景ALLGATHER可能更优"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_forward_context.py",
+          "function": "MoECommType",
+          "lines": "24-29",
+          "purpose": "定义四种通信类型枚举：ALLGATHER/MC2/ALLTOALL/FUSED_MC2"
+        },
+        {
+          "file": "vllm_ascend/ascend_forward_context.py",
+          "function": "select_moe_comm_method",
+          "lines": "198-272",
+          "purpose": "核心选择逻辑，根据设备类型、EP配置、token数量、量化类型选择通信方式"
+        },
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+          "function": "setup_moe_comm_method",
+          "lines": "50-54",
+          "purpose": "初始化四种通信方法的实现类"
+        },
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+          "function": "AllGatherCommImpl",
+          "lines": "228-256",
+          "purpose": "ALLGATHER实现，使用npu_moe_init_routing_v2和npu_moe_token_unpermute"
+        },
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+          "function": "MC2CommImpl",
+          "lines": "258-273",
+          "purpose": "MC2实现，使用npu_moe_distribute_dispatch和npu_moe_distribute_combine"
+        },
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+          "function": "AlltoAllCommImpl",
+          "lines": "275-294",
+          "purpose": "ALLTOALL实现，使用all-to-all通信交换token"
+        }
+      ],
+      "modification_points": [
+        "ascend_forward_context.py: 修改select_moe_comm_method选择逻辑",
+        "moe_comm_method.py: 添加新的通信方法实现",
+        "envs.py: 添加新的通信相关环境变量"
+      ],
+      "affected_features": [
+        "MoE层前向计算",
+        "Expert并行通信",
+        "量化兼容性",
+        "mc2_mask管理"
+      ]
+    },
+    "design": {
+      "principle": "根据硬件特性、并行配置和数据特征自动选择最优通信方式，实现通信与计算的最大重叠",
+      "theory_analysis": "MoE模型的通信模式直接影响性能：ALLGATHER通信量最大但实现简单；MC2通过通信计算重叠减少延迟；ALLTOALL适合DP场景；FUSED_MC2通过算子融合进一步优化。选择逻辑基于：1)设备类型决定可用算子；2)EP配置决定是否需要跨rank通信；3)token数量决定通信开销占比；4)量化类型决定是否支持融合算子。",
+      "design_decisions": [
+        {
+          "decision": "A2设备：token<=capacity且DP>=16时选MC2，否则ALLGATHER",
+          "reason": "A2设备MC2算子性能优异，但需要足够的DP规模才能发挥优势。DP>=16时通信带宽利用率高，MC2收益明显。"
+        },
+        {
+          "decision": "A3设备：优先FUSED_MC2，其次MC2，最后ALLTOALL",
+          "reason": "A3设备支持dispatch_ffn_combine和dispatch_gmm_combine_decode融合算子，性能最优。但需要w8a8_dynamic量化和EP<=32。"
+        },
+        {
+          "decision": "A5设备：DP>1且token<=capacity时选MC2，否则ALLTOALL",
+          "reason": "A5设备MC2算子性能优异，但需要DP配置才能启用。无DP时回退到ALLTOALL。"
+        },
+        {
+          "decision": "310P设备：仅支持ALLGATHER",
+          "reason": "310P设备不支持MC2相关算子，只能使用ALLGATHER。"
+        },
+        {
+          "decision": "mc2_tokens_capacity限制MC2使用",
+          "reason": "MC2算子有预分配内存容量限制，超过容量时需要回退到ALLGATHER或ALLTOALL，避免内存溢出。"
+        }
+      ],
+      "communication_types": [
+        {
+          "type": "ALLGATHER",
+          "description": "每个rank持有完整expert副本，通信量最大，实现最简单，兼容性最好",
+          "suitable_for": [
+            "EP=1",
+            "310P设备",
+            "小token场景"
+          ]
+        },
+        {
+          "type": "MC2",
+          "description": "通信计算重叠，使用npu_moe_distribute_dispatch/combine，延迟低",
+          "suitable_for": [
+            "A2设备(DP>=16)",
+            "A3设备",
+            "A5设备(DP>1)",
+            "大token场景"
+          ]
+        },
+        {
+          "type": "ALLTOALL",
+          "description": "使用all-to-all通信交换token，适合DP场景",
+          "suitable_for": [
+            "A3设备(大token)",
+            "A5设备(无DP)",
+            "DP场景"
+          ]
+        },
+        {
+          "type": "FUSED_MC2",
+          "description": "融合dispatch+compute+combine，性能最优",
+          "suitable_for": [
+            "A3设备",
+            "w8a8_dynamic量化",
+            "EP<=32",
+            "非MTP模式"
+          ]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "46e7971c97a3f08081e6226595614f5b609329bd0ff274b10e7bf1f95719fcac",
+  "knowledge_domain": "vllm-ascend-core"
+}

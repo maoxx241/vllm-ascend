@@ -1,0 +1,103 @@
+{
+  "id": "api:device_operator",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "DeviceOperator",
+  "summary": "设备操作器，根据NPU设备类型选择对应的优化实现",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "1-50"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "BaseDeviceAdaptor",
+    "A5DeviceAdaptor"
+  ],
+  "related_features": [
+    "device_adaptation",
+    "npu_optimization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "reshape_and_cache() KV Cache操作",
+        "npu_moe_init_routing() MoE路由",
+        "npu_dynamic_quant() 动态量化"
+      ],
+      "memory_impact": "管理操作相关的临时内存",
+      "throughput_impact": "设备特定优化提升吞吐量",
+      "latency_impact": "优化的kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "A2设备测试",
+          "description": ""
+        },
+        {
+          "name": "A3设备测试",
+          "description": ""
+        },
+        {
+          "name": "A5设备测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "自动检测设备类型选择适配器",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "使用设备特定优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/device/device_op.py:1-50",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "设备检测逻辑",
+        "适配器选择"
+      ],
+      "affected_features": [
+        "设备适配",
+        "性能优化"
+      ]
+    },
+    "design": {
+      "principle": "根据设备类型选择最优实现",
+      "theory_analysis": "不同NPU代际有不同的优化kernel",
+      "design_decisions": [
+        {
+          "decision": "支持A2/A3/A5设备",
+          "reason": ""
+        },
+        {
+          "decision": "自动选择适配器",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2498f74adb03d0def0f5c5bb162c6e9594c3ddf810f5405ddf3c60fe89ead447",
+  "knowledge_domain": "vllm-ascend-core"
+}

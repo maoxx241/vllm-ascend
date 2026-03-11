@@ -1,0 +1,113 @@
+{
+  "id": "api:eplb_updator",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "EplbUpdator",
+  "summary": "EPLB更新器，实现Expert Parallel负载均衡的动态更新",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/eplb_updator.py",
+      "lines": "50-200"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_EPLB"
+  ],
+  "related_apis": [
+    "VllmEplbAdaptor",
+    "MoECommMethod"
+  ],
+  "related_features": [
+    "eplb",
+    "load_balancing",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "update()更新负载均衡",
+        "get_expert_map()获取专家映射"
+      ],
+      "memory_impact": "管理专家映射表",
+      "throughput_impact": "负载均衡提升吞吐量",
+      "latency_impact": "动态更新有额外开销",
+      "test_cases": [
+        {
+          "name": "负载均衡测试",
+          "description": ""
+        },
+        {
+          "name": "动态更新测试",
+          "description": ""
+        },
+        {
+          "name": "专家映射测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "配置enable_eplb启用",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "EP=1场景"
+      ],
+      "best_practices": [
+        "定期更新负载均衡",
+        "监控专家负载"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/eplb/eplb_updator.py:50-200",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "update()更新逻辑",
+        "负载均衡算法"
+      ],
+      "affected_features": [
+        "负载均衡",
+        "MoE性能"
+      ]
+    },
+    "design": {
+      "principle": "动态调整专家映射实现负载均衡",
+      "theory_analysis": "根据专家负载动态调整token分配",
+      "design_decisions": [
+        {
+          "decision": "支持动态更新",
+          "reason": ""
+        },
+        {
+          "decision": "支持log2phy映射",
+          "reason": ""
+        },
+        {
+          "decision": "集成到MoE通信",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "892e9e833922ee19d1efcc4c91127268e5c65fe3c1f88da7d4a12201626be5cd",
+  "knowledge_domain": "vllm-ascend-core"
+}

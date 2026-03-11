@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:953
-- read_ref: vllm/vllm/config/cache.py:117, vllm/vllm/config/cache.py:123, vllm/vllm/config/cache.py:124
-- effect_ref: vllm/vllm/config/cache.py:123, vllm/vllm/model_executor/layers/mamba/mamba_utils.py:27
+- definition_ref: vllm/engine/arg_utils.py:955
+- read_ref: vllm/vllm/config/cache.py:128, vllm/vllm/config/cache.py:134, vllm/vllm/config/cache.py:135
+- effect_ref: vllm/vllm/config/cache.py:134, vllm/vllm/model_executor/layers/mamba/mamba_utils.py:27
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

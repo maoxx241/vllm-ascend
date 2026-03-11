@@ -1,0 +1,109 @@
+{
+  "id": "env_var:soc_version",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "SOC_VERSION",
+  "summary": "指定Ascend芯片版本，用于包编译时确定目标硬件平台",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "50-53"
+    }
+  ],
+  "related_env_vars": [
+    "ASCEND_HOME_PATH"
+  ],
+  "related_apis": [
+    "get_ascend_device_type"
+  ],
+  "related_features": [
+    "device_adaptor",
+    "custom_ops"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "影响自定义算子编译",
+        "与设备类型检测交互"
+      ],
+      "memory_impact": "不同SOC版本可能有不同的内存优化策略",
+      "throughput_impact": "正确的SOC版本可启用特定优化",
+      "latency_impact": "正确的SOC版本可启用特定优化",
+      "test_cases": [
+        {
+          "name": "SOC版本检测测试",
+          "description": "验证npu-smi查询SOC版本的正确性",
+          "threshold": 0
+        },
+        {
+          "name": "编译目标测试",
+          "description": "验证SOC版本对编译的影响",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export SOC_VERSION=Ascend910B1",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "编译时设置正确的SOC版本",
+        "未设置时通过npu-smi自动查询",
+        "确保版本与实际硬件匹配"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "50-53",
+          "purpose": "环境变量定义，默认值为None(自动查询)"
+        },
+        {
+          "file": "vllm_ascend/csrc/build_aclnn.sh",
+          "function": "N/A",
+          "lines": "28-83",
+          "purpose": "使用SOC_VERSION编译自定义算子"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值或验证逻辑"
+      ],
+      "affected_features": [
+        "custom_ops",
+        "device_adaptor"
+      ]
+    },
+    "design": {
+      "principle": "SOC版本决定编译目标，不同芯片版本有不同的指令集和优化策略",
+      "theory_analysis": "Ascend芯片系列包括910A、910B1、910B2、310P等，不同版本有不同的计算能力和优化特性",
+      "design_decisions": [
+        {
+          "decision": "支持自动查询",
+          "reason": "未设置时通过npu-smi自动查询，简化部署"
+        },
+        {
+          "decision": "允许手动指定",
+          "reason": "某些场景(如交叉编译)需要手动指定目标版本"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "af2f0fa959bd6fe719baa4db1f5219b3afe0dc83cc8fae88d7bdfd05cd3664fc",
+  "knowledge_domain": "vllm-ascend-core"
+}

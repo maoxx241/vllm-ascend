@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:759
-- read_ref: vllm/vllm/engine/arg_utils.py:561, vllm/vllm/engine/arg_utils.py:1725, vllm/vllm/engine/arg_utils.py:1728
-- effect_ref: vllm/vllm/engine/arg_utils.py:1725, vllm/vllm/engine/arg_utils.py:1732, vllm/vllm/model_executor/layers/batch_invariant.py:1021
+- definition_ref: vllm/engine/arg_utils.py:758
+- read_ref: vllm/vllm/engine/arg_utils.py:561, vllm/vllm/engine/arg_utils.py:1741, vllm/vllm/engine/arg_utils.py:1744
+- effect_ref: vllm/vllm/engine/arg_utils.py:1741, vllm/vllm/engine/arg_utils.py:1748, vllm/vllm/model_executor/layers/batch_invariant.py:1021
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

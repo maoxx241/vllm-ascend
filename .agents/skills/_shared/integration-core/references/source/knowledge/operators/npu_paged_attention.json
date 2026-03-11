@@ -1,0 +1,117 @@
+{
+  "id": "operator:npu_paged_attention",
+  "type": "operator",
+  "category": "attention",
+  "name": "npu_paged_attention",
+  "summary": "NPU分页注意力算子，专为decode阶段优化，通过block_table实现KV缓存分页管理，支持高效的内存访问模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/attention_v1.py",
+      "lines": "621-683, 838-858"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu._npu_paged_attention",
+    "torch_npu._npu_paged_attention_get_workspace"
+  ],
+  "related_features": [
+    "paged_attention",
+    "decode_optimization",
+    "kv_cache_management"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与block_table配合管理KV缓存页",
+        "与context_lens配合处理不同序列长度"
+      ],
+      "memory_impact": "需要workspace内存，通过_npu_paged_attention_get_workspace获取大小",
+      "throughput_impact": "decode阶段专用优化，避免变长序列开销",
+      "latency_impact": "单token decode场景延迟最优",
+      "test_cases": [
+        {
+          "name": "单序列decode",
+          "description": ""
+        },
+        {
+          "name": "多序列batch decode",
+          "description": ""
+        },
+        {
+          "name": "不同block_size配置",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用PagedAttention的模型"
+      ],
+      "enable_config": "decode阶段且token数满足条件时自动启用",
+      "unsuitable_scenarios": [
+        "prefill阶段",
+        "sliding_window场景"
+      ],
+      "best_practices": [
+        "block_size=128为最优配置",
+        "确保key_cache/value_cache格式正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendAttentionBackendImpl.forward_paged_attention",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendAttentionBackendImpl.full_graph_pa",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "scale_value计算",
+        "block_table格式"
+      ],
+      "affected_features": [
+        "decode性能",
+        "图捕获模式"
+      ]
+    },
+    "design": {
+      "principle": "使用block_table索引实现非连续内存访问，支持KV缓存分页存储",
+      "theory_analysis": "decode阶段每个序列只有1个query token，使用PA避免变长序列padding",
+      "design_decisions": [
+        {
+          "decision": "decode专用路径",
+          "reason": ""
+        },
+        {
+          "decision": "支持图捕获模式",
+          "reason": ""
+        },
+        {
+          "decision": "workspace预分配",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "fea09cf1822ec49bb9e7b0b88f8fdca240dae9d1a5457ff48e8dd99e81933bd9",
+  "knowledge_domain": "integration-core"
+}

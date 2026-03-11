@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1211
-- read_ref: vllm/vllm/config/vllm.py:263, vllm/vllm/config/vllm.py:360, vllm/vllm/config/vllm.py:361
-- effect_ref: vllm/vllm/config/vllm.py:360, vllm/vllm/config/vllm.py:361, vllm/vllm/config/vllm.py:361
+- definition_ref: vllm/engine/arg_utils.py:1216
+- read_ref: vllm/vllm/config/vllm.py:272, vllm/vllm/config/vllm.py:369, vllm/vllm/config/vllm.py:370
+- effect_ref: vllm/vllm/config/vllm.py:369, vllm/vllm/config/vllm.py:370, vllm/vllm/config/vllm.py:370
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: RuntimeError: Xlite graph mode incompatible with current setup; ValueError/AssertionError: finegrained_tp_config 或 eplb_config 校验失败
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

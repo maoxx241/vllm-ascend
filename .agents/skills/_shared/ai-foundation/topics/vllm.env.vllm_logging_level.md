@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:645
+- definition_ref: vllm/envs.py:657
 - read_ref: vllm/vllm/compilation/cuda_graph.py:161, vllm/vllm/compilation/cuda_graph.py:177, vllm/vllm/config/device.py:58
 - effect_ref: vllm/vllm/logger.py:247, vllm/vllm/utils/system_utils.py:74
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

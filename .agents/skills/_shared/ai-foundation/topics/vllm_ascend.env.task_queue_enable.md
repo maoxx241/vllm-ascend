@@ -14,7 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `model_selection`
 - status/confidence: `upstream_delta` / `0.55`
-- source: `multi_source` / source_tags: docs_export, tests_yaml
+- source: `docs_export` / source_tags: docs_export
 - semantics: 控制 Ascend 任务队列执行模式，常与高并发服务配置同时启用。
 - aliases: `TASK_QUEUE_ENABLE`, `task_queue_enable`, `task-queue-enable`, `task queue enable`, `model_selection`, `model selection`, `model-selection`
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 高并发下吞吐抖动或稳定性下降。
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,111 @@
+{
+  "id": "api:v1_llmengine",
+  "type": "api",
+  "category": "vllm",
+  "name": "V1 LLMEngine",
+  "summary": "vLLM V1架构的同步引擎核心类，提供统一的同步推理接口",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/engine/llm_engine.py",
+      "lines": "48-430"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_V1_MULTIPROCESSING"
+  ],
+  "related_apis": [
+    "AsyncLLM",
+    "EngineCoreClient",
+    "InputProcessor",
+    "OutputProcessor"
+  ],
+  "related_features": [
+    "continuous_batching",
+    "chunked_prefill",
+    "cuda_graph"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "step()执行推理步骤",
+        "add_request()添加请求",
+        "abort_request()取消请求",
+        "has_unfinished_requests()检查状态"
+      ],
+      "memory_impact": "管理KV Cache和模型权重内存",
+      "throughput_impact": "V1架构优化提升吞吐量",
+      "latency_impact": "优化的调度降低延迟",
+      "test_cases": [
+        {
+          "name": "单请求测试",
+          "description": ""
+        },
+        {
+          "name": "多请求并发测试",
+          "description": ""
+        },
+        {
+          "name": "调度测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有HuggingFace transformers模型"
+      ],
+      "enable_config": "from_vllm_config()创建实例",
+      "unsuitable_scenarios": [
+        "需要异步接口的在线服务"
+      ],
+      "best_practices": [
+        "使用多进程模式隔离计算"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/engine/llm_engine.py:48-430",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "step()执行逻辑",
+        "调度策略"
+      ],
+      "affected_features": [
+        "同步推理",
+        "调度"
+      ]
+    },
+    "design": {
+      "principle": "V1架构统一同步/异步引擎",
+      "theory_analysis": "使用EngineCore作为核心计算引擎",
+      "design_decisions": [
+        {
+          "decision": "支持多进程模式",
+          "reason": ""
+        },
+        {
+          "decision": "模块化设计",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "9100b61b4b4daaf8a76eb8ee158b030acaf44f7905823da5e0b8bb017bd84e95",
+  "knowledge_domain": "vllm-upstream"
+}

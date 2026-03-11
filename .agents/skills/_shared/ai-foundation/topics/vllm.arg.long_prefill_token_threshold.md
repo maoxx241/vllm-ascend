@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1126
+- definition_ref: vllm/engine/arg_utils.py:1131
 - read_ref: vllm/vllm/config/scheduler.py:68, vllm/vllm/config/scheduler.py:72, vllm/vllm/config/scheduler.py:214
-- effect_ref: vllm/vllm/config/scheduler.py:230, vllm/vllm/config/scheduler.py:280, vllm/vllm/config/vllm.py:1104
+- effect_ref: vllm/vllm/config/scheduler.py:230, vllm/vllm/config/scheduler.py:280, vllm/vllm/config/vllm.py:1122
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: connector 超时; P/D 节点路由异常
 - value_failure_signals: connector 超时; P/D 节点路由异常
 - recommendation: 先验证连接器与地址，再调并行参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

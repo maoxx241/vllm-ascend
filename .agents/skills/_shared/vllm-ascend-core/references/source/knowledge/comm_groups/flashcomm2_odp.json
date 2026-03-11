@@ -1,0 +1,121 @@
+{
+  "id": "comm_group:flashcomm2_odp",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_FLASHCOMM2_ODP",
+  "summary": "FlashComm2 O Data Parallel通信组，用于FlashComm2特性的数据并行通信，默认使用全局TP组，与FlashComm2 OTP组配合实现All2All+ReduceScatter通信",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "19,143-175,256-258,317-320"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE"
+  ],
+  "related_apis": [
+    "get_flashcomm2_odp_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "flashcomm2",
+    "data_parallel",
+    "reduce_scatter"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm2 OTP组配合",
+        "用于ReduceScatter通信"
+      ],
+      "memory_impact": "无额外显存开销",
+      "throughput_impact": "ReduceScatter优化数据并行通信效率",
+      "latency_impact": "减少数据并行通信延迟",
+      "test_cases": [
+        {
+          "name": "验证FlashComm2 ODP组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试ReduceScatter通信正确性",
+          "description": ""
+        },
+        {
+          "name": "验证与FlashComm2 OTP组配合",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE: N",
+      "unsuitable_scenarios": [
+        "非FlashComm2场景"
+      ],
+      "best_practices": [
+        "配合FlashComm2 OTP组使用",
+        "确保组大小配置正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_FLASHCOMM2_ODP: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_flashcomm2_odp_group(): 获取FlashComm2 ODP组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改组划分逻辑"
+      ],
+      "affected_features": [
+        "flashcomm2",
+        "data_parallel"
+      ]
+    },
+    "design": {
+      "principle": "FlashComm2 ODP组用于ReduceScatter通信，将All2All后的数据按DP维度分发",
+      "theory_analysis": "ReduceScatter减少通信数据量，将AllReduce分解为ReduceScatter+AllGather",
+      "design_decisions": [
+        {
+          "decision": "默认使用全局TP组",
+          "reason": ""
+        },
+        {
+          "decision": "与FlashComm2 OTP组正交",
+          "reason": ""
+        },
+        {
+          "decision": "支持多DP场景",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "edf2aca2f4db1740fda6d5951450b31b4e7e3c4a0fa3ce7e02fab8916f0160ea",
+  "knowledge_domain": "vllm-ascend-core"
+}

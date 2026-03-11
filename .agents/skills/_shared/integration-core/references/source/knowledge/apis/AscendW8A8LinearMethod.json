@@ -1,0 +1,112 @@
+{
+  "id": "api:ascend_w8_a8_linear_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendW8A8LinearMethod",
+  "summary": "昇腾W8A8静态量化线性层方法，实现INT8权重的静态per-tensor激活量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_static.py",
+      "lines": "33-161"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendLinearScheme",
+    "torch_npu.npu_quant_matmul"
+  ],
+  "related_features": [
+    "quantization",
+    "w8a8",
+    "static_quant"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "apply()执行量化线性计算",
+        "process_weights_after_loading()处理权重"
+      ],
+      "memory_impact": "INT8权重减少内存占用",
+      "throughput_impact": "静态量化吞吐量高",
+      "latency_impact": "无动态量化开销，延迟低",
+      "test_cases": [
+        {
+          "name": "量化计算测试",
+          "description": ""
+        },
+        {
+          "name": "权重处理测试",
+          "description": ""
+        },
+        {
+          "name": "FlashComm2测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持W8A8量化的模型"
+      ],
+      "enable_config": "配置quantization为W8A8",
+      "unsuitable_scenarios": [
+        "激活分布变化大的场景"
+      ],
+      "best_practices": [
+        "使用NZ格式优化",
+        "支持FlashComm2通信"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/quantization/methods/w8a8_static.py:33-161",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()量化逻辑",
+        "process_weights_after_loading()权重处理",
+        "FlashComm2集成"
+      ],
+      "affected_features": [
+        "线性层量化",
+        "静态量化"
+      ]
+    },
+    "design": {
+      "principle": "使用静态per-tensor量化激活，per-channel量化权重",
+      "theory_analysis": "静态量化scale预先计算，运行时无额外开销",
+      "design_decisions": [
+        {
+          "decision": "支持FlashComm2量化通信",
+          "reason": ""
+        },
+        {
+          "decision": "支持compressed_tensors",
+          "reason": ""
+        },
+        {
+          "decision": "支持NZ格式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "e8bfc29cb274393ed87fc9bac89615501558917d18e851a6e8a8dff30e084040",
+  "knowledge_domain": "integration-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1061
+- definition_ref: vllm/engine/arg_utils.py:1066
 - read_ref: vllm/vllm/config/observability.py:36, vllm/vllm/config/observability.py:121, vllm/vllm/config/observability.py:130
-- effect_ref: vllm/vllm/config/observability.py:148, vllm/vllm/v1/engine/async_llm.py:902, vllm/vllm/config/observability.py:40
+- effect_ref: vllm/vllm/config/observability.py:148, vllm/vllm/v1/engine/async_llm.py:860, vllm/vllm/config/observability.py:40
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

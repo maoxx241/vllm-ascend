@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:901
+- definition_ref: vllm/envs.py:913
 - read_ref: vllm/vllm/_aiter_ops.py:853, vllm/vllm/_aiter_ops.py:904, vllm/vllm/_aiter_ops.py:932
 - effect_ref: vllm/vllm/model_executor/layers/fused_moe/oracle/fp8.py:304, vllm/vllm/model_executor/layers/fused_moe/oracle/fp8.py:305
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

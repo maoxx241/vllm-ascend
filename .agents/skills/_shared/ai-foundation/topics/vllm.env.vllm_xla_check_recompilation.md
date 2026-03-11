@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:796
-- read_ref: vllm/vllm/envs.py:55, vllm/vllm/envs.py:796, vllm/vllm/envs.py:797
-- effect_ref: vllm/vllm/envs.py:55, vllm/vllm/envs.py:796, vllm/vllm/envs.py:797
+- definition_ref: vllm/envs.py:808
+- read_ref: vllm/vllm/envs.py:55, vllm/vllm/envs.py:808, vllm/vllm/envs.py:809
+- effect_ref: vllm/vllm/envs.py:55, vllm/vllm/envs.py:808, vllm/vllm/envs.py:809
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: 图编译失败; 服务启动后首轮请求异常
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

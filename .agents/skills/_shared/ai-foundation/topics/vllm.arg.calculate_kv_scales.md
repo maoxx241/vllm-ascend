@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:947
-- read_ref: vllm/vllm/config/cache.py:104, vllm/vllm/engine/arg_utils.py:563, vllm/vllm/engine/arg_utils.py:563
+- definition_ref: vllm/engine/arg_utils.py:949
+- read_ref: vllm/vllm/config/cache.py:115, vllm/vllm/engine/arg_utils.py:563, vllm/vllm/engine/arg_utils.py:563
 - effect_ref: vllm/vllm/model_executor/layers/attention/attention.py:391, vllm/vllm/model_executor/layers/attention/attention.py:546, vllm/vllm/model_executor/layers/attention/attention.py:548
 - web_refs: 3
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

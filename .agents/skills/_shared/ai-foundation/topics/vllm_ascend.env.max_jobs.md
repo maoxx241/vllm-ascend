@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: vllm_ascend/envs.py:34
-- read_ref: vllm/vllm/envs.py:77, vllm/vllm/envs.py:477, vllm/vllm/envs.py:477
-- effect_ref: vllm/vllm/envs.py:480
+- read_ref: vllm/vllm/envs.py:77, vllm/vllm/envs.py:480, vllm/vllm/envs.py:480
+- effect_ref: vllm/vllm/envs.py:483
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

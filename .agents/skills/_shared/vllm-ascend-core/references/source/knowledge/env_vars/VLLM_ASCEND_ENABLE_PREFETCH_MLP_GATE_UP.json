@@ -1,0 +1,97 @@
+{
+  "id": "env_var:vllm_ascend_enable_prefetch_mlp_gate_up",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_PREFETCH_MLP_GATE_UP",
+  "summary": "控制MLP gate_up权重预取开关，用于小并发场景优化(已弃用，建议使用weight_prefetch_config)",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "N/A"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
+    "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE"
+  ],
+  "related_apis": [
+    "WeightPrefetchConfig"
+  ],
+  "related_features": [
+    "weight_prefetch",
+    "mlp_prefetch"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与VLLM_ASCEND_ENABLE_PREFETCH_MLP配合使用",
+        "已被weight_prefetch_config替代"
+      ],
+      "memory_impact": "预取需要额外的缓冲区内存",
+      "throughput_impact": "小并发场景可提升吞吐量",
+      "latency_impact": "减少权重加载延迟",
+      "test_cases": [
+        {
+          "name": "gate_up预取测试",
+          "description": "验证gate_up权重预取效果",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_PREFETCH_MLP=1 (已弃用)",
+      "unsuitable_scenarios": [
+        "大并发场景",
+        "内存紧张场景"
+      ],
+      "best_practices": [
+        "建议使用weight_prefetch_config替代",
+        "小并发场景可考虑启用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "N/A",
+          "purpose": "环境变量定义(已弃用)"
+        }
+      ],
+      "modification_points": [
+        "建议使用weight_prefetch_config配置"
+      ],
+      "affected_features": [
+        "weight_prefetch",
+        "mlp_forward"
+      ]
+    },
+    "design": {
+      "principle": "预取MLP gate_up权重，实现计算-通信重叠",
+      "theory_analysis": "MLP的gate_up投影是第一个计算步骤，预取可以减少等待时间",
+      "design_decisions": [
+        {
+          "decision": "已弃用",
+          "reason": "统一使用weight_prefetch_config提供更灵活的配置"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "8013f80914c32d9ed421ee2a1eea9facaab46bfdb80fc415ca1b0f95419147d6",
+  "knowledge_domain": "vllm-ascend-core"
+}

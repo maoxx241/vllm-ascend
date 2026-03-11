@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:810
+- definition_ref: vllm/engine/arg_utils.py:809
 - read_ref: vllm/vllm/config/parallel.py:256, vllm/vllm/config/parallel.py:260, vllm/vllm/config/parallel.py:271
 - effect_ref: vllm-ascend/vllm_ascend/platform.py:395
 - web_refs: 7
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: KV 传输配置错误; 时延反而变高
 - value_failure_signals: KV 传输配置错误; 时延反而变高
 - recommendation: 优先在高并发长上下文场景启用并做 A/B。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:675
-- read_ref: vllm/vllm/config/model.py:194, vllm/vllm/config/model.py:336, vllm/vllm/config/model.py:960
-- effect_ref: vllm/vllm/config/model.py:960, vllm/vllm/config/vllm.py:844, vllm/vllm/entrypoints/llm.py:166
+- definition_ref: vllm/engine/arg_utils.py:677
+- read_ref: vllm/vllm/config/model.py:194, vllm/vllm/config/model.py:333, vllm/vllm/config/model.py:964
+- effect_ref: vllm/vllm/config/model.py:964, vllm/vllm/config/vllm.py:731, vllm/vllm/config/vllm.py:853
 - web_refs: 7
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: warning: Enforce eager set, overriding optimization level to -O0; info: Cudagraph is disabled under eager mode
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

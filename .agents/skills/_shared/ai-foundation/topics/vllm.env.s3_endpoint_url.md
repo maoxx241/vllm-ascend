@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:623
-- read_ref: vllm/vllm/envs.py:31, vllm/vllm/envs.py:623, vllm/vllm/envs.py:623
-- effect_ref: vllm/vllm/envs.py:31, vllm/vllm/envs.py:623, vllm/vllm/envs.py:623
+- definition_ref: vllm/envs.py:635
+- read_ref: vllm/vllm/envs.py:31, vllm/vllm/envs.py:635, vllm/vllm/envs.py:635
+- effect_ref: vllm/vllm/envs.py:31, vllm/vllm/envs.py:635, vllm/vllm/envs.py:635
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,2689 @@
+{
+  "generated_at": "2026-03-11T07:48:53+00:00",
+  "entry_count": 179,
+  "entries": [
+    {
+      "source_id": "api:a5_device_adaptor",
+      "normalized_id": "api:a5_device_adaptor",
+      "name": "A5DeviceAdaptor",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:aclgraph_wrapper",
+      "normalized_id": "api:aclgraph_wrapper",
+      "name": "ACLGraphWrapper",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "graph-analyzer",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:all_gather_method",
+      "normalized_id": "api:all_gather_method",
+      "name": "AllGatherMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:all_to_all_method",
+      "normalized_id": "api:all_to_all_method",
+      "name": "AllToAllMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_attention_backend",
+      "normalized_id": "api:ascend_attention_backend",
+      "name": "AscendAttentionBackend",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_column_parallel_linear",
+      "normalized_id": "api:ascend_column_parallel_linear",
+      "name": "AscendColumnParallelLinear",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_deepseek_scaling_rotary_embedding",
+      "normalized_id": "api:ascend_deepseek_scaling_rotary_embedding",
+      "name": "AscendDeepseekScalingRotaryEmbedding",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_eagle_proposer",
+      "normalized_id": "api:ascend_eagle_proposer",
+      "name": "AscendEagleProposer",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_fused_mo_e",
+      "normalized_id": "api:ascend_fused_mo_e",
+      "name": "AscendFusedMoE",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_medusa_proposer",
+      "normalized_id": "api:ascend_medusa_proposer",
+      "name": "AscendMedusaProposer",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_merged_column_parallel_linear",
+      "normalized_id": "api:ascend_merged_column_parallel_linear",
+      "name": "AscendMergedColumnParallelLinear",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_mlabackend",
+      "normalized_id": "api:ascend_mlabackend",
+      "name": "AscendMLABackend",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_mlaimpl",
+      "normalized_id": "api:ascend_mlaimpl",
+      "name": "AscendMLAImpl",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_mrotary_embedding",
+      "normalized_id": "api:ascend_mrotary_embedding",
+      "name": "AscendMRotaryEmbedding",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_multi_head_latent_attention",
+      "normalized_id": "api:ascend_multi_head_latent_attention",
+      "name": "AscendMultiHeadLatentAttention",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_ngram_proposer",
+      "normalized_id": "api:ascend_ngram_proposer",
+      "name": "AscendNgramProposer",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_qkvparallel_linear",
+      "normalized_id": "api:ascend_qkvparallel_linear",
+      "name": "AscendQKVParallelLinear",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_replicated_linear",
+      "normalized_id": "api:ascend_replicated_linear",
+      "name": "AscendReplicatedLinear",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_rotary_embedding",
+      "normalized_id": "api:ascend_rotary_embedding",
+      "name": "AscendRotaryEmbedding",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_row_parallel_linear",
+      "normalized_id": "api:ascend_row_parallel_linear",
+      "name": "AscendRowParallelLinear",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_sampler",
+      "normalized_id": "api:ascend_sampler",
+      "name": "AscendSampler",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_sfabackend",
+      "normalized_id": "api:ascend_sfabackend",
+      "name": "AscendSFABackend",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_sfaimpl",
+      "normalized_id": "api:ascend_sfaimpl",
+      "name": "AscendSFAImpl",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_sfametadata_builder",
+      "normalized_id": "api:ascend_sfametadata_builder",
+      "name": "AscendSFAMetadataBuilder",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_suffix_decoding_proposer",
+      "normalized_id": "api:ascend_suffix_decoding_proposer",
+      "name": "AscendSuffixDecodingProposer",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_w4_a16_fused_mo_emethod",
+      "normalized_id": "api:ascend_w4_a16_fused_mo_emethod",
+      "name": "AscendW4A16FusedMoEMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "precision-validator"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "normalized_id": "api:ascend_w8_a8_dynamic_fused_mo_emethod",
+      "name": "AscendW8A8DynamicFusedMoEMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "precision-validator"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_w8_a8_dynamic_linear_method",
+      "normalized_id": "api:ascend_w8_a8_dynamic_linear_method",
+      "name": "AscendW8A8DynamicLinearMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "precision-validator"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_w8_a8_linear_method",
+      "normalized_id": "api:ascend_w8_a8_linear_method",
+      "name": "AscendW8A8LinearMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "precision-validator"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ascend_ya_rnrotary_embedding",
+      "normalized_id": "api:ascend_ya_rnrotary_embedding",
+      "name": "AscendYaRNRotaryEmbedding",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:async_llm",
+      "normalized_id": "api:async_llm",
+      "name": "AsyncLLM",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:async_llmengine",
+      "normalized_id": "api:async_llmengine",
+      "name": "AsyncLLMEngine",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:base_device_adaptor",
+      "normalized_id": "api:base_device_adaptor",
+      "name": "BaseDeviceAdaptor",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:ca_mem_allocator",
+      "normalized_id": "api:ca_mem_allocator",
+      "name": "CaMemAllocator",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:device_operator",
+      "normalized_id": "api:device_operator",
+      "name": "DeviceOperator",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:eplb_updator",
+      "normalized_id": "api:eplb_updator",
+      "name": "EplbUpdator",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:flash_common3_context",
+      "normalized_id": "api:flash_common3_context",
+      "name": "FlashCommon3Context",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:fused_mc2_method",
+      "normalized_id": "api:fused_mc2_method",
+      "name": "FusedMC2Method",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:gpuworker",
+      "normalized_id": "api:gpuworker",
+      "name": "Worker (GPU)",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "graph-analyzer",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:indexer_wrapper",
+      "normalized_id": "api:indexer_wrapper",
+      "name": "IndexerWrapper",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:llmengine",
+      "normalized_id": "api:llmengine",
+      "name": "LLMEngine",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:mc2_method",
+      "normalized_id": "api:mc2_method",
+      "name": "MC2Method",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:mo_ecomm_method",
+      "normalized_id": "api:mo_ecomm_method",
+      "name": "MoECommMethod",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:model_runner",
+      "normalized_id": "api:model_runner",
+      "name": "GPUModelRunner",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:npucommunicator",
+      "normalized_id": "api:npucommunicator",
+      "name": "NPUCommunicator",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:npuinput_batch",
+      "normalized_id": "api:npuinput_batch",
+      "name": "NPUInputBatch",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:npumodel_runner",
+      "normalized_id": "api:npumodel_runner",
+      "name": "NPUModelRunner",
+      "category": "apis",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:npumodel_runner_v2",
+      "normalized_id": "api:npumodel_runner_v2",
+      "name": "NPUModelRunnerV2",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:npuworker",
+      "normalized_id": "api:npuworker",
+      "name": "NPUWorker",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "graph-analyzer",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:pcpmanager",
+      "normalized_id": "api:pcpmanager",
+      "name": "PCPManager",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:request_output",
+      "normalized_id": "api:request_output",
+      "name": "RequestOutput",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:sampling_params",
+      "normalized_id": "api:sampling_params",
+      "name": "SamplingParams",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:select_moe_comm_method",
+      "normalized_id": "api:select_moe_comm_method",
+      "name": "select_moe_comm_method",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:set_ascend_forward_context",
+      "normalized_id": "api:set_ascend_forward_context",
+      "name": "set_ascend_forward_context",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:v1_async_llm",
+      "normalized_id": "api:v1_async_llm",
+      "name": "V1 AsyncLLM",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:v1_llmengine",
+      "normalized_id": "api:v1_llmengine",
+      "name": "V1 LLMEngine",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:vllm_eplb_adaptor",
+      "normalized_id": "api:vllm_eplb_adaptor",
+      "name": "VllmEplbAdaptor",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "parallelism-planner"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "api:xlite_wrapper",
+      "normalized_id": "api:xlite_wrapper",
+      "name": "XliteWrapper",
+      "category": "apis",
+      "design_skills": [
+        "custom-model-integrator",
+        "graph-analyzer",
+        "model-adapter"
+      ],
+      "migration_target": "model-adaptation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:dynamic_eplb",
+      "normalized_id": "comm_group:dynamic_eplb",
+      "name": "_DYNAMIC_EPLB",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:embed_tp",
+      "normalized_id": "comm_group:embed_tp",
+      "name": "_EMBED_TP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:fc3_quant_x",
+      "normalized_id": "comm_group:fc3_quant_x",
+      "name": "_FC3_QUANT_X",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:flashcomm2_odp",
+      "normalized_id": "comm_group:flashcomm2_odp",
+      "name": "_FLASHCOMM2_ODP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:flashcomm2_otp",
+      "normalized_id": "comm_group:flashcomm2_otp",
+      "name": "_FLASHCOMM2_OTP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:lmtp",
+      "normalized_id": "comm_group:lmtp",
+      "name": "_LMTP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:mc2",
+      "normalized_id": "comm_group:mc2",
+      "name": "_MC2",
+      "category": "comm_groups",
+      "design_skills": [
+        "custom-model-integrator",
+        "graph-analyzer",
+        "model-adapter",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:mlp_tp",
+      "normalized_id": "comm_group:mlp_tp",
+      "name": "_MLP_TP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:otp",
+      "normalized_id": "comm_group:otp",
+      "name": "_OTP",
+      "category": "comm_groups",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:p_tp",
+      "normalized_id": "comm_group:p_tp",
+      "name": "_P_TP",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "comm_group:shard_weight",
+      "normalized_id": "comm_group:shard_weight",
+      "name": "_SHARD_WEIGHT",
+      "category": "comm_groups",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:ascend_compilation_config",
+      "normalized_id": "config:ascend_compilation_config",
+      "name": "ascend_compilation_config",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:config_compatibility_matrix",
+      "normalized_id": "config:config_compatibility_matrix",
+      "name": "config_compatibility_matrix",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:dump_config_path",
+      "normalized_id": "config:dump_config_path",
+      "name": "dump_config_path",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:enable_kv_nz",
+      "normalized_id": "config:enable_kv_nz",
+      "name": "enable_kv_nz",
+      "category": "configs",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:enable_shared_expert_dp",
+      "normalized_id": "config:enable_shared_expert_dp",
+      "name": "enable_shared_expert_dp",
+      "category": "configs",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:eplb_config",
+      "normalized_id": "config:eplb_config",
+      "name": "eplb_config",
+      "category": "configs",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:finegrained_tp_config",
+      "normalized_id": "config:finegrained_tp_config",
+      "name": "finegrained_tp_config",
+      "category": "configs",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:layer_sharding",
+      "normalized_id": "config:layer_sharding",
+      "name": "layer_sharding",
+      "category": "configs",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:multistream_overlap_gate",
+      "normalized_id": "config:multistream_overlap_gate",
+      "name": "multistream_overlap_gate",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:multistream_overlap_shared_expert",
+      "normalized_id": "config:multistream_overlap_shared_expert",
+      "name": "multistream_overlap_shared_expert",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:num_head_replica",
+      "normalized_id": "config:num_head_replica",
+      "name": "num_head_replica",
+      "category": "configs",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:pd_head_ratio",
+      "normalized_id": "config:pd_head_ratio",
+      "name": "pd_head_ratio",
+      "category": "configs",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:pd_tp_ratio",
+      "normalized_id": "config:pd_tp_ratio",
+      "name": "pd_tp_ratio",
+      "category": "configs",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:recompute_scheduler_enable",
+      "normalized_id": "config:recompute_scheduler_enable",
+      "name": "recompute_scheduler_enable",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:weight_prefetch_config",
+      "normalized_id": "config:weight_prefetch_config",
+      "name": "weight_prefetch_config",
+      "category": "configs",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "config:xlite_graph_config",
+      "normalized_id": "config:xlite_graph_config",
+      "name": "xlite_graph_config",
+      "category": "configs",
+      "design_skills": [
+        "graph-analyzer",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "device:310_p",
+      "normalized_id": "device:310_p",
+      "name": "_310P",
+      "category": "devices",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "ascend-foundation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "device:a2",
+      "normalized_id": "device:a2",
+      "name": "A2",
+      "category": "devices",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "ascend-foundation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "device:a3",
+      "normalized_id": "device:a3",
+      "name": "A3",
+      "category": "devices",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "ascend-foundation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "device:a5",
+      "normalized_id": "device:a5",
+      "name": "A5",
+      "category": "devices",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "ascend-foundation",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "env_var:triton_all_blocks_parallel",
+      "normalized_id": "env_var:triton_all_blocks_parallel",
+      "name": "TRITON_ALL_BLOCKS_PARALLEL",
+      "category": "env_vars",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "env_var:vllm_ascend_enable_context_parallel",
+      "normalized_id": "env_var:vllm_ascend_enable_context_parallel",
+      "name": "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL",
+      "category": "env_vars",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "env_var:vllm_ascend_enable_quant_comm",
+      "normalized_id": "env_var:vllm_ascend_enable_quant_comm",
+      "name": "VLLM_ASCEND_ENABLE_QUANT_COMM",
+      "category": "env_vars",
+      "design_skills": [
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "normalized_id": "env_var:vllm_ascend_flashcomm2_parallel_size",
+      "name": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
+      "category": "env_vars",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "deployment-config",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:acl_graph",
+      "normalized_id": "feature:acl_graph",
+      "name": "ACL Graph",
+      "category": "features/ascend",
+      "design_skills": [
+        "graph-analyzer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:ascend_eagle_proposer",
+      "normalized_id": "feature:ascend_eagle_proposer",
+      "name": "AscendEagleProposer",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:ascend_speculative_decoding",
+      "normalized_id": "feature:ascend_speculative_decoding",
+      "name": "Ascend Speculative Decoding Methods",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:async_scheduling",
+      "normalized_id": "feature:async_scheduling",
+      "name": "Async Scheduling",
+      "category": "features/vllm",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:balance_scheduling",
+      "normalized_id": "feature:balance_scheduling",
+      "name": "Balance Scheduling",
+      "category": "features/ascend",
+      "design_skills": [
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:batch_invariant",
+      "normalized_id": "feature:batch_invariant",
+      "name": "Batch Invariant",
+      "category": "features/ascend",
+      "design_skills": [
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:chunked_prefill",
+      "normalized_id": "feature:chunked_prefill",
+      "name": "Chunked Prefill",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:context_parallel",
+      "normalized_id": "feature:context_parallel",
+      "name": "Context Parallel",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:continuous_batching",
+      "normalized_id": "feature:continuous_batching",
+      "name": "Continuous Batching",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:cuda_graph",
+      "normalized_id": "feature:cuda_graph",
+      "name": "CUDA Graph",
+      "category": "features/vllm",
+      "design_skills": [
+        "graph-analyzer",
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:device_adaptor",
+      "normalized_id": "feature:device_adaptor",
+      "name": "Device Adaptor",
+      "category": "features/ascend",
+      "design_skills": [
+        "custom-model-integrator",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:dsa_cp",
+      "normalized_id": "feature:dsa_cp",
+      "name": "DSA-CP",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:dynamic_batch_scheduler",
+      "normalized_id": "feature:dynamic_batch_scheduler",
+      "name": "Dynamic Batch Scheduler",
+      "category": "features/ascend",
+      "design_skills": [
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:dynamic_eplb",
+      "normalized_id": "feature:dynamic_eplb",
+      "name": "Dynamic EPLB",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:eplb",
+      "normalized_id": "feature:eplb",
+      "name": "EPLB",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:finegrained_tp",
+      "normalized_id": "feature:finegrained_tp",
+      "name": "Finegrained TP",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:flashcomm1",
+      "normalized_id": "feature:flashcomm1",
+      "name": "FlashComm1",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:flashcomm2",
+      "normalized_id": "feature:flashcomm2",
+      "name": "FlashComm2",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:fused_mc2",
+      "normalized_id": "feature:fused_mc2",
+      "name": "Fused MC2",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:fused_moe",
+      "normalized_id": "feature:fused_moe",
+      "name": "FusedMoE",
+      "category": "features/vllm",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:graph_fusion_passes",
+      "normalized_id": "feature:graph_fusion_passes",
+      "name": "Graph Fusion Passes",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:kv_nz_format",
+      "normalized_id": "feature:kv_nz_format",
+      "name": "KV NZ Format",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:kv_transfer",
+      "normalized_id": "feature:kv_transfer",
+      "name": "KV Transfer",
+      "category": "features/vllm",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:kv_transfer_ascend",
+      "normalized_id": "feature:kv_transfer_ascend",
+      "name": "KV Transfer (Ascend)",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:layer_sharding",
+      "normalized_id": "feature:layer_sharding",
+      "name": "Layer Sharding",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:lora",
+      "normalized_id": "feature:lora",
+      "name": "LoRA",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:lora_ascend",
+      "normalized_id": "feature:lora_ascend",
+      "name": "LoRA (Ascend)",
+      "category": "features/ascend",
+      "design_skills": [
+        "graph-analyzer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:matmul_allreduce",
+      "normalized_id": "feature:matmul_allreduce",
+      "name": "MatmulAllReduce Fusion",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:mc2_communication",
+      "normalized_id": "feature:mc2_communication",
+      "name": "MC2通信",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:mlapo",
+      "normalized_id": "feature:mlapo",
+      "name": "MLAPO",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:multi_modal",
+      "normalized_id": "feature:multi_modal",
+      "name": "Multi-Modal",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:multistream_overlap",
+      "normalized_id": "feature:multistream_overlap",
+      "name": "Multistream Overlap",
+      "category": "features/ascend",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:paged_attention",
+      "normalized_id": "feature:paged_attention",
+      "name": "PagedAttention",
+      "category": "features/vllm",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:pd_disaggregation",
+      "normalized_id": "feature:pd_disaggregation",
+      "name": "PD Disaggregation",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:prefix_caching",
+      "normalized_id": "feature:prefix_caching",
+      "name": "Prefix Caching",
+      "category": "features/vllm",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:quantization",
+      "normalized_id": "feature:quantization",
+      "name": "Quantization",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:recompute_scheduler",
+      "normalized_id": "feature:recompute_scheduler",
+      "name": "Recompute Scheduler",
+      "category": "features/ascend",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:sequence_parallelism",
+      "normalized_id": "feature:sequence_parallelism",
+      "name": "Sequence Parallelism",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:shared_expert_dp",
+      "normalized_id": "feature:shared_expert_dp",
+      "name": "Shared Expert DP",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:sleep_mode",
+      "normalized_id": "feature:sleep_mode",
+      "name": "Sleep Mode",
+      "category": "features/vllm",
+      "design_skills": [
+        "attention-kv-designer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:sleep_mode_npu",
+      "normalized_id": "feature:sleep_mode_npu",
+      "name": "Sleep Mode (NPU)",
+      "category": "features/ascend",
+      "design_skills": [
+        "parallelism-planner",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:speculative_decoding",
+      "normalized_id": "feature:speculative_decoding",
+      "name": "Speculative Decoding",
+      "category": "features/vllm",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-upstream",
+      "domain_scope": "vllm",
+      "knowledge_domain": "vllm-upstream",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:weight_prefetch",
+      "normalized_id": "feature:weight_prefetch",
+      "name": "Weight Prefetch",
+      "category": "features/ascend",
+      "design_skills": [
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "feature:xlite_graph",
+      "normalized_id": "feature:xlite_graph",
+      "name": "XliteGraph",
+      "category": "features/ascend",
+      "design_skills": [
+        "graph-analyzer",
+        "perf-assistant"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "moe_comm_type:allgather",
+      "normalized_id": "moe_comm_type:allgather",
+      "name": "ALLGATHER",
+      "category": "moe_comm_types",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "moe_comm_type:alltoall",
+      "normalized_id": "moe_comm_type:alltoall",
+      "name": "ALLTOALL",
+      "category": "moe_comm_types",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "moe_comm_type:fused_mc2",
+      "normalized_id": "moe_comm_type:fused_mc2",
+      "name": "FUSED_MC2",
+      "category": "moe_comm_types",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "moe_comm_type:mc2",
+      "normalized_id": "moe_comm_type:mc2",
+      "name": "MC2",
+      "category": "moe_comm_types",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:batch_matmul_transpose",
+      "normalized_id": "operator:batch_matmul_transpose",
+      "name": "batch_matmul_transpose",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:dispatch_ffn_combine",
+      "normalized_id": "operator:dispatch_ffn_combine",
+      "name": "dispatch_ffn_combine",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "parallelism-planner",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:dispatch_gmm_combine_decode",
+      "normalized_id": "operator:dispatch_gmm_combine_decode",
+      "name": "dispatch_gmm_combine_decode",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:mla_preprocess",
+      "normalized_id": "operator:mla_preprocess",
+      "name": "mla_preprocess",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_add_rms_norm_quant",
+      "normalized_id": "operator:npu_add_rms_norm_quant",
+      "name": "npu_add_rms_norm_quant",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_convert_weight_to_int4pack",
+      "normalized_id": "operator:npu_convert_weight_to_int4pack",
+      "name": "npu_convert_weight_to_int4pack",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_dequant_swiglu_quant",
+      "normalized_id": "operator:npu_dequant_swiglu_quant",
+      "name": "npu_dequant_swiglu_quant",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_dynamic_mx_quant",
+      "normalized_id": "operator:npu_dynamic_mx_quant",
+      "name": "npu_dynamic_mx_quant",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_dynamic_quant",
+      "normalized_id": "operator:npu_dynamic_quant",
+      "name": "npu_dynamic_quant",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_format_cast",
+      "normalized_id": "operator:npu_format_cast",
+      "name": "npu_format_cast",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_fused_infer_attention_score",
+      "normalized_id": "operator:npu_fused_infer_attention_score",
+      "name": "npu_fused_infer_attention_score",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_grouped_matmul",
+      "normalized_id": "operator:npu_grouped_matmul",
+      "name": "npu_grouped_matmul",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_grouped_matmul_swiglu_quant",
+      "normalized_id": "operator:npu_grouped_matmul_swiglu_quant",
+      "name": "npu_grouped_matmul_swiglu_quant",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_interleave_rope",
+      "normalized_id": "operator:npu_interleave_rope",
+      "name": "npu_interleave_rope",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_kv_rmsnorm_rope_cache",
+      "normalized_id": "operator:npu_kv_rmsnorm_rope_cache",
+      "name": "npu_kv_rmsnorm_rope_cache",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_lightning_indexer",
+      "normalized_id": "operator:npu_lightning_indexer",
+      "name": "npu_lightning_indexer",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_moe_init_routing",
+      "normalized_id": "operator:npu_moe_init_routing",
+      "name": "npu_moe_init_routing",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_moe_init_routing_v2",
+      "normalized_id": "operator:npu_moe_init_routing_v2",
+      "name": "npu_moe_init_routing_v2",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_mrope",
+      "normalized_id": "operator:npu_mrope",
+      "name": "npu_mrope",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_paged_attention",
+      "normalized_id": "operator:npu_paged_attention",
+      "name": "npu_paged_attention",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_quant_matmul",
+      "normalized_id": "operator:npu_quant_matmul",
+      "name": "npu_quant_matmul",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_reshape_and_cache",
+      "normalized_id": "operator:npu_reshape_and_cache",
+      "name": "npu_reshape_and_cache",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_ring_mla",
+      "normalized_id": "operator:npu_ring_mla",
+      "name": "npu_ring_mla",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_rotary_embedding",
+      "normalized_id": "operator:npu_rotary_embedding",
+      "name": "npu_rotary_embedding",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_rotary_mul",
+      "normalized_id": "operator:npu_rotary_mul",
+      "name": "npu_rotary_mul",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_scatter_nd_update",
+      "normalized_id": "operator:npu_scatter_nd_update",
+      "name": "npu_scatter_nd_update_",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_scatter_pa_kv_cache",
+      "normalized_id": "operator:npu_scatter_pa_kv_cache",
+      "name": "npu_scatter_pa_kv_cache",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_sparse_flash_attention",
+      "normalized_id": "operator:npu_sparse_flash_attention",
+      "name": "npu_sparse_flash_attention",
+      "category": "operators",
+      "design_skills": [
+        "attention-kv-designer",
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "operator:npu_swiglu",
+      "normalized_id": "operator:npu_swiglu",
+      "name": "npu_swiglu",
+      "category": "operators",
+      "design_skills": [
+        "graph-analyzer",
+        "op-developer",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w4_a16",
+      "normalized_id": "quantization:w4_a16",
+      "name": "W4A16",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w4_a4_flatquant",
+      "normalized_id": "quantization:w4_a4_flatquant",
+      "name": "W4A4_FLATQUANT",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w4_a4_laos_dynamic",
+      "normalized_id": "quantization:w4_a4_laos_dynamic",
+      "name": "W4A4_LAOS_DYNAMIC",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w4_a8",
+      "normalized_id": "quantization:w4_a8",
+      "name": "W4A8",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w8_a16",
+      "normalized_id": "quantization:w8_a16",
+      "name": "W8A16",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator",
+        "scheduler-feature-designer"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w8_a8",
+      "normalized_id": "quantization:w8_a8",
+      "name": "W8A8",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w8_a8_dynamic",
+      "normalized_id": "quantization:w8_a8_dynamic",
+      "name": "W8A8_DYNAMIC",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w8_a8_mxfp8",
+      "normalized_id": "quantization:w8_a8_mxfp8",
+      "name": "W8A8_MXFP8",
+      "category": "quantization",
+      "design_skills": [
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "vllm-ascend",
+      "knowledge_domain": "vllm-ascend-core",
+      "status": "validated"
+    },
+    {
+      "source_id": "quantization:w8_a8_pdmix",
+      "normalized_id": "quantization:w8_a8_pdmix",
+      "name": "W8A8_PDMIX",
+      "category": "quantization",
+      "design_skills": [
+        "attention-kv-designer",
+        "custom-model-integrator",
+        "model-adapter",
+        "perf-assistant",
+        "precision-validator"
+      ],
+      "migration_target": "vllm-ascend-core",
+      "domain_scope": "both",
+      "knowledge_domain": "integration-core",
+      "status": "validated"
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "id": "feature:flashcomm1",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "FlashComm1",
+  "summary": "Tensor Parallel通信优化，通过ReduceScatter+Allgather替代Allreduce，高并发场景(>1000 tokens)显著提升性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "72-74"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "84-104"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "760-778"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1",
+    "VLLM_ASCEND_ENABLE_FLASHCOMM"
+  ],
+  "related_apis": [
+    "enable_sp",
+    "select_moe_comm_method"
+  ],
+  "related_features": [
+    "FlashComm2",
+    "EPLB",
+    "MC2通信",
+    "权重预取",
+    "LayerSharding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "EPLB动态负载均衡",
+        "MC2通信选择逻辑",
+        "权重预取优化",
+        "LayerSharding内存优化"
+      ],
+      "memory_impact": "ReduceScatter后数据分散存储，LayerNorm计算量减少，激活内存略有降低；配合量化时通信量减半",
+      "throughput_impact": "高并发场景(>1000 tokens)吞吐量提升15-30%，量化场景收益更大",
+      "latency_impact": "小batch场景(<1000 tokens)延迟可能增加5-10%，因通信算子固定开销占比增大",
+      "test_cases": [
+        {
+          "name": "高并发性能测试",
+          "description": "验证>1000 tokens时ReduceScatter+Allgather相比Allreduce的性能提升",
+          "threshold": 1000
+        },
+        {
+          "name": "阈值边界测试",
+          "description": "验证1000 tokens阈值附近的切换行为，确保无性能抖动",
+          "threshold": 1000
+        },
+        {
+          "name": "量化场景测试",
+          "description": "验证INT8量化下通信量减半带来的额外收益",
+          "threshold": 0
+        },
+        {
+          "name": "MoE模型测试",
+          "description": "验证MoE模型中Allgather延迟到Gating+DynamicQuant后的效果",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen3",
+        "Qwen3-VL",
+        "Llama系列"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1 或 --compilation-config '{\"pass_config\": {\"enable_sp\": true}}'",
+      "unsuitable_scenarios": [
+        "小batch场景（<1000 tokens）",
+        "VL类模型（需使用SP pass模式）",
+        "eager模式（SP仅支持graph模式）"
+      ],
+      "best_practices": [
+        "高并发场景(>1000 tokens)推荐启用",
+        "配合FlashComm2使用效果更佳",
+        "量化场景收益更大",
+        "MoE模型建议与MC2通信配合使用",
+        "推荐设置HCCL_OP_EXPANSION_MODE=AIV以增加支持的batch size范围"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "VLLM_ASCEND_ENABLE_FLASHCOMM1",
+          "lines": "72-74",
+          "purpose": "环境变量定义，控制FlashComm1开关"
+        },
+        {
+          "file": "vllm_ascend/ascend_forward_context.py",
+          "function": "set_ascend_forward_context",
+          "lines": "84-104",
+          "purpose": "根据token数量和模型类型动态启用FlashComm1"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "enable_sp",
+          "lines": "760-778",
+          "purpose": "判断是否启用Sequence Parallel/FlashComm1"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 添加新的环境变量",
+        "ascend_forward_context.py: 修改阈值逻辑或添加新的启用条件",
+        "utils.py: 修改enable_sp判断逻辑"
+      ],
+      "affected_features": [
+        "MC2通信选择逻辑",
+        "MoE通信模式",
+        "mmrs_fusion配置",
+        "pad_size计算"
+      ]
+    },
+    "design": {
+      "principle": "将Allreduce拆分为ReduceScatter+Allgather，利用通信计算重叠减少同步开销，在高并发场景下收益明显",
+      "theory_analysis": "原始Allreduce需要全局同步，延迟与TP size成正比。拆分后：1)ReduceScatter可与前序Matmul融合；2)Allgather可与后序Matmul融合；3)量化场景下通信量减半。当token数量足够大时，通信延迟被计算完全隐藏。",
+      "design_decisions": [
+        {
+          "decision": "阈值设为1000 tokens",
+          "reason": "当通信量小时，通信算子的固定开销（启动延迟、同步开销）成为主导因素。一个Allreduce拆成两个通信算子（ReduceScatter+Allgather），在小batch场景下反而增加端到端延迟。1000是经验阈值，低于此值时通信开销大于计算收益。"
+        },
+        {
+          "decision": "MoE模型无阈值限制",
+          "reason": "MoE模型中Allgather延迟到Gating+DynamicQuant之后执行，通信量进一步减少，因此MoE模型只要启用SP就生效，不受1000 tokens阈值限制。"
+        },
+        {
+          "decision": "作为环境变量控制",
+          "reason": "便于用户根据实际场景灵活配置，无需修改代码。同时支持VLLM_ASCEND_ENABLE_FLASHCOMM向后兼容。"
+        },
+        {
+          "decision": "Dense模型和MoE模型采用不同的启用策略",
+          "reason": "Dense模型需要num_tokens > 1000才启用；MoE模型只要enable_sp()返回True就启用，因为MoE的通信优化更激进。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.1.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2747781ac611bd37cf2f0546d445f90922237339e4ff57343e366514c6d30115",
+  "knowledge_domain": "vllm-ascend-core"
+}

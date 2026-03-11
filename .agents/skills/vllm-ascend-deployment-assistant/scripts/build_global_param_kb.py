@@ -3114,7 +3114,7 @@ def _write_markdown_docs(
     entries: list[dict[str, Any]],
     validation_report: dict[str, Any],
 ) -> None:
-    vllm_doc = shared_root / "vllm-foundation" / "references" / "vllm-inputs-and-envs-global.md"
+    vllm_doc = shared_root / "vllm-upstream" / "references" / "vllm-inputs-and-envs-global.md"
     ascend_doc = shared_root / "vllm-ascend-core" / "references" / "vllm-ascend-inputs-and-envs-global.md"
     feature_map_doc = shared_root / "deployment-config" / "references" / "global-parameter-feature-map.md"
     combo_doc = shared_root / "deployment-config" / "references" / "global-parameter-combination-guide.md"
@@ -3127,8 +3127,8 @@ def _write_markdown_docs(
         "\n".join(
             [
                 "---",
-                "knowledge_id: vllm-foundation.inputs-and-envs-global",
-                "domain: vllm-foundation",
+                "knowledge_id: vllm-upstream.inputs-and-envs-global",
+                "domain: vllm-upstream",
                 "knowledge_type: reference",
                 "summary: Code-truth inventory of vLLM deployment arguments and environment variables with evidence refs.",
                 f"last_verified: \"{now}\"",
@@ -3403,7 +3403,7 @@ def main() -> int:
     }
 
     shared_root = ascend_root / ".agents" / "skills" / "_shared"
-    out_vllm = shared_root / "vllm-foundation" / "references" / "generated"
+    out_vllm = shared_root / "vllm-upstream" / "references" / "generated"
     out_ascend = shared_root / "vllm-ascend-core" / "references" / "generated"
     out_deploy = shared_root / "deployment-config" / "references" / "generated"
 

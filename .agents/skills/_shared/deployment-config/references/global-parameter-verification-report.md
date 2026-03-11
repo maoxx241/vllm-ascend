@@ -3,7 +3,7 @@ knowledge_id: deployment-config.global-parameter-verification-report
 domain: deployment-config
 knowledge_type: verification
 summary: Dual-baseline verification report (local code truth + upstream web checks).
-last_verified: "2026-03-06"
+last_verified: "2026-03-11"
 source_commit: "workspace-head"
 freshness: "fresh"
 ---
@@ -11,22 +11,19 @@ freshness: "fresh"
 # Global Parameter Verification Report
 
 - Coverage ratio: **1.0**
-- Evidence completeness ratio: **0.9891**
-- Conflict count: **72**
+- Evidence completeness ratio: **0.9905**
+- Conflict count: **66**
 - High-risk validated count: **53**
-- Official refs: **1272**
-- External refs: **338**
-- Entries with external refs: **283**
-- Value semantics done: **491**
+- Official refs: **1270**
+- External refs: **341**
+- Entries with external refs: **286**
+- Value semantics done: **493**
 - Value semantics ratio: **1.0**
 
 ## Unresolved items (first 50)
 
-- `vllm.arg.api_server_count:upstream_delta`
-- `vllm.arg.config:upstream_delta`
 - `vllm.arg.disable_log_requests:upstream_delta`
-- `vllm.arg.headless:upstream_delta`
-- `vllm.arg.logits_processor_pattern:upstream_delta`
+- `vllm.arg.swap_space:upstream_delta`
 - `vllm.env.vllm_sleep_when_idle:upstream_delta`
 - `vllm_ascend.arg.decode_servers_urls:needs_manual_review`
 - `vllm_ascend.arg.decoder_hosts:needs_manual_review`
@@ -67,10 +64,13 @@ freshness: "fresh"
 - `vllm_ascend.env.ascend_connect_timeout:missing_behavior_ref`
 - `vllm_ascend.env.ascend_connect_timeout:upstream_delta`
 - `vllm_ascend.env.ascend_custom_opp_path:upstream_delta`
-- `vllm_ascend.env.ascend_enable_use_fabric_mem:upstream_delta`
 - `vllm_ascend.env.ascend_rt_visible_devices:upstream_delta`
 - `vllm_ascend.env.ascend_transfer_timeout:upstream_delta`
 - `vllm_ascend.env.ascend_transport_print:missing_behavior_ref`
 - `vllm_ascend.env.ascend_transport_print:upstream_delta`
+- `vllm_ascend.env.expert_map_record:upstream_delta`
+- `vllm_ascend.env.hccl_buffsize:upstream_delta`
+- `vllm_ascend.env.hccl_connect_timeout:missing_behavior_ref`
+- `vllm_ascend.env.hccl_connect_timeout:upstream_delta`
 
 Back to [INDEX](../../INDEX.md).

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:603
+- definition_ref: vllm/envs.py:615
 - read_ref: vllm/vllm/distributed/device_communicators/all_reduce_utils.py:99, vllm/vllm/distributed/device_communicators/all_reduce_utils.py:133, vllm/vllm/distributed/device_communicators/all_reduce_utils.py:200
-- effect_ref: vllm/vllm/platforms/rocm.py:67, vllm/vllm/platforms/rocm.py:118, vllm/vllm/triton_utils/importing.py:27
+- effect_ref: vllm/vllm/platforms/rocm.py:67, vllm/vllm/platforms/rocm.py:116, vllm/vllm/triton_utils/importing.py:27
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: ValueError: World size (...) is larger than the number of available GPUs (...)
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

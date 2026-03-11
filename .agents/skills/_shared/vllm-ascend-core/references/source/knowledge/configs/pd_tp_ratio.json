@@ -1,0 +1,104 @@
+{
+  "id": "config:pd_tp_ratio",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "pd_tp_ratio",
+  "summary": "Prefill/Decode节点TP比例配置，表示P节点TP大小与D节点TP大小的比值",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "90-116"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "pd_disaggregation"
+  ],
+  "sub_configs": [],
+  "constraints": [
+    "仅在有kv_transfer_config且非DeepSeek-MLA模型时生效",
+    "prefill_tp_size必须能被decode_tp_size整除",
+    "P节点TP大小必须大于等于D节点TP大小"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试不同TP比例的性能影响",
+        "需要验证KV transfer的正确性"
+      ],
+      "memory_impact": "不同TP比例影响内存分布",
+      "throughput_impact": "合理配置可优化整体吞吐量",
+      "latency_impact": "影响P/D节点的计算延迟",
+      "test_cases": [
+        {
+          "name": "测试pd_tp_ratio=2时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试不同TP组合的效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen等支持PD分离的非MLA模型"
+      ],
+      "enable_config": "通过kv_transfer_config中的prefill.tp_size和decode.tp_size间接配置",
+      "unsuitable_scenarios": [
+        "DeepSeek-MLA模型",
+        "非PD分离场景"
+      ],
+      "best_practices": [
+        "根据P/D节点的计算特性选择合适的TP比例",
+        "确保KV transfer配置正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:90-116",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的pd_tp_ratio计算"
+      ],
+      "affected_features": [
+        "PD分离",
+        "张量并行",
+        "KV transfer"
+      ]
+    },
+    "design": {
+      "principle": "允许P和D节点使用不同的TP大小，优化各自场景的性能",
+      "theory_analysis": "P节点和D节点的计算特性不同，使用不同TP可以针对性优化",
+      "design_decisions": [
+        {
+          "decision": "P节点TP必须大于等于D节点TP",
+          "reason": ""
+        },
+        {
+          "decision": "通过KV transfer配置间接设置",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "23f242c6cf09b0ef52178efd27b415893aa52e940c85db5bb9079cb01ff035f5",
+  "knowledge_domain": "vllm-ascend-core"
+}

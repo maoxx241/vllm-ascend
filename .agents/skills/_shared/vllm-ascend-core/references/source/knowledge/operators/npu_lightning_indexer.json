@@ -1,0 +1,112 @@
+{
+  "id": "operator:npu_lightning_indexer",
+  "type": "operator",
+  "category": "attention",
+  "name": "npu_lightning_indexer",
+  "summary": "NPU闪电索引器算子，用于SFA(Sparse Flash Attention)架构中的专家选择，通过稀疏计算选择top-k专家索引。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "843-933"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_lightning_indexer",
+    "torch.ops._C_ascend.npu_lightning_indexer"
+  ],
+  "related_features": [
+    "sfa_attention",
+    "sparse_attention",
+    "expert_selection"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与weights_proj配合计算选择权重",
+        "与block_table配合访问KV缓存"
+      ],
+      "memory_impact": "输出topk_indices用于后续稀疏注意力",
+      "throughput_impact": "sparse_count=2048控制稀疏度",
+      "latency_impact": "快速选择相关专家减少计算量",
+      "test_cases": [
+        {
+          "name": "TND布局query",
+          "description": ""
+        },
+        {
+          "name": "PA_BSND布局key",
+          "description": ""
+        },
+        {
+          "name": "不同sparse_count配置",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3.2",
+        "GLM-MoE-DSA"
+      ],
+      "enable_config": "SFA模型自动启用",
+      "unsuitable_scenarios": [
+        "非SFA架构模型"
+      ],
+      "best_practices": [
+        "sparse_count=2048平衡精度和性能",
+        "确保layout配置正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendSFAImpl.indexer_select_post_process",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "sparse_count参数",
+        "sparse_mode配置",
+        "layout设置"
+      ],
+      "affected_features": [
+        "专家选择精度",
+        "稀疏注意力效率"
+      ]
+    },
+    "design": {
+      "principle": "通过query和key的相似度计算，选择最相关的专家进行稀疏注意力计算",
+      "theory_analysis": "使用weights进行加权选择，sparse_count控制选择数量",
+      "design_decisions": [
+        {
+          "decision": "支持TND和PA_BSND布局",
+          "reason": ""
+        },
+        {
+          "decision": "sparse_mode=3因果掩码",
+          "reason": ""
+        },
+        {
+          "decision": "两种实现路径兼容不同模型",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "161001ee14278f937efa5cbbb8096876b35230dcddaac3ed829c93cca4181470",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,106 @@
+{
+  "id": "api:ascend_merged_column_parallel_linear",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMergedColumnParallelLinear",
+  "summary": "昇腾合并列并行线性层，实现多个线性层的合并计算和列并行",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/linear.py",
+      "lines": "200-350"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "AscendColumnParallelLinear",
+    "MergedColumnParallelLinear"
+  ],
+  "related_features": [
+    "tensor_parallel",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行计算",
+        "weight_loader()加载权重"
+      ],
+      "memory_impact": "合并多个线性层减少内存碎片",
+      "throughput_impact": "合并计算提升吞吐量",
+      "latency_impact": "减少kernel launch开销",
+      "test_cases": [
+        {
+          "name": "合并计算测试",
+          "description": ""
+        },
+        {
+          "name": "列并行测试",
+          "description": ""
+        },
+        {
+          "name": "MoE gate测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "MoE模型",
+        "MLP层"
+      ],
+      "enable_config": "自动应用于合并线性层",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "合理合并线性层",
+        "配置TP size"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/linear.py:200-350",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()计算逻辑",
+        "权重布局优化"
+      ],
+      "affected_features": [
+        "MLP计算",
+        "MoE gate"
+      ]
+    },
+    "design": {
+      "principle": "合并多个列并行线性层，优化计算效率",
+      "theory_analysis": "减少内存访问和kernel launch开销",
+      "design_decisions": [
+        {
+          "decision": "支持权重合并",
+          "reason": ""
+        },
+        {
+          "decision": "优化NZ格式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "3fc24c3f8b9059d12f73c897306397c3b21d72dce0ae1b5147beb9d79a4a9366",
+  "knowledge_domain": "vllm-ascend-core"
+}

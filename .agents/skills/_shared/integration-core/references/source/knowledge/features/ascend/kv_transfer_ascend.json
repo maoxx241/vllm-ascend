@@ -1,0 +1,191 @@
+{
+  "id": "feature:kv_transfer_ascend",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "KV Transfer (Ascend)",
+  "summary": "vLLM-Ascend的KV Cache传输框架，支持分离式Prefill/Decode部署，提供Mooncake P2P、Mooncake Layerwise、KV Pool、UCM、CPU Offload五种传输模式，实现跨节点KV Cache高效传输。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/__init__.py",
+      "lines": "1-53"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py",
+      "lines": "1-1820"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py",
+      "lines": "1-1442"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py",
+      "lines": "1-255"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_pool/ucm_connector.py",
+      "lines": "1-245"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/cpu_offload_connector.py",
+      "lines": "1-448"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_NIXL_ABORT_REQUEST_TIMEOUT",
+    "ASCEND_TRANSFER_TIMEOUT",
+    "VLLM_ASCEND_FUSION_OP_TRANSPOSE_KV_CACHE_BY_BLOCK"
+  ],
+  "related_apis": [
+    "KVConnectorBase_V1",
+    "MooncakeConnector",
+    "MooncakeLayerwiseConnector",
+    "AscendStoreConnector",
+    "UCMConnectorV1",
+    "CPUOffloadingConnector",
+    "AscendMultiConnector"
+  ],
+  "related_features": [
+    "disaggregated_prefill",
+    "prefix_caching",
+    "context_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Scheduler交互获取KV传输请求",
+        "与Worker交互执行实际KV传输",
+        "与Mooncake TransferEngine交互进行RDMA传输",
+        "与ZMQ交互进行元数据握手"
+      ],
+      "memory_impact": "Mooncake需要注册KV cache到传输引擎；CPU Offload需要CPU内存存储KV cache；KV Pool需要额外的存储后端",
+      "throughput_impact": "分离式部署可显著提升Decode节点throughput(避免prefill阻塞)；传输开销取决于网络带宽和KV cache大小",
+      "latency_impact": "TTFT降低(利用远程prefill结果)；传输延迟取决于网络条件和KV cache大小",
+      "test_cases": [
+        {
+          "name": "test_mooncake_connector.py: Mooncake连接器单元测试",
+          "description": ""
+        },
+        {
+          "name": "test_remote_decode_lifecycle.py: 远程decode生命周期测试",
+          "description": ""
+        },
+        {
+          "name": "test_config_data.py: 配置解析测试",
+          "description": ""
+        },
+        {
+          "name": "KV传输正确性和性能基准测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持KV cache的模型",
+        "MLA架构(DeepSeek系列)需要特殊处理",
+        "Sparse Attention模型需要额外支持"
+      ],
+      "enable_config": "kv_transfer_config.kv_connector='MooncakeConnectorV1'/'MooncakeLayerwiseConnector'/'AscendStoreConnector'/'UCMConnector'/'CPUOffloadingConnector'",
+      "unsuitable_scenarios": [
+        "单节点部署(无需KV传输)",
+        "网络带宽受限场景(传输延迟过高)",
+        "KV cache极小场景(传输开销占比高)"
+      ],
+      "best_practices": [
+        "Mooncake P2P: 适合分离式P/D部署，利用RDMA实现低延迟传输",
+        "Mooncake Layerwise: 适合P/D TP不等的场景，支持逐层传输和resharding",
+        "KV Pool: 适合prefix caching场景，利用共享存储池",
+        "UCM: 适合持久化prefix caching，支持NFS/3FS等存储后端",
+        "CPU Offload: 适合单节点内存扩展，利用CPU内存作为KV cache扩展",
+        "配置kv_port确保P/D节点通信端口正确",
+        "PCP/DCP场景需要正确配置remote_pcp_size/remote_dcp_size"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "mooncake_connector.py",
+          "function": "KVCacheSendingThread/RecvingThread",
+          "purpose": "后台线程处理KV传输"
+        },
+        {
+          "file": "mooncake_connector.py",
+          "function": "_transfer_kv_cache",
+          "purpose": "执行实际KV cache传输"
+        },
+        {
+          "file": "mooncake_layerwise_connector.py",
+          "function": "save_kv_layer",
+          "purpose": "逐层保存和传输KV cache"
+        },
+        {
+          "file": "cpu_offload_connector.py",
+          "function": "load_kv_layer/save_listener",
+          "purpose": "CPU-GPU KV cache交换"
+        },
+        {
+          "file": "ascend_store_connector.py",
+          "function": "LookupKeyServer",
+          "purpose": "KV Pool查找服务"
+        }
+      ],
+      "modification_points": [
+        "新增Connector: 继承KVConnectorBase_V1并实现Scheduler/Worker方法",
+        "注册Connector: 在__init__.py的register_connector中注册",
+        "优化传输: 修改_transfer_kv_cache中的批量传输逻辑",
+        "支持新存储: 在KV Pool中添加新的backend实现"
+      ],
+      "affected_features": [
+        "Context Parallel: 需要正确处理PCP/DCP场景的KV分割",
+        "Pipeline Parallel: 需要正确映射PP层的KV cache",
+        "MLA: 需要特殊处理latent KV cache格式"
+      ]
+    },
+    "design": {
+      "principle": "KV Transfer框架将KV cache的生产和消费解耦，支持分离式Prefill/Decode部署。Producer节点完成prefill后传输KV cache到Consumer节点，Consumer节点直接利用接收的KV cache进行decode，避免重复计算。",
+      "theory_analysis": "分离式部署的收益 = (Prefill时间 - 传输时间) / Decode节点数。当Prefill时间显著大于传输时间时，收益为正。传输时间 = KV cache大小 / 网络带宽。KV cache大小 = num_layers * block_size * num_kv_heads * head_dim * seq_len / block_size。",
+      "design_decisions": [
+        {
+          "decision": "Scheduler-Worker分离架构",
+          "reason": "Scheduler负责元数据管理和调度决策，Worker负责实际传输执行，职责清晰便于扩展"
+        },
+        {
+          "decision": "ZMQ用于元数据握手，Mooncake用于数据传输",
+          "reason": "ZMQ提供可靠的消息传递用于控制面，Mooncake利用RDMA实现高吞吐数据面"
+        },
+        {
+          "decision": "支持多种传输模式",
+          "reason": "不同场景有不同需求：P2P适合分离部署，Pool适合缓存共享，Offload适合内存扩展"
+        },
+        {
+          "decision": "Layerwise传输支持TP resharding",
+          "reason": "P/D节点TP不等时需要resharding KV cache，逐层传输允许在传输过程中完成resharding"
+        },
+        {
+          "decision": "CPU Offload使用独立进程管理元数据",
+          "reason": "避免GIL限制，支持多DP共享CPU KV cache，使用ZMQ RPC进行进程间通信"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "b31c95f64bc3e30aee6e4c358ace45183c40ea39dfd6c8eb446ef7621a8ad8e8",
+  "knowledge_domain": "integration-core"
+}

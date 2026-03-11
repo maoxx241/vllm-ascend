@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: examples/offline_data_parallel.py:75, examples/offline_external_launcher.py:108, examples/offline_weight_load.py:117
-- read_ref: vllm/vllm/benchmarks/datasets.py:1569, vllm/vllm/benchmarks/datasets.py:1725, vllm/vllm/benchmarks/lib/endpoint_request_func.py:71
-- effect_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:171, vllm/vllm/benchmarks/lib/endpoint_request_func.py:300, vllm/vllm/benchmarks/lib/endpoint_request_func.py:394
+- read_ref: vllm/vllm/benchmarks/datasets.py:1603, vllm/vllm/benchmarks/datasets.py:1759, vllm/vllm/benchmarks/lib/endpoint_request_func.py:71
+- effect_ref: vllm/vllm/benchmarks/lib/endpoint_request_func.py:172, vllm/vllm/benchmarks/lib/endpoint_request_func.py:301, vllm/vllm/benchmarks/lib/endpoint_request_func.py:395
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

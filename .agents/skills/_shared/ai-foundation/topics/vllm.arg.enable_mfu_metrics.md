@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1090
+- definition_ref: vllm/engine/arg_utils.py:1095
 - read_ref: vllm/vllm/config/observability.py:65, vllm/vllm/engine/arg_utils.py:529, vllm/vllm/engine/arg_utils.py:529
-- effect_ref: vllm/vllm/v1/core/sched/scheduler.py:251, vllm/vllm/v1/metrics/loggers.py:136, vllm/vllm/engine/arg_utils.py:1091
+- effect_ref: vllm/vllm/v1/core/sched/scheduler.py:251, vllm/vllm/v1/metrics/loggers.py:136, vllm/vllm/engine/arg_utils.py:1096
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 指标缺失; 追踪上报失败
 - value_failure_signals: 指标缺失; 追踪上报失败
 - recommendation: 按需开启细粒度 tracing，避免全量常开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

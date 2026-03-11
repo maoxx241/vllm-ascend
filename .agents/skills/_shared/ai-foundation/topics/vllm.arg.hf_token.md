@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:700
-- read_ref: vllm/vllm/config/model.py:248, vllm/vllm/config/model.py:342, vllm/vllm/config/model.py:495
-- effect_ref: vllm/vllm/config/model.py:248, vllm/vllm/config/model.py:342, vllm/vllm/config/model.py:495
+- definition_ref: vllm/engine/arg_utils.py:702
+- read_ref: vllm/vllm/config/model.py:248, vllm/vllm/config/model.py:339, vllm/vllm/config/model.py:498
+- effect_ref: vllm/vllm/config/model.py:248, vllm/vllm/config/model.py:339, vllm/vllm/config/model.py:498
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 401/403; TLS 握手失败
 - value_failure_signals: 401/403; TLS 握手失败
 - recommendation: 生产默认开启鉴权并最小化 CORS 白名单。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

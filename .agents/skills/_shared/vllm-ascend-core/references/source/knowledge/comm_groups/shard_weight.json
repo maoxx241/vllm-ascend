@@ -1,0 +1,129 @@
+{
+  "id": "comm_group:shard_weight",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_SHARD_WEIGHT",
+  "summary": "权重分片通信组，用于layer_sharding特性的权重广播通信，支持FlashComm2和DSA_CP两种模式，实现跨rank的权重同步",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "23,177-213,261-263,322-325"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_shard_weight_group",
+    "init_model_parallel_group",
+    "create_shard_weight_group"
+  ],
+  "related_features": [
+    "layer_sharding",
+    "flashcomm2",
+    "dsa_cp",
+    "weight_broadcast"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与layer_sharding配合",
+        "支持FlashComm2和DSA_CP两种模式"
+      ],
+      "memory_impact": "分片权重减少显存占用，但需要广播通信",
+      "throughput_impact": "权重广播有通信开销，但减少显存可支持更大batch",
+      "latency_impact": "权重广播增加延迟，但可与计算重叠",
+      "test_cases": [
+        {
+          "name": "验证SHARD_WEIGHT组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试FlashComm2模式权重广播",
+          "description": ""
+        },
+        {
+          "name": "测试DSA_CP模式权重广播",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "layer_sharding: ['o_proj']",
+      "unsuitable_scenarios": [
+        "非layer_sharding场景"
+      ],
+      "best_practices": [
+        "配合FlashComm2或DSA_CP使用",
+        "选择合适的层进行分片",
+        "确保权重广播与计算重叠"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_SHARD_WEIGHT: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "create_shard_weight_group(): 创建分片权重组",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_shard_weight_group(): 获取SHARD_WEIGHT组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "create_shard_weight_group(): 修改组划分逻辑",
+        "init_ascend_model_parallel(): 添加新模式支持"
+      ],
+      "affected_features": [
+        "layer_sharding",
+        "flashcomm2",
+        "dsa_cp"
+      ]
+    },
+    "design": {
+      "principle": "SHARD_WEIGHT组用于权重分片后的广播通信，支持FlashComm2和DSA_CP两种模式",
+      "theory_analysis": "权重分片可减少显存占用，广播通信确保各rank权重一致",
+      "design_decisions": [
+        {
+          "decision": "支持FlashComm2和DSA_CP两种模式",
+          "reason": ""
+        },
+        {
+          "decision": "根据module_tp_group_ranks确定组成员",
+          "reason": ""
+        },
+        {
+          "decision": "支持PP维度的权重共享",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c8f941d507b2006fcc37c2a452f378b7dea415a3ce10e227b56bcb13ab2ea6ee",
+  "knowledge_domain": "vllm-ascend-core"
+}

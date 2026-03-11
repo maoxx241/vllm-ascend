@@ -1,0 +1,110 @@
+{
+  "id": "env_var:vllm_allow_expert_load_collecting",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ALLOW_EXPERT_LOAD_COLLECTING",
+  "summary": "控制是否允许收集专家负载信息，用于动态EPLB的负载监控",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/envs.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/eplb_updator.py",
+      "lines": "55-61"
+    }
+  ],
+  "related_env_vars": [
+    "DYNAMIC_EPLB"
+  ],
+  "related_apis": [
+    "EplbUpdator.init_eplb"
+  ],
+  "related_features": [
+    "dynamic_eplb",
+    "expert_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与动态EPLB交互",
+        "影响专家负载收集频率"
+      ],
+      "memory_impact": "负载收集需要额外内存存储统计数据",
+      "throughput_impact": "负载收集有轻微开销",
+      "latency_impact": "影响极小",
+      "test_cases": [
+        {
+          "name": "负载收集测试",
+          "description": "验证专家负载正确收集",
+          "threshold": 0
+        },
+        {
+          "name": "动态EPLB集成测试",
+          "description": "验证与动态EPLB的配合",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "MoE模型"
+      ],
+      "enable_config": "export VLLM_ALLOW_EXPERT_LOAD_COLLECTING=1",
+      "unsuitable_scenarios": [
+        "非动态EPLB场景"
+      ],
+      "best_practices": [
+        "动态EPLB场景需要启用",
+        "配合expert_heat_collection_interval配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/eplb/eplb_updator.py",
+          "function": "EplbUpdator.init_eplb",
+          "lines": "55-61",
+          "purpose": "检查VLLM_ALLOW_EXPERT_LOAD_COLLECTING决定是否周期性收集负载"
+        }
+      ],
+      "modification_points": [
+        "eplb_updator.py: 修改负载收集逻辑"
+      ],
+      "affected_features": [
+        "dynamic_eplb",
+        "expert_parallel"
+      ]
+    },
+    "design": {
+      "principle": "专家负载收集是动态EPLB的基础，需要用户显式启用",
+      "theory_analysis": "负载收集需要额外的计算和内存开销，通过环境变量控制是否启用",
+      "design_decisions": [
+        {
+          "decision": "需要显式启用",
+          "reason": "负载收集有开销，仅在动态EPLB场景需要"
+        },
+        {
+          "decision": "影响收集频率",
+          "reason": "未启用时使用expert_heat_collection_interval作为单次收集周期"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "c3ceeca542fad448b4b8d68bd7c8fb4e0e7c2d7a67496f27dcebcaf501977776",
+  "knowledge_domain": "integration-core"
+}

@@ -1,0 +1,115 @@
+{
+  "id": "api:aclgraph_wrapper",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "ACLGraphWrapper",
+  "summary": "ACL Graph包装器，实现NPU图捕获和重放，优化推理性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/acl_graph.py",
+      "lines": "36-201"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_LOGGING_LEVEL"
+  ],
+  "related_apis": [
+    "CUDAGraphOptions",
+    "BatchDescriptor",
+    "GraphParams"
+  ],
+  "related_features": [
+    "acl_graph",
+    "cuda_graph",
+    "speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "__call__()执行图捕获或重放",
+        "unwrap()获取原始runnable"
+      ],
+      "memory_impact": "管理图缓存和工作空间内存",
+      "throughput_impact": "图模式显著提升吞吐量",
+      "latency_impact": "减少kernel launch开销降低延迟",
+      "test_cases": [
+        {
+          "name": "图捕获测试",
+          "description": ""
+        },
+        {
+          "name": "图重放测试",
+          "description": ""
+        },
+        {
+          "name": "多batch size测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "enforce_eager=False时自动启用",
+      "unsuitable_scenarios": [
+        "动态shape场景",
+        "调试模式"
+      ],
+      "best_practices": [
+        "预热图捕获",
+        "合理配置capture_sizes"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/compilation/acl_graph.py:36-201",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "__call__()捕获/重放逻辑",
+        "图参数管理"
+      ],
+      "affected_features": [
+        "图优化",
+        "推理性能"
+      ]
+    },
+    "design": {
+      "principle": "包装runnable，添加图捕获和重放能力",
+      "theory_analysis": "使用torch.npu.NPUGraph捕获计算图，减少Python开销",
+      "design_decisions": [
+        {
+          "decision": "支持FULL和PIECEWISE模式",
+          "reason": ""
+        },
+        {
+          "decision": "弱引用输出节省内存",
+          "reason": ""
+        },
+        {
+          "decision": "支持调试模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "f8e016e0a56026624e02f95cc0e6f6b0451295a37bcca9a26f3a13c5de75e5d9",
+  "knowledge_domain": "integration-core"
+}

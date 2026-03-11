@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1051
-- read_ref: vllm/vllm/config/parallel.py:586, vllm/vllm/envs.py:136, vllm/vllm/envs.py:1051
+- definition_ref: vllm/envs.py:1063
+- read_ref: vllm/vllm/config/parallel.py:586, vllm/vllm/envs.py:137, vllm/vllm/envs.py:1063
 - effect_ref: vllm/vllm/utils/network_utils.py:159
 - web_refs: 4
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: 端口占用/连接失败导致 DP 初始化错误。
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

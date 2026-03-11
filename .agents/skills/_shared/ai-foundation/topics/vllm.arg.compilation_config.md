@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1204
+- definition_ref: vllm/engine/arg_utils.py:1209
 - read_ref: vllm/vllm/benchmarks/lib/utils.py:18, vllm/vllm/benchmarks/lib/utils.py:31, vllm/vllm/benchmarks/lib/utils.py:61
 - effect_ref: vllm/vllm/compilation/backends.py:94, vllm/vllm/compilation/backends.py:107, vllm/vllm/compilation/backends.py:148
 - web_refs: 7
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: ValueError: cudagraph_capture_sizes ... mutually exclusive; ValueError: max_cudagraph_capture_size ... mutually exclusive
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

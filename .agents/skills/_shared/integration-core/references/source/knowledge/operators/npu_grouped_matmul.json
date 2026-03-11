@@ -1,0 +1,126 @@
+{
+  "id": "operator:npu_grouped_matmul",
+  "type": "operator",
+  "category": "moe",
+  "name": "npu_grouped_matmul",
+  "summary": "NPU分组矩阵乘法算子，用于MoE专家计算，支持分组处理不同专家的矩阵乘法，支持量化和反量化模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_mlp.py",
+      "lines": "178-188, 221-246, 281-295, 343-371"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_grouped_matmul"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "quantization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与group_list配合分组",
+        "与per_token_scale配合量化",
+        "与antiquant配合反量化"
+      ],
+      "memory_impact": "支持INT8/INT4权重减少内存",
+      "throughput_impact": "分组处理提升专家并行效率",
+      "latency_impact": "单算子处理多专家",
+      "test_cases": [
+        {
+          "name": "量化模式",
+          "description": ""
+        },
+        {
+          "name": "反量化模式",
+          "description": ""
+        },
+        {
+          "name": "非量化模式",
+          "description": ""
+        },
+        {
+          "name": "不同group_list_type",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "MoE模型自动启用",
+      "unsuitable_scenarios": [
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "split_item=2用于专家分组",
+        "group_list_type正确配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "quant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "unquant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "DeviceOperator.npu_grouped_matmul_gmm2",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "split_item配置",
+        "group_type设置",
+        "output_dtype选择"
+      ],
+      "affected_features": [
+        "MoE计算效率",
+        "量化/反量化精度"
+      ]
+    },
+    "design": {
+      "principle": "使用group_list将输入分组，每组对应一个专家的矩阵乘法",
+      "theory_analysis": "分组矩阵乘法避免多次kernel启动，提升MoE计算效率",
+      "design_decisions": [
+        {
+          "decision": "支持量化和反量化模式",
+          "reason": ""
+        },
+        {
+          "decision": "支持per_token_scale",
+          "reason": ""
+        },
+        {
+          "decision": "支持MXFP量化(A5)",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "ab3b822d4c64adc48c05f4957c0c1f6f3c38d38554b010e3d2663155102ab0e5",
+  "knowledge_domain": "integration-core"
+}

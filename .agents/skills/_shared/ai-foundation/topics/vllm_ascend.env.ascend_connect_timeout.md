@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: docs/source/user_guide/feature_guide/kv_pool.md:157, docs/source/user_guide/feature_guide/kv_pool.md:224, docs/source/user_guide/feature_guide/kv_pool.md:335
+- definition_ref: docs/source/user_guide/feature_guide/kv_pool.md:148, docs/source/user_guide/feature_guide/kv_pool.md:215, docs/source/user_guide/feature_guide/kv_pool.md:326
 - read_ref: N/A
 - effect_ref: N/A
 - web_refs: 4
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

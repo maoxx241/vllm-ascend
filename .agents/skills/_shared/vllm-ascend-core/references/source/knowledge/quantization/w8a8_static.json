@@ -1,0 +1,124 @@
+{
+  "id": "quantization:w8_a8",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W8A8",
+  "summary": "INT8静态量化方案，激活值使用per-tensor静态量化，权重使用per-channel量化，需要预先校准获取input_scale，适合固定输入分布场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_static.py",
+      "lines": "1-161"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_quant_matmul",
+    "torch.ops.vllm.quantize"
+  ],
+  "related_features": [
+    "flashcomm2",
+    "compressed_tensors",
+    "weight_prefetch"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm2量化通信配合使用",
+        "支持compressed-tensors量化格式导入"
+      ],
+      "memory_impact": "权重存储为INT8，内存占用减少约50%，需要存储input_scale和deq_scale",
+      "throughput_impact": "静态量化无运行时量化开销，吞吐量优于动态量化",
+      "latency_impact": "无动态量化开销，延迟最低",
+      "test_cases": [
+        {
+          "name": "验证静态scale校准精度",
+          "description": ""
+        },
+        {
+          "name": "测试FlashComm2量化通信正确性",
+          "description": ""
+        },
+        {
+          "name": "验证compressed-tensors格式兼容性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型",
+        "支持compressed-tensors格式模型"
+      ],
+      "enable_config": "quantization: w8a8",
+      "unsuitable_scenarios": [
+        "输入分布变化大的场景",
+        "无法预先校准的场景"
+      ],
+      "best_practices": [
+        "使用代表性数据集进行校准",
+        "配合FlashComm2优化o_proj通信",
+        "启用weight_prefetch预取权重"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8LinearMethod: 静态量化Linear层实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_pertensor_param(): per-tensor参数定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_perchannel_param(): per-channel参数定义",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()方法: 修改量化逻辑，支持FlashComm2通信",
+        "process_weights_after_loading(): 修改权重后处理，支持compressed-tensors"
+      ],
+      "affected_features": [
+        "flashcomm2_quant_comm",
+        "weight_prefetch",
+        "compressed_tensors"
+      ]
+    },
+    "design": {
+      "principle": "激活值per-tensor静态量化：整个张量共享一个scale，需要预先校准；权重per-channel量化：每行权重独立scale",
+      "theory_analysis": "静态量化需要校准数据确定scale，精度取决于校准数据代表性，理论精度损失约0.1-0.3%",
+      "design_decisions": [
+        {
+          "decision": "选择静态量化以消除运行时量化开销",
+          "reason": ""
+        },
+        {
+          "decision": "支持FlashComm2量化通信，减少通信数据量",
+          "reason": ""
+        },
+        {
+          "decision": "兼容compressed-tensors格式，支持第三方量化模型",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2c671b28c509ddd168902541bea3608fd6ee9d6212ae9b66bc41e1bbbaaa6fae",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -35,7 +35,7 @@ topic_kind: parameter
 
 - definition_ref: examples/external_online_dp/launch_online_dp.py:10, examples/offline_data_parallel.py:81
 - read_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:84, vllm/vllm/benchmarks/sweep/plot_pareto.py:90, vllm/vllm/benchmarks/sweep/plot_pareto.py:91
-- effect_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:90, vllm/vllm/model_executor/layers/fused_moe/all2all_utils.py:104, vllm/vllm/model_executor/layers/fused_moe/config.py:888
+- effect_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:90, vllm/vllm/model_executor/layers/fused_moe/all2all_utils.py:104, vllm/vllm/model_executor/layers/fused_moe/config.py:929
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: RPC 连接失败; 请求分发不均衡
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,103 @@
+{
+  "id": "env_var:vllm_ascend_enable_quant_comm",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_QUANT_COMM",
+  "summary": "控制量化通信开关，在通信过程中使用量化减少通信量",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "N/A"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1"
+  ],
+  "related_apis": [],
+  "related_features": [
+    "quantization",
+    "flashcomm1",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm1配合使用",
+        "与量化配置交互"
+      ],
+      "memory_impact": "量化通信减少通信缓冲区大小",
+      "throughput_impact": "通信量减半可提升吞吐量",
+      "latency_impact": "减少通信延迟",
+      "test_cases": [
+        {
+          "name": "量化通信正确性测试",
+          "description": "验证量化通信的数值正确性",
+          "threshold": 0
+        },
+        {
+          "name": "通信量测试",
+          "description": "验证通信量减少效果",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "量化模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_QUANT_COMM=1",
+      "unsuitable_scenarios": [
+        "非量化模型",
+        "对精度要求极高的场景"
+      ],
+      "best_practices": [
+        "配合FlashComm1使用",
+        "验证量化精度影响",
+        "监控通信性能提升"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "N/A",
+          "purpose": "环境变量定义"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 添加环境变量定义"
+      ],
+      "affected_features": [
+        "flashcomm1",
+        "quantization",
+        "distributed_inference"
+      ]
+    },
+    "design": {
+      "principle": "在通信前对数据进行量化，减少通信量，通信后反量化恢复精度",
+      "theory_analysis": "INT8量化可将通信量减半，但会引入量化误差。需要权衡精度和性能",
+      "design_decisions": [
+        {
+          "decision": "可选启用",
+          "reason": "量化通信有精度损失，需要用户根据场景选择"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "732a368dae5947b82b9d0c485c5f914d67d8ebdd687a4fc06305b8e0a5ebe2fe",
+  "knowledge_domain": "integration-core"
+}

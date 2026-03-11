@@ -5,22 +5,17 @@
     "cooccurrence_files": 32
   },
   {
-    "left": "--port",
-    "right": "--trust-remote-code",
-    "cooccurrence_files": 26
-  },
-  {
     "left": "--max-model-len",
     "right": "--tensor-parallel-size",
     "cooccurrence_files": 26
   },
   {
-    "left": "--served-model-name",
+    "left": "--max-model-len",
     "right": "--trust-remote-code",
     "cooccurrence_files": 25
   },
   {
-    "left": "--max-model-len",
+    "left": "--port",
     "right": "--trust-remote-code",
     "cooccurrence_files": 25
   },
@@ -47,6 +42,11 @@
   {
     "left": "--served-model-name",
     "right": "--tensor-parallel-size",
+    "cooccurrence_files": 24
+  },
+  {
+    "left": "--served-model-name",
+    "right": "--trust-remote-code",
     "cooccurrence_files": 24
   },
   {
@@ -70,11 +70,6 @@
     "cooccurrence_files": 22
   },
   {
-    "left": "--model",
-    "right": "--trust-remote-code",
-    "cooccurrence_files": 22
-  },
-  {
     "left": "--gpu-memory-utilization",
     "right": "--served-model-name",
     "cooccurrence_files": 22
@@ -115,14 +110,14 @@
     "cooccurrence_files": 21
   },
   {
-    "left": "--max-num-batched-tokens",
-    "right": "--port",
+    "left": "--model",
+    "right": "--trust-remote-code",
     "cooccurrence_files": 21
   },
   {
-    "left": "--host",
-    "right": "--trust-remote-code",
-    "cooccurrence_files": 20
+    "left": "--max-num-batched-tokens",
+    "right": "--port",
+    "cooccurrence_files": 21
   },
   {
     "left": "--max-model-len",
@@ -140,6 +135,11 @@
     "cooccurrence_files": 20
   },
   {
+    "left": "--seed",
+    "right": "--trust-remote-code",
+    "cooccurrence_files": 19
+  },
+  {
     "left": "--enable-expert-parallel",
     "right": "--trust-remote-code",
     "cooccurrence_files": 19
@@ -147,6 +147,11 @@
   {
     "left": "--host",
     "right": "--max-model-len",
+    "cooccurrence_files": 19
+  },
+  {
+    "left": "--host",
+    "right": "--trust-remote-code",
     "cooccurrence_files": 19
   },
   {
@@ -162,11 +167,6 @@
   {
     "left": "--seed",
     "right": "--tensor-parallel-size",
-    "cooccurrence_files": 18
-  },
-  {
-    "left": "--seed",
-    "right": "--trust-remote-code",
     "cooccurrence_files": 18
   },
   {
@@ -2210,11 +2210,6 @@
     "cooccurrence_files": 4
   },
   {
-    "left": "--tokenizer",
-    "right": "--trust-remote-code",
-    "cooccurrence_files": 4
-  },
-  {
     "left": "--hf-overrides",
     "right": "--max-model-len",
     "cooccurrence_files": 4
@@ -2497,6 +2492,11 @@
   {
     "left": "--api-server-count",
     "right": "--host",
+    "cooccurrence_files": 4
+  },
+  {
+    "left": "--api-server-count",
+    "right": "--max-model-len",
     "cooccurrence_files": 4
   }
 ]

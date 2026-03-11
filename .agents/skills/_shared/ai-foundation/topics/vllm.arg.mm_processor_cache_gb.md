@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:990
-- read_ref: vllm/vllm/config/model.py:304, vllm/vllm/config/model.py:353, vllm/vllm/config/model.py:418
-- effect_ref: vllm/vllm/multimodal/registry.py:289
+- definition_ref: vllm/engine/arg_utils.py:995
+- read_ref: vllm/vllm/config/model.py:301, vllm/vllm/config/model.py:349, vllm/vllm/config/model.py:421
+- effect_ref: vllm/vllm/multimodal/registry.py:291
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,164 @@
+{
+  "id": "feature:speculative_decoding",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Speculative Decoding",
+  "summary": "使用轻量级draft模型或方法预测多个token，由target模型并行验证，在保持输出分布不变的前提下显著提升推理吞吐",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/speculative.py",
+      "lines": "33-60"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/config/speculative.py",
+      "lines": "62-597"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/spec_decode/eagle.py",
+      "lines": "57-667"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SpeculativeConfig",
+    "SpeculativeMethod",
+    "EagleProposer",
+    "num_speculative_tokens"
+  ],
+  "related_features": [
+    "cuda_graph",
+    "attention_backend",
+    "kv_cache"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与CUDA Graph交互，需要调整cudagraph_capture_sizes为(num_speculative_tokens+1)的倍数",
+        "与Sequence Parallelism交互，需要确保尺寸同时是TP size的倍数",
+        "与LoRA交互，draft模型可独立配置LoRA"
+      ],
+      "memory_impact": "需要额外的KV cache slots存储draft tokens，draft模型本身也占用显存。EAGLE/MTP方法共享target模型权重，内存开销较小",
+      "throughput_impact": "acceptance rate高时吞吐提升显著，典型场景提升1.5-3x。acceptance rate低时可能因验证开销导致性能下降",
+      "latency_impact": "单次forward生成多个token，有效降低per-token延迟。但draft模型推理会增加首token延迟",
+      "test_cases": [
+        {
+          "name": "test_ngram_speculation",
+          "description": "验证ngram方法的prompt lookup功能"
+        },
+        {
+          "name": "test_eagle_speculation",
+          "description": "验证EAGLE/EAGLE3方法的hidden state传递和draft生成"
+        },
+        {
+          "name": "test_mtp_speculation",
+          "description": "验证MTP方法的multi-token prediction"
+        },
+        {
+          "name": "test_draft_model_speculation",
+          "description": "验证独立draft模型的speculative decoding"
+        },
+        {
+          "name": "test_acceptance_rate",
+          "description": "验证不同方法的acceptance rate和吞吐提升"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "EAGLE: LLaMA系列、Qwen系列、DeepSeek系列、Mistral系列",
+        "MTP: DeepSeek V3、Qwen3.5、MiMo、GLM4-MoE等内置MTP层的模型",
+        "ngram: 所有模型（无需额外权重）",
+        "draft_model: 需要target和draft模型词表大小相同"
+      ],
+      "enable_config": "通过speculative_config配置，设置num_speculative_tokens和method/model",
+      "unsuitable_scenarios": [
+        "acceptance rate极低的场景（如创意写作）",
+        "显存受限无法容纳draft模型的场景",
+        "需要严格确定性输出的场景（非贪婪采样时）"
+      ],
+      "best_practices": [
+        "EAGLE方法acceptance rate最高，推荐用于支持的模型",
+        "MTP方法与模型深度集成，适合DeepSeek V3等原生支持模型",
+        "ngram方法零额外开销，适合快速验证或资源受限场景",
+        "num_speculative_tokens通常设为4-8，过高会降低acceptance rate",
+        "parallel_drafting可进一步提升EAGLE性能，但需要模型支持"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/speculative.py",
+          "function": "SpeculativeConfig",
+          "purpose": "定义speculative decoding配置，包括方法检测和参数验证"
+        },
+        {
+          "file": "vllm/config/speculative.py",
+          "function": "SpeculativeConfig.__post_init__",
+          "purpose": "自动检测speculative方法类型，初始化draft模型配置"
+        },
+        {
+          "file": "vllm/v1/spec_decode/eagle.py",
+          "function": "SpecDecodeBaseProposer",
+          "purpose": "EAGLE/MTP/draft model的基类，实现draft token生成逻辑"
+        },
+        {
+          "file": "vllm/v1/spec_decode/eagle.py",
+          "function": "EagleProposer.propose",
+          "purpose": "执行draft模型forward生成speculative tokens"
+        }
+      ],
+      "modification_points": [
+        "添加新的speculative方法需要在SpeculativeMethod中定义类型",
+        "修改acceptance逻辑需要理解rejection sampling原理",
+        "调整parallel_drafting需要处理masked token逻辑"
+      ],
+      "affected_features": [
+        "cuda_graph: 需要调整捕获尺寸对齐",
+        "kv_cache: 需要额外slots存储draft tokens",
+        "attention: 需要支持tree attention用于验证"
+      ]
+    },
+    "design": {
+      "principle": "Speculative Decoding利用draft模型快速生成多个候选token，由target模型并行验证。验证过程使用rejection sampling保证输出分布与target模型一致。关键是通过并行化验证过程来抵消draft模型的开销。",
+      "theory_analysis": "设draft模型生成k个token的时间为T_d，target模型验证k个token的时间为T_v/k（并行验证）。当acceptance rate为α时，有效吞吐提升为k*α。总时间T = T_d + T_v，需要T_d << T_v且α足够高才能获得收益。",
+      "design_decisions": [
+        {
+          "decision": "支持多种speculative方法",
+          "reason": "不同方法有不同trade-off：EAGLE高acceptance但需要额外权重，ngram零开销但acceptance低，MTP原生集成但模型依赖性强"
+        },
+        {
+          "decision": "EAGLE使用hidden states作为输入",
+          "reason": "Hidden states包含丰富的语义信息，比仅使用token id能更好地预测下一个token，提高acceptance rate"
+        },
+        {
+          "decision": "MTP与模型深度集成",
+          "reason": "DeepSeek V3等模型原生支持MTP层，无需额外加载权重，内存开销最小"
+        },
+        {
+          "decision": "支持parallel_drafting",
+          "reason": "对于支持并行drafting的模型，可以一次性生成所有draft tokens而非串行生成，进一步降低延迟"
+        },
+        {
+          "decision": "支持tree-based speculation",
+          "reason": "Tree attention允许验证多个分支的draft tokens，提高acceptance rate"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "de6e74f99bdbe024e6062e5415824a45603efb30e89aa237f5acab71efc8cc31",
+  "knowledge_domain": "vllm-upstream"
+}

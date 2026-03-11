@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:663
-- read_ref: vllm/vllm/config/vllm.py:404, vllm/vllm/config/vllm.py:406, vllm/vllm/envs.py:47
-- effect_ref: vllm/vllm/config/vllm.py:404, vllm/vllm/config/vllm.py:406
+- definition_ref: vllm/envs.py:675
+- read_ref: vllm/vllm/config/vllm.py:413, vllm/vllm/config/vllm.py:415, vllm/vllm/envs.py:47
+- effect_ref: vllm/vllm/config/vllm.py:413, vllm/vllm/config/vllm.py:415
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

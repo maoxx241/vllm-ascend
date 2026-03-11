@@ -1,0 +1,102 @@
+{
+  "id": "api:all_gather_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AllGatherMethod",
+  "summary": "AllGather通信方法实现，使用AllGather收集所有expert计算结果，适用于EP=1场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "228-256"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MoECommMethod",
+    "TokenDispatcherWithAllGather",
+    "PrepareAndFinalizeWithAllGather"
+  ],
+  "related_features": [
+    "moe",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "prepare()准备通信",
+        "fused_experts()执行计算",
+        "finalize()完成通信"
+      ],
+      "memory_impact": "使用AllGather通信缓冲区",
+      "throughput_impact": "简单可靠，适合EP=1",
+      "latency_impact": "通信开销相对较大",
+      "test_cases": [
+        {
+          "name": "AllGather通信测试",
+          "description": ""
+        },
+        {
+          "name": "单卡MoE测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "默认通信方法",
+      "unsuitable_scenarios": [
+        "EP>1场景(建议使用MC2或AlltoAll)"
+      ],
+      "best_practices": [
+        "EP=1时使用",
+        "兼容性最好"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py:228-256",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "_get_token_dispatcher()",
+        "_get_prepare_finalize()"
+      ],
+      "affected_features": [
+        "MoE通信"
+      ]
+    },
+    "design": {
+      "principle": "使用AllGather收集结果，简单可靠",
+      "theory_analysis": "使用npu_moe_init_routing_v2和npu_moe_token_unpermute优化",
+      "design_decisions": [
+        {
+          "decision": "默认实现",
+          "reason": ""
+        },
+        {
+          "decision": "兼容所有场景",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "7204b8d91af2e534ea59e3b40361f043feecdfb4670631fc76555476bec6d57d",
+  "knowledge_domain": "vllm-ascend-core"
+}

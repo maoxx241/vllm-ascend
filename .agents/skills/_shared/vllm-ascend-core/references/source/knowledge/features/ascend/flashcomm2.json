@@ -1,0 +1,178 @@
+{
+  "id": "feature:flashcomm2",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "FlashComm2",
+  "summary": "O-matrix Tensor Parallel优化，通过配置O-proj TP group size实现通信与计算的更细粒度并行，主要面向P场景部署",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "75-79"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "978-1036"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "139-200"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/linear_op.py",
+      "lines": "688-720"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE"
+  ],
+  "related_apis": [
+    "flashcomm2_enable",
+    "get_flashcomm2_config_and_validate",
+    "get_flashcomm2_otp_group",
+    "get_flashcomm2_odp_group"
+  ],
+  "related_features": [
+    "FlashComm1",
+    "LayerSharding",
+    "DSA-CP",
+    "EPLB"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "FlashComm1",
+        "LayerSharding",
+        "DSA-CP",
+        "KV Transfer"
+      ],
+      "memory_impact": "O-proj权重按flashcomm2_oproj_tp_size分片存储，显存占用与TP size/flashcomm2_oproj_tp_size成正比；配合LayerSharding可进一步降低显存",
+      "throughput_impact": "P场景(Prefill)高并发下吞吐量提升20-40%；D场景(Decode)可能略有下降，不推荐在D场景启用",
+      "latency_impact": "P场景延迟降低；D场景延迟可能增加，因此主要面向P场景部署",
+      "test_cases": [
+        {
+          "name": "P场景性能测试",
+          "description": "验证P场景(Prefill instance)下FlashComm2的性能提升",
+          "threshold": 0
+        },
+        {
+          "name": "TP group size配置测试",
+          "description": "验证不同flashcomm2_oproj_tp_size配置下的性能差异",
+          "threshold": 0
+        },
+        {
+          "name": "LayerSharding配合测试",
+          "description": "验证FlashComm2+LayerSharding的显存优化效果",
+          "threshold": 0
+        },
+        {
+          "name": "混合部署场景测试",
+          "description": "验证PD混合部署下FlashComm2的行为",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "DeepSeek-V3.2"
+      ],
+      "enable_config": "export VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE=1  # 值为O-matrix TP group size",
+      "unsuitable_scenarios": [
+        "D场景(Decode instance)部署",
+        "KV Consumer场景",
+        "与oproj_tensor_parallel_size同时启用",
+        "flashcomm2_oproj_tp_size >= global_tp_size"
+      ],
+      "best_practices": [
+        "推荐与FlashComm1同时启用以获得最佳性能",
+        "P场景部署推荐启用",
+        "配合LayerSharding=['o_proj']进一步降低显存",
+        "flashcomm2_oproj_tp_size应能整除global tensor parallel size",
+        "混合部署场景需谨慎，可能导致decode性能下降"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
+          "lines": "75-79",
+          "purpose": "环境变量定义，值作为O-matrix TP group size"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "flashcomm2_enable",
+          "lines": "978-979",
+          "purpose": "判断FlashComm2是否启用"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "get_flashcomm2_config_and_validate",
+          "lines": "989-1036",
+          "purpose": "配置验证和初始化"
+        },
+        {
+          "file": "vllm_ascend/distributed/parallel_state.py",
+          "function": "initialize_model_parallel",
+          "lines": "139-200",
+          "purpose": "初始化FLASHCOMM2_OTP和FLASHCOMM2_ODP通信组"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值或添加新的配置项",
+        "utils.py: 修改验证逻辑或添加新的约束",
+        "parallel_state.py: 修改通信组初始化逻辑",
+        "linear_op.py: 修改O-proj层的通信逻辑"
+      ],
+      "affected_features": [
+        "O-proj层通信模式",
+        "TP通信组划分",
+        "LayerSharding配置"
+      ]
+    },
+    "design": {
+      "principle": "将O-proj层的Tensor Parallel通信独立出来，配置更小的TP group size，实现通信与计算的更细粒度并行",
+      "theory_analysis": "传统TP中，所有层的TP group size相同。FlashComm2允许O-proj层使用独立的TP group size，当flashcomm2_oproj_tp_size=1时，O-proj层无需TP通信，Allreduce被消除。这种设计特别适合P场景，因为P场景的计算密集度更高，通信开销占比更小。",
+      "design_decisions": [
+        {
+          "decision": "参数值为O-matrix TP group size",
+          "reason": "值>0即启用，具体数值决定O-proj层的TP分片粒度。值为1表示O-proj层不分片，消除Allreduce通信。"
+        },
+        {
+          "decision": "主要面向P场景部署",
+          "reason": "P场景(Prefill)计算密集，通信占比低，FlashComm2收益明显。D场景(Decode)计算稀疏，通信占比高，启用FlashComm2可能导致性能下降。"
+        },
+        {
+          "decision": "推荐与FlashComm1同时启用",
+          "reason": "FlashComm1优化整体TP通信模式，FlashComm2优化O-proj层特定通信，两者配合可获得最佳性能。"
+        },
+        {
+          "decision": "不支持KV Consumer场景",
+          "reason": "KV Consumer是D场景，FlashComm2在D场景可能导致性能下降，因此明确不支持。"
+        },
+        {
+          "decision": "flashcomm2_oproj_tp_size必须能整除global_tp_size",
+          "reason": "通信组划分需要均匀分布，确保每个rank的负载均衡。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "261209dd4bdce8257f3cd012ce4a6c8a365049b130cbb283e3fae4e1d4bc3160",
+  "knowledge_domain": "vllm-ascend-core"
+}

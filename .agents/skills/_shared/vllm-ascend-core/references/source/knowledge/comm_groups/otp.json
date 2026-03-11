@@ -1,0 +1,122 @@
+{
+  "id": "comm_group:otp",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_OTP",
+  "summary": "O Proj张量并行通信组，用于attention output projection的细粒度张量并行，通过finegrained_tp_config.oproj_tensor_parallel_size配置组大小",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "13,121,128-129,237-239,302-305"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_otp_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "finegrained_tp",
+    "attention",
+    "o_proj"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm2 OTP组互斥",
+        "用于attention层的output projection"
+      ],
+      "memory_impact": "O Proj权重按组大小分片，减少显存占用",
+      "throughput_impact": "O Proj并行可提升attention计算吞吐量",
+      "latency_impact": "O Proj通信增加延迟",
+      "test_cases": [
+        {
+          "name": "验证OTP组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同oproj_tensor_parallel_size性能",
+          "description": ""
+        },
+        {
+          "name": "验证与FlashComm2互斥",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有包含attention层的模型"
+      ],
+      "enable_config": "finegrained_tp_config.oproj_tensor_parallel_size: N",
+      "unsuitable_scenarios": [
+        "oproj_tensor_parallel_size=0",
+        "与FlashComm2同时启用"
+      ],
+      "best_practices": [
+        "确保oproj_tensor_parallel_size能被全局TP整除",
+        "不与FlashComm2同时启用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_OTP: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_otp_group(): 获取OTP组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "_create_or_get_group(): 修改组创建逻辑",
+        "init_ascend_model_parallel(): 添加与FlashComm2互斥检查"
+      ],
+      "affected_features": [
+        "attention_layers",
+        "finegrained_tp",
+        "flashcomm2"
+      ]
+    },
+    "design": {
+      "principle": "O Proj TP组允许attention output projection使用独立的并行策略，与FlashComm2互斥",
+      "theory_analysis": "O Proj计算量相对较小，并行度不宜过高，需平衡通信开销",
+      "design_decisions": [
+        {
+          "decision": "使用组缓存避免重复创建",
+          "reason": ""
+        },
+        {
+          "decision": "与FlashComm2互斥，避免冲突",
+          "reason": ""
+        },
+        {
+          "decision": "按DP维度划分组内rank",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2bf687a163a552144260fe9e67e861f87afa2f0a1ceafa66f9a4a01a7978c7ba",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,139 @@
+{
+  "id": "feature:chunked_prefill",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Chunked Prefill",
+  "summary": "将长prompt分块处理，避免长prefill请求阻塞短请求，提升GPU利用率和请求公平性。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/scheduler.py",
+      "lines": "69-89"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/scheduler.py",
+      "lines": "660-695"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SchedulerConfig.enable_chunked_prefill",
+    "SchedulerConfig.max_num_partial_prefills",
+    "SchedulerConfig.max_long_partial_prefills",
+    "SchedulerConfig.long_prefill_token_threshold"
+  ],
+  "related_features": [
+    "feature:async_scheduling",
+    "feature:prefix_caching",
+    "feature:speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与prefix caching交互：chunked prefill可以利用已缓存的prefix tokens",
+        "与speculative decoding交互：chunk边界需要考虑spec tokens",
+        "与async scheduling协同：chunked prefill是async scheduling的基础"
+      ],
+      "memory_impact": "减少长prefill的峰值显存占用，允许更多请求并发；但需要管理partial prefill状态的KV cache",
+      "throughput_impact": "显著提升吞吐量，特别是在混合长短请求的场景下；避免长prefill独占GPU",
+      "latency_impact": "短请求的TTFT（Time To First Token）显著降低；长请求的首token延迟可能略有增加",
+      "test_cases": [
+        {
+          "name": "test_chunked_prefill_basic",
+          "description": "验证长prompt被正确分块处理"
+        },
+        {
+          "name": "test_chunked_prefill_with_encoder_budget",
+          "description": "测试encoder budget约束下的chunked prefill"
+        },
+        {
+          "name": "test_pooling_chunked_prefill",
+          "description": "验证pooling模型的chunked prefill支持"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有decoder-only模型",
+        "多模态模型（需注意encoder budget）",
+        "不支持encoder-decoder模型（如BART）"
+      ],
+      "enable_config": "默认启用。通过--enable-chunked-prefill或EngineArgs.enable_chunked_prefill配置。通过--max-num-batched-tokens控制chunk大小。",
+      "unsuitable_scenarios": [
+        "encoder-decoder模型自动禁用",
+        "极短prompt场景收益有限",
+        "需要完整prompt attention的某些特殊模型"
+      ],
+      "best_practices": [
+        "设置max_num_batched_tokens为模型隐藏层维度的倍数，优化计算效率",
+        "对于混合长短请求场景，设置long_prefill_token_threshold让短请求优先",
+        "监控num_partial_prefills指标，避免过多partial prefill占用资源"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/scheduler.py",
+          "function": "SchedulerConfig.__post_init__",
+          "purpose": "配置验证和默认值设置"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler.schedule",
+          "purpose": "核心调度逻辑，计算num_new_tokens"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler._try_schedule_encoder_inputs",
+          "purpose": "处理多模态输入的chunking"
+        }
+      ],
+      "modification_points": [
+        "修改long_prefill_token_threshold阈值影响长短请求调度策略",
+        "调整max_num_partial_prefills控制并发partial prefill数量",
+        "在schedule方法中修改token_budget分配逻辑"
+      ],
+      "affected_features": [
+        "KV cache管理：需要支持partial KV cache",
+        "Attention backend：需要支持变长attention",
+        "Model runner：需要处理chunk边界"
+      ]
+    },
+    "design": {
+      "principle": "将长prefill请求分解为多个小chunk，每个iteration处理一个chunk，同时允许decode请求插入执行。核心思想是'iteration-level scheduling'而非'request-level scheduling'。",
+      "theory_analysis": "传统方法中，长prefill会独占GPU直到完成，导致短请求饥饿。Chunked prefill通过限制每次处理的token数量(max_num_batched_tokens)，让调度器在每个iteration重新分配资源。数学上，这相当于将O(n)的连续prefill时间分解为O(n/k)个iteration，每个iteration处理k个tokens，期间可以穿插decode操作。",
+      "design_decisions": [
+        {
+          "decision": "默认启用chunked prefill",
+          "reason": "现代LLM服务场景中，混合长短请求是常态，默认启用可获得最佳性能"
+        },
+        {
+          "decision": "max_num_partial_prefills默认为1",
+          "reason": "避免多个partial prefill同时占用资源，简化状态管理"
+        },
+        {
+          "decision": "encoder-decoder模型禁用",
+          "reason": "encoder-decoder架构的cross-attention机制与chunked prefill不兼容"
+        },
+        {
+          "decision": "使用token_budget而非time_budget",
+          "reason": "token数量与计算量直接相关，更容易预测和控制"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "9d05d701b4f04d8a67b1cac12375337e309989ecc1710decc680b2878c85079f",
+  "knowledge_domain": "vllm-upstream"
+}

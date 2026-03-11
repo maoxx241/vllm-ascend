@@ -1,0 +1,164 @@
+{
+  "id": "feature:eplb",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "EPLB",
+  "summary": "Expert Parallel Load Balancing (专家并行负载均衡)，通过静态专家映射实现MoE模型的负载均衡，支持冗余专家和多种均衡策略。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "374-435"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/core/policy/policy_default_eplb.py",
+      "lines": "1-353"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/core/policy/policy_factory.py",
+      "lines": "1-50"
+    }
+  ],
+  "related_env_vars": [
+    "DYNAMIC_EPLB",
+    "EXPERT_MAP_RECORD"
+  ],
+  "related_apis": [
+    "EplbConfig",
+    "PolicyFactory.generate_policy",
+    "DefaultEplb.rebalance_experts"
+  ],
+  "related_features": [
+    "dynamic_eplb",
+    "expert_parallel",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Expert Parallel协同工作，影响专家分布策略",
+        "与MoE模型架构深度耦合，测试需覆盖不同专家数量配置",
+        "静态EPLB在模型加载时确定专家映射，运行时不变"
+      ],
+      "memory_impact": "静态EPLB通过expert_map_path加载预设映射，内存占用固定；冗余专家(num_redundant_experts)会增加显存占用，每增加一个冗余专家约增加单个专家权重的显存",
+      "throughput_impact": "良好的负载均衡可提升吞吐量20-40%；热点专家导致的负载不均会显著降低吞吐量；冗余专家可缓解热点问题但增加显存开销",
+      "latency_impact": "均衡的专家分布可降低P99延迟；负载不均会导致部分请求延迟激增；静态映射无法适应动态负载变化",
+      "test_cases": [
+        {
+          "name": "测试不同eplb_policy_type(0-3)的均衡效果",
+          "description": ""
+        },
+        {
+          "name": "验证expert_map_path加载的映射正确性",
+          "description": ""
+        },
+        {
+          "name": "测试num_redundant_experts对显存和性能的影响",
+          "description": ""
+        },
+        {
+          "name": "对比静态EPLB与动态EPLB的负载均衡效果",
+          "description": ""
+        },
+        {
+          "name": "测试极端负载场景下的专家热点问题",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 (MoE架构)",
+        "Qwen2-MoE",
+        "Mixtral",
+        "所有支持Expert Parallel的MoE模型"
+      ],
+      "enable_config": "通过additional_config配置: eplb_config: {expert_map_path: 'path/to/map.json', num_redundant_experts: N, eplb_policy_type: 1}",
+      "unsuitable_scenarios": [
+        "非MoE模型无意义",
+        "专家数量少于GPU数量的场景",
+        "负载模式完全未知的冷启动场景(建议使用动态EPLB)",
+        "显存紧张且无法容纳冗余专家的场景"
+      ],
+      "best_practices": [
+        "生产环境建议预先收集负载信息生成expert_map",
+        "num_redundant_experts建议设置为GPU数量的整数倍",
+        "eplb_policy_type=1为默认策略，适用于大多数场景",
+        "定期监控专家热度分布，必要时更新静态映射",
+        "结合模型特点选择合适的均衡策略"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "description": "EplbConfig配置类，定义静态EPLB参数",
+          "key_methods": [
+            "__init__",
+            "_validate_config"
+          ]
+        },
+        {
+          "file": "vllm_ascend/eplb/core/policy/policy_default_eplb.py",
+          "description": "默认EPLB策略实现，包含负载均衡核心算法",
+          "key_methods": [
+            "rebalance_experts",
+            "compute_balanced_pack_redundancy"
+          ]
+        },
+        {
+          "file": "vllm_ascend/eplb/core/policy/policy_factory.py",
+          "description": "策略工厂，根据policy_type创建不同策略实例"
+        }
+      ],
+      "modification_points": [
+        "新增均衡策略：继承EplbPolicy基类，实现rebalance_experts方法",
+        "调整冗余专家分配算法：修改compute_balanced_pack_redundancy",
+        "扩展验证逻辑：在EplbConfig._validate_config中添加新约束",
+        "自定义热度计算：修改add_redundant方法中的workload聚合逻辑"
+      ],
+      "affected_features": [
+        "dynamic_eplb: 动态EPLB继承静态EPLB的配置和策略框架",
+        "expert_parallel: EPLB依赖EP进行专家分布",
+        "moe_forward: 专家路由逻辑需适配EPLB映射"
+      ]
+    },
+    "design": {
+      "principle": "EPLB基于贪心装箱算法(Greedy Bin Packing)，将专家按热度分配到不同GPU，目标是使各GPU的总负载尽可能均衡。核心思想：1)收集专家热度信息 2)按热度排序 3)贪心分配到负载最轻的GPU 4)支持冗余专家复制热点专家",
+      "theory_analysis": "装箱问题为NP-hard，EPLB采用贪心近似算法，近似比为2。冗余专家机制通过复制热点专家实现负载分流，理论可将最大负载降低至原来的1/(r+1)，其中r为冗余副本数。约束条件：1)每个GPU专家数相同 2)同一专家的不同副本不能在同一GPU 3)最小化专家迁移成本",
+      "design_decisions": [
+        {
+          "decision": "静态映射 vs 动态调整",
+          "rationale": "静态EPLB适合负载模式稳定的场景，避免运行时重平衡开销；动态EPLB适合负载波动大的场景，但需要额外的监控和迁移机制"
+        },
+        {
+          "decision": "冗余专家策略",
+          "rationale": "冗余专家可缓解热点问题，但增加显存开销和同步成本。设计选择让用户通过num_redundant_experts权衡"
+        },
+        {
+          "decision": "四种policy_type设计",
+          "rationale": "不同策略适用于不同场景：type 0为随机策略，type 1为默认均衡，type 2为Swift均衡器，type 3为FlashLB。提供灵活性"
+        },
+        {
+          "decision": "expert_map_path外部加载",
+          "rationale": "允许离线分析和优化专家映射，支持A/B测试和迭代优化，避免启动时计算开销"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d8cc0426c35616adbb1e42f61ef11d4aa62a98ddb61bb334b94e16d718298b44",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,112 @@
+{
+  "id": "api:select_moe_comm_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "select_moe_comm_method",
+  "summary": "选择MoE通信方法，根据配置和设备特性自动选择最优的MoE通信策略",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "150-200"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MC2",
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "MoECommMethod",
+    "MoECommType",
+    "get_moe_comm_method"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "communication"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "根据EP/DP配置选择通信方法"
+      ],
+      "memory_impact": "影响MoE通信缓冲区大小",
+      "throughput_impact": "选择最优方法提升吞吐量",
+      "latency_impact": "通信方法影响延迟",
+      "test_cases": [
+        {
+          "name": "EP=1场景测试",
+          "description": ""
+        },
+        {
+          "name": "EP>1场景测试",
+          "description": ""
+        },
+        {
+          "name": "DP>1场景测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "自动选择或通过配置指定",
+      "unsuitable_scenarios": [
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "让系统自动选择最优方法"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_forward_context.py:150-200",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "选择逻辑",
+        "新增通信方法"
+      ],
+      "affected_features": [
+        "MoE通信",
+        "性能优化"
+      ]
+    },
+    "design": {
+      "principle": "根据场景自动选择最优通信方法",
+      "theory_analysis": "EP=1用AllGather，EP>1用MC2或AlltoAll",
+      "design_decisions": [
+        {
+          "decision": "支持自动选择",
+          "reason": ""
+        },
+        {
+          "decision": "支持手动指定",
+          "reason": ""
+        },
+        {
+          "decision": "考虑设备特性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "0fca4d6adc60abd8c6b6990d205fbd8166de9f0ebbc1381d815805a1f14a2b65",
+  "knowledge_domain": "vllm-ascend-core"
+}

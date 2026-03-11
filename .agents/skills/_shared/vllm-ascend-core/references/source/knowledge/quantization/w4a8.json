@@ -1,0 +1,135 @@
+{
+  "id": "quantization:w4_a8",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W4A8",
+  "summary": "INT4权重+INT8激活量化方案，支持两级量化（per-channel + per-group），支持新旧两种量化版本，专为MoE层设计，通过npu_weight_quant_batchmatmul实现高效计算",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a8.py",
+      "lines": "1-530"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_weight_quant_batchmatmul",
+    "torch_npu.npu_convert_weight_to_int4pack",
+    "torch_npu.npu_quantize"
+  ],
+  "related_features": [
+    "moe",
+    "compressed_tensors",
+    "dynamic_eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "支持compressed-tensors格式导入",
+        "支持dynamic_eplb动态专家负载均衡",
+        "支持新旧两种量化版本"
+      ],
+      "memory_impact": "权重INT4存储减少75%，激活INT8减少50%，需要存储两级scale",
+      "throughput_impact": "权重和激活双量化大幅减少计算和访存开销，吞吐量提升显著",
+      "latency_impact": "两级量化有计算开销，但整体延迟仍优于FP16",
+      "test_cases": [
+        {
+          "name": "验证两级scale计算正确性",
+          "description": ""
+        },
+        {
+          "name": "测试新旧量化版本兼容性",
+          "description": ""
+        },
+        {
+          "name": "验证compressed-tensors格式支持",
+          "description": ""
+        },
+        {
+          "name": "测试TP>16限制",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "仅支持MoE模型的专家层"
+      ],
+      "enable_config": "quantization: w4a8_dynamic, group_size: 256, version: 1.0.0",
+      "unsuitable_scenarios": [
+        "TP>16的场景（新版本限制）",
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "使用新量化版本(version=1.0.0)获得更好的压缩率",
+        "group_size设为256平衡精度与性能",
+        "确保TP<=16以使用新版本"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW4A8DynamicLinearMethod: Linear层W4A8实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendW4A8DynamicFusedMoEMethod: MoE层W4A8实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "process_scale_second(): 两级scale处理",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "process_scale(): MoE scale处理",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "get_weight(): 根据量化版本调整权重形状",
+        "process_scale_second(): 修改两级scale计算逻辑",
+        "pack_to_int32(): 修改INT4打包逻辑"
+      ],
+      "affected_features": [
+        "fused_experts",
+        "moe_comm_method",
+        "compressed_tensors"
+      ]
+    },
+    "design": {
+      "principle": "两级量化：第一级per-channel量化，第二级per-group量化；新版本将两个INT4打包为一个INT8进一步压缩",
+      "theory_analysis": "W4A8理论精度损失约2-5%，两级量化可减少精度损失，新版本打包方式进一步减少存储",
+      "design_decisions": [
+        {
+          "decision": "支持两级量化以平衡精度与压缩率",
+          "reason": ""
+        },
+        {
+          "decision": "新版本采用INT8打包INT4，减少存储空间",
+          "reason": ""
+        },
+        {
+          "decision": "兼容compressed-tensors格式，支持第三方量化模型",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "a02a2c95dc5d2bca6f60dac82eb2d05825da3b176996b2afc29bafcf9017c770",
+  "knowledge_domain": "vllm-ascend-core"
+}

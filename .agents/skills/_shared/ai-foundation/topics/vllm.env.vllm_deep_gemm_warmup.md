@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1156
-- read_ref: vllm/vllm/envs.py:153, vllm/vllm/envs.py:1156, vllm/vllm/envs.py:1157
+- definition_ref: vllm/envs.py:1168
+- read_ref: vllm/vllm/envs.py:154, vllm/vllm/envs.py:1168, vllm/vllm/envs.py:1169
 - effect_ref: vllm/vllm/model_executor/warmup/deep_gemm_warmup.py:186, vllm/vllm/model_executor/warmup/deep_gemm_warmup.py:188
 - web_refs: 3
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

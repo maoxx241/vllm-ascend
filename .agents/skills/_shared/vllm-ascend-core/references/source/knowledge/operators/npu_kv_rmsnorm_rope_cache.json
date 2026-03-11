@@ -1,0 +1,113 @@
+{
+  "id": "operator:npu_kv_rmsnorm_rope_cache",
+  "type": "operator",
+  "category": "attention",
+  "name": "npu_kv_rmsnorm_rope_cache",
+  "summary": "NPU融合KV RMSNorm、RoPE和缓存写入算子，用于MLA架构中将KV投影、归一化、位置编码和缓存更新融合为单一操作。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "1095-1148"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_kv_rmsnorm_rope_cache"
+  ],
+  "related_features": [
+    "mla_attention",
+    "kv_cache",
+    "rope",
+    "rmsnorm"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与kv_a_layernorm权重配合",
+        "与slot_mapping配合写入缓存"
+      ],
+      "memory_impact": "直接写入KV缓存，减少中间张量",
+      "throughput_impact": "融合三个操作减少内存访问",
+      "latency_impact": "单算子完成KV预处理全流程",
+      "test_cases": [
+        {
+          "name": "decode场景PA模式",
+          "description": ""
+        },
+        {
+          "name": "prefill场景输出KV",
+          "description": ""
+        },
+        {
+          "name": "PA_NZ模式(A5)",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "其他MLA架构模型"
+      ],
+      "enable_config": "MLA模型自动启用",
+      "unsuitable_scenarios": [
+        "非MLA架构模型"
+      ],
+      "best_practices": [
+        "使用PA模式处理标准场景",
+        "A5设备可使用PA_NZ模式优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendMLAImpl.exec_kv_decode",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendMLAImpl.exec_kv_prefill",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "cache_mode选择",
+        "is_output_kv标志"
+      ],
+      "affected_features": [
+        "KV缓存写入效率",
+        "位置编码正确性"
+      ]
+    },
+    "design": {
+      "principle": "融合RMSNorm归一化、RoPE位置编码和KV缓存写入，减少内存访问次数",
+      "theory_analysis": "MLA的KV需要经过layernorm和rope处理，融合可减少中间结果存储",
+      "design_decisions": [
+        {
+          "decision": "支持PA和PA_NZ两种缓存模式",
+          "reason": ""
+        },
+        {
+          "decision": "is_output_kv控制是否输出KV张量",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "73b4169a377e8ce386e7cbbdf441050ec8c8e003d1aa8c5bd3e703a738d2c6cb",
+  "knowledge_domain": "vllm-ascend-core"
+}

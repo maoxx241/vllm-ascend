@@ -1,0 +1,102 @@
+{
+  "id": "api:ascend_medusa_proposer",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendMedusaProposer",
+  "summary": "昇腾Medusa推测解码提议器，实现Medusa方法的投机采样",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/spec_decode/medusa_proposer.py",
+      "lines": "13-73"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MedusaProposer",
+    "SpecDecodeMetadata",
+    "SamplingMetadata"
+  ],
+  "related_features": [
+    "speculative_decoding",
+    "medusa"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "propose()生成推测token",
+        "dummy_run()预热运行"
+      ],
+      "memory_impact": "管理Medusa头和推测token缓冲区",
+      "throughput_impact": "推测解码提升吞吐量",
+      "latency_impact": "减少解码迭代次数",
+      "test_cases": [
+        {
+          "name": "Medusa推测测试",
+          "description": ""
+        },
+        {
+          "name": "多head测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持Medusa的模型"
+      ],
+      "enable_config": "配置speculative_config启用",
+      "unsuitable_scenarios": [
+        "不支持Medusa的模型"
+      ],
+      "best_practices": [
+        "配置合理的Medusa heads数"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/spec_decode/medusa_proposer.py:13-73",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "propose()推测逻辑",
+        "dummy_run()预热逻辑"
+      ],
+      "affected_features": [
+        "推测解码",
+        "Medusa方法"
+      ]
+    },
+    "design": {
+      "principle": "继承MedusaProposer，适配NPU特性",
+      "theory_analysis": "使用多个Medusa头并行生成候选token",
+      "design_decisions": [
+        {
+          "decision": "支持set_ascend_forward_context",
+          "reason": ""
+        },
+        {
+          "decision": "处理accepted tokens",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "003e34fbd205a4da12bd8f508d11ee4299b5f73335103620009a18cdabd169ab",
+  "knowledge_domain": "integration-core"
+}

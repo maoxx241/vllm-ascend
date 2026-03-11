@@ -1,0 +1,109 @@
+{
+  "id": "api:base_device_adaptor",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "BaseDeviceAdaptor",
+  "summary": "基础设备适配器，定义NPU操作的通用接口和默认实现",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "29-155"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "A5DeviceAdaptor",
+    "DeviceOperator"
+  ],
+  "related_features": [
+    "device_adaptation",
+    "npu_ops"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "reshape_and_cache() KV Cache操作",
+        "npu_moe_init_routing() MoE路由",
+        "npu_dynamic_quant() 动态量化",
+        "npu_grouped_matmul_swiglu_quant() 量化GMM"
+      ],
+      "memory_impact": "管理操作的临时内存",
+      "throughput_impact": "基础实现保证兼容性",
+      "latency_impact": "基础实现延迟适中",
+      "test_cases": [
+        {
+          "name": "KV Cache测试",
+          "description": ""
+        },
+        {
+          "name": "MoE路由测试",
+          "description": ""
+        },
+        {
+          "name": "量化测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "作为默认适配器",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "子类化实现设备特定优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/device/device_op.py:29-155",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "各操作方法实现",
+        "新增操作接口"
+      ],
+      "affected_features": [
+        "NPU操作",
+        "量化",
+        "MoE"
+      ]
+    },
+    "design": {
+      "principle": "定义通用接口，提供默认实现",
+      "theory_analysis": "使用torch_npu基础操作实现",
+      "design_decisions": [
+        {
+          "decision": "支持量化操作",
+          "reason": ""
+        },
+        {
+          "decision": "支持MoE操作",
+          "reason": ""
+        },
+        {
+          "decision": "支持KV Cache",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "33f1b09536ebd3a9b05255bdf6f7308a5b273f639dd46ec0b7421dd121419a71",
+  "knowledge_domain": "vllm-ascend-core"
+}

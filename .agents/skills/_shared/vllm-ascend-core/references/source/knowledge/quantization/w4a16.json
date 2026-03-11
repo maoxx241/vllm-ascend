@@ -1,0 +1,124 @@
+{
+  "id": "quantization:w4_a16",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W4A16",
+  "summary": "INT4权重量化方案，权重使用4-bit量化配合per-group scale，激活值保持FP16/BF16精度，专为MoE层设计，通过pack_to_int32实现权重压缩存储",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w4a16.py",
+      "lines": "1-269"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_convert_weight_to_int4pack",
+    "unpack_from_int32",
+    "pack_to_int32"
+  ],
+  "related_features": [
+    "moe",
+    "dynamic_eplb",
+    "group_quantization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与dynamic_eplb配合支持动态专家负载均衡",
+        "支持group_size配置控制量化粒度"
+      ],
+      "memory_impact": "权重存储为INT4，内存占用减少约75%，需要存储per-group scale和offset",
+      "throughput_impact": "权重压缩减少显存带宽压力，吞吐量提升显著",
+      "latency_impact": "反量化有计算开销，但显存带宽优化带来整体延迟降低",
+      "test_cases": [
+        {
+          "name": "验证INT4 pack/unpack正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同group_size对精度影响",
+          "description": ""
+        },
+        {
+          "name": "验证MoE专家权重转置正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "仅支持MoE模型的专家层"
+      ],
+      "enable_config": "quantization: w4a16, group_size: 32",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "对精度要求极高的场景"
+      ],
+      "best_practices": [
+        "group_size设为32或64平衡精度与压缩率",
+        "配合dynamic_eplb优化专家负载",
+        "确保hidden_size和intermediate_size可被pack_factor整除"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW4A16FusedMoEMethod: W4A16 MoE实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "unpack_from_int32(): INT4解包函数",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "pack_to_int32(): INT4打包函数",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "get_weight(): 修改权重形状定义",
+        "get_dynamic_quant_param(): 修改scale/offset参数定义",
+        "process_weights_after_loading(): 修改权重转置和打包逻辑"
+      ],
+      "affected_features": [
+        "fused_experts",
+        "moe_comm_method"
+      ]
+    },
+    "design": {
+      "principle": "权重INT4量化：将FP16/BF16权重量化为4-bit整数，每group_size个元素共享scale和offset；激活值保持高精度",
+      "theory_analysis": "INT4量化理论精度损失约1-3%，per-group量化可减少精度损失，group_size越小精度越高但存储开销越大",
+      "design_decisions": [
+        {
+          "decision": "选择W4A16而非W4A8，保持激活值精度",
+          "reason": ""
+        },
+        {
+          "decision": "使用INT32打包存储INT4权重，节省存储空间",
+          "reason": ""
+        },
+        {
+          "decision": "支持权重转置以适应不同算子需求",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "03de3651d247a3361f466ef01b32f2a1e269ad93846cd49dca7856ac24ae1e4f",
+  "knowledge_domain": "vllm-ascend-core"
+}

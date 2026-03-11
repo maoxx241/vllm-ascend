@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:973
-- read_ref: vllm/vllm/distributed/device_communicators/quick_all_reduce.py:169, vllm/vllm/distributed/device_communicators/quick_all_reduce.py:183, vllm/vllm/envs.py:182
-- effect_ref: vllm/vllm/distributed/device_communicators/quick_all_reduce.py:169, vllm/vllm/distributed/device_communicators/quick_all_reduce.py:183, vllm/vllm/envs.py:182
+- definition_ref: vllm/envs.py:985
+- read_ref: vllm/vllm/distributed/device_communicators/quick_all_reduce.py:169, vllm/vllm/distributed/device_communicators/quick_all_reduce.py:183, vllm/vllm/envs.py:183
+- effect_ref: vllm/vllm/distributed/device_communicators/quick_all_reduce.py:169, vllm/vllm/distributed/device_communicators/quick_all_reduce.py:183, vllm/vllm/envs.py:183
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: 模型加载失败; 精度异常; 推理速度低于预期
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,133 @@
+{
+  "id": "feature:batch_invariant",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Batch Invariant",
+  "summary": "批处理不变模式，使用Triton kernel实现确定性计算，支持可复现的推理结果",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/triton/batch_invariant/rmsnorm.py",
+      "lines": "1-152"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/triton/batch_invariant/matmul.py",
+      "lines": "1-440"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/triton/batch_invariant/softmax.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "rms_norm_batch_invariant",
+    "matmul_batch_invariant",
+    "linear_batch_invariant"
+  ],
+  "related_features": [
+    "feature:graph_fusion_passes"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与vLLM batch_invariant模式集成测试",
+        "不同batch size下的确定性测试",
+        "数值精度对比测试"
+      ],
+      "memory_impact": "无显著影响",
+      "throughput_impact": "可能略有下降，Triton kernel性能可能不如NPU原生kernel",
+      "latency_impact": "单次推理延迟可能略增",
+      "test_cases": [
+        {
+          "name": "测试相同输入多次推理结果一致性",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch size下的数值正确性",
+          "description": ""
+        },
+        {
+          "name": "测试与NPU原生kernel的数值差异",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "通过vLLM的batch_invariant模式启用",
+      "unsuitable_scenarios": [
+        "对性能要求极高的场景",
+        "需要NPU特定优化的场景"
+      ],
+      "best_practices": [
+        "用于需要可复现结果的场景",
+        "用于调试和验证",
+        "注意与async_exponential不兼容"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "rms_norm_kernel：RMSNorm Triton实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "matmul_bias_persistent_kernel：Matmul Triton实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "linear_persistent_kernel：Linear Triton实现",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多算子",
+        "优化Triton kernel性能"
+      ],
+      "affected_features": [
+        "RMSNorm层",
+        "Linear层",
+        "Softmax层"
+      ]
+    },
+    "design": {
+      "principle": "使用Triton编写确定性kernel，避免NPU原生kernel可能存在的非确定性行为（如并行归约顺序），实现batch size无关的确定性计算。",
+      "theory_analysis": "NPU原生kernel可能使用非确定性的并行算法。Triton kernel通过控制并行策略和归约顺序，确保相同输入产生相同输出，无论batch size如何变化。",
+      "design_decisions": [
+        {
+          "decision": "使用persistent kernel：固定grid size，确保确定性",
+          "reason": ""
+        },
+        {
+          "decision": "禁用custom op：某些custom op不支持batch_invariant",
+          "reason": ""
+        },
+        {
+          "decision": "禁用async_exponential：与batch_invariant不兼容",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "85448344ce13f38156b4ba520c6c68b5abe6f6b6cb4c56439a10b6aaab26f71f",
+  "knowledge_domain": "vllm-ascend-core"
+}

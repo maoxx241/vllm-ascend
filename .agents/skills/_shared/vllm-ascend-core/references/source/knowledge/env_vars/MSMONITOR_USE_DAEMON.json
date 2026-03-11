@@ -1,0 +1,96 @@
+{
+  "id": "env_var:msmonitor_use_daemon",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "MSMONITOR_USE_DAEMON",
+  "summary": "控制msMonitor工具守护进程模式，用于监控vllm-ascend性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "90-91"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "performance_monitoring",
+    "profiling"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与性能分析工具交互",
+        "影响监控数据收集"
+      ],
+      "memory_impact": "守护进程模式可能增加少量内存开销",
+      "throughput_impact": "监控开销极小，不影响吞吐量",
+      "latency_impact": "监控开销极小，不影响延迟",
+      "test_cases": [
+        {
+          "name": "守护进程模式测试",
+          "description": "验证msMonitor守护进程正确启动",
+          "threshold": 0
+        },
+        {
+          "name": "性能数据收集测试",
+          "description": "验证监控数据正确收集",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export MSMONITOR_USE_DAEMON=1",
+      "unsuitable_scenarios": [
+        "不需要性能监控的场景"
+      ],
+      "best_practices": [
+        "性能调优时启用",
+        "生产环境可按需启用",
+        "配合其他性能分析工具使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "90-91",
+          "purpose": "环境变量定义，默认值为0(禁用)"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值"
+      ],
+      "affected_features": [
+        "performance_monitoring"
+      ]
+    },
+    "design": {
+      "principle": "msMonitor是Ascend平台的性能监控工具，守护进程模式提供持续监控能力",
+      "theory_analysis": "守护进程模式允许后台持续收集性能数据，不影响主推理流程",
+      "design_decisions": [
+        {
+          "decision": "默认禁用",
+          "reason": "监控需要显式启用，避免不必要的开销"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d25ba7e75d30d2fdc4f1f7844889f894f466d398aa60dfaed2fd40dc8dc9e342",
+  "knowledge_domain": "vllm-ascend-core"
+}

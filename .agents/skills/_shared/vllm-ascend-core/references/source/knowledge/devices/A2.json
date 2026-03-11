@@ -1,0 +1,122 @@
+{
+  "id": "device:a2",
+  "type": "device",
+  "category": "vllm_ascend",
+  "name": "A2",
+  "summary": "Ascend A2推理芯片，soc_version范围220-225，支持推理系列优化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "689-727"
+    }
+  ],
+  "related_env_vars": [
+    "HCCL_OP_EXPANSION_MODE"
+  ],
+  "related_apis": [
+    "get_ascend_device_type",
+    "check_ascend_device_type"
+  ],
+  "related_features": [
+    "acl_graph"
+  ],
+  "device_specs": {
+    "soc_version_range": "220-225",
+    "device_type_enum": "AscendDeviceType.A2",
+    "series": "inference_series"
+  },
+  "specialized_operators": [],
+  "optimization_strategies": [
+    {
+      "name": "AIV模式",
+      "description": "HCCL_OP_EXPANSION_MODE=AIV时，使用AIV模式优化通信性能",
+      "impact": "增加支持的ACL graph形状数量，提升通信性能"
+    },
+    {
+      "name": "FFTS+方法",
+      "description": "默认使用FFTS+方法进行通信展开，减少并发流数量",
+      "impact": "减少流资源消耗，但可能限制支持的形状范围"
+    }
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试AIV模式的性能提升",
+        "需要验证ACL graph捕获大小限制"
+      ],
+      "memory_impact": "AIV模式可能增加内存占用",
+      "throughput_impact": "AIV模式可显著提升吞吐量",
+      "latency_impact": "优化通信可降低延迟",
+      "test_cases": [
+        {
+          "name": "测试AIV模式下的性能",
+          "description": ""
+        },
+        {
+          "name": "测试ACL graph最大捕获数量",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM-Ascend支持的模型"
+      ],
+      "enable_config": "设置HCCL_OP_EXPANSION_MODE=AIV启用AIV模式",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "启用AIV模式以获得最佳性能",
+        "监控流资源使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py:689-727",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:452-584",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "update_aclgraph_sizes中的A2特定逻辑"
+      ],
+      "affected_features": [
+        "ACL Graph",
+        "HCCL通信"
+      ]
+    },
+    "design": {
+      "principle": "A2芯片针对推理场景优化，支持高效的图执行和通信",
+      "theory_analysis": "A2芯片的硬件特性决定了其通信和图执行策略",
+      "design_decisions": [
+        {
+          "decision": "支持AIV模式优化通信",
+          "reason": ""
+        },
+        {
+          "decision": "使用FFTS+作为默认通信方法",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "6fd7892c5a370a4fec49c993730c22f3811f2816801752a3f80b2a3cfaaef683",
+  "knowledge_domain": "vllm-ascend-core"
+}

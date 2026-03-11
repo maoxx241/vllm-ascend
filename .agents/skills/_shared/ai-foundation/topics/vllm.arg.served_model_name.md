@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:694
-- read_ref: vllm/vllm/benchmarks/serve.py:1562, vllm/vllm/config/model.py:105, vllm/vllm/config/model.py:234
-- effect_ref: vllm/vllm/config/model.py:1691, vllm/vllm/config/model.py:1693, vllm/vllm/config/model.py:1694
+- definition_ref: vllm/engine/arg_utils.py:696
+- read_ref: vllm/vllm/benchmarks/serve.py:1606, vllm/vllm/config/model.py:105, vllm/vllm/config/model.py:234
+- effect_ref: vllm/vllm/config/model.py:1699, vllm/vllm/config/model.py:1701, vllm/vllm/config/model.py:1702
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

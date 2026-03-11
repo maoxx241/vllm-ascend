@@ -1,0 +1,107 @@
+{
+  "id": "api:vllm_eplb_adaptor",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "VllmEplbAdaptor",
+  "summary": "vLLM EPLB适配器，将EPLB功能集成到vLLM推理流程中",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/adaptor/vllm_adaptor.py",
+      "lines": "50-200"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_EPLB"
+  ],
+  "related_apis": [
+    "EplbUpdator",
+    "NPUModelRunner"
+  ],
+  "related_features": [
+    "eplb",
+    "load_balancing",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "adapt()适配推理流程",
+        "get_log2phy()获取映射"
+      ],
+      "memory_impact": "管理适配状态",
+      "throughput_impact": "负载均衡提升吞吐量",
+      "latency_impact": "适配开销小",
+      "test_cases": [
+        {
+          "name": "适配测试",
+          "description": ""
+        },
+        {
+          "name": "集成测试",
+          "description": ""
+        },
+        {
+          "name": "负载均衡测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "配置enable_eplb启用",
+      "unsuitable_scenarios": [
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "与ModelRunner集成"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/eplb/adaptor/vllm_adaptor.py:50-200",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "adapt()适配逻辑",
+        "集成点"
+      ],
+      "affected_features": [
+        "EPLB集成",
+        "MoE性能"
+      ]
+    },
+    "design": {
+      "principle": "适配器模式集成EPLB到vLLM",
+      "theory_analysis": "在推理流程中插入负载均衡逻辑",
+      "design_decisions": [
+        {
+          "decision": "非侵入式集成",
+          "reason": ""
+        },
+        {
+          "decision": "支持动态开关",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "21b3e6f0e4966c3bd19db732b35edd9933a94d66b51c8fdf04f17823e3895ada",
+  "knowledge_domain": "vllm-ascend-core"
+}

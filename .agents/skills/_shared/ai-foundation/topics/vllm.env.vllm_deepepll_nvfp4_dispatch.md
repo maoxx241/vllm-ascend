@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1107
-- read_ref: vllm/vllm/envs.py:144, vllm/vllm/envs.py:1107, vllm/vllm/envs.py:1108
-- effect_ref: vllm/vllm/model_executor/layers/fused_moe/deepep_ll_prepare_finalize.py:190, vllm/vllm/model_executor/layers/fused_moe/flashinfer_cutedsl_moe.py:124, vllm/vllm/model_executor/layers/fused_moe/flashinfer_cutedsl_moe.py:162
+- definition_ref: vllm/envs.py:1119
+- read_ref: vllm/vllm/envs.py:145, vllm/vllm/envs.py:1119, vllm/vllm/envs.py:1120
+- effect_ref: vllm/vllm/model_executor/layers/fused_moe/deepep_ll_prepare_finalize.py:190, vllm/vllm/model_executor/layers/fused_moe/flashinfer_cutedsl_moe.py:125, vllm/vllm/model_executor/layers/fused_moe/flashinfer_cutedsl_moe.py:163
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,520 @@
+{
+  "matrix_type": "recommendations",
+  "version": "1.0.0",
+  "created_at": "2026-03-10T00:00:00Z",
+  "description": "推荐配置矩阵，针对不同模型、场景和硬件给出最佳配置建议",
+  "model_recommendations": {
+    "DeepSeek-V3": {
+      "description": "DeepSeek-V3 MoE模型，支持MLA注意力和多种优化",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:eplb",
+        "feature:chunked_prefill",
+        "feature:async_scheduling"
+      ],
+      "optional_features": [
+        "feature:dynamic_eplb",
+        "feature:speculative_decoding",
+        "feature:context_parallel"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "standard": {
+          "description": "标准配置，适用于大多数场景",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "eplb_config": {
+              "num_redundant_experts": 0,
+              "eplb_policy_type": 1
+            }
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--async-scheduling"
+          ]
+        },
+        "high_throughput": {
+          "description": "高吞吐配置，适用于批量推理",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "eplb_config": {
+              "num_redundant_experts": 2,
+              "eplb_policy_type": 1
+            }
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--async-scheduling",
+            "--max-num-batched-tokens 8192"
+          ]
+        },
+        "speculative": {
+          "description": "推测解码配置，适用于低延迟场景",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "speculative_config": {
+            "method": "mtp",
+            "num_speculative_tokens": 4
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--async-scheduling"
+          ]
+        }
+      }
+    },
+    "DeepSeek-V3.2": {
+      "description": "DeepSeek V3.2 DSA模型，支持SFA和DSA-CP优化",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:dsa_cp",
+        "feature:layer_sharding",
+        "feature:mlapo"
+      ],
+      "optional_features": [
+        "feature:flashcomm2",
+        "feature:weight_prefetch"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "p_node": {
+          "description": "Prefill节点配置",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "layer_sharding": ["q_b_proj", "o_proj"],
+            "weight_prefetch_config": {
+              "enabled": true
+            }
+          },
+          "notes": "P节点启用Layer Sharding，权重广播与计算重叠"
+        },
+        "d_node": {
+          "description": "Decode节点配置",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "weight_prefetch_config": {
+              "enabled": true
+            }
+          },
+          "notes": "D节点不启用Layer Sharding"
+        }
+      }
+    },
+    "DeepSeek-R1": {
+      "description": "DeepSeek-R1推理模型，支持长序列和Context Parallel",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:context_parallel",
+        "feature:chunked_prefill"
+      ],
+      "optional_features": [
+        "feature:speculative_decoding"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "long_sequence": {
+          "description": "长序列配置，适用于128k+输入",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "command_args": [
+            "--prefill-context-parallel-size 2",
+            "--enable-chunked-prefill",
+            "--max-model-len 131072"
+          ],
+          "notes": "PCP将128k输入TTFT从73.2s降至46.0s"
+        }
+      }
+    },
+    "Qwen3": {
+      "description": "Qwen3系列模型，支持多种优化",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:chunked_prefill",
+        "feature:async_scheduling"
+      ],
+      "optional_features": [
+        "feature:speculative_decoding",
+        "feature:xlite_graph",
+        "feature:cuda_graph"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "standard": {
+          "description": "标准配置",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--async-scheduling"
+          ]
+        },
+        "xlite": {
+          "description": "XliteGraph配置，适用于高并发Decode",
+          "additional_config": {
+            "xlite_graph_config": {
+              "enabled": true,
+              "full_mode": false
+            }
+          },
+          "command_args": [
+            "--block-size 128"
+          ],
+          "notes": "Decode延迟降低50-70%"
+        }
+      }
+    },
+    "Qwen3-MoE": {
+      "description": "Qwen3 MoE模型",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:eplb",
+        "feature:chunked_prefill"
+      ],
+      "optional_features": [
+        "feature:dynamic_eplb",
+        "feature:multistream_overlap"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "standard": {
+          "description": "MoE标准配置",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "eplb_config": {
+              "num_redundant_experts": 0
+            },
+            "multistream_overlap_shared_expert": true
+          }
+        }
+      }
+    },
+    "Llama": {
+      "description": "Llama系列模型",
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:chunked_prefill",
+        "feature:cuda_graph"
+      ],
+      "optional_features": [
+        "feature:speculative_decoding",
+        "feature:xlite_graph"
+      ],
+      "incompatible_features": [],
+      "config_templates": {
+        "standard": {
+          "description": "标准配置",
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--compilation-config '{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\"}'"
+          ]
+        },
+        "speculative": {
+          "description": "EAGLE推测解码配置",
+          "speculative_config": {
+            "method": "eagle",
+            "num_speculative_tokens": 4
+          },
+          "command_args": [
+            "--enable-chunked-prefill",
+            "--async-scheduling"
+          ]
+        }
+      }
+    }
+  },
+  "scenario_recommendations": {
+    "high_throughput": {
+      "description": "高吞吐场景，最大化请求处理能力",
+      "priority": "吞吐量优先",
+      "recommended_features": [
+        "feature:chunked_prefill",
+        "feature:async_scheduling",
+        "feature:flashcomm1",
+        "feature:eplb"
+      ],
+      "config_guidelines": [
+        "增大max_num_batched_tokens",
+        "启用冗余专家(num_redundant_experts > 0)",
+        "使用量化减少显存占用",
+        "启用动态EPLB适应负载变化"
+      ],
+      "example_config": {
+        "env_vars": {
+          "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+        },
+        "additional_config": {
+          "eplb_config": {
+            "num_redundant_experts": 2,
+            "dynamic_eplb": true
+          }
+        },
+        "command_args": [
+          "--enable-chunked-prefill",
+          "--async-scheduling",
+          "--max-num-batched-tokens 8192"
+        ]
+      }
+    },
+    "low_latency": {
+      "description": "低延迟场景，最小化首token时间",
+      "priority": "延迟优先",
+      "recommended_features": [
+        "feature:speculative_decoding",
+        "feature:async_scheduling",
+        "feature:weight_prefetch",
+        "feature:xlite_graph"
+      ],
+      "config_guidelines": [
+        "使用EAGLE/MTP推测解码",
+        "启用权重预取",
+        "使用XliteGraph优化Decode",
+        "减小batch size以降低排队延迟"
+      ],
+      "example_config": {
+        "speculative_config": {
+          "method": "eagle",
+          "num_speculative_tokens": 4
+        },
+        "additional_config": {
+          "weight_prefetch_config": {
+            "enabled": true
+          },
+          "xlite_graph_config": {
+            "enabled": true,
+            "full_mode": false
+          }
+        },
+        "command_args": [
+          "--async-scheduling",
+          "--block-size 128"
+        ]
+      }
+    },
+    "long_sequence": {
+      "description": "长序列场景，处理超长输入",
+      "priority": "内存和长序列优化",
+      "recommended_features": [
+        "feature:context_parallel",
+        "feature:chunked_prefill",
+        "feature:flashcomm1"
+      ],
+      "config_guidelines": [
+        "启用PCP加速长序列Prefill",
+        "启用DCP减少KV Cache冗余",
+        "增大max_model_len",
+        "设置合适的long_prefill_token_threshold"
+      ],
+      "example_config": {
+        "env_vars": {
+          "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+        },
+        "command_args": [
+          "--prefill-context-parallel-size 2",
+          "--decode-context-parallel-size 2",
+          "--enable-chunked-prefill",
+          "--max-model-len 131072",
+          "--long-prefill-token-threshold 16384"
+        ]
+      }
+    },
+    "memory_constrained": {
+      "description": "显存受限场景",
+      "priority": "内存优化",
+      "recommended_features": [
+        "feature:quantization",
+        "feature:layer_sharding",
+        "feature:context_parallel"
+      ],
+      "config_guidelines": [
+        "使用AWQ/GPTQ 4-bit量化",
+        "启用KV Cache量化(--kv-cache-dtype fp8)",
+        "启用DCP减少KV Cache冗余",
+        "减小max_num_seqs"
+      ],
+      "example_config": {
+        "command_args": [
+          "--quantization awq",
+          "--kv-cache-dtype fp8",
+          "--decode-context-parallel-size 2",
+          "--max-num-seqs 128"
+        ]
+      }
+    },
+    "pd_disaggregation": {
+      "description": "PD分离部署场景",
+      "priority": "资源独立扩展",
+      "recommended_features": [
+        "feature:pd_disaggregation",
+        "feature:layer_sharding",
+        "feature:flashcomm1"
+      ],
+      "config_guidelines": [
+        "P节点使用更大TP加速Prefill",
+        "D节点使用较小TP节省资源",
+        "P节点启用Layer Sharding",
+        "使用高速网络(RoCE)"
+      ],
+      "example_config": {
+        "p_node": {
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1",
+            "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE": "1"
+          },
+          "additional_config": {
+            "layer_sharding": ["o_proj"],
+            "kv_transfer_config": {
+              "role": "kv_producer"
+            }
+          }
+        },
+        "d_node": {
+          "env_vars": {
+            "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+          },
+          "additional_config": {
+            "kv_transfer_config": {
+              "role": "kv_consumer"
+            }
+          }
+        }
+      }
+    }
+  },
+  "hardware_recommendations": {
+    "A2": {
+      "description": "Ascend A2芯片",
+      "characteristics": ["中等算力", "适合中小模型"],
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:chunked_prefill",
+        "feature:quantization"
+      ],
+      "config_notes": [
+        "推荐使用量化减少显存占用",
+        "FlashComm1阈值可能需要调整",
+        "适合TP=2或TP=4配置"
+      ],
+      "env_vars": {
+        "HCCL_OP_EXPANSION_MODE": "AIV"
+      }
+    },
+    "A3": {
+      "description": "Ascend A3芯片",
+      "characteristics": ["高算力", "适合大模型"],
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:flashcomm2",
+        "feature:eplb",
+        "feature:context_parallel"
+      ],
+      "config_notes": [
+        "推荐启用FlashComm1+FlashComm2组合",
+        "适合大TP配置",
+        "长序列场景启用PCP"
+      ],
+      "env_vars": {
+        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "HCCL_INTRA_PCIE_ENABLE": "1",
+        "HCCL_INTRA_ROCE_ENABLE": "0"
+      }
+    },
+    "A5": {
+      "description": "Ascend A5芯片",
+      "characteristics": ["超高算力", "适合超大模型"],
+      "recommended_features": [
+        "feature:flashcomm1",
+        "feature:dsa_cp",
+        "feature:layer_sharding",
+        "feature:context_parallel"
+      ],
+      "config_notes": [
+        "DeepSeek V3.2推荐启用DSA-CP",
+        "支持超大batch size",
+        "充分利用多流能力"
+      ],
+      "env_vars": {
+        "HCCL_OP_EXPANSION_MODE": "AIV"
+      }
+    },
+    "310P": {
+      "description": "Ascend 310P芯片",
+      "characteristics": ["推理专用", "低功耗"],
+      "recommended_features": [
+        "feature:quantization",
+        "feature:chunked_prefill"
+      ],
+      "config_notes": [
+        "必须使用量化",
+        "适合小batch推理",
+        "不建议启用复杂优化"
+      ]
+    }
+  },
+  "quick_reference": {
+    "feature_selection_guide": [
+      {
+        "scenario": "MoE模型",
+        "must_enable": ["feature:eplb"],
+        "recommended": ["feature:flashcomm1", "feature:multistream_overlap"],
+        "optional": ["feature:dynamic_eplb"]
+      },
+      {
+        "scenario": "长序列(>32k)",
+        "must_enable": ["feature:context_parallel"],
+        "recommended": ["feature:chunked_prefill", "feature:flashcomm1"],
+        "optional": ["feature:pd_disaggregation"]
+      },
+      {
+        "scenario": "低延迟要求",
+        "must_enable": ["feature:async_scheduling"],
+        "recommended": ["feature:speculative_decoding", "feature:weight_prefetch"],
+        "optional": ["feature:xlite_graph"]
+      },
+      {
+        "scenario": "显存受限",
+        "must_enable": ["feature:quantization"],
+        "recommended": ["feature:context_parallel", "feature:layer_sharding"],
+        "optional": []
+      },
+      {
+        "scenario": "高并发(>1000 tokens)",
+        "must_enable": [],
+        "recommended": ["feature:flashcomm1", "feature:chunked_prefill"],
+        "optional": ["feature:async_scheduling"]
+      }
+    ],
+    "incompatibility_quick_check": [
+      {
+        "if_enabled": "feature:mlapo",
+        "cannot_enable": ["feature:flashcomm1", "feature:flashcomm2", "feature:dsa_cp"],
+        "reason": "MLAPO与FlashComm通信模式不兼容"
+      },
+      {
+        "if_enabled": "feature:xlite_graph",
+        "cannot_enable": ["feature:speculative_decoding", "feature:ascend_speculative_decoding"],
+        "reason": "图执行模式与推测解码动态验证逻辑冲突"
+      },
+      {
+        "if_enabled": "feature:flashcomm2",
+        "not_recommended_for": "D场景(Decode instance)",
+        "reason": "FlashComm2主要面向P场景，D场景可能性能下降"
+      }
+    ]
+  }
+}

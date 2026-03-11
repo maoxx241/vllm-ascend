@@ -1,0 +1,155 @@
+{
+  "id": "feature:finegrained_tp",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Finegrained TP",
+  "summary": "允许不同模块（oproj/lmhead/embedding/mlp）使用独立的TP size，优化PD分离场景下Decode节点的内存和计算效率。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "211-250"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/linear_op.py",
+      "lines": "172-269"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "736-750"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "FinegrainedTPConfig",
+    "oproj_tensor_parallel_size",
+    "lmhead_tensor_parallel_size",
+    "embedding_tensor_parallel_size",
+    "mlp_tensor_parallel_size"
+  ],
+  "related_features": [
+    "feature:flashcomm2",
+    "feature:context_parallel",
+    "feature:pd_disaggregation"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与PD分离场景强绑定，oproj_tp仅在D节点生效",
+        "mlp_tp需要与data_parallel_size整除性验证",
+        "embedding_tp和lmhead_tp影响词表并行计算正确性"
+      ],
+      "memory_impact": "oproj_tp降低O投影矩阵内存占用，mlp_tp降低MLP层权重内存，embedding_tp降低嵌入层内存。在Decode节点可显著减少显存压力。",
+      "throughput_impact": "通过减少通信域大小，降低小batch场景下的通信开销。Decode阶段TP size减小时，通信量与计算量更匹配。",
+      "latency_impact": "Decode阶段使用更小的TP size可减少通信延迟，但可能增加计算延迟，需要权衡。",
+      "test_cases": [
+        {
+          "name": "验证oproj_tp仅在graph mode + D节点场景生效",
+          "description": ""
+        },
+        {
+          "name": "测试mlp_tp与DP size整除性约束",
+          "description": ""
+        },
+        {
+          "name": "验证不同TP size组合下的数值正确性",
+          "description": ""
+        },
+        {
+          "name": "测试PD分离场景下P节点和D节点配置差异",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen系列模型（支持PD TP ratio计算）",
+        "DeepSeek-V3.2（配合DSA-CP使用）",
+        "通用Transformer模型"
+      ],
+      "enable_config": "在additional_config中配置finegrained_tp_config，如：{\"finegrained_tp_config\": {\"oproj_tensor_parallel_size\": 2, \"mlp_tensor_parallel_size\": 4}}",
+      "unsuitable_scenarios": [
+        "非PD分离场景使用oproj_tp会报错",
+        "eager mode不支持oproj_tp",
+        "非KV consumer节点不支持oproj_tp"
+      ],
+      "best_practices": [
+        "oproj_tp仅用于PD分离的Decode节点，且必须启用graph mode",
+        "mlp_tp/embedding_tp/lmhead_tp的值必须能整除data_parallel_size",
+        "结合FlashComm2使用时，oproj_tp通过VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE环境变量配置",
+        "P节点和D节点TP size不同时，需要配置pd_tp_ratio和pd_head_ratio"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "class": "FinegrainedTPConfig",
+          "description": "配置类，定义四个模块的独立TP size"
+        },
+        {
+          "file": "vllm_ascend/ops/linear_op.py",
+          "class": "MLPColumnParallelOp/MLPRowParallelOp",
+          "description": "MLP层的自定义TP实现"
+        },
+        {
+          "file": "vllm_ascend/ops/linear_op.py",
+          "class": "OProjRowParallelOp",
+          "description": "O投影层的自定义TP实现，使用all-to-all通信"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "oproj_tp_enable/mlp_tp_enable",
+          "description": "特性启用检查函数"
+        }
+      ],
+      "modification_points": [
+        "FinegrainedTPConfig.__init__：添加新的模块TP配置项",
+        "get_column_parallel_op/get_row_parallel_op：添加新的线性算子选择逻辑",
+        "OProjRowParallelOp.apply_impl：修改all-to-all通信模式"
+      ],
+      "affected_features": [
+        "FlashComm2的oproj shard功能",
+        "PD分离的KV传输配置",
+        "权重预取的通信组管理"
+      ]
+    },
+    "design": {
+      "principle": "传统TP对所有层使用相同的并行度，但在PD分离场景下，P节点和D节点的最优TP size不同。细粒度TP允许不同模块使用独立的TP size，使通信开销与计算量更匹配。",
+      "theory_analysis": "1. oproj_tp：O投影层在Decode阶段计算量小，使用更小的TP size可减少通信开销。2. mlp_tp：MLP层权重占比较大，独立TP size可优化内存布局。3. embedding_tp/lmhead_tp：词表层通常很大，独立TP可平衡内存和通信。4. all-to-all通信：oproj使用all-to-all实现跨TP组的数据重排，避免冗余计算。",
+      "design_decisions": [
+        {
+          "decision": "oproj_tp仅支持graph mode：因为dummy_run不运行完整attention模块，eager模式无法正确处理",
+          "reason": ""
+        },
+        {
+          "decision": "oproj_tp仅支持D节点：P节点需要完整O投影矩阵用于KV传输，D节点可以分片",
+          "reason": ""
+        },
+        {
+          "decision": "mlp_tp必须整除DP size：确保权重分片在DP维度上均匀分布",
+          "reason": ""
+        },
+        {
+          "decision": "使用独立通信组：每个模块的TP使用独立的ProcessGroup，避免通信冲突",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "ea4a90c7601c28408d5ad5daa1facb64f29a26559ac375ef7e9cba9bc01e902f",
+  "knowledge_domain": "vllm-ascend-core"
+}

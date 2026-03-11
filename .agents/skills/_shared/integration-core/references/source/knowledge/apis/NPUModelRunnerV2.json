@@ -1,0 +1,115 @@
+{
+  "id": "api:npumodel_runner_v2",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "NPUModelRunnerV2",
+  "summary": "NPU模型运行器V2版本，重构版本提供更好的模块化和性能，支持新的调度和采样架构",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/v2/model_runner.py",
+      "lines": "47-363"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_USE_V2_MODEL_RUNNER"
+  ],
+  "related_apis": [
+    "AscendInputBatch",
+    "AscendSampler",
+    "AclGraphManager",
+    "AscendRequestState"
+  ],
+  "related_features": [
+    "acl_graph",
+    "speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "prepare_inputs()准备输入",
+        "postprocess()后处理",
+        "eplb_warmup() EPLB预热"
+      ],
+      "memory_impact": "优化的内存管理，减少内存碎片",
+      "throughput_impact": "更好的调度架构提升吞吐量",
+      "latency_impact": "优化的执行流程降低延迟",
+      "test_cases": [
+        {
+          "name": "输入准备测试",
+          "description": ""
+        },
+        {
+          "name": "采样测试",
+          "description": ""
+        },
+        {
+          "name": "后处理测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有昇腾NPU支持的模型"
+      ],
+      "enable_config": "设置VLLM_USE_V2_MODEL_RUNNER=1启用",
+      "unsuitable_scenarios": [
+        "部分特性尚未完全支持"
+      ],
+      "best_practices": [
+        "使用V2获得更好性能",
+        "配合AclGraphManager使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/v2/model_runner.py:47-363",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "prepare_inputs()输入准备",
+        "postprocess()后处理"
+      ],
+      "affected_features": [
+        "模型执行",
+        "调度"
+      ]
+    },
+    "design": {
+      "principle": "重构版本，更好的模块化和扩展性",
+      "theory_analysis": "分离输入准备和后处理逻辑，便于优化和维护",
+      "design_decisions": [
+        {
+          "decision": "使用AscendInputBatch",
+          "reason": ""
+        },
+        {
+          "decision": "独立的AclGraphManager",
+          "reason": ""
+        },
+        {
+          "decision": "支持seq_lens_cpu",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "1375e0f112bce7bfe412e58b26b354d759eb32bf7bd4f9b444e2c56cf700ecaa",
+  "knowledge_domain": "integration-core"
+}

@@ -1,0 +1,137 @@
+{
+  "id": "feature:shared_expert_dp",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Shared Expert DP",
+  "summary": "MoE模型共享专家数据并行优化，减少共享专家的显存占用并提升计算效率",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "61-69"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/fused_moe.py",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/prepare_finalize.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendSharedFusedMoE",
+    "shared_expert_dp_enabled"
+  ],
+  "related_features": [
+    "feature:multistream_overlap",
+    "feature:balance_scheduling",
+    "feature:eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Expert Parallel集成测试",
+        "与multistream_overlap_shared_expert交互测试",
+        "TP>1场景下的正确性测试"
+      ],
+      "memory_impact": "共享专家权重按DP维度复制而非TP维度，减少显存占用",
+      "throughput_impact": "减少通信开销，提升MoE模型吞吐量",
+      "latency_impact": "共享专家计算延迟降低",
+      "test_cases": [
+        {
+          "name": "测试enable_shared_expert_dp=true的DeepSeek-V3推理",
+          "description": ""
+        },
+        {
+          "name": "测试EP和DP组合场景",
+          "description": ""
+        },
+        {
+          "name": "测试共享专家计算正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen-MoE系列"
+      ],
+      "enable_config": "additional_config: {enable_shared_expert_dp: true}，需要enable_expert_parallel=true且TP>1",
+      "unsuitable_scenarios": [
+        "TP=1场景",
+        "非MoE模型",
+        "未启用Expert Parallel"
+      ],
+      "best_practices": [
+        "配合enable_sp=true使用",
+        "DP维度大于1时效果更佳",
+        "适用于共享专家较大的模型"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendConfig.enable_shared_expert_dp：配置入口",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSharedFusedMoE：共享专家计算实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "shared_expert_dp_enabled()：启用状态查询",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多MoE模型架构",
+        "优化共享专家的通信策略"
+      ],
+      "affected_features": [
+        "MoE前向计算流程",
+        "Expert Parallel通信",
+        "内存分配策略"
+      ]
+    },
+    "design": {
+      "principle": "MoE模型的共享专家(shared expert)被所有token使用，不需要按expert维度切分。将其按DP维度复制，每个DP rank有完整副本，避免TP通信开销。",
+      "theory_analysis": "传统TP方式下，共享专家权重被切分到各TP rank，需要AllReduce同步结果。DP方式下，每个DP rank有完整权重，计算后无需通信，减少延迟和内存碎片。",
+      "design_decisions": [
+        {
+          "decision": "需要EP启用：共享专家属于expert parallel范畴",
+          "reason": ""
+        },
+        {
+          "decision": "需要TP>1：单卡无需优化",
+          "reason": ""
+        },
+        {
+          "decision": "需要enable_sp：依赖sequence parallel基础设施",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "cb6d5b84e269187c95d2468baab3d4fcecb885085f7d945ec9dcb372a3a2f532",
+  "knowledge_domain": "vllm-ascend-core"
+}

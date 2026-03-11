@@ -1,0 +1,124 @@
+{
+  "id": "device:a3",
+  "type": "device",
+  "category": "vllm_ascend",
+  "name": "A3",
+  "summary": "Ascend A3推理芯片，soc_version范围250-255，支持更高性能的推理计算",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "689-727"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_ascend_device_type",
+    "check_ascend_device_type"
+  ],
+  "related_features": [
+    "acl_graph"
+  ],
+  "device_specs": {
+    "soc_version_range": "250-255",
+    "device_type_enum": "AscendDeviceType.A3",
+    "series": "inference_series"
+  },
+  "specialized_operators": [],
+  "optimization_strategies": [
+    {
+      "name": "AICPU方法",
+      "description": "默认使用AICPU方法进行通信展开",
+      "impact": "每个集合通信域可能额外分配rank_size-1个流，限制支持的形状范围"
+    },
+    {
+      "name": "ACL Graph大小调整",
+      "description": "A3芯片需要更保守的ACL graph捕获大小计算",
+      "impact": "减少支持的batch size数量，但保证稳定性"
+    }
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试AICPU方法的性能",
+        "需要验证ACL graph捕获大小限制"
+      ],
+      "memory_impact": "AICPU方法可能增加内存占用",
+      "throughput_impact": "需要权衡流资源和支持的形状范围",
+      "latency_impact": "通信方法影响延迟",
+      "test_cases": [
+        {
+          "name": "测试AICPU模式下的性能",
+          "description": ""
+        },
+        {
+          "name": "测试ACL graph最大捕获数量",
+          "description": ""
+        },
+        {
+          "name": "测试与A2的性能对比",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM-Ascend支持的模型"
+      ],
+      "enable_config": "使用默认配置即可",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "注意ACL graph捕获大小限制",
+        "根据模型层数调整batch size范围"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py:689-727",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:542-551",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "update_aclgraph_sizes中的A3特定逻辑"
+      ],
+      "affected_features": [
+        "ACL Graph",
+        "HCCL通信"
+      ]
+    },
+    "design": {
+      "principle": "A3芯片使用AICPU方法进行通信，需要更保守的资源管理",
+      "theory_analysis": "A3芯片的AICPU方法会消耗更多流资源，需要限制支持的形状范围",
+      "design_decisions": [
+        {
+          "decision": "使用保守的ACL graph大小计算公式",
+          "reason": ""
+        },
+        {
+          "decision": "考虑通信域对流资源的影响",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "ba71a19e818b9755770fc31767e89a1b593c8c08a7c0eaa3dbb2d0b44ed17d5d",
+  "knowledge_domain": "vllm-ascend-core"
+}

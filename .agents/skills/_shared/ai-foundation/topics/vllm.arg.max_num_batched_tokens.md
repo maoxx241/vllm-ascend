@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1105
-- read_ref: vllm/vllm/benchmarks/sweep/plot.py:580, vllm/vllm/benchmarks/sweep/plot.py:582, vllm/vllm/compilation/passes/fusion/allreduce_rms_fusion.py:736
+- definition_ref: vllm/engine/arg_utils.py:1110
+- read_ref: vllm/vllm/benchmarks/sweep/plot.py:580, vllm/vllm/benchmarks/sweep/plot.py:582, vllm/vllm/compilation/passes/fusion/allreduce_rms_fusion.py:721
 - effect_ref: vllm/vllm/config/scheduler.py:258, vllm/vllm/config/scheduler.py:265, vllm/vllm/engine/arg_utils.py:302
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: TTFT/TPOT 退化; OOM
 - value_failure_signals: ValueError: max_num_batched_tokens must be >= max_num_seqs; ValueError: smaller than max_model_len when chunked prefill disabled
 - recommendation: 按 TTFT/TPOT/吞吐三指标联合调参。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

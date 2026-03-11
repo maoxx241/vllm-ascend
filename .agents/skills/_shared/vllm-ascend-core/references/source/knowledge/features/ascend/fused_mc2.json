@@ -1,0 +1,214 @@
+{
+  "id": "feature:fused_mc2",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Fused MC2",
+  "summary": "MC2通信融合优化，通过dispatch_ffn_combine/dispatch_gmm_combine_decode算子实现dispatch+compute+combine三阶段融合，A3设备w8a8_dynamic量化场景性能最优",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "106-113"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "244-262"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "296-394"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "speculative_enable_dispatch_gmm_combine_decode"
+  ],
+  "related_features": [
+    "MC2通信",
+    "EPLB",
+    "ExpertParallel",
+    "w8a8_dynamic量化"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "MC2通信",
+        "w8a8_dynamic量化",
+        "EPLB动态负载均衡",
+        "MTP模式",
+        "Speculative Decoding"
+      ],
+      "memory_impact": "融合算子减少中间结果存储，显存占用略低于普通MC2；expert_token_nums张量占用少量额外显存",
+      "throughput_impact": "A3设备w8a8_dynamic量化场景吞吐量相比普通MC2提升10-15%，相比ALLGATHER提升30-40%",
+      "latency_impact": "融合算子减少kernel launch开销，延迟降低5-10%；但仅支持特定配置",
+      "test_cases": [
+        {
+          "name": "dispatch_ffn_combine模式测试",
+          "description": "验证VLLM_ASCEND_ENABLE_FUSED_MC2=1时dispatch_ffn_combine算子的正确性和性能",
+          "threshold": 0
+        },
+        {
+          "name": "dispatch_gmm_combine_decode模式测试",
+          "description": "验证VLLM_ASCEND_ENABLE_FUSED_MC2=2时dispatch_gmm_combine_decode算子的正确性和性能",
+          "threshold": 0
+        },
+        {
+          "name": "EP size限制测试",
+          "description": "验证EP>32时dispatch_ffn_combine的正确回退行为",
+          "threshold": 32
+        },
+        {
+          "name": "MTP模式兼容性测试",
+          "description": "验证MTP模式下dispatch_ffn_combine的禁用行为",
+          "threshold": 0
+        },
+        {
+          "name": "量化类型兼容性测试",
+          "description": "验证非w8a8_dynamic量化时FUSED_MC2的禁用行为",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen3-MoE"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_FUSED_MC2=1  # dispatch_ffn_combine模式\nexport VLLM_ASCEND_ENABLE_FUSED_MC2=2  # dispatch_gmm_combine_decode模式",
+      "unsuitable_scenarios": [
+        "非A3设备",
+        "非w8a8_dynamic量化",
+        "EP>32（dispatch_ffn_combine限制）",
+        "MTP模式（dispatch_ffn_combine限制）",
+        "动态EPLB（dispatch_ffn_combine限制）",
+        "非w8a8的draft模型（dispatch_gmm_combine_decode限制）"
+      ],
+      "best_practices": [
+        "A3设备推荐启用以获得最佳性能",
+        "确保模型使用w8a8_dynamic量化",
+        "EP配置不超过32",
+        "模式1适合通用场景，模式2适合decode节点",
+        "避免与动态EPLB同时使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "VLLM_ASCEND_ENABLE_FUSED_MC2",
+          "lines": "106-113",
+          "purpose": "环境变量定义，0=禁用，1=dispatch_ffn_combine，2=dispatch_gmm_combine_decode"
+        },
+        {
+          "file": "vllm_ascend/ascend_forward_context.py",
+          "function": "select_moe_comm_method",
+          "lines": "244-262",
+          "purpose": "根据配置和条件选择是否启用FUSED_MC2"
+        },
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+          "function": "FusedMC2CommImpl",
+          "lines": "296-394",
+          "purpose": "FUSED_MC2实现，调用dispatch_ffn_combine或dispatch_gmm_combine_decode算子"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "speculative_enable_dispatch_gmm_combine_decode",
+          "lines": "808-828",
+          "purpose": "判断speculative场景下是否启用dispatch_gmm_combine_decode"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 添加新的模式或配置项",
+        "ascend_forward_context.py: 修改启用条件判断",
+        "moe_comm_method.py: 修改融合算子调用逻辑",
+        "csrc/torch_binding_meta.cpp: 添加新的融合算子元数据"
+      ],
+      "affected_features": [
+        "MoE层前向计算",
+        "MC2通信选择",
+        "量化兼容性",
+        "Speculative Decoding"
+      ]
+    },
+    "design": {
+      "principle": "将MoE的dispatch、compute、combine三个阶段融合为单个算子，消除中间结果存储和kernel launch开销",
+      "theory_analysis": "传统MoE流程：dispatch(通信) -> compute(计算) -> combine(通信)，每个阶段独立执行，存在中间结果存储和kernel launch开销。FUSED_MC2通过融合算子：1)消除中间结果存储，减少显存占用；2)减少kernel launch次数，降低延迟；3)优化数据流，提高缓存利用率。但融合算子需要特定的硬件支持和量化配置。",
+      "design_decisions": [
+        {
+          "decision": "两种模式：dispatch_ffn_combine(1)和dispatch_gmm_combine_decode(2)",
+          "reason": "dispatch_ffn_combine适合通用MoE场景，支持prefill和decode；dispatch_gmm_combine_decode专门优化decode节点，性能更优但限制更多。"
+        },
+        {
+          "decision": "仅支持w8a8_dynamic量化",
+          "reason": "融合算子内部实现了INT8计算，需要w8a8_dynamic量化提供scale参数。其他量化类型数据格式不兼容。"
+        },
+        {
+          "decision": "dispatch_ffn_combine限制EP<=32",
+          "reason": "当前算子实现仅支持EP<=32，更大的EP规模需要等待算子更新。"
+        },
+        {
+          "decision": "dispatch_ffn_combine不支持MTP和动态EPLB",
+          "reason": "MTP模式和动态EPLB需要额外的路由信息，当前融合算子不支持这些特性。"
+        },
+        {
+          "decision": "dispatch_gmm_combine_decode需要w8a8的draft模型",
+          "reason": "decode节点融合算子需要draft模型也使用w8a8量化，否则数据格式不兼容。"
+        }
+      ],
+      "mode_comparison": [
+        {
+          "mode": 0,
+          "name": "禁用",
+          "description": "使用普通MC2或ALLTOALL",
+          "suitable_for": [
+            "非A3设备",
+            "非w8a8量化",
+            "需要动态EPLB"
+          ]
+        },
+        {
+          "mode": 1,
+          "name": "dispatch_ffn_combine",
+          "description": "通用融合模式，支持prefill和decode",
+          "suitable_for": [
+            "A3设备",
+            "w8a8_dynamic",
+            "EP<=32",
+            "非MTP",
+            "非动态EPLB"
+          ]
+        },
+        {
+          "mode": 2,
+          "name": "dispatch_gmm_combine_decode",
+          "description": "decode节点优化模式，性能最优",
+          "suitable_for": [
+            "A3设备",
+            "w8a8_dynamic",
+            "decode节点",
+            "draft模型w8a8"
+          ]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "55f1efa93e833e44eeb063455397f3a56a0eff40320a6423f0a6aacfac6453d6",
+  "knowledge_domain": "vllm-ascend-core"
+}

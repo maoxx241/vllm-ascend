@@ -1,0 +1,106 @@
+{
+  "id": "config:multistream_overlap_shared_expert",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "multistream_overlap_shared_expert",
+  "summary": "多流重叠共享专家计算配置，使用独立计算流重叠共享专家计算以提高效率",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "85"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "shared_experts_calculation_stream"
+  ],
+  "related_features": [
+    "multistream_overlap"
+  ],
+  "sub_configs": [],
+  "constraints": [],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试多流重叠的效果",
+        "需要验证流同步的正确性"
+      ],
+      "memory_impact": "多流可能增加内存占用",
+      "throughput_impact": "重叠计算可提升吞吐量",
+      "latency_impact": "隐藏共享专家计算延迟",
+      "test_cases": [
+        {
+          "name": "测试multistream_overlap_shared_expert=true时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试与shared_expert_dp的组合效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-MoE等有共享专家的MoE模型"
+      ],
+      "enable_config": "additional_config: {multistream_overlap_shared_expert: true}",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "没有共享专家的MoE模型"
+      ],
+      "best_practices": [
+        "在共享专家计算较重的场景启用",
+        "监控流同步开销"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:85",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:359-365",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的multistream_overlap_shared_expert处理"
+      ],
+      "affected_features": [
+        "共享专家计算",
+        "多流管理"
+      ]
+    },
+    "design": {
+      "principle": "利用多流并行执行，将共享专家计算与其他计算重叠",
+      "theory_analysis": "共享专家计算可以与其他专家计算并行执行，隐藏延迟",
+      "design_decisions": [
+        {
+          "decision": "使用独立计算流执行共享专家",
+          "reason": ""
+        },
+        {
+          "decision": "通过流同步保证正确性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "2ceeaf371d104def56e32dfc75045fd98bd8416e0fddfcd45efa19b705ba522e",
+  "knowledge_domain": "vllm-ascend-core"
+}

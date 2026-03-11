@@ -1,0 +1,108 @@
+{
+  "id": "api:ascend_sampler",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendSampler",
+  "summary": "昇腾采样器，实现NPU上的token采样，支持top-k、top-p和异步指数采样优化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/sample/sampler.py",
+      "lines": "38-146"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "Sampler",
+    "AscendTopKTopPSampler",
+    "TopKTopPSampler"
+  ],
+  "related_features": [
+    "sampling",
+    "async_exponential"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行采样",
+        "do_async_exponential()异步指数采样"
+      ],
+      "memory_impact": "管理采样缓冲区",
+      "throughput_impact": "异步指数采样提升吞吐量",
+      "latency_impact": "优化的采样kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "top-k采样测试",
+          "description": ""
+        },
+        {
+          "name": "top-p采样测试",
+          "description": ""
+        },
+        {
+          "name": "异步采样测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "自动使用，可通过enable_async_exponential启用异步优化",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "启用异步指数采样优化",
+        "使用AscendC kernel"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/sample/sampler.py:38-146",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward_native()实现",
+        "do_async_exponential()异步实现"
+      ],
+      "affected_features": [
+        "Token采样",
+        "异步优化"
+      ]
+    },
+    "design": {
+      "principle": "继承Sampler，适配NPU采样",
+      "theory_analysis": "使用NPU优化的top-k/top-p kernel，异步指数采样减少同步",
+      "design_decisions": [
+        {
+          "decision": "支持AscendC kernel",
+          "reason": ""
+        },
+        {
+          "decision": "异步指数采样",
+          "reason": ""
+        },
+        {
+          "decision": "支持batch_invariant模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "8a86502a3cdb25e6ced1fba59b72cf4730f8f040ee3dd6631a7706a999a5ef33",
+  "knowledge_domain": "vllm-ascend-core"
+}

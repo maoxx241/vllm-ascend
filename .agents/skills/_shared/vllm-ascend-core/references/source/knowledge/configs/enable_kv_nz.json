@@ -1,0 +1,104 @@
+{
+  "id": "config:enable_kv_nz",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "enable_kv_nz",
+  "summary": "KV缓存NZ格式配置，将KV缓存转换为FRACTAL_NZ格式以优化内存访问",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "136-144"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "kv_nz_format"
+  ],
+  "sub_configs": [],
+  "constraints": [
+    "仅支持MLA模型",
+    "仅支持PD场景的D节点（decode节点）",
+    "需要kv_transfer_config不为None且is_kv_consumer=true"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试NZ格式的内存访问性能",
+        "需要验证与KV transfer的兼容性"
+      ],
+      "memory_impact": "NZ格式可能改变内存布局",
+      "throughput_impact": "优化内存访问可提升吞吐量",
+      "latency_impact": "减少内存访问延迟",
+      "test_cases": [
+        {
+          "name": "测试enable_kv_nz=true时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试MLA模型的NZ格式转换",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3等MLA模型"
+      ],
+      "enable_config": "additional_config: {enable_kv_nz: true}",
+      "unsuitable_scenarios": [
+        "非MLA模型",
+        "非PD场景",
+        "P节点（prefill节点）"
+      ],
+      "best_practices": [
+        "仅在D节点启用",
+        "确保模型支持MLA"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:136-144",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的enable_kv_nz处理"
+      ],
+      "affected_features": [
+        "KV缓存管理",
+        "MLA注意力"
+      ]
+    },
+    "design": {
+      "principle": "将KV缓存转换为NZ格式以优化NPU的内存访问模式",
+      "theory_analysis": "NZ格式更适合NPU的内存访问特性，可以提高缓存命中率",
+      "design_decisions": [
+        {
+          "decision": "仅支持MLA模型以简化实现",
+          "reason": ""
+        },
+        {
+          "decision": "仅用于D节点以避免P节点的复杂性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d9ba62f794a717c50e1450157cb133fb3acade0a38528d3bd4e48c088c035d3e",
+  "knowledge_domain": "vllm-ascend-core"
+}

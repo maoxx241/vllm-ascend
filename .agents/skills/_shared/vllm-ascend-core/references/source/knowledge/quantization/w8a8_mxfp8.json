@@ -1,0 +1,135 @@
+{
+  "id": "quantization:w8_a8_mxfp8",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W8A8_MXFP8",
+  "summary": "Microscaling FP8量化方案，使用MXFP8(E4M3FN)格式配合per-group E8M0 scale，专为A5设备设计，支持Linear层和MoE层，通过npu_dynamic_mx_quant实现动态量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_mxfp8.py",
+      "lines": "1-219"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_dynamic_mx_quant",
+    "torch_npu.npu_quant_matmul",
+    "FLOAT8_E8M0FNU_DTYPE"
+  ],
+  "related_features": [
+    "moe",
+    "mxfp8",
+    "a5_device"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持A5设备",
+        "支持Linear层和MoE层"
+      ],
+      "memory_impact": "权重和激活均为FP8，内存占用减少约50%，需要存储per-group E8M0 scale",
+      "throughput_impact": "FP8计算利用A5专用硬件加速，吞吐量提升显著",
+      "latency_impact": "MXFP8格式专为A5优化，延迟最低",
+      "test_cases": [
+        {
+          "name": "验证MXFP8动态量化正确性",
+          "description": ""
+        },
+        {
+          "name": "测试per-group scale计算",
+          "description": ""
+        },
+        {
+          "name": "验证A5设备兼容性",
+          "description": ""
+        },
+        {
+          "name": "测试group_size配置影响",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型",
+        "支持MoE模型"
+      ],
+      "enable_config": "quantization: w8a8_mxfp8, group_size: 32",
+      "unsuitable_scenarios": [
+        "非A5设备（不支持）",
+        "对精度要求极高的场景"
+      ],
+      "best_practices": [
+        "仅在A5设备上使用",
+        "group_size设为32获得最佳性能",
+        "配合dynamic_eplb优化MoE负载"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8MXFP8DynamicLinearMethod: Linear层MXFP8实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendW8A8MXFP8DynamicFusedMoEMethod: MoE层MXFP8实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "ensure_mxfp8_linear_available(): 检查MXFP8可用性",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "ensure_mxfp8_moe_available(): 检查MoE MXFP8可用性",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply(): 修改npu_quant_matmul的group_sizes参数",
+        "get_pergroup_param(): 修改per-group scale参数定义",
+        "process_weights_after_loading(): 修改权重scale reshape逻辑"
+      ],
+      "affected_features": [
+        "fused_experts",
+        "moe_comm_method",
+        "device_compat"
+      ]
+    },
+    "design": {
+      "principle": "MXFP8量化：使用E4M3FN格式存储权重和激活值，E8M0格式存储per-group scale，利用Microscaling技术保持精度",
+      "theory_analysis": "MXFP8理论精度损失约0.5-1%，E8M0 scale提供更大的动态范围，适合深度学习场景",
+      "design_decisions": [
+        {
+          "decision": "选择MXFP8而非标准FP8，利用Microscaling技术提升精度",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持A5设备，利用专用硬件加速",
+          "reason": ""
+        },
+        {
+          "decision": "使用E4M3FN格式平衡精度与动态范围",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "cbd062e9cde94c2c59351323aed5a1d70db619663aa88534fc9248d3eb61f1f5",
+  "knowledge_domain": "vllm-ascend-core"
+}

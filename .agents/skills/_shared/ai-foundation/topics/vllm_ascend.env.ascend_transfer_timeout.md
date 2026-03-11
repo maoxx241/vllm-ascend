@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: docs/source/user_guide/feature_guide/kv_pool.md:160, docs/source/user_guide/feature_guide/kv_pool.md:225, docs/source/user_guide/feature_guide/kv_pool.md:336
+- definition_ref: docs/source/user_guide/feature_guide/kv_pool.md:151, docs/source/user_guide/feature_guide/kv_pool.md:216, docs/source/user_guide/feature_guide/kv_pool.md:327
 - read_ref: vllm-ascend/vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097, vllm-ascend/vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809, vllm-ascend/vllm_ascend/distributed/kv_transfer/utils/utils.py:52
 - effect_ref: vllm-ascend/vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097, vllm-ascend/vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809, vllm-ascend/vllm_ascend/distributed/kv_transfer/utils/utils.py:52
 - web_refs: 4
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

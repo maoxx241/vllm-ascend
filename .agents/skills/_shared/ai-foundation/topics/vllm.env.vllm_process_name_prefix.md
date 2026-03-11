@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1378
-- read_ref: vllm/vllm/envs.py:1378, vllm/vllm/envs.py:1378, vllm/vllm/utils/system_utils.py:166
-- effect_ref: vllm/vllm/envs.py:1378, vllm/vllm/envs.py:1378, vllm/vllm/utils/system_utils.py:166
+- definition_ref: vllm/envs.py:1390
+- read_ref: vllm/vllm/envs.py:1390, vllm/vllm/envs.py:1390, vllm/vllm/utils/system_utils.py:166
+- effect_ref: vllm/vllm/envs.py:1390, vllm/vllm/envs.py:1390, vllm/vllm/utils/system_utils.py:166
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - value_failure_signals: 命中率低导致收益不明显; 缓存策略与分块预填充冲突
 - recommendation: 结合业务前缀分布评估收益，保留回退开关。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

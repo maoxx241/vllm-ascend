@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:932
+- definition_ref: vllm/engine/arg_utils.py:931
 - read_ref: vllm/vllm/_custom_ops.py:45, vllm/vllm/_custom_ops.py:66, vllm/vllm/_custom_ops.py:92
-- effect_ref: vllm/vllm/config/cache.py:106, vllm/vllm/model_executor/layers/attention/attention.py:166, vllm/vllm/model_executor/layers/attention/attention.py:358
+- effect_ref: vllm/vllm/config/cache.py:117, vllm/vllm/model_executor/layers/attention/attention.py:166, vllm/vllm/model_executor/layers/attention/attention.py:358
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 非法枚举值会在配置解析阶段报错。
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

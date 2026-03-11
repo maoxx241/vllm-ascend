@@ -1,0 +1,180 @@
+{
+  "id": "feature:dynamic_eplb",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Dynamic EPLB",
+  "summary": "动态专家并行负载均衡，在运行时监控专家热度并动态调整专家分布，实现自适应负载均衡，解决静态EPLB无法应对负载变化的问题。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/eplb_updator.py",
+      "lines": "1-171"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/core/eplb_worker.py",
+      "lines": "1-348"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/eplb/core/eplb_device_transfer_loader.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [
+    "DYNAMIC_EPLB=true",
+    "EXPERT_MAP_RECORD=true",
+    "VLLM_ALLOW_EXPERT_LOAD_COLLECTING"
+  ],
+  "related_apis": [
+    "EplbUpdator",
+    "EplbProcess",
+    "EplbWorker.do_update",
+    "D2DExpertWeightLoader"
+  ],
+  "related_features": [
+    "eplb",
+    "expert_parallel",
+    "d2d_transfer"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与推理主循环异步运行，通过shared_dict共享数据",
+        "依赖D2D(Direct Device-to-Device)传输进行专家权重迁移",
+        "与静态EPLB共享策略框架，但运行时动态调整"
+      ],
+      "memory_impact": "动态EPLB需要额外的共享内存(shared_dict)存储专家映射和负载信息；专家权重迁移期间会有临时显存峰值；D2D传输需要预分配传输缓冲区",
+      "throughput_impact": "良好的动态均衡可提升吞吐量30-50%；迁移期间可能有短暂性能下降(约5-10%)；异步设计最小化对推理的影响",
+      "latency_impact": "动态调整可显著降低P99延迟；迁移期间个别请求可能延迟增加；长期看可保持低延迟稳定性",
+      "test_cases": [
+        {
+          "name": "测试expert_heat_collection_interval和algorithm_execution_interval的合理配置",
+          "description": ""
+        },
+        {
+          "name": "验证专家权重D2D迁移的正确性和性能",
+          "description": ""
+        },
+        {
+          "name": "测试高并发场景下的动态均衡效果",
+          "description": ""
+        },
+        {
+          "name": "验证expert_map_record_path记录功能",
+          "description": ""
+        },
+        {
+          "name": "测试极端负载变化场景的响应速度",
+          "description": ""
+        },
+        {
+          "name": "验证多GPU环境下的同步机制",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V2/V3 (MoE架构)",
+        "Qwen2-MoE",
+        "所有支持Expert Parallel的MoE模型"
+      ],
+      "enable_config": "环境变量: DYNAMIC_EPLB=true; 配置: eplb_config: {dynamic_eplb: true, expert_heat_collection_interval: 400, algorithm_execution_interval: 30}",
+      "unsuitable_scenarios": [
+        "负载模式非常稳定的场景(静态EPLB更高效)",
+        "显存紧张无法支持专家迁移的场景",
+        "对延迟抖动极度敏感的场景(迁移期间可能抖动)",
+        "单GPU环境无意义"
+      ],
+      "best_practices": [
+        "expert_heat_collection_interval建议400-1000次迭代，平衡监控开销和响应速度",
+        "algorithm_execution_interval建议30-100次迭代，避免频繁迁移",
+        "生产环境建议启用expert_map_record_path记录历史映射",
+        "监控专家热度分布，调整冗余专家数量",
+        "预热阶段禁用动态调整，待负载稳定后启用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/eplb/eplb_updator.py",
+          "description": "EplbUpdator类，协调主进程和EPLB子进程",
+          "key_methods": [
+            "forward_before",
+            "forward_end",
+            "compute_and_set_moe_load"
+          ]
+        },
+        {
+          "file": "vllm_ascend/eplb/core/eplb_worker.py",
+          "description": "EplbWorker和EplbProcess，实现异步负载均衡计算",
+          "key_methods": [
+            "do_update",
+            "compose_expert_update_info_greedy"
+          ]
+        },
+        {
+          "file": "vllm_ascend/eplb/core/eplb_device_transfer_loader.py",
+          "description": "D2DExpertWeightLoader，实现GPU间专家权重直接传输",
+          "key_methods": [
+            "asyn_expert_weight_transfer",
+            "update_expert_map_and_weight"
+          ]
+        }
+      ],
+      "modification_points": [
+        "调整监控周期：修改expert_heat_collection_interval默认值",
+        "优化迁移策略：修改compose_expert_update_info_greedy的贪心算法",
+        "扩展D2D传输：在D2DExpertWeightLoader中添加新的传输优化",
+        "自定义热度计算：修改compute_and_set_moe_load中的负载聚合逻辑",
+        "添加新的触发条件：在forward_before/forward_end中添加新的判断逻辑"
+      ],
+      "affected_features": [
+        "eplb: 动态EPLB继承静态EPLB的配置和策略",
+        "model_runner: 需要在forward前后调用EplbUpdator",
+        "distributed: 依赖分布式通信进行负载信息同步"
+      ]
+    },
+    "design": {
+      "principle": "动态EPLB采用生产者-消费者模式，主进程作为生产者收集专家负载信息，子进程作为消费者执行负载均衡计算。核心流程：1)主进程每N次迭代收集负载 2)通过shared_dict传递给子进程 3)子进程计算新的专家映射 4)主进程异步执行专家权重迁移 5)更新专家映射表",
+      "theory_analysis": "动态负载均衡可建模为在线装箱问题(Online Bin Packing)，需要在不知道未来负载的情况下做出决策。EPLB采用周期性重平衡策略，时间复杂度O(L*G*E)，其中L为层数，G为GPU数，E为专家数。迁移成本通过贪心算法最小化，只迁移必要的专家。异步设计避免了阻塞主推理流程。",
+      "design_decisions": [
+        {
+          "decision": "异步子进程设计",
+          "rationale": "负载均衡计算和专家迁移是计算密集型操作，异步执行避免阻塞主推理流程，保证吞吐量。通过Queue和shared_dict实现进程间通信"
+        },
+        {
+          "decision": "周期性触发机制",
+          "rationale": "expert_heat_collection_interval和algorithm_execution_interval分离，允许灵活调整监控频率和调整频率。避免过度频繁的迁移导致性能下降"
+        },
+        {
+          "decision": "D2D直接传输",
+          "rationale": "GPU间直接传输专家权重避免经过CPU，大幅降低迁移延迟。需要硬件支持P2P传输"
+        },
+        {
+          "decision": "逐层迁移策略",
+          "rationale": "每次只迁移一层专家，分散迁移开销，避免一次性大量迁移导致的性能抖动"
+        },
+        {
+          "decision": "约束检查机制",
+          "rationale": "check_expert_placement确保迁移后的专家分布合法：1)每个逻辑专家必须被放置 2)同一专家的不同副本不能在同一GPU 3)最小化NPU内部专家移动"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "cde4b9a452386efffe0e9b2e0ed8b30f89b6a0abd8138bd38ed6c908b3531ad7",
+  "knowledge_domain": "integration-core"
+}

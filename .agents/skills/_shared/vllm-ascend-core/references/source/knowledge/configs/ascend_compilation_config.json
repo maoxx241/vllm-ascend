@@ -1,0 +1,144 @@
+{
+  "id": "config:ascend_compilation_config",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "ascend_compilation_config",
+  "summary": "Ascend图编译配置，控制图融合优化行为，直接影响模型在Ascend平台的性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "252-302"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "graph_fusion_passes",
+    "acl_graph"
+  ],
+  "sub_configs": [
+    {
+      "name": "enable_npugraph_ex",
+      "type": "bool",
+      "default": true,
+      "description": "是否启用npugraph_ex后端，启用后Fx图将被npugraph_ex后端优化和编译"
+    },
+    {
+      "name": "enable_static_kernel",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用静态kernel，适用于纯静态形状或形状变化极少的场景"
+    },
+    {
+      "name": "fuse_norm_quant",
+      "type": "bool",
+      "default": true,
+      "description": "是否启用norm和quant融合优化"
+    },
+    {
+      "name": "fuse_qknorm_rope",
+      "type": "bool",
+      "default": true,
+      "description": "是否启用qknorm和rope融合优化"
+    },
+    {
+      "name": "fuse_allreduce_rms",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用allreduce和addrmsnorm融合优化"
+    },
+    {
+      "name": "fuse_muls_add",
+      "type": "bool",
+      "default": true,
+      "description": "是否启用muls和add融合优化"
+    }
+  ],
+  "constraints": [
+    "enable_static_kernel需要enable_npugraph_ex=true"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试各种融合组合的性能影响",
+        "需要验证静态kernel的形状约束"
+      ],
+      "memory_impact": "融合优化可能减少中间张量内存占用",
+      "throughput_impact": "融合优化显著提升吞吐量",
+      "latency_impact": "减少kernel launch开销，降低延迟",
+      "test_cases": [
+        {
+          "name": "测试fuse_allreduce_rms=true时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试enable_static_kernel=true时的编译时间",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有Ascend支持的模型"
+      ],
+      "enable_config": "additional_config: {ascend_compilation_config: {enable_npugraph_ex: true, fuse_norm_quant: true}}",
+      "unsuitable_scenarios": [
+        "动态形状变化频繁的场景不适合enable_static_kernel=true"
+      ],
+      "best_practices": [
+        "默认配置已针对大多数场景优化",
+        "静态形状场景启用enable_static_kernel"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:252-302",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/ascend_config.py:169-209",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendCompilationConfig.__init__方法",
+        "update_compile_ranges_split_points方法"
+      ],
+      "affected_features": [
+        "图融合passes",
+        "ACL Graph编译"
+      ]
+    },
+    "design": {
+      "principle": "通过算子融合减少内存访问和kernel launch开销，提升整体性能",
+      "theory_analysis": "融合优化将多个小算子合并为大算子，减少中间结果的读写",
+      "design_decisions": [
+        {
+          "decision": "默认启用大部分融合优化",
+          "reason": ""
+        },
+        {
+          "decision": "静态kernel作为可选功能以支持特定场景",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "4ffcf0ff17fe63d51eab5b62362159bbbe18089ef351c59ce2d00dd0aedaa1f9",
+  "knowledge_domain": "vllm-ascend-core"
+}

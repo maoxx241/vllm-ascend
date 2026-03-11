@@ -1,0 +1,94 @@
+{
+  "id": "config:recompute_scheduler_enable",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "recompute_scheduler_enable",
+  "summary": "重计算调度器配置，启用后可在内存紧张时重计算中间结果以节省内存",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "87"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "recompute_scheduler"
+  ],
+  "sub_configs": [],
+  "constraints": [],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试重计算的性能开销",
+        "需要验证内存节省效果"
+      ],
+      "memory_impact": "显著减少内存占用",
+      "throughput_impact": "重计算会增加计算开销，可能降低吞吐量",
+      "latency_impact": "增加计算延迟",
+      "test_cases": [
+        {
+          "name": "测试recompute_scheduler_enable=true时的内存占用",
+          "description": ""
+        },
+        {
+          "name": "测试不同batch size下的性能影响",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "additional_config: {recompute_scheduler_enable: true}",
+      "unsuitable_scenarios": [
+        "计算资源紧张的场景"
+      ],
+      "best_practices": [
+        "在内存紧张时启用",
+        "权衡计算开销和内存节省"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:87",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的recompute_scheduler_enable处理"
+      ],
+      "affected_features": [
+        "调度器",
+        "内存管理"
+      ]
+    },
+    "design": {
+      "principle": "通过重计算中间结果，用计算换内存",
+      "theory_analysis": "在内存受限场景下，重计算可以允许更大的batch size",
+      "design_decisions": [
+        {
+          "decision": "作为可选功能，由用户根据场景选择",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c9bb50b87e72de199e2742e7598e2180ddda118d111eeeee37928212ada9757f",
+  "knowledge_domain": "vllm-ascend-core"
+}

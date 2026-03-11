@@ -1,0 +1,250 @@
+{
+  "id": "feature:kv_transfer",
+  "type": "feature",
+  "category": "vllm",
+  "name": "KV Transfer",
+  "summary": "分布式KV缓存传输机制，支持KV cache在vLLM实例间传输，实现Prefill-Decode分离、KV offloading等高级场景，降低首token延迟。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/kv_transfer.py",
+      "lines": "1-115"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+      "lines": "1-629"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/distributed/kv_transfer/kv_connector/factory.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/distributed/kv_transfer/kv_connector/v1/p2p/p2p_nccl_connector.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/distributed/kv_transfer/kv_connector/v1/offloading_connector.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/distributed/kv_transfer/kv_connector/v1/lmcache_connector.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/scheduler.py",
+      "lines": "113-133"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/gpu/kv_connector.py",
+      "lines": "N/A"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_KV_CONNECTOR",
+    "VLLM_KV_ROLE",
+    "VLLM_KV_RANK",
+    "VLLM_KV_IP",
+    "VLLM_KV_PORT",
+    "VLLM_KV_BUFFER_SIZE"
+  ],
+  "related_apis": [
+    "KVTransferConfig",
+    "KVConnectorBase_V1",
+    "KVConnectorRole",
+    "KVConnectorMetadata",
+    "KVConnectorOutput",
+    "start_load_kv",
+    "wait_for_layer_load",
+    "save_kv_layer",
+    "wait_for_save",
+    "get_num_new_matched_tokens",
+    "request_finished"
+  ],
+  "related_features": [
+    "paged_attention",
+    "prefix_caching",
+    "disaggregated_prefill",
+    "kv_offloading",
+    "speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与PagedAttention交互：传输的是paged KV cache block，依赖block结构",
+        "与Prefix Caching交互：可传输缓存的block，实现跨实例缓存共享",
+        "与Disaggregated Prefill交互：KV Transfer是实现P/D分离的核心机制",
+        "与KV Offloading交互：KV Transfer支持offloading到CPU或其他存储",
+        "与Speculative Decoding交互：可传输draft model的KV cache"
+      ],
+      "memory_impact": "需要额外的buffer用于KV传输（默认1GB）。支持CPU buffer减少GPU显存占用。传输过程中临时占用额外内存。",
+      "throughput_impact": "P/D分离场景可提升整体吞吐量2-3倍。KV offloading可支持更大的batch size。但传输本身有开销，需要权衡网络带宽和计算节省。",
+      "latency_impact": "P/D分离场景显著降低decode实例的首token延迟（接近零）。异步传输可隐藏传输延迟。但同步传输会增加延迟。",
+      "test_cases": [
+        {
+          "name": "test_kv_transfer_p2p",
+          "description": "测试P2P NCCL connector的KV传输正确性"
+        },
+        {
+          "name": "test_kv_transfer_offloading",
+          "description": "测试KV offloading到CPU的正确性"
+        },
+        {
+          "name": "test_kv_transfer_lmcache",
+          "description": "测试LMCache connector的正确性"
+        },
+        {
+          "name": "test_async_kv_load",
+          "description": "测试异步KV加载的正确性"
+        },
+        {
+          "name": "test_kv_save_and_load",
+          "description": "测试KV保存和加载的完整流程"
+        },
+        {
+          "name": "test_kv_transfer_failure_handling",
+          "description": "测试KV传输失败时的recompute策略"
+        },
+        {
+          "name": "test_kv_connector_metadata",
+          "description": "测试scheduler和worker间的metadata传递"
+        },
+        {
+          "name": "test_prefill_decode_separation",
+          "description": "测试P/D分离场景的端到端正确性"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持PagedAttention的模型",
+        "Llama系列",
+        "Qwen系列",
+        "Mistral/Mixtral",
+        "DeepSeek系列"
+      ],
+      "enable_config": "通过KVTransferConfig配置。需要设置kv_connector（如PyTorchDistributedConnector、NixlConnector、LMCacheConnector）、kv_role（kv_producer/kv_consumer/kv_both）、kv_rank、kv_ip、kv_port等参数。",
+      "unsuitable_scenarios": [
+        "单实例部署：KV Transfer无意义",
+        "网络带宽受限环境：传输开销可能超过计算节省",
+        "极短序列场景：传输延迟占比过高",
+        "实时性要求极高且网络不稳定：传输失败会导致延迟"
+      ],
+      "best_practices": [
+        "P/D分离场景：prefill实例设为kv_producer，decode实例设为kv_consumer",
+        "使用高速网络（InfiniBand/RoCE）减少传输延迟",
+        "合理设置kv_buffer_size，平衡内存占用和传输效率",
+        "启用异步传输隐藏延迟",
+        "监控KV传输指标（传输时间、命中率、失败率）",
+        "设置kv_load_failure_policy=recompute，保证可靠性",
+        "使用LMCache实现跨请求、跨实例的KV缓存共享"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+          "function": "KVConnectorBase_V1",
+          "purpose": "KV connector基类，定义scheduler端和worker端接口"
+        },
+        {
+          "file": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+          "function": "start_load_kv",
+          "purpose": "启动异步KV加载，在forward context之前调用"
+        },
+        {
+          "file": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+          "function": "wait_for_layer_load",
+          "purpose": "等待指定layer的KV加载完成"
+        },
+        {
+          "file": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+          "function": "save_kv_layer",
+          "purpose": "保存指定layer的KV cache"
+        },
+        {
+          "file": "vllm/distributed/kv_transfer/kv_connector/v1/base.py",
+          "function": "get_num_new_matched_tokens",
+          "purpose": "获取可从外部KV cache加载的token数量"
+        },
+        {
+          "file": "vllm/config/kv_transfer.py",
+          "function": "KVTransferConfig",
+          "purpose": "KV传输配置，包含connector、role、rank等参数"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler.__init__",
+          "purpose": "创建scheduler端的KV connector"
+        }
+      ],
+      "modification_points": [
+        "添加新的connector：继承KVConnectorBase_V1，实现所有抽象方法",
+        "修改传输协议：在具体connector中实现新的传输逻辑",
+        "优化异步传输：改进start_load_kv和wait_for_layer_load的流水线",
+        "添加新的buffer策略：修改kv_buffer_device和kv_buffer_size的使用",
+        "支持新的KV layout：实现get_required_kvcache_layout方法"
+      ],
+      "affected_features": [
+        "paged_attention：KV传输依赖block结构",
+        "prefix_caching：可传输缓存的block",
+        "scheduler：需要集成KV connector的调度逻辑",
+        "worker：需要实现KV connector的worker端逻辑",
+        "attention layer：需要调用wait_for_layer_load和save_kv_layer"
+      ]
+    },
+    "design": {
+      "principle": "采用scheduler-worker分离架构。Scheduler端connector负责元数据管理和调度决策，Worker端connector负责实际的KV传输。通过layer-by-layer的异步传输实现流水线优化，隐藏传输延迟。",
+      "theory_analysis": "传统方案需要完整传输KV cache后才能开始计算，延迟高。vLLM的layer-by-layer传输允许在传输某一层时计算其他层，实现传输和计算的重叠。理论上可将传输延迟隐藏在计算中，实现接近零开销的KV传输。",
+      "design_decisions": [
+        {
+          "decision": "Scheduler-Worker分离架构",
+          "reason": "Scheduler负责全局调度和元数据管理，Worker负责实际传输。解耦设计和实现，支持分布式部署。"
+        },
+        {
+          "decision": "Layer-by-layer异步传输",
+          "reason": "实现传输和计算的重叠，隐藏传输延迟。支持流水线优化。"
+        },
+        {
+          "decision": "抽象connector接口",
+          "reason": "支持多种传输后端（NCCL、NIXL、LMCache等），用户可根据场景选择最优方案。"
+        },
+        {
+          "decision": "支持KV buffer device选择",
+          "reason": "CPU buffer减少GPU显存占用，适合大模型场景。GPU buffer传输更快，适合低延迟场景。"
+        },
+        {
+          "decision": "提供kv_load_failure_policy",
+          "reason": "传输失败时可选择recompute或fail，平衡可靠性和性能。"
+        },
+        {
+          "decision": "支持cross-layer blocks",
+          "reason": "部分connector（如NIXL）支持跨层block，减少传输次数，提升效率。"
+        },
+        {
+          "decision": "集成KV cache events",
+          "reason": "支持KV缓存事件的发布，实现跨实例的缓存一致性管理。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "e90551ed36281af7ce2d6d980c93f8a37689a2a1840775a7a406c24692bf193d",
+  "knowledge_domain": "vllm-upstream"
+}

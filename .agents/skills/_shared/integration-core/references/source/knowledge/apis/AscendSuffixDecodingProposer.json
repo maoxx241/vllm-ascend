@@ -1,0 +1,99 @@
+{
+  "id": "api:ascend_suffix_decoding_proposer",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendSuffixDecodingProposer",
+  "summary": "昇腾Suffix Decoding推测解码提议器，使用后缀树匹配进行投机采样",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/spec_decode/suffix_proposer.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SuffixDecodingProposer",
+    "SpecDecodeMetadata"
+  ],
+  "related_features": [
+    "speculative_decoding",
+    "suffix_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "propose()生成推测token"
+      ],
+      "memory_impact": "管理后缀树数据结构",
+      "throughput_impact": "后缀匹配提升吞吐量",
+      "latency_impact": "无需额外模型，延迟低",
+      "test_cases": [
+        {
+          "name": "后缀匹配测试",
+          "description": ""
+        },
+        {
+          "name": "推测测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "配置speculative_config启用suffix方法",
+      "unsuitable_scenarios": [
+        "随机性高的生成任务"
+      ],
+      "best_practices": [
+        "配置合理的后缀树参数"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/spec_decode/suffix_proposer.py:1-100",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "propose()推测逻辑"
+      ],
+      "affected_features": [
+        "推测解码",
+        "Suffix Decoding方法"
+      ]
+    },
+    "design": {
+      "principle": "使用后缀树匹配预测下一个token",
+      "theory_analysis": "基于后缀树快速查找匹配序列",
+      "design_decisions": [
+        {
+          "decision": "无需额外模型",
+          "reason": ""
+        },
+        {
+          "decision": "支持动态更新",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "acada8aa7a34ad86471fa84f9937d0414c27c7de87079ca1731d0094a02d9b6c",
+  "knowledge_domain": "integration-core"
+}

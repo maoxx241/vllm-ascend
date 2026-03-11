@@ -1,0 +1,144 @@
+{
+  "id": "config:weight_prefetch_config",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "weight_prefetch_config",
+  "summary": "权重预取配置，通过异步预取权重到缓存以隐藏内存访问延迟",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "346-372"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
+    "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
+    "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE"
+  ],
+  "related_apis": [
+    "set_weight_prefetch_method",
+    "get_weight_prefetch_method",
+    "prefetch_stream"
+  ],
+  "related_features": [
+    "weight_prefetch"
+  ],
+  "sub_configs": [
+    {
+      "name": "enabled",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用权重预取"
+    },
+    {
+      "name": "prefetch_ratio",
+      "type": "dict",
+      "default": {
+        "attn": {
+          "qkv": 1.0,
+          "o": 1.0
+        },
+        "moe": {
+          "gate_up": 0.8
+        },
+        "mlp": {
+          "gate_up": 1,
+          "down": 1.0
+        }
+      },
+      "description": "各模块的预取比例配置"
+    }
+  ],
+  "constraints": [
+    "旧版环境变量VLLM_ASCEND_ENABLE_PREFETCH_MLP已废弃，将在v0.16.0移除"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试不同预取比例的性能影响",
+        "需要验证预取与计算的重叠效果"
+      ],
+      "memory_impact": "预取会增加缓存内存占用",
+      "throughput_impact": "有效隐藏内存延迟，提升吞吐量",
+      "latency_impact": "减少权重加载等待时间",
+      "test_cases": [
+        {
+          "name": "测试enabled=true时的性能提升",
+          "description": ""
+        },
+        {
+          "name": "测试不同prefetch_ratio的效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "additional_config: {weight_prefetch_config: {enabled: true, prefetch_ratio: {...}}}",
+      "unsuitable_scenarios": [
+        "内存紧张的场景需要谨慎配置预取比例"
+      ],
+      "best_practices": [
+        "根据模型结构调整预取比例",
+        "监控缓存命中率优化配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:346-372",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/ascend_config.py:146-167",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/ops/weight_prefetch.py",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "WeightPrefetchConfig.__init__方法",
+        "set_mlp_pre_version_compatibale_config方法"
+      ],
+      "affected_features": [
+        "权重加载",
+        "内存管理"
+      ]
+    },
+    "design": {
+      "principle": "利用计算和内存访问的异步性，提前预取下一层权重到缓存",
+      "theory_analysis": "通过预取隐藏内存访问延迟，提高计算单元利用率",
+      "design_decisions": [
+        {
+          "decision": "支持按模块配置预取比例",
+          "reason": ""
+        },
+        {
+          "decision": "保留旧版环境变量兼容性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "da174e09f58bec12957c1e9912b7c11fa43834ff0430b5ecd386d5818f674565",
+  "knowledge_domain": "vllm-ascend-core"
+}

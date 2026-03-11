@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:655
+- definition_ref: vllm/engine/arg_utils.py:657
 - read_ref: vllm/vllm/_aiter_ops.py:89, vllm/vllm/_aiter_ops.py:112, vllm/vllm/_aiter_ops.py:131
 - effect_ref: vllm/vllm/_aiter_ops.py:134, vllm/vllm/_aiter_ops.py:438, vllm/vllm/_aiter_ops.py:463
 - web_refs: 6
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: ValueError: Unknown dtype; ValueError: For Gemma 2 and 3, float16 is not supported
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

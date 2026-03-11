@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1097
-- read_ref: vllm/vllm/envs.py:143, vllm/vllm/envs.py:1097, vllm/vllm/envs.py:1098
-- effect_ref: vllm/vllm/model_executor/layers/quantization/mxfp4.py:95, vllm/vllm/model_executor/layers/quantization/mxfp4.py:156
+- definition_ref: vllm/envs.py:1109
+- read_ref: vllm/vllm/envs.py:144, vllm/vllm/envs.py:1109, vllm/vllm/envs.py:1110
+- effect_ref: vllm/vllm/model_executor/layers/quantization/mxfp4.py:96, vllm/vllm/model_executor/layers/quantization/mxfp4.py:157
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

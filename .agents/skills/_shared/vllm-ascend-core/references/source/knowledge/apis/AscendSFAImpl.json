@@ -1,0 +1,98 @@
+{
+  "id": "api:ascend_sfaimpl",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendSFAImpl",
+  "summary": "昇腾SFA实现类，提供稀疏flash attention的具体实现",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "100-300"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendSFABackend",
+    "AscendSFAMetadataBuilder"
+  ],
+  "related_features": [
+    "sparse_attention",
+    "long_context"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行SFA计算"
+      ],
+      "memory_impact": "稀疏计算减少内存占用",
+      "throughput_impact": "稀疏优化提升吞吐量",
+      "latency_impact": "高效实现降低延迟",
+      "test_cases": [
+        {
+          "name": "稀疏计算测试",
+          "description": ""
+        },
+        {
+          "name": "长序列测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持稀疏attention的模型"
+      ],
+      "enable_config": "由AscendSFABackend自动使用",
+      "unsuitable_scenarios": [
+        "非稀疏场景"
+      ],
+      "best_practices": [
+        "配置合适的稀疏块大小"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/sfa_v1.py:100-300",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()实现",
+        "稀疏kernel优化"
+      ],
+      "affected_features": [
+        "稀疏Attention计算"
+      ]
+    },
+    "design": {
+      "principle": "使用NPU优化的稀疏flash attention kernel",
+      "theory_analysis": "利用稀疏性跳过不必要的计算",
+      "design_decisions": [
+        {
+          "decision": "支持多种稀疏模式",
+          "reason": ""
+        },
+        {
+          "decision": "优化内存访问模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "596ccad3172b95b47fff53884b1f4034a75d5bafeb8b39588cc93441f864e4de",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:670
+- definition_ref: vllm/engine/arg_utils.py:672
 - read_ref: vllm/vllm/_aiter_ops.py:851, vllm/vllm/_custom_ops.py:483, vllm/vllm/_custom_ops.py:494
 - effect_ref: vllm/vllm/_custom_ops.py:1740, vllm/vllm/_custom_ops.py:1813, vllm/vllm/_custom_ops.py:1814
 - web_refs: 8
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: ValueError: Unknown quantization method; ValueError: Quantization method specified in model config does not match argument; ValueError: quantization method is deprecated ... set --allow-deprecated-quantization
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1522
-- read_ref: vllm/vllm/envs.py:229, vllm/vllm/envs.py:1522, vllm/vllm/envs.py:1523
-- effect_ref: vllm-ascend/vllm_ascend/attention/attention_v1.py:74, vllm-ascend/vllm_ascend/attention/mla_v1.py:74, vllm-ascend/vllm_ascend/attention/sfa_v1.py:71
+- definition_ref: vllm/envs.py:1534
+- read_ref: vllm/vllm/envs.py:230, vllm/vllm/envs.py:1534, vllm/vllm/envs.py:1535
+- effect_ref: vllm-ascend/vllm_ascend/attention/attention_v1.py:74, vllm-ascend/vllm_ascend/attention/mla_v1.py:74, vllm-ascend/vllm_ascend/attention/sfa_v1.py:69
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

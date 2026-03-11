@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:669
+- definition_ref: vllm/engine/arg_utils.py:671
 - read_ref: vllm/vllm/benchmarks/latency.py:89, vllm/vllm/benchmarks/latency.py:92, vllm/vllm/benchmarks/mm_processor.py:158
-- effect_ref: vllm/vllm/config/model.py:657, vllm/vllm/config/model.py:1550, vllm/vllm/config/model.py:1938
+- effect_ref: vllm/vllm/config/model.py:661, vllm/vllm/config/model.py:1557, vllm/vllm/config/model.py:1946
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: ValueError: user-specified max_model_len greater than derived limit; 超长位置导致 NaN 或越界
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,109 @@
+{
+  "id": "env_var:vllm_ascend_enable_context_parallel",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL",
+  "summary": "控制Context Parallel(CP)并行开关，用于长序列场景的序列维度并行",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "102-103"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1"
+  ],
+  "related_apis": [
+    "enable_sp"
+  ],
+  "related_features": [
+    "context_parallel",
+    "sequence_parallelism",
+    "long_context"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm1/SP交互",
+        "影响长序列处理能力",
+        "与KV Transfer配置交互"
+      ],
+      "memory_impact": "CP并行可减少单卡内存占用，支持更长序列",
+      "throughput_impact": "长序列场景可提升吞吐量",
+      "latency_impact": "可能增加通信开销",
+      "test_cases": [
+        {
+          "name": "长序列测试",
+          "description": "验证CP并行对长序列的支持",
+          "threshold": 32768
+        },
+        {
+          "name": "CP与SP交互测试",
+          "description": "验证CP与SP同时启用时的行为",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持长序列的模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_CONTEXT_PARALLEL=1",
+      "unsuitable_scenarios": [
+        "短序列场景",
+        "单卡部署场景"
+      ],
+      "best_practices": [
+        "长序列场景推荐启用",
+        "配合FlashComm1使用效果更佳",
+        "根据序列长度合理设置CP size"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "102-103",
+          "purpose": "环境变量定义，默认值为0(禁用)"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值"
+      ],
+      "affected_features": [
+        "sequence_parallelism",
+        "long_context",
+        "kv_transfer"
+      ]
+    },
+    "design": {
+      "principle": "Context Parallel将长序列分割到多个GPU上并行处理，突破单卡内存限制",
+      "theory_analysis": "CP通过序列维度切分，每个GPU处理部分序列，通过AllGather同步中间结果。适用于超长序列场景",
+      "design_decisions": [
+        {
+          "decision": "默认禁用",
+          "reason": "CP需要特定场景和配置，避免误用"
+        },
+        {
+          "decision": "与SP配合使用",
+          "reason": "CP和SP可以协同工作，进一步优化并行效率"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "b19dfa0dbb208b26ea938f75dd65853d3044860faa45639d7b645f8327725fa9",
+  "knowledge_domain": "vllm-ascend-core"
+}

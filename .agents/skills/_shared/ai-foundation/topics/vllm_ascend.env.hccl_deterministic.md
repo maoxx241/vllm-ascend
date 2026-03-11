@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: docs/source/faqs.md:199, vllm_ascend/batch_invariant.py:85
-- read_ref: vllm-ascend/vllm_ascend/batch_invariant.py:85
-- effect_ref: vllm-ascend/vllm_ascend/batch_invariant.py:85
+- definition_ref: docs/source/faqs.md:199, vllm_ascend/batch_invariant.py:53
+- read_ref: vllm-ascend/vllm_ascend/batch_invariant.py:53
+- effect_ref: vllm-ascend/vllm_ascend/batch_invariant.py:53
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: HCCL init failed; Communication timeout
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

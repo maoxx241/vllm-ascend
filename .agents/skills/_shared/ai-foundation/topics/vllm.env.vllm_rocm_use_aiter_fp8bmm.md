@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:930
+- definition_ref: vllm/envs.py:942
 - read_ref: vllm/vllm/_aiter_ops.py:857, vllm/vllm/_aiter_ops.py:910, vllm/vllm/_aiter_ops.py:937
 - effect_ref: vllm/vllm/_aiter_ops.py:857, vllm/vllm/_aiter_ops.py:910, vllm/vllm/_aiter_ops.py:937
 - web_refs: 5
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: 模型加载失败; 精度异常; 推理速度低于预期
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

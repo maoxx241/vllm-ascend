@@ -1,0 +1,211 @@
+{
+  "id": "feature:paged_attention",
+  "type": "feature",
+  "category": "vllm",
+  "name": "PagedAttention",
+  "summary": "vLLM核心内存管理机制，将KV缓存分页存储，实现高效内存利用和灵活的内存共享，解决LLM推理中的内存碎片问题。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/attention/ops/paged_attn.py",
+      "lines": "1-51"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/block_pool.py",
+      "lines": "1-510"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/block_table.py",
+      "lines": "1-342"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/kv_cache_utils.py",
+      "lines": "1-1686"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/config/cache.py",
+      "lines": "1-217"
+    },
+    {
+      "repo": "vllm",
+      "path": "csrc/attention/",
+      "lines": "N/A"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_BLOCK_SIZE",
+    "VLLM_GPU_MEMORY_UTILIZATION",
+    "VLLM_MAX_MODEL_LEN"
+  ],
+  "related_apis": [
+    "CacheConfig",
+    "BlockPool",
+    "BlockTable",
+    "KVCacheBlock",
+    "FreeKVCacheBlockQueue",
+    "PagedAttention.split_kv_cache",
+    "PagedAttention.write_to_paged_cache"
+  ],
+  "related_features": [
+    "prefix_caching",
+    "kv_transfer",
+    "speculative_decoding",
+    "chunked_prefill"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与Prefix Caching交互：PagedAttention提供分页基础设施，Prefix Caching在此基础上实现缓存复用",
+        "与KV Transfer交互：分页结构便于KV缓存在实例间传输",
+        "与Speculative Decoding交互：支持推测解码的KV缓存管理",
+        "与Chunked Prefill交互：分块预填充依赖分页机制实现"
+      ],
+      "memory_impact": "显著降低显存碎片，提升显存利用率至90%以上。通过按需分配block，避免预分配连续大块内存。支持内存共享，相同prefix的请求可复用KV缓存。",
+      "throughput_impact": "提升吞吐量2-4倍。内存共享减少重复计算，更高的batch size支持，更少的内存拷贝操作。",
+      "latency_impact": "首token延迟降低，因为可以复用已计算的prefix。但单个attention操作可能因block table查找略有开销。",
+      "test_cases": [
+        {
+          "name": "test_block_allocation",
+          "description": "测试block分配和释放的正确性"
+        },
+        {
+          "name": "test_memory_sharing",
+          "description": "测试多个请求共享相同prefix时的内存复用"
+        },
+        {
+          "name": "test_eviction_policy",
+          "description": "测试LRU淘汰策略的正确性"
+        },
+        {
+          "name": "test_block_table_operations",
+          "description": "测试block table的append、move、swap操作"
+        },
+        {
+          "name": "test_slot_mapping",
+          "description": "测试token position到物理slot的映射正确性"
+        },
+        {
+          "name": "test_hybrid_blocks",
+          "description": "测试不同block size的混合场景"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有基于Transformer的LLM模型",
+        "Llama系列 (Llama-2, Llama-3, Llama-4)",
+        "Qwen系列",
+        "Mistral/Mixtral",
+        "DeepSeek系列",
+        "Gemma系列",
+        "支持GQA/MQA的模型",
+        "支持MLA的模型 (DeepSeek-V2/V3)"
+      ],
+      "enable_config": "默认启用。通过CacheConfig配置：block_size=16(默认), gpu_memory_utilization=0.9(默认)。可通过--block-size和--gpu-memory-utilization参数调整。",
+      "unsuitable_scenarios": [
+        "极短序列场景（<block_size）：分页开销相对较大",
+        "实时性要求极高的单请求场景：block管理有少量开销",
+        "内存极其受限的边缘设备：block元数据占用额外内存"
+      ],
+      "best_practices": [
+        "block_size通常设为16，平衡内存碎片和查找效率",
+        "gpu_memory_utilization建议0.85-0.95，留出安全余量",
+        "监控KV cache usage指标，避免OOM",
+        "长序列场景可适当增大block_size减少block数量",
+        "启用prefix_caching进一步提升重复prefix场景性能",
+        "使用FP8 KV cache减少显存占用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/core/block_pool.py",
+          "function": "BlockPool",
+          "purpose": "管理KV cache block池，实现block分配、释放、缓存和淘汰"
+        },
+        {
+          "file": "vllm/v1/core/kv_cache_utils.py",
+          "function": "KVCacheBlock",
+          "purpose": "Block元数据结构，包含block_id、ref_cnt、block_hash等"
+        },
+        {
+          "file": "vllm/v1/core/kv_cache_utils.py",
+          "function": "FreeKVCacheBlockQueue",
+          "purpose": "双向链表实现的空闲block队列，支持O(1)操作"
+        },
+        {
+          "file": "vllm/v1/worker/block_table.py",
+          "function": "BlockTable",
+          "purpose": "维护request到block的映射表，计算slot_mapping"
+        },
+        {
+          "file": "vllm/v1/attention/ops/paged_attn.py",
+          "function": "PagedAttention",
+          "purpose": "PagedAttention核心操作，split_kv_cache和write_to_paged_cache"
+        },
+        {
+          "file": "csrc/attention/attention_kernels.cu",
+          "function": "paged_attention_kernel",
+          "purpose": "CUDA kernel实现分页attention计算"
+        }
+      ],
+      "modification_points": [
+        "修改block_size：在CacheConfig.DEFAULT_BLOCK_SIZE中修改默认值",
+        "修改淘汰策略：在FreeKVCacheBlockQueue中实现不同的排序逻辑",
+        "添加新的block类型：扩展KVCacheBlock数据结构",
+        "优化slot_mapping计算：在BlockTable.compute_slot_mapping中优化",
+        "支持新的attention backend：在v1/attention/backends/中添加新实现"
+      ],
+      "affected_features": [
+        "prefix_caching：依赖block的hash机制",
+        "kv_transfer：依赖block结构进行传输",
+        "speculative_decoding：依赖block的append-only特性",
+        "chunked_prefill：依赖分页实现增量计算",
+        "sliding_window：需要特殊处理block淘汰"
+      ]
+    },
+    "design": {
+      "principle": "借鉴操作系统虚拟内存分页思想，将KV cache划分为固定大小的block。每个block存储block_size个token的KV数据。通过block table实现逻辑地址到物理地址的映射，支持非连续内存分配和内存共享。",
+      "theory_analysis": "传统连续内存分配存在严重碎片问题，内存利用率通常<60%。PagedAttention将内存利用率提升至>90%。核心创新：1) Block作为最小分配单位，消除外部碎片；2) Block table实现地址映射，支持非连续存储；3) 引用计数支持内存共享；4) Copy-on-write机制避免数据复制。",
+      "design_decisions": [
+        {
+          "decision": "block_size默认为16",
+          "reason": "平衡内存碎片和查找效率。太小会增加block数量和查找开销，太大会增加内部碎片。16是经验最优值。"
+        },
+        {
+          "decision": "使用双向链表管理空闲block",
+          "reason": "支持O(1)时间复杂度的中间元素删除，实现高效的LRU淘汰。比Python deque更高效。"
+        },
+        {
+          "decision": "Block table采用append-only设计",
+          "reason": "简化并发控制，避免修改已分配block的复杂性。支持CUDA graph优化。"
+        },
+        {
+          "decision": "Slot mapping在CPU预计算",
+          "reason": "减少GPU计算开销，利用CPU-GPU异步执行。使用numpy和pin memory优化传输。"
+        },
+        {
+          "decision": "支持混合block size",
+          "reason": "适应不同attention类型（full、sliding window、local）的内存需求差异。"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "a3e46762bf7ed1acd2c0730b2d5461bc731ba182860bcc47fea2d5f6a41a47c3",
+  "knowledge_domain": "vllm-upstream"
+}

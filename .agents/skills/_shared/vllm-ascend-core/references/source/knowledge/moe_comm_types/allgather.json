@@ -1,0 +1,116 @@
+{
+  "id": "moe_comm_type:allgather",
+  "type": "moe_comm_type",
+  "category": "vllm_ascend",
+  "name": "ALLGATHER",
+  "summary": "AllGather MoE通信类型，用于非专家并行或EP=1场景，通过AllGather收集所有专家权重，适合小规模部署或无EP场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "24-28,232-233,242,264"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MoECommType.ALLGATHER",
+    "select_moe_comm_method"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "allgather"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "用于非EP场景或EP=1",
+        "在A2/A3/A5设备上作为fallback"
+      ],
+      "memory_impact": "需要收集所有专家权重，显存占用较高",
+      "throughput_impact": "AllGather通信量较大，吞吐量相对较低",
+      "latency_impact": "通信延迟取决于专家数量和权重大小",
+      "test_cases": [
+        {
+          "name": "验证AllGather通信正确性",
+          "description": ""
+        },
+        {
+          "name": "测试EP=1场景性能",
+          "description": ""
+        },
+        {
+          "name": "验证A2/A3/A5设备选择逻辑",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "enable_expert_parallel: false 或 EP=1",
+      "unsuitable_scenarios": [
+        "大规模EP场景",
+        "对通信性能要求高的场景"
+      ],
+      "best_practices": [
+        "用于小规模部署",
+        "作为其他通信类型的fallback",
+        "确保显存足够存储所有专家权重"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MoECommType.ALLGATHER: 枚举定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "select_moe_comm_method(): 选择逻辑",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "select_moe_comm_method(): 修改选择条件"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts"
+      ]
+    },
+    "design": {
+      "principle": "AllGather通信类型通过AllGather操作收集所有专家权重，每个rank计算所有专家",
+      "theory_analysis": "AllGather通信复杂度O(E*H)，E为专家数，H为hidden_size；适合专家数较少或无EP场景",
+      "design_decisions": [
+        {
+          "decision": "作为默认通信类型",
+          "reason": ""
+        },
+        {
+          "decision": "用于非EP场景",
+          "reason": ""
+        },
+        {
+          "decision": "在A2/A3/A5设备上作为fallback",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f9c491b553027e804ec626cec1ea2865337bd5db2a4f1e7075235e76b8fd8091",
+  "knowledge_domain": "vllm-ascend-core"
+}

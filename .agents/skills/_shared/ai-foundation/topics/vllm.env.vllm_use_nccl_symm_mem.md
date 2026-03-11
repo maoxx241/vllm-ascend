@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1485
+- definition_ref: vllm/envs.py:1497
 - read_ref: vllm/vllm/distributed/device_communicators/pynccl_allocator.py:50, vllm/vllm/distributed/device_communicators/pynccl_wrapper.py:350, vllm/vllm/distributed/device_communicators/pynccl_wrapper.py:353
 - effect_ref: vllm/vllm/distributed/device_communicators/pynccl_allocator.py:50, vllm/vllm/distributed/device_communicators/pynccl_wrapper.py:350, vllm/vllm/distributed/device_communicators/pynccl_wrapper.py:353
 - web_refs: 2
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

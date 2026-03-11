@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:875
-- read_ref: vllm/vllm/config/compilation.py:939, vllm/vllm/config/compilation.py:1006, vllm/vllm/config/parallel.py:150
+- definition_ref: vllm/engine/arg_utils.py:874
+- read_ref: vllm/vllm/config/compilation.py:938, vllm/vllm/config/compilation.py:1005, vllm/vllm/config/parallel.py:150
 - effect_ref: vllm/vllm/distributed/device_communicators/cpu_communicator.py:42, vllm/vllm/distributed/device_communicators/cpu_communicator.py:49, vllm/vllm/distributed/device_communicators/cuda_communicator.py:93
 - web_refs: 4
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: HCCL/NCCL 初始化失败; 跨卡通信超时
 - value_failure_signals: 非法枚举值会在参数解析阶段报错。
 - recommendation: TP 变更后同步检查 max_model_len 与通信环境变量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

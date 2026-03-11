@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1194
-- read_ref: vllm/vllm/config/speculative.py:661, vllm/vllm/config/vllm.py:231, vllm/vllm/config/vllm.py:335
-- effect_ref: vllm/vllm/config/vllm.py:335, vllm/vllm/config/vllm.py:622, vllm/vllm/config/vllm.py:631
+- definition_ref: vllm/engine/arg_utils.py:1199
+- read_ref: vllm/vllm/config/speculative.py:677, vllm/vllm/config/vllm.py:240, vllm/vllm/config/vllm.py:344
+- effect_ref: vllm/vllm/config/vllm.py:344, vllm/vllm/config/vllm.py:631, vllm/vllm/config/vllm.py:640
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 服务启动后推理错误; 吞吐波动
 - value_failure_signals: ValueError: num_speculative_tokens must be provided ...; ValueError: 'tensor_parallel_size' is not a valid argument in speculative_config; ValueError: async scheduling is only supported with EAGLE/MTP/Draft ...
 - recommendation: 先用小 token 数验证，再逐步增加并发。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

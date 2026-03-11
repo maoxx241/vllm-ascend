@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:848
-- read_ref: vllm/vllm/envs.py:89, vllm/vllm/envs.py:848, vllm/vllm/envs.py:849
-- effect_ref: vllm/vllm/envs.py:89, vllm/vllm/envs.py:848, vllm/vllm/envs.py:849
+- definition_ref: vllm/envs.py:860
+- read_ref: vllm/vllm/envs.py:89, vllm/vllm/envs.py:860, vllm/vllm/envs.py:861
+- effect_ref: vllm/vllm/envs.py:89, vllm/vllm/envs.py:860, vllm/vllm/envs.py:861
 - web_refs: 4
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

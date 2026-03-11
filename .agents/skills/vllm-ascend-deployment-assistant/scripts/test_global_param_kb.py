@@ -46,8 +46,8 @@ def main() -> int:
     legacy_pairings_path = deploy_root / "global_flag_pairings.json"
     legacy_scan_files_path = deploy_root / "global_scan_files.json"
 
-    vllm_args_path = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_args_inventory.json"
-    vllm_env_path = shared_root / "vllm-foundation" / "references" / "generated" / "vllm_env_inventory.json"
+    vllm_args_path = shared_root / "vllm-upstream" / "references" / "generated" / "vllm_args_inventory.json"
+    vllm_env_path = shared_root / "vllm-upstream" / "references" / "generated" / "vllm_env_inventory.json"
     asc_args_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_inventory.json"
     asc_env_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_env_inventory.json"
     asc_args_freq_path = shared_root / "vllm-ascend-core" / "references" / "generated" / "vllm_ascend_args_frequency.json"

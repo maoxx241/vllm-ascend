@@ -1,0 +1,126 @@
+{
+  "id": "moe_comm_type:mc2",
+  "type": "moe_comm_type",
+  "category": "vllm_ascend",
+  "name": "MC2",
+  "summary": "MC2(Multi-Compute Communication) MoE通信类型，用于专家并行场景的dispatch和combine通信，通过MC2算子实现高效token分发和收集，适合A2/A3/A5设备",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_forward_context.py",
+      "lines": "24-28,235-242,255,267"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "MoECommType.MC2",
+    "select_moe_comm_method",
+    "get_mc2_group"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "mc2_communication",
+    "dispatch_combine"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与MC2通信组配合",
+        "支持A2/A3/A5设备",
+        "受mc2_tokens_capacity限制"
+      ],
+      "memory_impact": "需要MC2通信缓冲区，显存占用中等",
+      "throughput_impact": "MC2通信效率高，吞吐量显著提升",
+      "latency_impact": "dispatch/combine延迟较低",
+      "test_cases": [
+        {
+          "name": "验证MC2 dispatch/combine正确性",
+          "description": ""
+        },
+        {
+          "name": "测试mc2_tokens_capacity限制",
+          "description": ""
+        },
+        {
+          "name": "验证A2/A3/A5设备选择逻辑",
+          "description": ""
+        },
+        {
+          "name": "测试DP>=16场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "enable_expert_parallel: true",
+      "unsuitable_scenarios": [
+        "token数超过mc2_tokens_capacity",
+        "310P设备"
+      ],
+      "best_practices": [
+        "设置合适的mc2_tokens_capacity",
+        "在A2设备上设置HCCL_INTRA_PCIE_ENABLE=1",
+        "配合FUSED_MC2使用获得更好性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MoECommType.MC2: 枚举定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "select_moe_comm_method(): 选择逻辑",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "select_moe_comm_method(): 修改选择条件和设备判断"
+      ],
+      "affected_features": [
+        "moe_comm_method",
+        "fused_experts",
+        "mc2_mask"
+      ]
+    },
+    "design": {
+      "principle": "MC2通信类型通过dispatch操作将token分发到对应专家所在的rank，通过combine操作收集专家输出",
+      "theory_analysis": "MC2通信复杂度O(N*k)，N为token数，k为top-k；相比AllGather减少通信量，适合大规模EP场景",
+      "design_decisions": [
+        {
+          "decision": "在A2设备上当DP>=16且token数<=capacity时选择",
+          "reason": ""
+        },
+        {
+          "decision": "在A3设备上当token数<=capacity且不满足FUSED_MC2条件时选择",
+          "reason": ""
+        },
+        {
+          "decision": "在A5设备上当DP>1且token数<=capacity时选择",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "3c956bd1950efb9e0041f7094a255f8c097099313ab5b6a200ed535cdb63eb4e",
+  "knowledge_domain": "vllm-ascend-core"
+}

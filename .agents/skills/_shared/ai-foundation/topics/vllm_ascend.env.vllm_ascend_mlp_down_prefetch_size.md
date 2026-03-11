@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm_ascend/ascend_config.py:153, vllm_ascend/envs.py:87, vllm_ascend/envs.py:88
-- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:153, vllm-ascend/vllm_ascend/envs.py:87, vllm-ascend/vllm_ascend/envs.py:88
-- effect_ref: vllm-ascend/vllm_ascend/ascend_config.py:153, vllm-ascend/vllm_ascend/envs.py:87, vllm-ascend/vllm_ascend/envs.py:88
+- definition_ref: vllm_ascend/ascend_config.py:146, vllm_ascend/envs.py:87, vllm_ascend/envs.py:88
+- read_ref: vllm-ascend/vllm_ascend/ascend_config.py:146, vllm-ascend/vllm_ascend/envs.py:87, vllm-ascend/vllm_ascend/envs.py:88
+- effect_ref: vllm-ascend/vllm_ascend/ascend_config.py:146, vllm-ascend/vllm_ascend/envs.py:87, vllm-ascend/vllm_ascend/envs.py:88
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 显存 OOM; 收益不稳定
 - value_failure_signals: 显存 OOM; 收益不稳定
 - recommendation: 与 max_model_len/gpu_memory_utilization 联动调优。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

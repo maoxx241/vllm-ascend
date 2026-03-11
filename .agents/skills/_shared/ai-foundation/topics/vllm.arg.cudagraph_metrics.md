@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1082
+- definition_ref: vllm/engine/arg_utils.py:1087
 - read_ref: vllm/vllm/config/observability.py:56, vllm/vllm/engine/arg_utils.py:525, vllm/vllm/engine/arg_utils.py:525
-- effect_ref: vllm/vllm/v1/metrics/loggers.py:113, vllm/vllm/v1/worker/gpu_model_runner.py:3185, vllm-ascend/vllm_ascend/worker/model_runner_v1.py:1867
+- effect_ref: vllm/vllm/v1/metrics/loggers.py:113, vllm/vllm/v1/worker/gpu_model_runner.py:3189, vllm-ascend/vllm_ascend/worker/model_runner_v1.py:1876
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: 图编译失败; 服务启动后首轮请求异常
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

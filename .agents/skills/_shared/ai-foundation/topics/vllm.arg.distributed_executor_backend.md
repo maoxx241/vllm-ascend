@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:785
+- definition_ref: vllm/engine/arg_utils.py:784
 - read_ref: vllm/vllm/benchmarks/throughput.py:663, vllm/vllm/config/parallel.py:201, vllm/vllm/config/parallel.py:209
 - effect_ref: vllm/vllm/config/parallel.py:555, vllm/vllm/config/parallel.py:561, vllm/vllm/config/parallel.py:596
 - web_refs: 5
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

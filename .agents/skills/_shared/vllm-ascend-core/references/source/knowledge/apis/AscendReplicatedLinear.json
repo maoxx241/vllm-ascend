@@ -1,0 +1,98 @@
+{
+  "id": "api:ascend_replicated_linear",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendReplicatedLinear",
+  "summary": "昇腾复制线性层，权重在所有rank上复制，用于不需要张量并行的层",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/linear.py",
+      "lines": "650-750"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "ReplicatedLinear",
+    "AscendColumnParallelLinear"
+  ],
+  "related_features": [
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行计算",
+        "weight_loader()加载权重"
+      ],
+      "memory_impact": "权重在所有rank复制，内存占用与单卡相同",
+      "throughput_impact": "无需通信，吞吐量稳定",
+      "latency_impact": "无通信开销，延迟低",
+      "test_cases": [
+        {
+          "name": "复制计算测试",
+          "description": ""
+        },
+        {
+          "name": "权重加载测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "用于不需要TP的层",
+      "unsuitable_scenarios": [
+        "大权重层(建议使用TP)"
+      ],
+      "best_practices": [
+        "用于小权重层",
+        "embedding层"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/linear.py:650-750",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()计算逻辑"
+      ],
+      "affected_features": [
+        "小权重层计算"
+      ]
+    },
+    "design": {
+      "principle": "权重复制到所有rank，无需通信",
+      "theory_analysis": "适用于小权重层，避免通信开销",
+      "design_decisions": [
+        {
+          "decision": "支持权重广播",
+          "reason": ""
+        },
+        {
+          "decision": "优化内存布局",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "04a1e6a6ea03fee586756802c38aed471c612fb102efcf7f29993aa978be4988",
+  "knowledge_domain": "vllm-ascend-core"
+}

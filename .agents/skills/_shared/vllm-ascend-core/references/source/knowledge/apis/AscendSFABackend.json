@@ -1,0 +1,108 @@
+{
+  "id": "api:ascend_sfabackend",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendSFABackend",
+  "summary": "昇腾SFA(Sparse Flash Attention)后端，实现稀疏注意力机制，支持长序列和稀疏模式",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "50-250"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendSFAImpl",
+    "AscendSFAMetadataBuilder",
+    "AttentionBackend"
+  ],
+  "related_features": [
+    "sparse_attention",
+    "long_context",
+    "flash_attention"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行SFA attention",
+        "get_impl_cls()获取实现类",
+        "get_metadata_builder()获取元数据构建器"
+      ],
+      "memory_impact": "稀疏模式减少内存占用",
+      "throughput_impact": "稀疏计算提升吞吐量",
+      "latency_impact": "优化的稀疏kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "稀疏attention测试",
+          "description": ""
+        },
+        {
+          "name": "长序列测试",
+          "description": ""
+        },
+        {
+          "name": "稀疏模式测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持稀疏attention的模型"
+      ],
+      "enable_config": "通过配置启用",
+      "unsuitable_scenarios": [
+        "不支持稀疏模式的模型"
+      ],
+      "best_practices": [
+        "合理配置稀疏模式",
+        "优化稀疏块大小"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/attention/sfa_v1.py:50-250",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()执行逻辑",
+        "稀疏模式配置"
+      ],
+      "affected_features": [
+        "稀疏Attention",
+        "长序列支持"
+      ]
+    },
+    "design": {
+      "principle": "实现稀疏flash attention，优化长序列场景",
+      "theory_analysis": "利用稀疏性减少计算量，支持更长的上下文",
+      "design_decisions": [
+        {
+          "decision": "支持多种稀疏模式",
+          "reason": ""
+        },
+        {
+          "decision": "集成flash attention优化",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "5d468e29a47ecd68e2d87501636848b76f0570f23d41f84e3fdc523ad9b8fc27",
+  "knowledge_domain": "vllm-ascend-core"
+}

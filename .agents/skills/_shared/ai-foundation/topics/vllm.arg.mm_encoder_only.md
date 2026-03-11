@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1000
-- read_ref: vllm/vllm/config/model.py:307, vllm/vllm/config/model.py:421, vllm/vllm/config/model.py:586
-- effect_ref: vllm/vllm/model_executor/models/interfaces.py:217, vllm/vllm/v1/worker/gpu_model_runner.py:4649, vllm/vllm/v1/worker/gpu_model_runner.py:4953
+- definition_ref: vllm/engine/arg_utils.py:1005
+- read_ref: vllm/vllm/config/model.py:304, vllm/vllm/config/model.py:424, vllm/vllm/config/model.py:590
+- effect_ref: vllm/vllm/model_executor/models/interfaces.py:217, vllm/vllm/v1/worker/gpu_model_runner.py:4653, vllm/vllm/v1/worker/gpu_model_runner.py:4958
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

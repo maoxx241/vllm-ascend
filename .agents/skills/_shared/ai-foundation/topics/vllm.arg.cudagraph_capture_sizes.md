@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1165
-- read_ref: vllm/vllm/compilation/piecewise_backend.py:119, vllm/vllm/compilation/piecewise_backend.py:121, vllm/vllm/config/compilation.py:332
-- effect_ref: vllm/vllm/config/compilation.py:574, vllm/vllm/config/compilation.py:935, vllm/vllm/config/compilation.py:1130
+- definition_ref: vllm/engine/arg_utils.py:1170
+- read_ref: vllm/vllm/compilation/piecewise_backend.py:119, vllm/vllm/compilation/piecewise_backend.py:121, vllm/vllm/config/compilation.py:331
+- effect_ref: vllm/vllm/config/compilation.py:573, vllm/vllm/config/compilation.py:934, vllm/vllm/config/compilation.py:1129
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 图编译失败; 服务启动后首轮请求异常
 - value_failure_signals: ValueError: cudagraph_capture_sizes and compilation_config... are mutually exclusive; AssertionError: cudagraph_capture_sizes should contain at least one element
 - recommendation: 先小流量验证 FULL_DECODE_ONLY，再放量。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,105 @@
+{
+  "id": "operator:npu_rotary_mul",
+  "type": "operator",
+  "category": "rope",
+  "name": "npu_rotary_mul",
+  "summary": "NPU旋转乘法算子，实现RoPE的核心计算x * cos + rotate_half(x) * sin，用于ApplyRotaryEmb场景。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "565-583"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "897-902"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_rotary_mul"
+  ],
+  "related_features": [
+    "rope",
+    "apply_rotary_emb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与cos/sin配合",
+        "与输入张量配合"
+      ],
+      "memory_impact": "输出新张量",
+      "throughput_impact": "融合乘法和旋转提升吞吐",
+      "latency_impact": "单算子完成RoPE核心计算",
+      "test_cases": [
+        {
+          "name": "不同head_dim",
+          "description": ""
+        },
+        {
+          "name": "不同seq_len",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用RoPE的模型"
+      ],
+      "enable_config": "自动启用",
+      "unsuitable_scenarios": [
+        "非RoPE模型"
+      ],
+      "best_practices": [
+        "cos/sin shape正确展开"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendApplyRotaryEmb.forward_oot",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSFAImpl.indexer_select_post_process",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "RoPE计算效率"
+      ]
+    },
+    "design": {
+      "principle": "实现RoPE核心公式: output = x * cos + rotate_half(x) * sin",
+      "theory_analysis": "rotate_half将x分成两半并交换位置，实现旋转效果",
+      "design_decisions": [
+        {
+          "decision": "融合乘法和加法",
+          "reason": ""
+        },
+        {
+          "decision": "支持任意head_dim",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "61f72d99b65e7e80605036dc788c4209f22e3cba3cf121bd8a43626fc0dd0b72",
+  "knowledge_domain": "vllm-ascend-core"
+}

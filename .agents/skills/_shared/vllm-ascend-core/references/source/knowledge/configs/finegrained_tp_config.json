@@ -1,0 +1,139 @@
+{
+  "id": "config:finegrained_tp_config",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "finegrained_tp_config",
+  "summary": "细粒度张量并行配置，允许对不同模块使用不同的TP大小，优化PD场景性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "211-250"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "oproj_tp_enable",
+    "lmhead_tp_enable",
+    "embedding_tp_enable",
+    "mlp_tp_enable"
+  ],
+  "related_features": [
+    "finegrained_tp",
+    "pd_disaggregation"
+  ],
+  "sub_configs": [
+    {
+      "name": "oproj_tensor_parallel_size",
+      "type": "int",
+      "default": 0,
+      "description": "output projection的TP大小，0表示禁用"
+    },
+    {
+      "name": "lmhead_tensor_parallel_size",
+      "type": "int",
+      "default": 0,
+      "description": "lm_head的TP大小，0表示禁用"
+    },
+    {
+      "name": "embedding_tensor_parallel_size",
+      "type": "int",
+      "default": 0,
+      "description": "embedding层的TP大小，0表示禁用"
+    },
+    {
+      "name": "mlp_tensor_parallel_size",
+      "type": "int",
+      "default": 0,
+      "description": "MLP层的TP大小，0表示禁用"
+    }
+  ],
+  "constraints": [
+    "oproj_tensor_parallel_size只在图模式下支持",
+    "oproj_tensor_parallel_size只在PD场景的D节点支持",
+    "所有module tp sizes必须能整除data_parallel_size"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试不同TP组合的通信开销",
+        "需要验证与DP的兼容性"
+      ],
+      "memory_impact": "细粒度TP可以优化内存分布",
+      "throughput_impact": "合理配置可提升吞吐量",
+      "latency_impact": "减少通信开销可降低延迟",
+      "test_cases": [
+        {
+          "name": "测试oproj_tensor_parallel_size=2时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试多个TP配置同时启用的场景",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen等支持PD分离的模型"
+      ],
+      "enable_config": "additional_config: {finegrained_tp_config: {oproj_tensor_parallel_size: 2}}",
+      "unsuitable_scenarios": [
+        "eager模式不支持oproj_tensor_parallel_size",
+        "非PD场景的D节点不支持oproj_tensor_parallel_size"
+      ],
+      "best_practices": [
+        "在PD分离场景的D节点使用oproj_tensor_parallel_size",
+        "确保TP大小能整除DP大小"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:211-250",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:736-750",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "FinegrainedTPConfig.__init__方法中的约束检查"
+      ],
+      "affected_features": [
+        "张量并行",
+        "PD分离"
+      ]
+    },
+    "design": {
+      "principle": "通过细粒度TP配置，针对不同模块的特性优化并行策略",
+      "theory_analysis": "不同模块的计算和通信特性不同，细粒度TP可以针对性优化",
+      "design_decisions": [
+        {
+          "decision": "oproj TP只在图模式支持以避免eager模式的复杂性",
+          "reason": ""
+        },
+        {
+          "decision": "强制整除DP以保证负载均衡",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "82d57b600fb42910cef616273a96ff56930760d3cd88b86fd380a3e486bc41b8",
+  "knowledge_domain": "vllm-ascend-core"
+}

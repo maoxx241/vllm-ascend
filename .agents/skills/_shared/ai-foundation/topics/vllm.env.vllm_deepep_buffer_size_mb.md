@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1456
+- definition_ref: vllm/envs.py:1468
 - read_ref: vllm/vllm/distributed/device_communicators/all2all.py:389, vllm/vllm/distributed/device_communicators/all2all.py:394, vllm/vllm/distributed/device_communicators/all2all.py:463
 - effect_ref: vllm/vllm/distributed/device_communicators/all2all.py:389, vllm/vllm/distributed/device_communicators/all2all.py:394, vllm/vllm/distributed/device_communicators/all2all.py:463
 - web_refs: 3
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动报模型不支持 EP; 专家路由异常
 - value_failure_signals: 启动报模型不支持 EP; 专家路由异常
 - recommendation: 仅在 MoE profile 启用，并配合 TP/DP 校验。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:665
-- read_ref: vllm/vllm/envs.py:48, vllm/vllm/envs.py:665, vllm/vllm/envs.py:666
-- effect_ref: vllm/vllm/envs.py:668, vllm/vllm/v1/sample/ops/topk_topp_sampler.py:35
+- definition_ref: vllm/envs.py:677
+- read_ref: vllm/vllm/envs.py:48, vllm/vllm/envs.py:677, vllm/vllm/envs.py:678
+- effect_ref: vllm/vllm/envs.py:680, vllm/vllm/v1/sample/ops/topk_topp_sampler.py:35
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

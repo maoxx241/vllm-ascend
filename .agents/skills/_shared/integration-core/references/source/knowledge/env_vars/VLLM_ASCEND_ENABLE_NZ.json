@@ -1,0 +1,130 @@
+{
+  "id": "env_var:vllm_ascend_enable_nz",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_NZ",
+  "summary": "控制权重格式转换为FRACTAL_NZ的模式：0=关闭，1=仅量化场景启用，2=尽可能启用",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "97-101"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "137-165"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "maybe_trans_nz",
+    "_should_trans_nz"
+  ],
+  "related_features": [
+    "quantization",
+    "weight_format"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与量化配置交互",
+        "影响权重加载和内存布局",
+        "310P设备强制启用NZ"
+      ],
+      "memory_impact": "NZ格式可能改变内存对齐方式",
+      "throughput_impact": "NZ格式在某些场景下可提升计算效率",
+      "latency_impact": "权重转换可能增加加载时间",
+      "test_cases": [
+        {
+          "name": "NZ格式转换测试",
+          "description": "验证不同enable_nz值的转换行为",
+          "threshold": 0
+        },
+        {
+          "name": "310P设备测试",
+          "description": "验证310P设备强制NZ的行为",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_NZ=1 或 export VLLM_ASCEND_ENABLE_NZ=2",
+      "unsuitable_scenarios": [
+        "FP32权重(不支持NZ)",
+        "非310P设备且BF16/FP16权重时enable_nz=1无效"
+      ],
+      "best_practices": [
+        "量化模型推荐设置enable_nz=1",
+        "310P设备自动启用，无需配置",
+        "BF16/FP16模型如需NZ格式需设置enable_nz=2"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "97-101",
+          "purpose": "环境变量定义，默认值为1"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "_should_trans_nz",
+          "lines": "137-155",
+          "purpose": "判断是否需要转换为NZ格式"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "maybe_trans_nz",
+          "lines": "158-165",
+          "purpose": "执行NZ格式转换"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值",
+        "utils.py: 修改转换策略"
+      ],
+      "affected_features": [
+        "权重加载",
+        "内存布局",
+        "量化模型性能"
+      ]
+    },
+    "design": {
+      "principle": "FRACTAL_NZ是Ascend NPU优化的内存布局格式，可提升矩阵乘法效率。不同数据类型有不同的转换策略",
+      "theory_analysis": "NZ格式通过特定的内存分块方式提升NPU的计算效率，但FP32不支持此格式。310P设备对NZ有特殊优化，强制启用",
+      "design_decisions": [
+        {
+          "decision": "三档配置(0/1/2)",
+          "reason": "提供灵活的控制粒度：完全禁用、仅量化启用、尽可能启用"
+        },
+        {
+          "decision": "310P强制启用",
+          "reason": "310P设备对NZ格式有特殊优化，强制启用以获得最佳性能"
+        },
+        {
+          "decision": "FP32不支持NZ",
+          "reason": "FP32数据类型的内存布局与NZ不兼容"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "c5ee1ced2d7b9563698bc5118e94d34dbdeb1f603baf1c4dbfe98ba4cf6c8ad2",
+  "knowledge_domain": "integration-core"
+}

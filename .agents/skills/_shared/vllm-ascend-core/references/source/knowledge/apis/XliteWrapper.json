@@ -1,0 +1,114 @@
+{
+  "id": "api:xlite_wrapper",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "XliteWrapper",
+  "summary": "Xlite模型包装器，封装xlite推理引擎，支持LLaMA和QwenMoE等模型的高效推理",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/xlite/xlite.py",
+      "lines": "41-199"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "XliteModel",
+    "LlamaXliteModel",
+    "QwenMoeXliteModel"
+  ],
+  "related_features": [
+    "xlite_inference",
+    "moe"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "initialize()初始化模型",
+        "forward()执行推理"
+      ],
+      "memory_impact": "使用xlite优化的内存布局",
+      "throughput_impact": "xlite引擎优化提升吞吐量",
+      "latency_impact": "优化的kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "LLaMA模型测试",
+          "description": ""
+        },
+        {
+          "name": "QwenMoE模型测试",
+          "description": ""
+        },
+        {
+          "name": "NZ格式测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "LLaMA系列",
+        "QwenMoE"
+      ],
+      "enable_config": "通过配置启用xlite引擎",
+      "unsuitable_scenarios": [
+        "不支持的模型架构"
+      ],
+      "best_practices": [
+        "使用NZ格式优化",
+        "配置TP/DP size"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/xlite/xlite.py:41-199",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "initialize()初始化逻辑",
+        "_build_model()模型构建",
+        "_build_model_config()配置构建"
+      ],
+      "affected_features": [
+        "模型推理",
+        "MoE支持"
+      ]
+    },
+    "design": {
+      "principle": "封装xlite C++引擎，提供Python接口",
+      "theory_analysis": "使用xlite优化的推理kernel",
+      "design_decisions": [
+        {
+          "decision": "支持LLaMA和QwenMoE",
+          "reason": ""
+        },
+        {
+          "decision": "支持NZ权重格式",
+          "reason": ""
+        },
+        {
+          "decision": "支持TP/DP/EP",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c14dc443e24bf9615ae4988411660e3d7ec624b936fdb3ff71d82dde50322c8a",
+  "knowledge_domain": "vllm-ascend-core"
+}

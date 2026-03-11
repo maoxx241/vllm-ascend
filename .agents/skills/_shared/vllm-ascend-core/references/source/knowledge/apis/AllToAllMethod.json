@@ -1,0 +1,108 @@
+{
+  "id": "api:all_to_all_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AllToAllMethod",
+  "summary": "AllToAll通信方法实现，使用AllToAll交换token，适用于DP>1的MoE场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "275-294"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MoECommMethod",
+    "TokenDispatcherWithAll2AllV",
+    "PrepareAndFinalizeWithAll2All"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "data_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "prepare()准备通信",
+        "fused_experts()执行计算",
+        "finalize()完成通信"
+      ],
+      "memory_impact": "使用AllToAll通信缓冲区",
+      "throughput_impact": "DP>1时性能优于AllGather",
+      "latency_impact": "通信开销适中",
+      "test_cases": [
+        {
+          "name": "AllToAll通信测试",
+          "description": ""
+        },
+        {
+          "name": "DP>1测试",
+          "description": ""
+        },
+        {
+          "name": "EP测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "设置MoECommType.ALLTOALL",
+      "unsuitable_scenarios": [
+        "EP=1且DP=1场景"
+      ],
+      "best_practices": [
+        "DP>1时使用",
+        "配合EP优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py:275-294",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "_get_token_dispatcher()",
+        "_get_prepare_finalize()"
+      ],
+      "affected_features": [
+        "MoE通信",
+        "DP支持"
+      ]
+    },
+    "design": {
+      "principle": "使用AllToAll交换token到对应expert",
+      "theory_analysis": "DP>1时比AllGather更高效",
+      "design_decisions": [
+        {
+          "decision": "需要EP>1",
+          "reason": ""
+        },
+        {
+          "decision": "支持npu_grouped_matmul",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d0e6821d1fc7a602da9f805960863551194910a0c9ea9592949aa2710727fca2",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1062
-- read_ref: vllm/vllm/envs.py:139, vllm/vllm/envs.py:1062, vllm/vllm/envs.py:1063
-- effect_ref: vllm/vllm/v1/worker/gpu_model_runner.py:4540
+- definition_ref: vllm/envs.py:1074
+- read_ref: vllm/vllm/envs.py:140, vllm/vllm/envs.py:1074, vllm/vllm/envs.py:1075
+- effect_ref: vllm/vllm/v1/worker/gpu_model_runner.py:4544
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: RPC 连接失败; 请求分发不均衡
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

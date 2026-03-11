@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1305
-- read_ref: vllm/vllm/envs.py:179, vllm/vllm/envs.py:1305, vllm/vllm/envs.py:1306
-- effect_ref: vllm/vllm/envs.py:179, vllm/vllm/envs.py:1305, vllm/vllm/envs.py:1306
+- definition_ref: vllm/envs.py:1317
+- read_ref: vllm/vllm/envs.py:180, vllm/vllm/envs.py:1317, vllm/vllm/envs.py:1318
+- effect_ref: vllm/vllm/envs.py:180, vllm/vllm/envs.py:1317, vllm/vllm/envs.py:1318
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -14,7 +14,7 @@ topic_kind: parameter
 - stage: `runtime`
 - primary_feature: `general_runtime`
 - status/confidence: `upstream_delta` / `0.75`
-- source: `multi_source` / source_tags: code_reference, docs_export, tests_yaml
+- source: `multi_source` / source_tags: code_reference, docs_export
 - semantics: 控制 HCCL 算子展开策略（常见 AIV），影响通信兼容性与性能。
 - aliases: `HCCL_OP_EXPANSION_MODE`, `hccl_op_expansion_mode`, `hccl-op-expansion-mode`, `hccl op expansion mode`, `general_runtime`, `general runtime`, `general-runtime`
 
@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md:176, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:158, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:224
-- read_ref: vllm-ascend/vllm_ascend/utils.py:499, vllm-ascend/vllm_ascend/utils.py:547
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:499
+- read_ref: vllm-ascend/vllm_ascend/utils.py:477, vllm-ascend/vllm_ascend/utils.py:525
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:477
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: HCCL 初始化或通信超时告警。
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

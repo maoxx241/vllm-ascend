@@ -1,0 +1,127 @@
+{
+  "id": "comm_group:flashcomm2_otp",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_FLASHCOMM2_OTP",
+  "summary": "FlashComm2 O Proj张量并行通信组，用于FlashComm2特性的O Proj层通信优化，通过VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE配置组大小，支持All2All+ReduceScatter通信模式",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "18,139-175,252-254,312-316"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE"
+  ],
+  "related_apis": [
+    "get_flashcomm2_otp_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "flashcomm2",
+    "o_proj",
+    "all2all",
+    "reduce_scatter"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm2 ODP组配合",
+        "与finegrained_tp OTP组互斥"
+      ],
+      "memory_impact": "O Proj权重按flashcomm2_oproj_tensor_parallel_size分片",
+      "throughput_impact": "FlashComm2优化O Proj通信，显著提升吞吐量",
+      "latency_impact": "All2All+ReduceScatter减少通信延迟",
+      "test_cases": [
+        {
+          "name": "验证FlashComm2 OTP组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同flashcomm2_oproj_tensor_parallel_size性能",
+          "description": ""
+        },
+        {
+          "name": "验证与finegrained_tp互斥",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有包含attention层的模型"
+      ],
+      "enable_config": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE: N",
+      "unsuitable_scenarios": [
+        "非P场景部署",
+        "与finegrained_tp同时启用",
+        "D场景(KV consumer)"
+      ],
+      "best_practices": [
+        "仅在P场景部署启用",
+        "配合FlashComm1使用获得最佳性能",
+        "确保flashcomm2_oproj_tensor_parallel_size小于全局TP"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_FLASHCOMM2_OTP: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_flashcomm2_otp_group(): 获取FlashComm2 OTP组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改组划分逻辑",
+        "get_flashcomm2_config_and_validate(): 添加配置验证"
+      ],
+      "affected_features": [
+        "flashcomm2",
+        "attention_layers",
+        "layer_sharding"
+      ]
+    },
+    "design": {
+      "principle": "FlashComm2 OTP组使用All2All+ReduceScatter通信模式优化O Proj层通信，减少通信数据量和延迟",
+      "theory_analysis": "FlashComm2将O Proj通信分解为All2All和ReduceScatter，利用通信计算重叠提升性能",
+      "design_decisions": [
+        {
+          "decision": "使用交错rank划分优化负载均衡",
+          "reason": ""
+        },
+        {
+          "decision": "与finegrained_tp OTP组互斥",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持P场景部署",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f775e82c0394673952fb74d14db08b4744121e044615a88c53fe835d4beccc3d",
+  "knowledge_domain": "vllm-ascend-core"
+}

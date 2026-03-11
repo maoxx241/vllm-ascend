@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1047
-- read_ref: vllm/vllm/config/lora.py:61, vllm/vllm/engine/arg_utils.py:490, vllm/vllm/engine/arg_utils.py:490
+- definition_ref: vllm/engine/arg_utils.py:1052
+- read_ref: vllm/vllm/config/lora.py:61, vllm/vllm/engine/arg_utils.py:492, vllm/vllm/engine/arg_utils.py:492
 - effect_ref: vllm/vllm/lora/ops/triton_ops/lora_kernel_metadata.py:186
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

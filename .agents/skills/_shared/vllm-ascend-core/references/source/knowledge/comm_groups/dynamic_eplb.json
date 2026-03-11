@@ -1,0 +1,124 @@
+{
+  "id": "comm_group:dynamic_eplb",
+  "type": "comm_group",
+  "category": "vllm_ascend",
+  "name": "_DYNAMIC_EPLB",
+  "summary": "动态EPLB通信组，用于动态专家负载均衡特性的通信，与MC2组相同成员，支持运行时专家重分配和负载统计",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "lines": "27,90-94,276-278,332-335"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "get_dynamic_eplb_group",
+    "init_model_parallel_group"
+  ],
+  "related_features": [
+    "dynamic_eplb",
+    "eplb",
+    "expert_parallel",
+    "load_balancing"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与MC2组配合",
+        "用于动态专家负载均衡"
+      ],
+      "memory_impact": "需要存储专家负载统计信息，额外开销较小",
+      "throughput_impact": "动态负载均衡可显著提升MoE吞吐量",
+      "latency_impact": "负载均衡减少热点专家延迟",
+      "test_cases": [
+        {
+          "name": "验证DYNAMIC_EPLB组成员正确性",
+          "description": ""
+        },
+        {
+          "name": "测试动态负载均衡功能",
+          "description": ""
+        },
+        {
+          "name": "验证专家重分配正确性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "eplb_config.dynamic_eplb: true",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "EP=1场景"
+      ],
+      "best_practices": [
+        "配合MC2通信使用",
+        "设置合适的负载统计周期",
+        "监控专家负载分布"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "_DYNAMIC_EPLB: 全局变量定义",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "init_ascend_model_parallel(): 初始化逻辑",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "get_dynamic_eplb_group(): 获取DYNAMIC_EPLB组",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_ascend_model_parallel(): 修改初始化条件",
+        "添加负载统计通信逻辑"
+      ],
+      "affected_features": [
+        "dynamic_eplb",
+        "eplb",
+        "moe"
+      ]
+    },
+    "design": {
+      "principle": "DYNAMIC_EPLB组用于动态专家负载均衡，收集各rank的专家负载信息并动态调整专家分配",
+      "theory_analysis": "动态负载均衡可减少专家负载不均衡导致的性能损失，提升整体吞吐量10-30%",
+      "design_decisions": [
+        {
+          "decision": "与MC2组相同成员",
+          "reason": ""
+        },
+        {
+          "decision": "使用专用HCCL buffer(64 byte)",
+          "reason": ""
+        },
+        {
+          "decision": "仅在dynamic_eplb启用时创建",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "dadd12364e1df22058d265f500147f4f7996abab5c3249ead9d5dfd76167604a",
+  "knowledge_domain": "vllm-ascend-core"
+}

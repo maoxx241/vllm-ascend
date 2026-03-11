@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: vllm_ascend/envs.py:91
-- read_ref: vllm-ascend/vllm_ascend/envs.py:91, vllm-ascend/vllm_ascend/envs.py:91, vllm-ascend/vllm_ascend/worker/worker.py:373
-- effect_ref: vllm-ascend/vllm_ascend/worker/worker.py:373, vllm-ascend/vllm_ascend/worker/worker.py:588, vllm-ascend/vllm_ascend/worker/worker.py:589
+- read_ref: vllm-ascend/vllm_ascend/envs.py:91, vllm-ascend/vllm_ascend/envs.py:91, vllm-ascend/vllm_ascend/worker/worker.py:371
+- effect_ref: vllm-ascend/vllm_ascend/worker/worker.py:371, vllm-ascend/vllm_ascend/worker/worker.py:561, vllm-ascend/vllm_ascend/worker/worker.py:562
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 指标缺失; 追踪上报失败
 - value_failure_signals: 指标缺失; 追踪上报失败
 - recommendation: 按需开启细粒度 tracing，避免全量常开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

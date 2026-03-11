@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:153, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:220, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:86
-- read_ref: vllm-ascend/vllm_ascend/utils.py:926
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:926
+- read_ref: vllm-ascend/vllm_ascend/utils.py:898
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:898
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: HCCL init failed; Communication timeout
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

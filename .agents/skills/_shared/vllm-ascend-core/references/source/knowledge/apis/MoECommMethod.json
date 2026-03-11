@@ -1,0 +1,114 @@
+{
+  "id": "api:mo_ecomm_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "MoECommMethod",
+  "summary": "MoE通信方法基类，定义MoE层通信的抽象接口，支持多种通信策略",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "77-226"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AllGatherCommImpl",
+    "MC2CommImpl",
+    "AlltoAllCommImpl",
+    "FusedMC2CommImpl"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "prepare()准备通信",
+        "fused_experts()执行expert计算",
+        "finalize()完成通信"
+      ],
+      "memory_impact": "管理通信缓冲区",
+      "throughput_impact": "通信方法选择影响吞吐量",
+      "latency_impact": "通信开销影响延迟",
+      "test_cases": [
+        {
+          "name": "通信准备测试",
+          "description": ""
+        },
+        {
+          "name": "expert计算测试",
+          "description": ""
+        },
+        {
+          "name": "通信完成测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "通过MoECommType选择",
+      "unsuitable_scenarios": [
+        "非MoE模型"
+      ],
+      "best_practices": [
+        "根据场景选择通信方法",
+        "EP>1时使用MC2或AlltoAll"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py:77-226",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "prepare()实现",
+        "fused_experts()实现",
+        "finalize()实现"
+      ],
+      "affected_features": [
+        "MoE通信",
+        "Expert并行"
+      ]
+    },
+    "design": {
+      "principle": "抽象MoE通信接口，支持多种实现",
+      "theory_analysis": "不同通信方法适用于不同场景",
+      "design_decisions": [
+        {
+          "decision": "使用抽象基类",
+          "reason": ""
+        },
+        {
+          "decision": "支持token dispatcher",
+          "reason": ""
+        },
+        {
+          "decision": "支持prepare/finalize模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "4c8da8c9cb9fa9e9cee58d04e9ff1484e8b3124d0d9f330097108980b077d44d",
+  "knowledge_domain": "vllm-ascend-core"
+}

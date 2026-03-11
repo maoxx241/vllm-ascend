@@ -1,0 +1,152 @@
+{
+  "id": "feature:async_scheduling",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Async Scheduling",
+  "summary": "异步调度机制，通过output placeholders实现多步in-flight调度，消除GPU空闲间隙，提升吞吐和延迟。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/scheduler.py",
+      "lines": "138-141"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/async_scheduler.py",
+      "lines": "1-60"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/core/sched/scheduler.py",
+      "lines": "160-168"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SchedulerConfig.async_scheduling",
+    "SchedulerConfig.get_scheduler_cls",
+    "AsyncScheduler._update_after_schedule",
+    "AsyncScheduler._update_request_with_output"
+  ],
+  "related_features": [
+    "feature:chunked_prefill",
+    "feature:speculative_decoding",
+    "feature:pipeline_parallelism"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与speculative decoding深度集成：async scheduling是spec decoding高效运行的前提",
+        "与pipeline parallelism协同：PP需要多步in-flight调度来填充pipeline",
+        "与chunked prefill独立但互补：两者可以同时启用"
+      ],
+      "memory_impact": "需要额外存储output placeholders和spec token placeholders，轻微增加内存占用",
+      "throughput_impact": "消除CPU-GPU同步间隙，显著提升吞吐量，特别是在speculative decoding场景下",
+      "latency_impact": "减少请求端到端延迟，因为GPU利用率更高，请求处理更连续",
+      "test_cases": [
+        {
+          "name": "test_async_scheduling_without_spec_decoding",
+          "description": "验证无spec decoding时的async scheduling正确性"
+        },
+        {
+          "name": "test_async_scheduling_with_eagle3",
+          "description": "测试EAGLE3 spec decoding与async scheduling的集成"
+        },
+        {
+          "name": "test_async_scheduling_pp",
+          "description": "验证pipeline parallel场景下的多步in-flight调度"
+        },
+        {
+          "name": "test_async_scheduling_preemption",
+          "description": "测试preemption时async token的正确丢弃"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型，特别是与speculative decoding配合时效果最佳",
+        "pipeline parallel场景下必须启用"
+      ],
+      "enable_config": "通过--async-scheduling启用，或通过EngineArgs.async_scheduling配置。默认情况下，当启用speculative decoding或pipeline parallelism时自动启用。",
+      "unsuitable_scenarios": [
+        "单GPU、无spec decoding、无PP的简单场景可能收益有限",
+        "需要严格顺序保证的调试场景可能需要禁用"
+      ],
+      "best_practices": [
+        "启用speculative decoding时务必启用async scheduling",
+        "pipeline parallel场景下async scheduling是必需的",
+        "监控GPU利用率，async scheduling应能显著提升利用率"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/scheduler.py",
+          "function": "SchedulerConfig.get_scheduler_cls",
+          "purpose": "根据配置选择Scheduler或AsyncScheduler"
+        },
+        {
+          "file": "vllm/v1/core/sched/async_scheduler.py",
+          "function": "AsyncScheduler._update_after_schedule",
+          "purpose": "调度后更新output placeholders"
+        },
+        {
+          "file": "vllm/v1/core/sched/async_scheduler.py",
+          "function": "AsyncScheduler._update_request_with_output",
+          "purpose": "处理output并更新placeholders计数"
+        },
+        {
+          "file": "vllm/v1/core/sched/scheduler.py",
+          "function": "Scheduler.schedule",
+          "lines": "353-420",
+          "purpose": "检查output placeholders避免重复调度"
+        }
+      ],
+      "modification_points": [
+        "修改num_output_placeholders的计算逻辑影响调度行为",
+        "调整discard_latest_async_tokens逻辑影响preemption行为",
+        "在_update_after_schedule中添加新的placeholder处理逻辑"
+      ],
+      "affected_features": [
+        "Request状态管理：需要跟踪num_output_placeholders",
+        "KV cache管理：async模式下KV cache的cache_blocks时机不同",
+        "Model runner：需要处理placeholder tokens"
+      ]
+    },
+    "design": {
+      "principle": "核心思想是'overlap CPU and GPU work'。传统同步调度中，CPU必须等待GPU完成前向传播后才能调度下一步，造成GPU空闲。Async scheduling通过预先分配'placeholders'，让CPU可以提前调度下一步，GPU完成当前步后立即执行下一步，消除等待间隙。",
+      "theory_analysis": "设CPU调度时间为T_cpu，GPU计算时间为T_gpu。同步模式下，每步总时间为T_cpu + T_gpu。异步模式下，如果T_cpu < T_gpu，CPU调度可以完全隐藏在GPU计算中，每步时间接近max(T_cpu, T_gpu)。当T_gpu >> T_cpu时（典型LLM场景），吞吐提升可达(T_cpu + T_gpu) / T_gpu倍。",
+      "design_decisions": [
+        {
+          "decision": "使用num_output_placeholders跟踪in-flight tokens",
+          "reason": "简单直观的计数器机制，易于维护和调试"
+        },
+        {
+          "decision": "AsyncScheduler继承Scheduler而非组合",
+          "reason": "复用大部分调度逻辑，只覆盖关键的output处理方法"
+        },
+        {
+          "decision": "preemption时丢弃async tokens",
+          "reason": "避免重复输出，保证语义正确性"
+        },
+        {
+          "decision": "prefill chunk不添加placeholders",
+          "reason": "prefill阶段不需要async优化，且可能干扰chunk逻辑"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "11888142e5718025056af867f820ebbadf3296df5a8d20491b16843d5ae0b0c2",
+  "knowledge_domain": "vllm-upstream"
+}

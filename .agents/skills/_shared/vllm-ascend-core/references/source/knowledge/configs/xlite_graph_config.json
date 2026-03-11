@@ -1,0 +1,118 @@
+{
+  "id": "config:xlite_graph_config",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "xlite_graph_config",
+  "summary": "Xlite图模式配置，用于启用轻量级图执行模式，优化推理性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "322-344"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "XliteWrapper"
+  ],
+  "related_features": [
+    "xlite_graph"
+  ],
+  "sub_configs": [
+    {
+      "name": "enabled",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用Xlite图模式"
+    },
+    {
+      "name": "full_mode",
+      "type": "bool",
+      "default": false,
+      "description": "是否启用完整模式"
+    }
+  ],
+  "constraints": [
+    "不兼容speculative decoding",
+    "不兼容pipeline parallelism (pipeline_parallel_size必须为1)",
+    "只支持block_size=128"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要验证block_size=128的约束",
+        "需要测试与speculative decoding的互斥性"
+      ],
+      "memory_impact": "图模式可能增加内存占用",
+      "throughput_impact": "启用后可提升吞吐量",
+      "latency_impact": "降低首token延迟",
+      "test_cases": [
+        {
+          "name": "测试enabled=true时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试full_mode=true时的行为",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持block_size=128的模型"
+      ],
+      "enable_config": "additional_config: {xlite_graph_config: {enabled: true}}",
+      "unsuitable_scenarios": [
+        "speculative decoding场景",
+        "pipeline parallelism场景"
+      ],
+      "best_practices": [
+        "确保block_size设置为128",
+        "在纯推理场景下使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:322-344",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "XliteGraphConfig.__init__方法中的约束检查"
+      ],
+      "affected_features": [
+        "图编译优化",
+        "内存管理"
+      ]
+    },
+    "design": {
+      "principle": "通过轻量级图模式减少图编译开销，优化推理性能",
+      "theory_analysis": "Xlite模式通过简化图结构，减少编译时间和运行时开销",
+      "design_decisions": [
+        {
+          "decision": "强制block_size=128以保证图结构一致性",
+          "reason": ""
+        },
+        {
+          "decision": "与speculative decoding互斥以避免复杂性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "4c12bb3caa6a316398b410ce00b874998a223ed879c1e428ab91d42964076dee",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -1,0 +1,114 @@
+{
+  "id": "api:request_output",
+  "type": "api",
+  "category": "vllm",
+  "name": "RequestOutput",
+  "summary": "请求输出类，封装单个推理请求的完整输出结果，包括生成的文本、token ID、logprobs等信息",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/outputs.py",
+      "lines": "85-199"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "CompletionOutput",
+    "PoolingRequestOutput",
+    "SamplingParams",
+    "RequestStateStats"
+  ],
+  "related_features": [
+    "continuous_batching",
+    "streaming_output"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "访问outputs获取生成结果",
+        "检查finished判断是否完成",
+        "add()合并流式输出"
+      ],
+      "memory_impact": "存储生成的token和logprobs，输出较长时内存占用增加",
+      "throughput_impact": "流式输出模式下使用DELTA模式可减少内存拷贝",
+      "latency_impact": "不影响推理延迟",
+      "test_cases": [
+        {
+          "name": "单输出测试",
+          "description": ""
+        },
+        {
+          "name": "多输出(n>1)测试",
+          "description": ""
+        },
+        {
+          "name": "流式输出测试",
+          "description": ""
+        },
+        {
+          "name": "prefix cache命中测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "由引擎自动创建，用户通过generate()返回",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "使用output_kind控制输出模式",
+        "检查num_cached_tokens了解cache命中情况"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/outputs.py:85-199",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "add()合并逻辑",
+        "新增输出字段"
+      ],
+      "affected_features": [
+        "流式输出",
+        "多输出"
+      ]
+    },
+    "design": {
+      "principle": "使用dataclass封装输出，支持流式和非流式模式",
+      "theory_analysis": "支持多输出(n>1)场景，每个输出独立管理",
+      "design_decisions": [
+        {
+          "decision": "使用dataclass简化代码",
+          "reason": ""
+        },
+        {
+          "decision": "支持encoder-decoder模型",
+          "reason": ""
+        },
+        {
+          "decision": "支持LoRA请求",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "f1d4ff65b791a1fb05e9d34c718ff4bb06ff6a2b1edfa0c36edf0e4b7152a260",
+  "knowledge_domain": "vllm-upstream"
+}

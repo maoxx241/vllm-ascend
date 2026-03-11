@@ -1,0 +1,112 @@
+{
+  "id": "operator:npu_format_cast",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_format_cast",
+  "summary": "NPU格式转换算子，用于张量格式转换，支持ND、NZ等NPU专用格式，优化内存访问模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "99-106"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "841-863"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_format_cast"
+  ],
+  "related_features": [
+    "format_conversion",
+    "memory_optimization",
+    "nz_format"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与权重处理配合",
+        "与maybe_trans_nz配合"
+      ],
+      "memory_impact": "NZ格式优化内存访问",
+      "throughput_impact": "正确格式提升计算吞吐",
+      "latency_impact": "格式转换有额外开销",
+      "test_cases": [
+        {
+          "name": "INT8权重转NZ",
+          "description": ""
+        },
+        {
+          "name": "FP16权重转ND",
+          "description": ""
+        },
+        {
+          "name": "不同shape",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有NPU模型"
+      ],
+      "enable_config": "自动启用",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "权重加载后立即转换",
+        "避免频繁转换"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8DynamicLinearMethod.process_weights_after_loading",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendMLAImpl.process_weights_after_loading",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "目标格式选择"
+      ],
+      "affected_features": [
+        "内存访问效率",
+        "计算性能"
+      ]
+    },
+    "design": {
+      "principle": "NZ(FRACTAL_NZ)格式优化矩阵乘法的内存访问模式",
+      "theory_analysis": "NPU矩阵计算单元对NZ格式有更好的内存局部性",
+      "design_decisions": [
+        {
+          "decision": "INT8权重使用NZ格式",
+          "reason": ""
+        },
+        {
+          "decision": "MLA权重根据场景选择格式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d6954f10cb23cfb9791b8e8b9d54cd59bb1733c09b3a5ebf45211c290bb3cb3f",
+  "knowledge_domain": "vllm-ascend-core"
+}

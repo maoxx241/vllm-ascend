@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:707
-- read_ref: vllm/vllm/envs.py:60, vllm/vllm/envs.py:707, vllm/vllm/envs.py:708
+- definition_ref: vllm/envs.py:719
+- read_ref: vllm/vllm/envs.py:60, vllm/vllm/envs.py:719, vllm/vllm/envs.py:720
 - effect_ref: vllm/vllm/v1/executor/ray_executor.py:613
 - web_refs: 2
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

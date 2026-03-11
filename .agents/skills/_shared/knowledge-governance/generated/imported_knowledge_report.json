@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-03-11T07:48:53+00:00",
+  "source_entry_count": 196,
+  "eligible_entry_count": 196,
+  "validated_count": 196,
+  "validated_with_gap_count": 0,
+  "normalization_counts": {},
+  "migration_targets": {
+    "model-adaptation": 58,
+    "vllm-ascend-core": 84,
+    "deployment-config": 37,
+    "ascend-foundation": 4,
+    "vllm-upstream": 13
+  },
+  "domain_scopes": {
+    "both": 36,
+    "vllm-ascend": 137,
+    "vllm": 23
+  },
+  "knowledge_domains": {
+    "integration-core": 36,
+    "vllm-ascend-core": 137,
+    "vllm-upstream": 23
+  },
+  "task_coverage": {
+    "deployment": 94,
+    "env_bootstrap": 25,
+    "debugging": 183,
+    "model_adaptation": 68,
+    "upstream_sync": 72,
+    "release_analysis": 72,
+    "op_development": 44,
+    "performance_analysis": 138,
+    "design_analysis": 179
+  },
+  "scenario_coverage": {
+    "scenario_count": 16,
+    "status": "pass",
+    "composer_coverage": {
+      "model-adapter": 2,
+      "sync-coordinator": 2,
+      "debug-assistant": 2,
+      "release-assistant": 2,
+      "op-developer": 2,
+      "perf-assistant": 2
+    },
+    "atomic_skill_coverage": {
+      "env-bootstrap": 1,
+      "compatibility-checker": 2,
+      "repo-state-auditor": 2,
+      "log-analyzer": 2,
+      "crash-rooter": 1,
+      "perf-hunter": 2,
+      "graph-analyzer": 3,
+      "parallelism-planner": 2,
+      "scheduler-feature-designer": 1,
+      "attention-kv-designer": 5,
+      "custom-model-integrator": 2,
+      "precision-validator": 4,
+      "release-commit-analyzer": 2,
+      "release-notes-composer": 2,
+      "docs-compliance-checker": 1,
+      "test-matrix-planner": 1,
+      "ci-gatekeeper": 3,
+      "knowledge-index-maintainer": 2
+    }
+  }
+}

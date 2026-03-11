@@ -1,0 +1,99 @@
+{
+  "id": "api:indexer_wrapper",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "IndexerWrapper",
+  "summary": "Indexer包装器，用于DeepSeek-V3.2的稀疏索引加速MLA decode",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/mla.py",
+      "lines": "37-64"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendMultiHeadLatentAttention",
+    "MLAAttention"
+  ],
+  "related_features": [
+    "mla_attention",
+    "deepseek_v3",
+    "sparse_indexing"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行索引"
+      ],
+      "memory_impact": "删除未使用的buffer节省内存",
+      "throughput_impact": "稀疏索引加速decode",
+      "latency_impact": "优化的索引降低延迟",
+      "test_cases": [
+        {
+          "name": "Indexer测试",
+          "description": ""
+        },
+        {
+          "name": "稀疏索引测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3-0324"
+      ],
+      "enable_config": "自动检测index_topk配置启用",
+      "unsuitable_scenarios": [
+        "非DeepSeek-V3.2模型"
+      ],
+      "best_practices": [
+        "配置合理的topk_tokens"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/mla.py:37-64",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "权重管理",
+        "内存优化"
+      ],
+      "affected_features": [
+        "MLA decode加速"
+      ]
+    },
+    "design": {
+      "principle": "包装原始Indexer，删除未使用内存",
+      "theory_analysis": "使用稀疏索引加速MLA decode阶段",
+      "design_decisions": [
+        {
+          "decision": "删除topk_indices_buffer",
+          "reason": ""
+        },
+        {
+          "decision": "删除k_cache",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f51b2a4df67c46f2f173798fc7e5d82b29d902b4f17cbae4137c2ce7fa37107f",
+  "knowledge_domain": "vllm-ascend-core"
+}

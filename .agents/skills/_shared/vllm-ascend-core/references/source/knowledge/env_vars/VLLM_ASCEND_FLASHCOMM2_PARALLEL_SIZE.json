@@ -1,0 +1,119 @@
+{
+  "id": "env_var:vllm_ascend_flashcomm2_parallel_size",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE",
+  "summary": "控制FlashComm2的O-matrix TP组大小，0表示禁用，>=1表示启用并设置并行度",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "75-79"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1"
+  ],
+  "related_apis": [
+    "get_flashcomm2_config_and_validate",
+    "flashcomm2_enable"
+  ],
+  "related_features": [
+    "flashcomm2",
+    "finegrained_tp",
+    "layer_sharding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm1互斥",
+        "与FinegrainedTP配置交互",
+        "影响LayerSharding内存优化效果"
+      ],
+      "memory_impact": "FlashComm2通过更细粒度的并行度控制，可优化内存使用",
+      "throughput_impact": "适合特定并行度配置的场景，可提升吞吐量",
+      "latency_impact": "根据并行度配置可能影响延迟",
+      "test_cases": [
+        {
+          "name": "并行度配置测试",
+          "description": "验证不同parallel_size值的正确性",
+          "threshold": 0
+        },
+        {
+          "name": "与FlashComm1互斥测试",
+          "description": "验证同时启用FlashComm1和FlashComm2的行为",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen系列MoE模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE=2",
+      "unsuitable_scenarios": [
+        "不支持FlashComm2特性的模型",
+        "与FlashComm1冲突的场景"
+      ],
+      "best_practices": [
+        "参考文档中FlashComm1和FlashComm2的差异选择合适方案",
+        "根据TP size合理设置parallel_size",
+        "配合LayerSharding使用效果更佳"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "75-79",
+          "purpose": "环境变量定义"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "get_flashcomm2_config_and_validate",
+          "lines": "N/A",
+          "purpose": "验证和配置FlashComm2"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值或验证逻辑",
+        "utils.py: 修改并行度验证逻辑"
+      ],
+      "affected_features": [
+        "finegrained_tp",
+        "layer_sharding",
+        "oproj_tensor_parallel_size"
+      ]
+    },
+    "design": {
+      "principle": "FlashComm2提供更灵活的O-matrix TP组配置，允许用户根据模型和硬件特性优化并行度",
+      "theory_analysis": "通过设置O-matrix TP组大小，可以更细粒度地控制通信模式，平衡计算和通信开销",
+      "design_decisions": [
+        {
+          "decision": "值>=1表示启用",
+          "reason": "0表示禁用，>=1的值同时作为启用标志和并行度参数，简化配置"
+        },
+        {
+          "decision": "与FlashComm1互斥",
+          "reason": "两种通信优化策略不兼容，需要用户明确选择"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "54d4251ca1305049c0337bff1406b72fcf115f1e03e5a40e04923484e069419e",
+  "knowledge_domain": "vllm-ascend-core"
+}

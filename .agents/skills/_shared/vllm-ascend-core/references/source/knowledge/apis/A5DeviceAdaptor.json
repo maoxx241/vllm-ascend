@@ -1,0 +1,112 @@
+{
+  "id": "api:a5_device_adaptor",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "A5DeviceAdaptor",
+  "summary": "A5设备适配器，实现昇腾A5芯片的特定优化，支持MXFP量化和高级特性",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "157-350"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "BaseDeviceAdaptor",
+    "DeviceOperator"
+  ],
+  "related_features": [
+    "device_adaptation",
+    "mxfp_quantization",
+    "a5_optimization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "reshape_and_cache() KV Cache操作",
+        "npu_moe_init_routing() MoE路由",
+        "npu_dynamic_quant() MXFP量化",
+        "npu_grouped_matmul_swiglu_quant_v2() 量化GMM"
+      ],
+      "memory_impact": "支持MXFP量化减少内存占用",
+      "throughput_impact": "A5特定优化提升吞吐量",
+      "latency_impact": "优化的kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "A5设备测试",
+          "description": ""
+        },
+        {
+          "name": "MXFP量化测试",
+          "description": ""
+        },
+        {
+          "name": "KV Cache测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "自动检测A5设备启用",
+      "unsuitable_scenarios": [
+        "非A5设备"
+      ],
+      "best_practices": [
+        "启用MXFP量化优化",
+        "使用npu_scatter_pa_kv_cache"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/device/device_op.py:157-350",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "MXFP量化实现",
+        "A5特定kernel"
+      ],
+      "affected_features": [
+        "MXFP量化",
+        "A5优化"
+      ]
+    },
+    "design": {
+      "principle": "继承BaseDeviceAdaptor，实现A5特定优化",
+      "theory_analysis": "A5芯片支持MXFP8等高级量化格式",
+      "design_decisions": [
+        {
+          "decision": "支持MXFP量化",
+          "reason": ""
+        },
+        {
+          "decision": "使用npu_scatter_pa_kv_cache",
+          "reason": ""
+        },
+        {
+          "decision": "支持FLOAT4_E2M1FN_X2",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "32c13b37d93116e9c29438020f7f90010df2f3e8af264acbe071668838b093a0",
+  "knowledge_domain": "vllm-ascend-core"
+}

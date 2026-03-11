@@ -1,0 +1,176 @@
+{
+  "id": "config:config_compatibility_matrix",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "config_compatibility_matrix",
+  "summary": "配置兼容性矩阵，汇总分析各配置之间的兼容性关系和约束",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "1-459"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "init_ascend_config",
+    "get_ascend_config"
+  ],
+  "related_features": [],
+  "sub_configs": [],
+  "compatibility_rules": [
+    {
+      "config": "xlite_graph_config.enabled",
+      "incompatible_with": [
+        "speculative_config",
+        "pipeline_parallel_size > 1",
+        "block_size != 128"
+      ],
+      "requires": []
+    },
+    {
+      "config": "ascend_compilation_config.enable_static_kernel",
+      "incompatible_with": [],
+      "requires": [
+        "ascend_compilation_config.enable_npugraph_ex = true"
+      ]
+    },
+    {
+      "config": "finegrained_tp_config.oproj_tensor_parallel_size > 0",
+      "incompatible_with": [
+        "model_config.enforce_eager = true"
+      ],
+      "requires": [
+        "kv_transfer_config.is_kv_consumer = true",
+        "pd_disaggregation"
+      ]
+    },
+    {
+      "config": "enable_shared_expert_dp",
+      "incompatible_with": [],
+      "requires": [
+        "parallel_config.enable_expert_parallel = true",
+        "tensor_parallel_size > 1",
+        "enable_sp = true"
+      ]
+    },
+    {
+      "config": "enable_kv_nz",
+      "incompatible_with": [
+        "非MLA模型",
+        "非PD场景",
+        "P节点"
+      ],
+      "requires": [
+        "model_config.is_deepseek_mla = true",
+        "kv_transfer_config.is_kv_consumer = true"
+      ]
+    },
+    {
+      "config": "layer_sharding",
+      "incompatible_with": [],
+      "requires": [
+        "FLASHCOMM2",
+        "DSA-CP"
+      ],
+      "note": "不启用FLASHCOMM2和DSA-CP可能导致性能显著下降"
+    },
+    {
+      "config": "pd_tp_ratio > 1",
+      "incompatible_with": [
+        "DeepSeek-MLA模型"
+      ],
+      "requires": [
+        "kv_transfer_config",
+        "prefill_tp_size % decode_tp_size = 0"
+      ]
+    },
+    {
+      "config": "flashcomm2_oproj_tensor_parallel_size > 0",
+      "incompatible_with": [
+        "finegrained_tp_config.oproj_tensor_parallel_size > 0",
+        "D节点"
+      ],
+      "requires": [
+        "tensor_parallel_size % flashcomm2_oproj_tp_size = 0"
+      ]
+    }
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试所有兼容性组合",
+        "需要验证约束检查的正确性"
+      ],
+      "memory_impact": "不同配置组合影响内存占用",
+      "throughput_impact": "合理配置组合可优化吞吐量",
+      "latency_impact": "不同配置组合影响延迟",
+      "test_cases": [
+        {
+          "name": "测试所有不兼容配置的互斥检查",
+          "description": ""
+        },
+        {
+          "name": "测试所有必需配置的依赖检查",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "根据具体需求组合配置",
+      "unsuitable_scenarios": [
+        "违反兼容性规则的场景"
+      ],
+      "best_practices": [
+        "仔细阅读各配置的约束条件",
+        "避免配置冲突",
+        "根据场景选择合适的配置组合"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:27-145",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的约束检查"
+      ],
+      "affected_features": [
+        "所有配置相关功能"
+      ]
+    },
+    "design": {
+      "principle": "通过明确的兼容性规则，确保配置组合的正确性",
+      "theory_analysis": "不同配置可能相互影响，需要明确定义兼容性规则",
+      "design_decisions": [
+        {
+          "decision": "在初始化时进行约束检查",
+          "reason": ""
+        },
+        {
+          "decision": "提供清晰的错误信息",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "f67f2d391028d003a51f02d88ec21ea77c03c21467342aa09545641e467c8e2c",
+  "knowledge_domain": "vllm-ascend-core"
+}

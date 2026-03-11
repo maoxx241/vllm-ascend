@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1132
-- read_ref: vllm/vllm/engine/arg_utils.py:534, vllm/vllm/engine/arg_utils.py:1672, vllm/vllm/engine/arg_utils.py:1133
-- effect_ref: vllm/vllm/engine/arg_utils.py:534, vllm/vllm/engine/arg_utils.py:1672, vllm/vllm/engine/arg_utils.py:1133
+- definition_ref: vllm/engine/arg_utils.py:1137
+- read_ref: vllm/vllm/engine/arg_utils.py:534, vllm/vllm/engine/arg_utils.py:1688, vllm/vllm/engine/arg_utils.py:1138
+- effect_ref: vllm/vllm/engine/arg_utils.py:534, vllm/vllm/engine/arg_utils.py:1688, vllm/vllm/engine/arg_utils.py:1138
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 非法值会在参数校验时报错
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

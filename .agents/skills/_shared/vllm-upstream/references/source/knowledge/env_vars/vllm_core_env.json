@@ -1,0 +1,124 @@
+{
+  "id": "env_var:vllm_core_env",
+  "type": "env_var",
+  "category": "vllm",
+  "name": "vLLM Core Environment Variables",
+  "summary": "vLLM核心环境变量集合，包含安装时、运行时、日志、编译缓存、分布式等200+环境变量配置",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/envs.py",
+      "lines": "1-1825"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "environment_variables",
+    "__getattr__",
+    "enable_envs_cache"
+  ],
+  "related_features": [
+    "cuda_graph",
+    "distributed_inference",
+    "quantization",
+    "speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "环境变量缓存机制(enable_envs_cache)影响测试隔离",
+        "compile_factors()影响torch.compile缓存键",
+        "validate_environ()可检测未知环境变量"
+      ],
+      "memory_impact": "VLLM_CPU_KVCACHE_SPACE控制CPU KV缓存空间；VLLM_CACHE_ROOT影响缓存目录位置",
+      "throughput_impact": "VLLM_ENABLE_V1_MULTIPROCESSING、VLLM_USE_AOT_COMPILE等影响编译和执行效率",
+      "latency_impact": "VLLM_RPC_TIMEOUT、VLLM_ENGINE_ITERATION_TIMEOUT_S等影响超时行为",
+      "test_cases": [
+        {
+          "name": "环境变量缓存测试",
+          "description": "验证enable_envs_cache/disable_envs_cache的正确性",
+          "threshold": 0
+        },
+        {
+          "name": "环境变量验证测试",
+          "description": "验证validate_environ能正确检测未知VLLM_前缀变量",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM支持的模型"
+      ],
+      "enable_config": "通过环境变量设置，如export VLLM_LOGGING_LEVEL=DEBUG",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "生产环境设置VLLM_CONFIGURE_LOGGING=1配置日志",
+        "分布式场景设置VLLM_HOST_IP确定节点IP",
+        "使用VLLM_CACHE_ROOT和VLLM_CONFIG_ROOT统一管理缓存和配置目录",
+        "编译场景设置MAX_JOBS和NVCC_THREADS控制并行度"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/envs.py",
+          "function": "environment_variables",
+          "lines": "473-1638",
+          "purpose": "所有环境变量的定义和默认值"
+        },
+        {
+          "file": "vllm/envs.py",
+          "function": "__getattr__",
+          "lines": "1644-1653",
+          "purpose": "惰性求值环境变量"
+        },
+        {
+          "file": "vllm/envs.py",
+          "function": "enable_envs_cache",
+          "lines": "1662-1681",
+          "purpose": "启用环境变量缓存以提升性能"
+        }
+      ],
+      "modification_points": [
+        "environment_variables字典: 添加新的环境变量",
+        "env_with_choices/env_list_with_choices: 添加带验证的环境变量",
+        "compile_factors: 修改编译缓存键的计算逻辑"
+      ],
+      "affected_features": [
+        "所有vLLM功能模块"
+      ]
+    },
+    "design": {
+      "principle": "采用惰性求值(Lazy Evaluation)模式，环境变量仅在首次访问时求值并缓存，避免重复解析开销。支持类型验证、默认值、多选验证等高级特性。",
+      "theory_analysis": "惰性求值确保环境变量解析延迟到实际使用时，减少启动开销。缓存机制使用functools.cache装饰器，O(1)时间复杂度访问。env_with_choices提供编译时验证，避免运行时错误。",
+      "design_decisions": [
+        {
+          "decision": "惰性求值设计",
+          "reason": "环境变量解析可能涉及复杂逻辑(如版本检测、路径计算)，惰性求值避免不必要的计算开销"
+        },
+        {
+          "decision": "缓存机制",
+          "reason": "服务初始化后环境变量不再变化，缓存避免重复解析，提升运行时性能"
+        },
+        {
+          "decision": "类型安全验证",
+          "reason": "env_with_choices等函数提供编译时验证，确保环境变量值在允许范围内，避免运行时错误"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "42dad9178ee007ab23f91243ff6128e423ac321bb24cb7c33d696daed1fb51c1",
+  "knowledge_domain": "vllm-upstream"
+}

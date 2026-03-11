@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-06T00:35:38.578953+00:00",
+  "generated_at": "2026-03-11T07:50:27.716171+00:00",
   "routes": [
     {
       "query_intent": "deploy",
@@ -303,6 +303,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm.arg.cpu_offload_params",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.arg.cpu_offload_params",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.arg.cpu_offload_params",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm.arg.cudagraph_capture_sizes",
       "target_section": "Deployment View"
     },
@@ -1008,6 +1023,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm.arg.fail_on_environ_validation",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.arg.fail_on_environ_validation",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.arg.fail_on_environ_validation",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm.arg.fully_sharded_loras",
       "target_section": "Deployment View"
     },
@@ -1308,6 +1338,21 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm.arg.language_model_only",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.arg.language_model_only",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.arg.language_model_only",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm.arg.limit_mm_per_prompt",
       "target_section": "Deployment View"
     },
@@ -1334,21 +1379,6 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm.arg.load_format",
-      "target_section": "Details/Edge Cases"
-    },
-    {
-      "query_intent": "deploy",
-      "topic_id": "vllm.arg.logits_processor_pattern",
-      "target_section": "Deployment View"
-    },
-    {
-      "query_intent": "develop",
-      "topic_id": "vllm.arg.logits_processor_pattern",
-      "target_section": "Development View"
-    },
-    {
-      "query_intent": "troubleshoot",
-      "topic_id": "vllm.arg.logits_processor_pattern",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -3419,6 +3449,21 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm.env.vllm_enable_moe_dp_chunk",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes",
       "target_section": "Details/Edge Cases"
     },
     {
@@ -5658,6 +5703,36 @@
     },
     {
       "query_intent": "deploy",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva",
+      "target_section": "Deployment View"
+    },
+    {
+      "query_intent": "develop",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva",
+      "target_section": "Development View"
+    },
+    {
+      "query_intent": "troubleshoot",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva",
+      "target_section": "Details/Edge Cases"
+    },
+    {
+      "query_intent": "deploy",
       "topic_id": "vllm.env.vllm_worker_multiproc_method",
       "target_section": "Deployment View"
     },
@@ -6393,21 +6468,6 @@
     },
     {
       "query_intent": "deploy",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem",
-      "target_section": "Deployment View"
-    },
-    {
-      "query_intent": "develop",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem",
-      "target_section": "Development View"
-    },
-    {
-      "query_intent": "troubleshoot",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem",
-      "target_section": "Details/Edge Cases"
-    },
-    {
-      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.ascend_home_path",
       "target_section": "Deployment View"
     },
@@ -6873,21 +6933,6 @@
     },
     {
       "query_intent": "deploy",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
-      "target_section": "Deployment View"
-    },
-    {
-      "query_intent": "develop",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
-      "target_section": "Development View"
-    },
-    {
-      "query_intent": "troubleshoot",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len",
-      "target_section": "Details/Edge Cases"
-    },
-    {
-      "query_intent": "deploy",
       "topic_id": "vllm_ascend.env.pytorch_npu_alloc_conf",
       "target_section": "Deployment View"
     },
@@ -6914,21 +6959,6 @@
     {
       "query_intent": "troubleshoot",
       "topic_id": "vllm_ascend.env.rank",
-      "target_section": "Details/Edge Cases"
-    },
-    {
-      "query_intent": "deploy",
-      "topic_id": "vllm_ascend.env.server_port",
-      "target_section": "Deployment View"
-    },
-    {
-      "query_intent": "develop",
-      "topic_id": "vllm_ascend.env.server_port",
-      "target_section": "Development View"
-    },
-    {
-      "query_intent": "troubleshoot",
-      "topic_id": "vllm_ascend.env.server_port",
       "target_section": "Details/Edge Cases"
     },
     {

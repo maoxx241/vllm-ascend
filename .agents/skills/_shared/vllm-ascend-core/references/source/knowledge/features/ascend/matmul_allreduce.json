@@ -1,0 +1,133 @@
+{
+  "id": "feature:matmul_allreduce",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "MatmulAllReduce Fusion",
+  "summary": "融合Matmul和AllReduce操作，通过ReduceScatter+AllGather两阶段通信优化TP场景性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "69-71"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/allreduce_rmsnorm_fusion_pass.py",
+      "lines": "1-174"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE"
+  ],
+  "related_apis": [
+    "torch.ops._C_ascend.matmul_allreduce_add_rmsnorm",
+    "tensor_model_parallel_all_reduce"
+  ],
+  "related_features": [
+    "feature:graph_fusion_passes",
+    "feature:weight_prefetch",
+    "feature:sequence_parallelism"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与RMSNorm融合测试",
+        "TP场景下的正确性测试",
+        "不同batch size下的性能测试"
+      ],
+      "memory_impact": "减少中间tensor存储，降低内存峰值",
+      "throughput_impact": "A2芯片eager模式性能提升明显，通信与计算重叠",
+      "latency_impact": "减少通信延迟，降低端到端延迟",
+      "test_cases": [
+        {
+          "name": "测试ALLREDUCE_NORM_FUSE_THRESHOLD=512的边界条件",
+          "description": ""
+        },
+        {
+          "name": "测试MiddleLayer和LastLayer两种pattern",
+          "description": ""
+        },
+        {
+          "name": "测试TP=2/4/8场景下的性能提升",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有Dense模型",
+        "支持TP的模型"
+      ],
+      "enable_config": "环境变量: VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE=1",
+      "unsuitable_scenarios": [
+        "非A2芯片",
+        "TP=1场景",
+        "batch size小于512的场景"
+      ],
+      "best_practices": [
+        "A2芯片启用，配合eager模式",
+        "batch size大于512时效果更佳",
+        "配合fuse_allreduce_rms=true使用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MiddleLayerMatmulAllReduceAddRMSNormPattern：中间层融合pattern",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "LastLayerMatmulAllReduceAddRMSNormPattern：最后一层融合pattern",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "MatmulAllReduceAddRMSNormPass：融合pass入口",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "ALLREDUCE_NORM_FUSE_THRESHOLD：调整融合阈值",
+        "扩展支持更多融合pattern"
+      ],
+      "affected_features": [
+        "TP通信流程",
+        "MLP层计算",
+        "Graph编译优化"
+      ]
+    },
+    "design": {
+      "principle": "将Matmul计算结果直接进行ReduceScatter，然后分块计算RMSNorm，最后AllGather恢复完整tensor。避免完整tensor的AllReduce，减少通信数据量。",
+      "theory_analysis": "传统AllReduce需要传输完整tensor。融合后：1) ReduceScatter传输1/TP_size的数据；2) 本地计算RMSNorm；3) AllGather恢复。通信量减少，且计算与通信重叠。",
+      "design_decisions": [
+        {
+          "decision": "阈值512：低于此batch size融合收益不明显",
+          "reason": ""
+        },
+        {
+          "decision": "区分MiddleLayer和LastLayer：输出处理不同",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持A2芯片：其他芯片通信优化方式不同",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "eba5aae9c4da6a3bd5cd89aff0520cf788622e5cb4a1484b55f811ff9b3f8377",
+  "knowledge_domain": "vllm-ascend-core"
+}

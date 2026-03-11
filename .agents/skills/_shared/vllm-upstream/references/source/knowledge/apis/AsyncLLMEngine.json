@@ -1,0 +1,104 @@
+{
+  "id": "api:async_llmengine",
+  "type": "api",
+  "category": "vllm",
+  "name": "AsyncLLMEngine",
+  "summary": "异步LLM引擎类，是AsyncLLM的别名，提供异步推理接口",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/engine/async_llm_engine.py",
+      "lines": "1-7"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ENABLE_V1_MULTIPROCESSING",
+    "VLLM_LOG_STATS_INTERVAL"
+  ],
+  "related_apis": [
+    "AsyncLLM",
+    "LLMEngine",
+    "EngineCoreClient"
+  ],
+  "related_features": [
+    "async_inference",
+    "streaming_output",
+    "continuous_batching"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "generate()异步生成",
+        "encode()编码请求",
+        "abort()取消请求"
+      ],
+      "memory_impact": "与AsyncLLM相同",
+      "throughput_impact": "与AsyncLLM相同",
+      "latency_impact": "与AsyncLLM相同",
+      "test_cases": [
+        {
+          "name": "异步生成测试",
+          "description": ""
+        },
+        {
+          "name": "流式输出测试",
+          "description": ""
+        },
+        {
+          "name": "多客户端并发测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有HuggingFace transformers模型"
+      ],
+      "enable_config": "from_engine_args()创建实例",
+      "unsuitable_scenarios": [
+        "需要同步接口的离线批处理"
+      ],
+      "best_practices": [
+        "使用AsyncLLM获取最新功能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/engine/async_llm_engine.py:1-7",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "无，是AsyncLLM的别名"
+      ],
+      "affected_features": [
+        "向后兼容"
+      ]
+    },
+    "design": {
+      "principle": "提供向后兼容的别名",
+      "theory_analysis": "V1架构统一了AsyncLLMEngine和AsyncLLM",
+      "design_decisions": [
+        {
+          "decision": "使用别名保持API兼容性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "b4bb3bfaa987eb74b3c332d60da82605dfedf67f8a0eb32b848400e0c77c403f",
+  "knowledge_domain": "vllm-upstream"
+}

@@ -1,0 +1,104 @@
+{
+  "id": "operator:npu_dynamic_mx_quant",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_dynamic_mx_quant",
+  "summary": "NPU动态MX量化算子(A5专用)，实现MXFP8格式的动态量化，用于A5设备的MoE量化计算。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device/device_op.py",
+      "lines": "189-211"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_dynamic_mx_quant"
+  ],
+  "related_features": [
+    "mxfp_quantization",
+    "a5_optimization",
+    "moe"
+  ],
+  "device_specific": "A5",
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_grouped_matmul_swiglu_quant_v2配合"
+      ],
+      "memory_impact": "MXFP8格式减少内存占用",
+      "throughput_impact": "A5专用MXFP8硬件加速",
+      "latency_impact": "专用硬件实现低延迟",
+      "test_cases": [
+        {
+          "name": "MXFP8 E4M3格式",
+          "description": ""
+        },
+        {
+          "name": "不同dst_type",
+          "description": ""
+        },
+        {
+          "name": "有/无dynamic_scale",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "A5设备上支持MXFP量化的MoE模型"
+      ],
+      "enable_config": "A5设备 + use_mxfp_quant=True",
+      "unsuitable_scenarios": [
+        "非A5设备"
+      ],
+      "best_practices": [
+        "确保dst_type正确",
+        "dynamic_scale格式正确"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "A5DeviceAdaptor.npu_dynamic_quant",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "dst_type配置",
+        "dynamic_scale处理"
+      ],
+      "affected_features": [
+        "A5 MXFP量化精度"
+      ]
+    },
+    "design": {
+      "principle": "MXFP8使用E4M3或E5M2格式，结合block-wise scaling实现高精度量化",
+      "theory_analysis": "MXFP相比传统INT8量化有更好的精度保持",
+      "design_decisions": [
+        {
+          "decision": "仅A5设备支持",
+          "reason": ""
+        },
+        {
+          "decision": "支持E4M3/E5M2格式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "a958b31ce13c8dadc02f0ee2bc8ed5f3c80a862c1a3773d6f37c08eb51b43bbc",
+  "knowledge_domain": "vllm-ascend-core"
+}

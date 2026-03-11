@@ -1,0 +1,113 @@
+{
+  "id": "config:enable_shared_expert_dp",
+  "type": "config",
+  "category": "vllm_ascend",
+  "name": "enable_shared_expert_dp",
+  "summary": "共享专家数据并行配置，在MoE模型中对共享专家使用数据并行策略",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "61-69"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "shared_expert_dp_enabled",
+    "enable_sp"
+  ],
+  "related_features": [
+    "shared_expert_dp",
+    "sequence_parallelism"
+  ],
+  "sub_configs": [],
+  "constraints": [
+    "需要enable_expert_parallel=true",
+    "需要tensor_parallel_size > 1",
+    "启用时会自动设置enable_sp=true"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "需要测试与EP的配合效果",
+        "需要验证SP自动启用的行为"
+      ],
+      "memory_impact": "共享专家DP可以优化内存分布",
+      "throughput_impact": "合理配置可提升MoE模型吞吐量",
+      "latency_impact": "减少共享专家的通信开销",
+      "test_cases": [
+        {
+          "name": "测试enable_shared_expert_dp=true时的性能",
+          "description": ""
+        },
+        {
+          "name": "测试与EP+TP的组合效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-MoE等有共享专家的MoE模型"
+      ],
+      "enable_config": "additional_config: {enable_shared_expert_dp: true}",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "没有共享专家的MoE模型"
+      ],
+      "best_practices": [
+        "与EP和TP配合使用",
+        "确保SP已启用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ascend_config.py:61-69",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "vllm_ascend/utils.py:782-784",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "AscendConfig.__init__中的enable_shared_expert_dp处理"
+      ],
+      "affected_features": [
+        "共享专家计算",
+        "数据并行",
+        "序列并行"
+      ]
+    },
+    "design": {
+      "principle": "对共享专家使用数据并行，减少通信开销，提高效率",
+      "theory_analysis": "共享专家被所有token访问，使用DP可以避免重复计算和通信",
+      "design_decisions": [
+        {
+          "decision": "自动启用SP以保证功能正确性",
+          "reason": ""
+        },
+        {
+          "decision": "需要EP和TP同时启用",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "d677495cde4f5cd6ecbbb1e5d7e76598d7d3527b530c4e4deeb1f641e448cc51",
+  "knowledge_domain": "vllm-ascend-core"
+}

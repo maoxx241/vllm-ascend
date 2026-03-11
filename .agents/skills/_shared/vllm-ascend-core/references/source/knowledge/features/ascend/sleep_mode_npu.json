@@ -1,0 +1,130 @@
+{
+  "id": "feature:sleep_mode_npu",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Sleep Mode (NPU)",
+  "summary": "基于CANN内存管理的NPU睡眠模式，支持将NPU内存offload到CPU以释放显存资源",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/device_allocator/camem.py",
+      "lines": "1-269"
+    }
+  ],
+  "related_env_vars": [
+    "PYTORCH_NPU_ALLOC_CONF"
+  ],
+  "related_apis": [
+    "CaMemAllocator.sleep",
+    "CaMemAllocator.wake_up",
+    "torch.npu.memory.NPUPluggableAllocator"
+  ],
+  "related_features": [
+    "feature:pd_disaggregation",
+    "feature:kv_nz_format"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与权重加载流程交互测试",
+        "KV cache创建时的内存池测试",
+        "sleep/wake_up循环压力测试"
+      ],
+      "memory_impact": "sleep时释放NPU内存到CPU，wake_up时恢复，CPU内存占用增加",
+      "throughput_impact": "sleep/wake_up操作有开销，不适合频繁切换场景",
+      "latency_impact": "wake_up时需要将数据从CPU拷贝回NPU，增加启动延迟",
+      "test_cases": [
+        {
+          "name": "测试offload_tags参数的正确性",
+          "description": ""
+        },
+        {
+          "name": "测试多次sleep/wake_up的内存一致性",
+          "description": ""
+        },
+        {
+          "name": "测试expandable_segments配置冲突处理",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "自动启用，通过CaMemAllocator.get_instance()获取单例",
+      "unsuitable_scenarios": [
+        "频繁sleep/wake_up的场景",
+        "内存极度紧张导致CPU也无法容纳的场景"
+      ],
+      "best_practices": [
+        "仅在长时间空闲时调用sleep",
+        "使用tag区分不同类型的内存分配",
+        "避免expandable_segments:True配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "CaMemAllocator：单例内存分配器",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AllocationData：内存分配元数据",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "python_malloc_callback/python_free_callback：内存管理回调",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展offload_tags支持更多分类",
+        "优化memcpy性能"
+      ],
+      "affected_features": [
+        "权重加载流程",
+        "KV cache创建",
+        "内存池管理"
+      ]
+    },
+    "design": {
+      "principle": "通过PyTorch的Pluggable Allocator机制，拦截NPU内存分配/释放操作，实现内存的offload/restore功能。使用tag机制区分不同类型的内存，支持选择性offload。",
+      "theory_analysis": "NPU内存是稀缺资源。在多实例部署或长时间空闲场景，通过将内存offload到CPU可以释放NPU资源给其他任务。使用pinned memory加速CPU-NPU数据传输。",
+      "design_decisions": [
+        {
+          "decision": "单例模式：确保全局只有一个内存分配器实例",
+          "reason": ""
+        },
+        {
+          "decision": "tag机制：支持按类型管理内存，灵活控制offload范围",
+          "reason": ""
+        },
+        {
+          "decision": "C扩展：使用vllm_ascend_C实现底层内存操作",
+          "reason": ""
+        },
+        {
+          "decision": "禁止expandable_segments：与内存池机制冲突",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "5469367cdcab7d48e58ce51291c1dd2ccdf41fb95e295df5eafebdf422c7161e",
+  "knowledge_domain": "vllm-ascend-core"
+}

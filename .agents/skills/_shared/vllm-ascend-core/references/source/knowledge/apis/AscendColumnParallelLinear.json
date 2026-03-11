@@ -1,0 +1,101 @@
+{
+  "id": "api:ascend_column_parallel_linear",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendColumnParallelLinear",
+  "summary": "昇腾列并行线性层，实现列维度的张量并行，输出按列分片",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/linear.py",
+      "lines": "500-650"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "AscendRowParallelLinear",
+    "ColumnParallelLinear"
+  ],
+  "related_features": [
+    "tensor_parallel",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "forward()执行计算",
+        "weight_loader()加载权重"
+      ],
+      "memory_impact": "权重按列分片，减少单卡内存",
+      "throughput_impact": "并行计算提升吞吐量",
+      "latency_impact": "无需通信，延迟低",
+      "test_cases": [
+        {
+          "name": "列并行计算测试",
+          "description": ""
+        },
+        {
+          "name": "权重加载测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用MLP的模型"
+      ],
+      "enable_config": "自动应用于MLP第一层",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "配置TP size",
+        "优化权重布局"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/linear.py:500-650",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "forward()计算逻辑",
+        "权重分片逻辑"
+      ],
+      "affected_features": [
+        "MLP输入",
+        "张量并行"
+      ]
+    },
+    "design": {
+      "principle": "实现列并行，输出按列分片无需通信",
+      "theory_analysis": "每个rank计算部分输出列，后续层处理",
+      "design_decisions": [
+        {
+          "decision": "支持gather-output模式",
+          "reason": ""
+        },
+        {
+          "decision": "优化权重加载",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "4c8b0dd98dbe23688ea9fb330995f0f411ef48cef18b6abba6dfa7f2917b8fdc",
+  "knowledge_domain": "vllm-ascend-core"
+}

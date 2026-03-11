@@ -1,0 +1,119 @@
+{
+  "id": "operator:npu_interleave_rope",
+  "type": "operator",
+  "category": "rope",
+  "name": "npu_interleave_rope",
+  "summary": "NPU交错RoPE算子，用于MLA和SFA架构中的位置编码，支持交错格式的cos/sin输入。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "1150-1160"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "612-622, 867-871"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_interleave_rope"
+  ],
+  "related_features": [
+    "mla_attention",
+    "sfa_attention",
+    "rope"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与cos/sin配合",
+        "与BNSD布局输入配合"
+      ],
+      "memory_impact": "原地操作减少内存",
+      "throughput_impact": "专用实现提升MLA/SFA吞吐",
+      "latency_impact": "单算子完成位置编码",
+      "test_cases": [
+        {
+          "name": "MLA decode场景",
+          "description": ""
+        },
+        {
+          "name": "SFA场景",
+          "description": ""
+        },
+        {
+          "name": "不同rope_dim",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "DeepSeek-V3.2",
+        "GLM-MoE-DSA"
+      ],
+      "enable_config": "MLA/SFA模型自动启用",
+      "unsuitable_scenarios": [
+        "标准GQA模型"
+      ],
+      "best_practices": [
+        "输入shape为[B,N,S,D]",
+        "cos/sin正确展开"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendMLAImpl.rope_single",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSFAImpl.rope_single",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSFAImpl.indexer_select_pre_process",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "MLA/SFA位置编码精度"
+      ]
+    },
+    "design": {
+      "principle": "交错格式RoPE，将cos/sin交错存储，适配MLA/SFA的rope处理",
+      "theory_analysis": "MLA将rope部分分离处理，需要专用的位置编码算子",
+      "design_decisions": [
+        {
+          "decision": "支持BNSD布局",
+          "reason": ""
+        },
+        {
+          "decision": "与npu_kv_rmsnorm_rope_cache配合",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c49ee38f2e5cd55129234fcebb333354ce255118454751d67f59dd92d0ca2d15",
+  "knowledge_domain": "vllm-ascend-core"
+}

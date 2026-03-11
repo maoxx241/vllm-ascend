@@ -1,0 +1,105 @@
+{
+  "id": "operator:dispatch_ffn_combine",
+  "type": "operator",
+  "category": "moe",
+  "name": "dispatch_ffn_combine",
+  "summary": "MoE分发FFN组合融合算子，将token分发、专家计算和结果组合融合为单一操作，用于Fused MC2通信模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "359-374"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "torch.ops._C_ascend.dispatch_ffn_combine"
+  ],
+  "related_features": [
+    "moe",
+    "fused_mc2",
+    "expert_parallel",
+    "communication"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与MC2通信组配合",
+        "与expert_idx配合路由"
+      ],
+      "memory_impact": "融合减少中间存储",
+      "throughput_impact": "通信计算重叠提升吞吐",
+      "latency_impact": "融合减少同步开销",
+      "test_cases": [
+        {
+          "name": "VLLM_ASCEND_ENABLE_FUSED_MC2=1",
+          "description": ""
+        },
+        {
+          "name": "不同expert_num配置",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "W8A8量化的MoE模型"
+      ],
+      "enable_config": "VLLM_ASCEND_ENABLE_FUSED_MC2=1",
+      "unsuitable_scenarios": [
+        "非量化MoE",
+        "VLLM_ASCEND_ENABLE_FUSED_MC2!=1"
+      ],
+      "best_practices": [
+        "确保通信组正确配置",
+        "max_output_size足够大"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "FusedMC2CommImpl.fused_experts",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "max_output_size配置",
+        "expert_token_nums输出"
+      ],
+      "affected_features": [
+        "MoE通信效率",
+        "计算通信重叠"
+      ]
+    },
+    "design": {
+      "principle": "将token分发、专家FFN计算和结果组合融合，实现通信计算重叠",
+      "theory_analysis": "Fused MC2通过算子融合隐藏通信延迟",
+      "design_decisions": [
+        {
+          "decision": "仅支持VLLM_ASCEND_ENABLE_FUSED_MC2=1",
+          "reason": ""
+        },
+        {
+          "decision": "输出expert_token_nums用于负载分析",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "63d04d222159ca7845792451989538c32cf476957cd69321e079271a787495dd",
+  "knowledge_domain": "vllm-ascend-core"
+}

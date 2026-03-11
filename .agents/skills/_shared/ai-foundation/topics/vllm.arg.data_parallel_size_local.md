@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:835
+- definition_ref: vllm/engine/arg_utils.py:834
 - read_ref: vllm/vllm/config/parallel.py:106, vllm/vllm/config/parallel.py:313, vllm/vllm/config/parallel.py:315
-- effect_ref: vllm/vllm/config/parallel.py:313, vllm/vllm/config/parallel.py:559, vllm/vllm/engine/arg_utils.py:1518
+- effect_ref: vllm/vllm/config/parallel.py:313, vllm/vllm/config/parallel.py:559, vllm/vllm/engine/arg_utils.py:1534
 - web_refs: 7
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: AssertionError: data_parallel_size_local must be 1 or None when data_parallel_rank is set; AssertionError: data_parallel_size_local must be set to use data_parallel_hybrid_lb
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

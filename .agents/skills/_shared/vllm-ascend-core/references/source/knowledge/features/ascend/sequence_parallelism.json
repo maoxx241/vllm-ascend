@@ -1,0 +1,156 @@
+{
+  "id": "feature:sequence_parallelism",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Sequence Parallelism",
+  "summary": "将AllReduce分解为ReduceScatter和AllGather，减少LayerNorm计算量和量化场景通信量，支持VL模型图模式优化。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+      "lines": "1-198"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "756-778"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "200-208"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1"
+  ],
+  "related_apis": [
+    "AscendSequenceParallelismPass",
+    "AscendMiddleAllReduceRMSNormPattern",
+    "AscendLastAllReduceRMSNormPattern",
+    "enable_sp"
+  ],
+  "related_features": [
+    "feature:flashcomm1",
+    "feature:flashcomm2",
+    "feature:context_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm1互补：SP支持VL模型，FC1支持non-VL模型",
+        "依赖graph mode：必须启用compilation_config",
+        "与量化不兼容：当前SP不支持量化场景"
+      ],
+      "memory_impact": "ReduceScatter后hidden states在sequence维度分片，降低LayerNorm计算的activation内存峰值。",
+      "throughput_impact": "在token数大于阈值（默认1000）时提升吞吐量。量化场景下AllGather通信量减半，吞吐提升更明显。",
+      "latency_impact": "小batch场景（token<1000）可能增加延迟，因为两个通信操作的开销超过一个AllReduce。大batch场景显著降低延迟。",
+      "test_cases": [
+        {
+          "name": "测试sp_threshold阈值行为：验证token数低于阈值时SP不启用",
+          "description": ""
+        },
+        {
+          "name": "测试VL模型（Qwen3-VL）的正确性",
+          "description": ""
+        },
+        {
+          "name": "测试不同TP size下的性能差异",
+          "description": ""
+        },
+        {
+          "name": "验证与MoE模型的兼容性（当前不支持）",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "Qwen3-VL系列视觉语言模型",
+        "其他VL类Dense模型（graph mode）"
+      ],
+      "enable_config": "通过compilation_config启用：--compilation-config '{\"pass_config\": {\"enable_sp\": true}}'，可选配置sp_threshold（默认1000）",
+      "unsuitable_scenarios": [
+        "MoE模型（当前不支持）",
+        "量化模型（当前不支持）",
+        "eager mode（必须使用graph mode）",
+        "小batch低并发场景（token<1000）"
+      ],
+      "best_practices": [
+        "仅在高并发场景启用，token数应大于sp_threshold",
+        "VL模型优先使用SP，non-VL模型使用FlashComm1",
+        "配合Matmul-ReduceScatter融合可获得更好性能",
+        "默认sp_threshold=1000通常无需修改"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+          "class": "AscendSequenceParallelismPass",
+          "description": "Inductor Pass主类，实现模式匹配和替换"
+        },
+        {
+          "file": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+          "class": "AscendMiddleAllReduceRMSNormPattern",
+          "description": "中间层AllReduce+RMSNorm模式替换"
+        },
+        {
+          "file": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+          "class": "AscendLastAllReduceRMSNormPattern",
+          "description": "最后一层AllReduce+RMSNorm模式替换"
+        },
+        {
+          "file": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+          "function": "get_sp_threshold",
+          "description": "获取SP启用阈值，MoE模型返回1"
+        }
+      ],
+      "modification_points": [
+        "AscendSequenceParallelismPass.__call__：添加新的模式匹配规则",
+        "is_applicable_for_range：修改阈值判断逻辑",
+        "get_sp_threshold：调整不同模型类型的阈值"
+      ],
+      "affected_features": [
+        "compile_ranges_split_points：SP阈值会添加到编译范围分割点",
+        "AllReduce-RMSNorm融合：SP替换会影响融合pass",
+        "量化支持：需要扩展支持量化场景"
+      ]
+    },
+    "design": {
+      "principle": "Megatron-LM提出的SP将AllReduce分解为ReduceScatter和AllGather，中间插入LayerNorm。ReduceScatter使LayerNorm在更小的sequence维度上计算，减少计算量。",
+      "theory_analysis": "1. 计算量减少：LayerNorm在S/tp_size维度计算，计算量减少tp_size倍。2. 通信优化：量化场景下AllGather传输INT8数据，通信量减半。3. 算子融合：ReduceScatter可与前序Matmul融合，AllGather可与后序Matmul融合，实现通信计算重叠。",
+      "design_decisions": [
+        {
+          "decision": "基于Inductor Pass实现：相比Custom OP更易支持VL模型，可利用PyTorch编译优化",
+          "reason": ""
+        },
+        {
+          "decision": "阈值控制：小batch场景SP反而增加延迟，通过阈值自动切换",
+          "reason": ""
+        },
+        {
+          "decision": "不支持MoE：MoE模型的AllGather需要延迟到Gating+DynamicQuant之后，由FlashComm1处理",
+          "reason": ""
+        },
+        {
+          "decision": "模式匹配替换：识别AllReduce+RMSNorm模式，替换为ReduceScatter+RMSNorm+AllGather",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "19350d68934b9ed4eba18ecbd1d15b91ef85459f23766db8abc0bfed9f59af18",
+  "knowledge_domain": "vllm-ascend-core"
+}

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:1431
-- read_ref: vllm/vllm/entrypoints/openai/responses/context.py:380, vllm/vllm/entrypoints/openai/responses/context.py:423, vllm/vllm/entrypoints/openai/responses/context.py:693
-- effect_ref: vllm/vllm/entrypoints/openai/responses/context.py:380, vllm/vllm/entrypoints/openai/responses/context.py:423, vllm/vllm/entrypoints/openai/responses/context.py:693
+- definition_ref: vllm/envs.py:1443
+- read_ref: vllm/vllm/entrypoints/openai/responses/context.py:389, vllm/vllm/entrypoints/openai/responses/context.py:432, vllm/vllm/entrypoints/openai/responses/context.py:702
+- effect_ref: vllm/vllm/entrypoints/openai/responses/context.py:389, vllm/vllm/entrypoints/openai/responses/context.py:432, vllm/vllm/entrypoints/openai/responses/context.py:702
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 日志过载; 关键问题难定位
 - value_failure_signals: 日志过载; 关键问题难定位
 - recommendation: 问题排查阶段提升日志级别，稳定后回落。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1086
+- definition_ref: vllm/engine/arg_utils.py:1091
 - read_ref: vllm/vllm/compilation/wrapper.py:128, vllm/vllm/config/observability.py:60, vllm/vllm/engine/arg_utils.py:526
-- effect_ref: vllm-ascend/vllm_ascend/platform.py:703, vllm/vllm/engine/arg_utils.py:1087, vllm/vllm/v1/worker/gpu_model_runner.py:3203
+- effect_ref: vllm-ascend/vllm_ascend/platform.py:703, vllm/vllm/engine/arg_utils.py:1092, vllm/vllm/v1/worker/gpu_model_runner.py:3207
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

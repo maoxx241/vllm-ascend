@@ -1,0 +1,128 @@
+{
+  "id": "quantization:w8_a8_pdmix",
+  "type": "quantization",
+  "category": "vllm_ascend",
+  "name": "W8A8_PDMIX",
+  "summary": "Prefill-Decode混合量化方案，Prefill阶段使用动态W8A8量化，Decode(KV consumer)阶段使用静态W8A8量化，支持PD分离部署场景",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_pdmix.py",
+      "lines": "1-101"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "pd_disaggregation",
+    "kv_transfer",
+    "w8a8_dynamic",
+    "w8a8_static"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与KV Transfer配合用于PD分离部署",
+        "Prefill使用动态量化，Decode使用静态量化"
+      ],
+      "memory_impact": "需要同时存储动态和静态量化参数，内存占用略高于单一量化方案",
+      "throughput_impact": "Prefill阶段动态量化适应变长输入，Decode阶段静态量化无运行时开销",
+      "latency_impact": "Decode阶段延迟最低，Prefill阶段有动态量化开销",
+      "test_cases": [
+        {
+          "name": "验证is_kv_consumer判断正确性",
+          "description": ""
+        },
+        {
+          "name": "测试Prefill和Decode阶段量化切换",
+          "description": ""
+        },
+        {
+          "name": "验证KV Transfer兼容性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "支持所有Linear层模型",
+        "支持MoE模型"
+      ],
+      "enable_config": "quantization: w8a8_mix, kv_transfer_config: ...",
+      "unsuitable_scenarios": [
+        "非PD分离部署场景",
+        "单一Prefill或Decode实例"
+      ],
+      "best_practices": [
+        "配合KV Transfer使用实现PD分离",
+        "确保kv_transfer_config正确配置",
+        "Prefill实例使用动态量化，Decode实例使用静态量化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8PDMixLinearMethod: PD混合量化Linear层实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendW8A8PDMixFusedMoeMethod: PD混合量化MoE实现",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "_static_method: 静态量化方法实例",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "_dynamic_method: 动态量化方法实例",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "__init__(): 修改is_kv_consumer判断逻辑",
+        "apply(): 修改量化方法选择逻辑",
+        "get_dynamic_quant_param(): 添加Decode阶段专用参数"
+      ],
+      "affected_features": [
+        "kv_transfer",
+        "pd_disaggregation"
+      ]
+    },
+    "design": {
+      "principle": "PD混合量化：Prefill阶段使用动态量化适应变长输入，Decode阶段使用静态量化消除运行时开销，通过is_kv_consumer判断当前角色",
+      "theory_analysis": "混合量化结合动态和静态量化的优点，Prefill精度更高，Decode延迟更低",
+      "design_decisions": [
+        {
+          "decision": "使用组合模式委托给动态/静态量化方法",
+          "reason": ""
+        },
+        {
+          "decision": "通过kv_transfer_config判断实例角色",
+          "reason": ""
+        },
+        {
+          "decision": "MoE层继承动态量化方法，添加Decode专用参数",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "c8eb5c6185979e58d368972ec39ee26847807af1c2a84cf161479958bbac1c90",
+  "knowledge_domain": "integration-core"
+}

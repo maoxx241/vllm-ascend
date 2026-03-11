@@ -1,0 +1,126 @@
+{
+  "id": "api:gpuworker",
+  "type": "api",
+  "category": "vllm",
+  "name": "Worker (GPU)",
+  "summary": "GPU Worker类，负责GPU设备上的模型加载、内存管理、推理执行和CUDA Graph捕获",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/gpu_worker.py",
+      "lines": "105-1056"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_FLOAT32_MATMUL_PRECISION",
+    "VLLM_USE_V2_MODEL_RUNNER",
+    "VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS"
+  ],
+  "related_apis": [
+    "GPUModelRunner",
+    "WorkerBase",
+    "CuMemAllocator",
+    "EngineCoreClient"
+  ],
+  "related_features": [
+    "cuda_graph",
+    "sleep_mode",
+    "paged_attention",
+    "lora"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "init_device()初始化设备",
+        "load_model()加载模型",
+        "execute_model()执行推理",
+        "sleep()/wake_up()休眠唤醒"
+      ],
+      "memory_impact": "管理模型权重、KV Cache、CUDA Graph内存，支持sleep模式释放显存",
+      "throughput_impact": "CUDA Graph优化提升小batch吞吐量，内存池管理减少碎片",
+      "latency_impact": "CUDA Graph降低kernel launch开销",
+      "test_cases": [
+        {
+          "name": "模型加载测试",
+          "description": ""
+        },
+        {
+          "name": "内存profiling测试",
+          "description": ""
+        },
+        {
+          "name": "CUDA Graph捕获测试",
+          "description": ""
+        },
+        {
+          "name": "sleep/wake测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有CUDA支持的模型"
+      ],
+      "enable_config": "由Executor自动创建，通过distributed_init_method连接",
+      "unsuitable_scenarios": [
+        "非CUDA设备(使用对应设备Worker)"
+      ],
+      "best_practices": [
+        "合理设置gpu_memory_utilization",
+        "启用sleep mode支持权重卸载",
+        "使用V2 Model Runner获得更好性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/worker/gpu_worker.py:105-1056",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "init_device()设备初始化",
+        "determine_available_memory()内存计算",
+        "execute_model()执行逻辑"
+      ],
+      "affected_features": [
+        "内存管理",
+        "CUDA Graph",
+        "分布式推理"
+      ]
+    },
+    "design": {
+      "principle": "单Worker单GPU架构，通过分布式通信实现多GPU推理",
+      "theory_analysis": "使用CuMemAllocator实现内存池管理，支持sleep mode卸载权重到CPU",
+      "design_decisions": [
+        {
+          "decision": "支持V1/V2 Model Runner",
+          "reason": ""
+        },
+        {
+          "decision": "集成CUDA Graph捕获",
+          "reason": ""
+        },
+        {
+          "decision": "支持Pipeline Parallel",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "80d243f68af6187377bf0c3f04196fa1453cd2f8495053ac102b210258fa80a5",
+  "knowledge_domain": "vllm-upstream"
+}

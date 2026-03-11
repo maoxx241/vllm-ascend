@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:825
-- read_ref: vllm/vllm/envs.py:825, vllm/vllm/envs.py:826, vllm/vllm/model_executor/layers/fused_moe/oracle/fp8.py:297
+- definition_ref: vllm/envs.py:837
+- read_ref: vllm/vllm/envs.py:837, vllm/vllm/envs.py:838, vllm/vllm/model_executor/layers/fused_moe/oracle/fp8.py:297
 - effect_ref: vllm/vllm/model_executor/layers/fused_moe/oracle/fp8.py:297, vllm/vllm/model_executor/layers/fused_moe/oracle/nvfp4.py:231
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 模型加载失败; 精度异常; 推理速度低于预期
 - value_failure_signals: 模型加载失败; 精度异常; 推理速度低于预期
 - recommendation: 优先使用官方教程中的已验证量化工件与并行参数组合。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

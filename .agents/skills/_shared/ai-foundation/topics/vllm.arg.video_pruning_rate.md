@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1017
-- read_ref: vllm/vllm/config/model.py:312, vllm/vllm/config/model.py:426, vllm/vllm/config/model.py:591
-- effect_ref: vllm/vllm/config/multimodal.py:258, vllm/vllm/config/multimodal.py:258, vllm/vllm/model_executor/models/nano_nemotron_vl.py:1160
+- definition_ref: vllm/engine/arg_utils.py:1022
+- read_ref: vllm/vllm/config/model.py:309, vllm/vllm/config/model.py:429, vllm/vllm/config/model.py:595
+- effect_ref: vllm/vllm/config/multimodal.py:265, vllm/vllm/config/multimodal.py:265, vllm/vllm/model_executor/models/nano_nemotron_vl.py:1160
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,100 @@
+{
+  "rules": [
+    {
+      "id": "path_relative",
+      "description": "所有代码路径必须是相对路径",
+      "check": "code_paths[*].path 不以 / 或 C: 或盘符开头",
+      "severity": "error"
+    },
+    {
+      "id": "four_perspectives",
+      "description": "每个知识点必须包含四个视角",
+      "check": "perspectives 包含 test, deploy, develop, design",
+      "severity": "error"
+    },
+    {
+      "id": "commit_match",
+      "description": "commit_hash必须与版本锁定一致",
+      "check": "metadata.commit_hash 在允许列表中",
+      "allowed_commits": [
+        "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee",
+        "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+      ],
+      "severity": "error"
+    },
+    {
+      "id": "id_format",
+      "description": "知识点ID必须符合命名规范",
+      "check": "id 匹配格式 ^[a-z_]+:[a-z_0-9]+$",
+      "severity": "error"
+    },
+    {
+      "id": "summary_length",
+      "description": "summary长度不超过200字符",
+      "check": "summary.length <= 200",
+      "severity": "warning"
+    },
+    {
+      "id": "required_fields",
+      "description": "必须字段完整性检查",
+      "check": "包含 id, type, category, name, summary, perspectives, metadata",
+      "severity": "error"
+    },
+    {
+      "id": "metadata_fields",
+      "description": "metadata必须字段检查",
+      "check": "metadata 包含 created_at, updated_at, version, commit_hash",
+      "severity": "error"
+    },
+    {
+      "id": "repo_valid",
+      "description": "代码路径repo必须是有效值",
+      "check": "code_paths[*].repo in ['vllm', 'vllm-ascend']",
+      "severity": "error"
+    },
+    {
+      "id": "domain_scope",
+      "description": "每个知识点必须显式声明语义归属域",
+      "check": "domain_scope in ['vllm', 'vllm-ascend', 'both'] 且 implementation_repos 非空",
+      "severity": "error"
+    },
+    {
+      "id": "knowledge_domain",
+      "description": "每个知识点必须声明物理归属知识域",
+      "check": "knowledge_domain in ['vllm-upstream', 'vllm-ascend-core', 'integration-core'] 且与 domain_scope 映射一致",
+      "severity": "error"
+    },
+    {
+      "id": "source_hash",
+      "description": "每个知识点必须带 canonical source hash",
+      "check": "source_hash 为 64 位小写十六进制，且与 payload 内容一致",
+      "severity": "error"
+    },
+    {
+      "id": "resume_state",
+      "description": "执行过程必须写 execution_state.json 以支持上下文折叠后恢复",
+      "check": "验证开始、每条 entry 完成、所有 artifacts 写入后都刷新 execution_state.json",
+      "severity": "error"
+    },
+    {
+      "id": "domain_registry",
+      "description": "治理层必须通过 knowledge_domain_registry.json 驱动 source 扫描和恢复",
+      "check": "validate_shared_knowledge.py 从 knowledge-governance/contracts/knowledge_domain_registry.json 加载 source_roots，并写 execution_state.source_roots",
+      "severity": "error"
+    }
+  ],
+  "validation_phases": [
+    {
+      "phase": "after_each_knowledge_point",
+      "rules": ["path_relative", "four_perspectives", "id_format", "required_fields", "metadata_fields", "repo_valid"]
+    },
+    {
+      "phase": "after_each_task",
+      "rules": ["summary_length"]
+    },
+    {
+      "phase": "after_each_phase",
+      "rules": ["commit_match", "resume_state"]
+    }
+  ]
+}

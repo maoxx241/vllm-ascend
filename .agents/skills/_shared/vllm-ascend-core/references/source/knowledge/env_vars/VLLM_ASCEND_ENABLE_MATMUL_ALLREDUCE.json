@@ -1,0 +1,104 @@
+{
+  "id": "env_var:vllm_ascend_enable_matmul_allreduce",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE",
+  "summary": "控制MatmulAllReduce融合算子开关，在TP场景下融合矩阵乘法和AllReduce通信",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "69-71"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "matmul_allreduce",
+    "tensor_parallel",
+    "graph_fusion"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅A2设备支持",
+        "与eager模式配合效果更好",
+        "与TP配置交互"
+      ],
+      "memory_impact": "融合算子减少中间结果存储",
+      "throughput_impact": "融合可提升TP场景吞吐量",
+      "latency_impact": "减少通信延迟",
+      "test_cases": [
+        {
+          "name": "A2设备测试",
+          "description": "验证A2设备上的融合效果",
+          "threshold": 0
+        },
+        {
+          "name": "eager模式测试",
+          "description": "验证eager模式下的性能提升",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有TP模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE=1",
+      "unsuitable_scenarios": [
+        "非A2设备",
+        "TP=1的场景"
+      ],
+      "best_practices": [
+        "A2设备TP场景推荐启用",
+        "eager模式下效果更好",
+        "验证输出正确性"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "69-71",
+          "purpose": "环境变量定义，默认值为0(禁用)"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值"
+      ],
+      "affected_features": [
+        "tensor_parallel",
+        "linear_layer"
+      ]
+    },
+    "design": {
+      "principle": "将矩阵乘法和AllReduce融合为单一算子，减少通信开销和内存访问",
+      "theory_analysis": "传统方式需要先完成矩阵乘法再执行AllReduce，融合算子可以流水线执行，隐藏通信延迟",
+      "design_decisions": [
+        {
+          "decision": "仅A2支持",
+          "reason": "A2设备有特定的硬件优化支持此融合算子"
+        },
+        {
+          "decision": "eager模式效果更好",
+          "reason": "graph模式可能有其他优化冲突"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c4c185a946b6e60e6dcdd379cd5be55f0bf89b9caa1e7ad70a1e4d7a87076a59",
+  "knowledge_domain": "vllm-ascend-core"
+}

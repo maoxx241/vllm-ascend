@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:614
-- read_ref: vllm/vllm/entrypoints/openai/api_server.py:239, vllm/vllm/entrypoints/openai/api_server.py:240, vllm/vllm/envs.py:27
-- effect_ref: vllm/vllm/entrypoints/openai/api_server.py:240
+- definition_ref: vllm/envs.py:626
+- read_ref: vllm/vllm/entrypoints/openai/api_server.py:253, vllm/vllm/entrypoints/openai/api_server.py:254, vllm/vllm/envs.py:27
+- effect_ref: vllm/vllm/entrypoints/openai/api_server.py:254
 - web_refs: 2
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: 未设置且无 CLI key 时接口可能处于无鉴权状态（依部署策略）。
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,98 @@
+{
+  "id": "env_var:vllm_ascend_balance_scheduling",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_BALANCE_SCHEDULING",
+  "summary": "控制均衡调度开关，优化多卡负载均衡",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "114-115"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [],
+  "related_features": [
+    "balance_scheduling",
+    "distributed_inference"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与分布式推理配置交互",
+        "影响请求调度策略"
+      ],
+      "memory_impact": "均衡调度可能影响各卡内存使用",
+      "throughput_impact": "良好的均衡调度可提升整体吞吐量",
+      "latency_impact": "减少单卡过载导致的延迟抖动",
+      "test_cases": [
+        {
+          "name": "负载均衡测试",
+          "description": "验证多卡场景下的负载分布",
+          "threshold": 0
+        },
+        {
+          "name": "高并发测试",
+          "description": "验证高并发场景下的调度效果",
+          "threshold": 100
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "export VLLM_ASCEND_BALANCE_SCHEDULING=1",
+      "unsuitable_scenarios": [
+        "单卡部署场景",
+        "负载模式非常均匀的场景"
+      ],
+      "best_practices": [
+        "多卡部署推荐启用",
+        "监控各卡负载分布",
+        "配合动态EPLB使用效果更佳"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "114-115",
+          "purpose": "环境变量定义，默认值为0(禁用)"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值"
+      ],
+      "affected_features": [
+        "scheduler",
+        "distributed_inference"
+      ]
+    },
+    "design": {
+      "principle": "均衡调度通过智能分配请求到不同GPU，避免单卡过载",
+      "theory_analysis": "在多卡场景下，不同请求的计算量可能差异很大，均衡调度通过预测和分配优化整体效率",
+      "design_decisions": [
+        {
+          "decision": "默认禁用",
+          "reason": "需要用户根据场景显式启用"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "55d45c0ba5376fc2f90f6f2f710b3e89b320621922c68cd3b4deb5c8ca45f95d",
+  "knowledge_domain": "vllm-ascend-core"
+}

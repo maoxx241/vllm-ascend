@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-03-11T00:00:00+00:00",
+  "domains": [
+    {
+      "domain_id": "vllm-upstream",
+      "source_root": "vllm-upstream/references/source/knowledge",
+      "domain_scope_values": [
+        "vllm"
+      ],
+      "owner_skill": "knowledge-index-maintainer",
+      "generated_role": "domain-owned"
+    },
+    {
+      "domain_id": "vllm-ascend-core",
+      "source_root": "vllm-ascend-core/references/source/knowledge",
+      "domain_scope_values": [
+        "vllm-ascend"
+      ],
+      "owner_skill": "knowledge-index-maintainer",
+      "generated_role": "domain-owned"
+    },
+    {
+      "domain_id": "integration-core",
+      "source_root": "integration-core/references/source/knowledge",
+      "domain_scope_values": [
+        "both"
+      ],
+      "owner_skill": "knowledge-index-maintainer",
+      "generated_role": "integration-owned"
+    }
+  ]
+}

@@ -1,0 +1,464 @@
+{
+  "matrix_type": "performance",
+  "version": "1.0.0",
+  "created_at": "2026-03-10T00:00:00Z",
+  "description": "性能影响矩阵，分析特性组合对内存、吞吐和延迟的影响",
+  "legend": {
+    "memory_impact": "显存影响：increase(增加)/decrease(减少)/neutral(无影响)",
+    "throughput_impact": "吞吐影响：提升百分比或描述",
+    "latency_impact": "延迟影响：降低百分比或描述"
+  },
+  "feature_performance": [
+    {
+      "feature": "feature:flashcomm1",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "轻微降低",
+        "notes": "ReduceScatter后数据分散存储，LayerNorm计算量减少，激活内存略有降低"
+      },
+      "throughput_impact": {
+        "improvement": "15-30%",
+        "condition": "高并发场景(>1000 tokens)",
+        "notes": "量化场景收益更大"
+      },
+      "latency_impact": {
+        "improvement": "小batch场景可能增加5-10%",
+        "condition": "阈值1000 tokens",
+        "notes": "MoE模型无阈值限制"
+      },
+      "optimal_scenarios": ["高并发推理(>1000 tokens)", "量化模型", "MoE模型"],
+      "unsuitable_scenarios": ["小batch场景(<1000 tokens)", "VL类模型", "eager模式"]
+    },
+    {
+      "feature": "feature:mlapo",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "10-20%",
+        "notes": "需要额外的融合权重；KV Consumer场景下可释放原始权重，净增约5-10%"
+      },
+      "throughput_impact": {
+        "improvement": "20-40%",
+        "condition": "token数<=1024",
+        "notes": "通过算子融合减少kernel launch开销"
+      },
+      "latency_impact": {
+        "improvement": "15-30%",
+        "condition": "token数<=1024",
+        "notes": "融合算子减少内存访问"
+      },
+      "constraints": {
+        "max_tokens": 1024,
+        "quantization": "仅W8A8",
+        "incompatible_with": ["FlashComm"]
+      }
+    },
+    {
+      "feature": "feature:eplb",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "取决于冗余专家数",
+        "notes": "每增加一个冗余专家约增加单个专家权重的显存"
+      },
+      "throughput_impact": {
+        "improvement": "20-40%",
+        "condition": "良好负载均衡",
+        "notes": "热点专家导致的负载不均会显著降低吞吐量"
+      },
+      "latency_impact": {
+        "improvement": "显著降低P99延迟",
+        "condition": "均衡的专家分布",
+        "notes": "静态映射无法适应动态负载变化"
+      }
+    },
+    {
+      "feature": "feature:dynamic_eplb",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "轻微增加",
+        "notes": "需要额外的共享内存存储专家映射和负载信息"
+      },
+      "throughput_impact": {
+        "improvement": "30-50%",
+        "condition": "动态负载场景",
+        "notes": "迁移期间可能有短暂性能下降(约5-10%)"
+      },
+      "latency_impact": {
+        "improvement": "显著降低P99延迟",
+        "condition": "长期稳定",
+        "notes": "迁移期间个别请求可能延迟增加"
+      }
+    },
+    {
+      "feature": "feature:weight_prefetch",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "约18MB",
+        "notes": "预取缓冲区内存占用(MAX_PREFETCH_WEIGHT_SIZE)"
+      },
+      "throughput_impact": {
+        "improvement": "10-30%",
+        "condition": "小批量场景(token<500)",
+        "notes": "大批量场景效果不明显"
+      },
+      "latency_impact": {
+        "improvement": "首token延迟降低",
+        "condition": "权重加载延迟被计算时间隐藏",
+        "notes": "计算-通信重叠"
+      }
+    },
+    {
+      "feature": "feature:chunked_prefill",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "减少峰值显存",
+        "notes": "减少长prefill的峰值显存占用，允许更多请求并发"
+      },
+      "throughput_impact": {
+        "improvement": "显著提升",
+        "condition": "混合长短请求场景",
+        "notes": "避免长prefill独占GPU"
+      },
+      "latency_impact": {
+        "improvement": "短请求TTFT显著降低",
+        "condition": "混合场景",
+        "notes": "长请求首token延迟可能略有增加"
+      }
+    },
+    {
+      "feature": "feature:async_scheduling",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "轻微增加",
+        "notes": "需要额外存储output placeholders和spec token placeholders"
+      },
+      "throughput_impact": {
+        "improvement": "显著提升",
+        "condition": "消除CPU-GPU同步间隙",
+        "notes": "特别是在speculative decoding场景下"
+      },
+      "latency_impact": {
+        "improvement": "减少端到端延迟",
+        "condition": "GPU利用率更高",
+        "notes": "请求处理更连续"
+      }
+    },
+    {
+      "feature": "feature:speculative_decoding",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "取决于方法",
+        "notes": "EAGLE/MTP共享权重内存开销小，独立draft模型需要额外显存"
+      },
+      "throughput_impact": {
+        "improvement": "1.5-3x",
+        "condition": "acceptance rate高",
+        "notes": "acceptance rate低时可能性能下降"
+      },
+      "latency_impact": {
+        "improvement": "per-token延迟降低",
+        "condition": "单次forward生成多个token",
+        "notes": "draft模型推理会增加首token延迟"
+      }
+    },
+    {
+      "feature": "feature:context_parallel",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "PCP: 1/pcp_size, DCP: tp_size/dcp_size倍",
+        "notes": "KV Cache在sequence维度分片存储"
+      },
+      "throughput_impact": {
+        "improvement": "PCP加速长序列Prefill",
+        "condition": "长序列场景",
+        "notes": "DeepSeek-R1 128k输入TTFT从73.2s降至46.0s"
+      },
+      "latency_impact": {
+        "improvement": "PCP降低长序列Prefill延迟",
+        "condition": "输入长度>32k",
+        "notes": "DCP对Decode延迟影响小"
+      }
+    },
+    {
+      "feature": "feature:xlite_graph",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "rt_pool_size MB",
+        "notes": "需要预分配tensor_pool"
+      },
+      "throughput_impact": {
+        "improvement": "Decode阶段2-3x",
+        "condition": "高并发decode场景",
+        "notes": "full_mode下prefill也有优化"
+      },
+      "latency_impact": {
+        "improvement": "Decode延迟降低50-70%",
+        "condition": "非full_mode",
+        "notes": "首token延迟不受影响"
+      },
+      "constraints": {
+        "block_size": 128,
+        "incompatible_with": ["speculative_decoding", "pipeline_parallel"]
+      }
+    },
+    {
+      "feature": "feature:quantization",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "AWQ/GPTQ 4-bit: 75%, FP8: 50%",
+        "notes": "FP16→INT4/FP8"
+      },
+      "throughput_impact": {
+        "improvement": "AWQ Marlin: 2-3x, FP8: 接近2x",
+        "condition": "H100/A100",
+        "notes": "MoE模型量化收益更大"
+      },
+      "latency_impact": {
+        "improvement": "首token延迟降低20-50%",
+        "condition": "解码延迟降低更明显",
+        "notes": "FP8在H100上延迟最低"
+      }
+    },
+    {
+      "feature": "feature:cuda_graph",
+      "memory_impact": {
+        "direction": "increase",
+        "magnitude": "每个batch size独立内存",
+        "notes": "FULL模式内存开销更大"
+      },
+      "throughput_impact": {
+        "improvement": "小batch: 2-3x",
+        "condition": "消除CPU启动开销",
+        "notes": "大batch场景提升有限"
+      },
+      "latency_impact": {
+        "improvement": "10-50%",
+        "condition": "典型场景",
+        "notes": "显著降低TTFT和解码延迟"
+      }
+    },
+    {
+      "feature": "feature:flashcomm2",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "与TP size/flashcomm2_oproj_tp_size成正比",
+        "notes": "O-proj权重按flashcomm2_oproj_tp_size分片存储"
+      },
+      "throughput_impact": {
+        "improvement": "P场景: 20-40%",
+        "condition": "Prefill instance",
+        "notes": "D场景可能略有下降"
+      },
+      "latency_impact": {
+        "improvement": "P场景延迟降低",
+        "condition": "仅P场景推荐",
+        "notes": "D场景延迟可能增加"
+      }
+    },
+    {
+      "feature": "feature:dsa_cp",
+      "memory_impact": {
+        "direction": "decrease",
+        "magnitude": "num_devices倍",
+        "notes": "Layer Sharding将q_b_proj和o_proj权重按层分片存储"
+      },
+      "throughput_impact": {
+        "improvement": "通信计算重叠",
+        "condition": "DeepSeek V3.2",
+        "notes": "Prefill阶段零开销权重加载"
+      },
+      "latency_impact": {
+        "improvement": "长序列TTFT显著降低",
+        "condition": "权重广播与attention计算重叠",
+        "notes": "不增加额外延迟"
+      }
+    },
+    {
+      "feature": "feature:multistream_overlap",
+      "memory_impact": {
+        "direction": "neutral",
+        "magnitude": "增加stream资源",
+        "notes": "可能影响ACL graph捕获数量"
+      },
+      "throughput_impact": {
+        "improvement": "10-20%",
+        "condition": "MoE模型",
+        "notes": "计算与通信重叠"
+      },
+      "latency_impact": {
+        "improvement": "减少共享专家计算延迟",
+        "condition": "MoE场景",
+        "notes": "独立stream执行"
+      }
+    }
+  ],
+  "combination_synergies": [
+    {
+      "features": ["feature:chunked_prefill", "feature:async_scheduling"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "neutral",
+        "notes": "两者内存影响相互独立"
+      },
+      "throughput_impact": {
+        "improvement": "显著提升",
+        "notes": "Chunked Prefill是Async Scheduling的基础，消除GPU空闲间隙"
+      },
+      "latency_impact": {
+        "improvement": "短请求TTFT大幅降低",
+        "notes": "请求处理更连续"
+      },
+      "recommendation": "推荐同时启用"
+    },
+    {
+      "features": ["feature:flashcomm1", "feature:eplb"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "neutral",
+        "notes": "内存影响相互独立"
+      },
+      "throughput_impact": {
+        "improvement": "20-40%",
+        "notes": "EPLB优化专家负载，FlashComm1优化TP通信，协同提升MoE性能"
+      },
+      "latency_impact": {
+        "improvement": "高并发场景延迟降低",
+        "notes": "通信与负载均衡双重优化"
+      },
+      "recommendation": "MoE模型推荐同时启用"
+    },
+    {
+      "features": ["feature:flashcomm1", "feature:flashcomm2"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "decrease",
+        "notes": "两者都优化通信内存"
+      },
+      "throughput_impact": {
+        "improvement": "P场景: 20-40%",
+        "notes": "FlashComm1优化整体TP通信，FlashComm2优化O-proj层特定通信"
+      },
+      "latency_impact": {
+        "improvement": "P场景延迟降低",
+        "notes": "通信优化叠加"
+      },
+      "recommendation": "P场景推荐同时启用"
+    },
+    {
+      "features": ["feature:eplb", "feature:dynamic_eplb"],
+      "synergy_type": "dependency",
+      "memory_impact": {
+        "direction": "increase",
+        "notes": "动态EPLB需要额外监控内存"
+      },
+      "throughput_impact": {
+        "improvement": "30-50%",
+        "notes": "动态调整适应负载变化"
+      },
+      "latency_impact": {
+        "improvement": "P99延迟显著降低",
+        "notes": "长期稳定性更好"
+      },
+      "recommendation": "负载波动场景推荐Dynamic EPLB"
+    },
+    {
+      "features": ["feature:weight_prefetch", "feature:multistream_overlap"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "increase",
+        "notes": "预取缓冲区+stream资源"
+      },
+      "throughput_impact": {
+        "improvement": "计算-通信-预取三重重叠",
+        "notes": "最大化硬件利用率"
+      },
+      "latency_impact": {
+        "improvement": "延迟显著降低",
+        "notes": "多流并行执行"
+      },
+      "recommendation": "小批量MoE场景推荐"
+    },
+    {
+      "features": ["feature:dsa_cp", "feature:layer_sharding"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "decrease",
+        "notes": "Layer Sharding显著降低显存"
+      },
+      "throughput_impact": {
+        "improvement": "通信计算重叠",
+        "notes": "权重广播与计算并行"
+      },
+      "latency_impact": {
+        "improvement": "长序列TTFT降低",
+        "notes": "零开销权重加载"
+      },
+      "recommendation": "DeepSeek V3.2 P节点推荐组合"
+    },
+    {
+      "features": ["feature:quantization", "feature:flashcomm1"],
+      "synergy_type": "strong",
+      "memory_impact": {
+        "direction": "decrease",
+        "notes": "量化大幅减少显存"
+      },
+      "throughput_impact": {
+        "improvement": "量化+通信优化叠加",
+        "notes": "INT8量化下通信量减半"
+      },
+      "latency_impact": {
+        "improvement": "延迟大幅降低",
+        "notes": "量化减少内存访问"
+      },
+      "recommendation": "量化模型推荐启用FlashComm1"
+    },
+    {
+      "features": ["feature:context_parallel", "feature:pd_disaggregation"],
+      "synergy_type": "moderate",
+      "memory_impact": {
+        "direction": "decrease",
+        "notes": "CP减少KV Cache冗余"
+      },
+      "throughput_impact": {
+        "improvement": "长序列场景吞吐提升",
+        "notes": "PCP加速Prefill，PD分离独立扩展"
+      },
+      "latency_impact": {
+        "improvement": "TTFT降低",
+        "notes": "需设置cp_kv_cache_interleave_size"
+      },
+      "recommendation": "长序列PD分离场景推荐"
+    }
+  ],
+  "performance_tradeoffs": [
+    {
+      "feature": "feature:flashcomm1",
+      "tradeoff": "高并发性能提升 vs 小batch延迟增加",
+      "threshold": "1000 tokens",
+      "recommendation": "根据实际batch size选择是否启用"
+    },
+    {
+      "feature": "feature:mlapo",
+      "tradeoff": "性能提升 vs token数限制",
+      "threshold": "1024 tokens",
+      "recommendation": "确保max_num_batched_tokens <= 1024"
+    },
+    {
+      "feature": "feature:dynamic_eplb",
+      "tradeoff": "动态均衡 vs 迁移开销",
+      "threshold": "迁移期间5-10%性能下降",
+      "recommendation": "负载波动大时启用，稳定场景用静态EPLB"
+    },
+    {
+      "feature": "feature:speculative_decoding",
+      "tradeoff": "吞吐提升 vs acceptance rate依赖",
+      "threshold": "acceptance rate决定收益",
+      "recommendation": "EAGLE方法acceptance rate最高"
+    },
+    {
+      "feature": "feature:flashcomm2",
+      "tradeoff": "P场景性能提升 vs D场景可能下降",
+      "threshold": "场景依赖",
+      "recommendation": "仅P场景启用"
+    }
+  ]
+}

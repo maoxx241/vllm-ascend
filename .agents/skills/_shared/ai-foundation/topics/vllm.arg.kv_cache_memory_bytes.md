@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:928
-- read_ref: vllm/vllm/config/cache.py:151, vllm/vllm/config/cache.py:155, vllm/vllm/config/cache.py:157
-- effect_ref: vllm/vllm/engine/arg_utils.py:302, vllm/vllm/v1/worker/gpu_worker.py:313, vllm/vllm/v1/worker/gpu_worker.py:313
+- definition_ref: vllm/engine/arg_utils.py:927
+- read_ref: vllm/vllm/config/cache.py:162, vllm/vllm/config/cache.py:166, vllm/vllm/config/cache.py:168
+- effect_ref: vllm/vllm/engine/arg_utils.py:302, vllm/vllm/v1/worker/gpu_worker.py:345, vllm/vllm/v1/worker/gpu_worker.py:345
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: 启动或运行 OOM; 缓存不足导致吞吐下降
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -33,7 +33,7 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:819
+- definition_ref: vllm/engine/arg_utils.py:818
 - read_ref: vllm/vllm/benchmarks/sweep/plot_pareto.py:84, vllm/vllm/benchmarks/throughput.py:475, vllm/vllm/benchmarks/throughput.py:479
 - effect_ref: vllm/vllm/benchmarks/throughput.py:483, vllm/vllm/benchmarks/throughput.py:492, vllm/vllm/benchmarks/throughput.py:662
 - web_refs: 6
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: RPC 连接失败; 请求分发不均衡
 - value_failure_signals: ValueError: data_parallel_size_local ... must be <= data_parallel_size; ValueError: data_parallel_external_lb can only be set when data_parallel_size > 1
 - recommendation: 固定 DP 地址和端口后再迭代性能参数。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

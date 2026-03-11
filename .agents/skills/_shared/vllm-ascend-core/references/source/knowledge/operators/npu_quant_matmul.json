@@ -1,0 +1,109 @@
+{
+  "id": "operator:npu_quant_matmul",
+  "type": "operator",
+  "category": "quantization",
+  "name": "npu_quant_matmul",
+  "summary": "NPU量化矩阵乘法算子，支持INT8权重和动态量化激活，用于W8A8动态量化线性层计算。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "74-97"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_quant_matmul"
+  ],
+  "related_features": [
+    "w8a8_quantization",
+    "dynamic_quantization",
+    "linear_layer"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_dynamic_quant配合获取pertoken_scale",
+        "与weight_scale配合进行反量化"
+      ],
+      "memory_impact": "INT8权重减少内存占用",
+      "throughput_impact": "量化计算提升吞吐",
+      "latency_impact": "专用硬件加速降低延迟",
+      "test_cases": [
+        {
+          "name": "单token计算",
+          "description": ""
+        },
+        {
+          "name": "batch计算",
+          "description": ""
+        },
+        {
+          "name": "不同dtype输出",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持W8A8量化的模型"
+      ],
+      "enable_config": "quantization=W8A8_DYNAMIC",
+      "unsuitable_scenarios": [
+        "非量化模型"
+      ],
+      "best_practices": [
+        "权重使用NZ格式提升性能",
+        "预计算weight_scale_fp32"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendW8A8DynamicLinearMethod.apply",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "pertoken_scale处理",
+        "output_dtype配置"
+      ],
+      "affected_features": [
+        "量化精度",
+        "线性层性能"
+      ]
+    },
+    "design": {
+      "principle": "使用INT8权重和动态量化激活进行矩阵乘法，通过scale进行反量化",
+      "theory_analysis": "W8A8量化将权重和激活量化为INT8，减少计算和存储开销",
+      "design_decisions": [
+        {
+          "decision": "支持pertoken_scale动态量化",
+          "reason": ""
+        },
+        {
+          "decision": "支持bias输入",
+          "reason": ""
+        },
+        {
+          "decision": "输出dtype可配置",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "3b9b5ffad3ec4ae4ce759e717e53551cc599350a6411228d52d030206420b220",
+  "knowledge_domain": "vllm-ascend-core"
+}

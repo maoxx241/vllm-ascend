@@ -34,7 +34,7 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/tutorials/models/DeepSeek-V3.2.md:141, docs/source/tutorials/models/DeepSeek-V3.2.md:200, docs/source/tutorials/models/DeepSeek-V3.2.md:249
-- read_ref: vllm-ascend/vllm_ascend/attention/sfa_v1.py:400, vllm-ascend/vllm_ascend/attention/utils.py:329, vllm-ascend/vllm_ascend/envs.py:96
+- read_ref: vllm-ascend/vllm_ascend/attention/sfa_v1.py:398, vllm-ascend/vllm_ascend/attention/utils.py:329, vllm-ascend/vllm_ascend/envs.py:96
 - effect_ref: vllm-ascend/vllm_ascend/attention/utils.py:329
 - web_refs: 5
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动失败; 行为与预期不符
 - value_failure_signals: 启动失败; 行为与预期不符
 - recommendation: 先查证代码与文档证据再启用。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

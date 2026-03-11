@@ -34,8 +34,8 @@ topic_kind: parameter
 ## Development View
 
 - definition_ref: docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:161, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:227, docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md:321
-- read_ref: vllm-ascend/vllm_ascend/envs.py:103, vllm-ascend/vllm_ascend/envs.py:103, vllm-ascend/vllm_ascend/utils.py:781
-- effect_ref: vllm-ascend/vllm_ascend/utils.py:781
+- read_ref: vllm-ascend/vllm_ascend/envs.py:103, vllm-ascend/vllm_ascend/envs.py:103, vllm-ascend/vllm_ascend/utils.py:753
+- effect_ref: vllm-ascend/vllm_ascend/utils.py:753
 - web_refs: 6
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: KV 传输配置错误; 时延反而变高
 - value_failure_signals: KV 传输配置错误; 时延反而变高
 - recommendation: 优先在高并发长上下文场景启用并做 A/B。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

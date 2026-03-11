@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Knowledge Point Schema",
+  "description": "Schema for vLLM+vLLM-Ascend knowledge base knowledge points",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "category",
+    "name",
+    "summary",
+    "perspectives",
+    "metadata",
+    "domain_scope",
+    "knowledge_domain",
+    "implementation_repos",
+    "domain_reason",
+    "source_hash"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z_]+:[a-z_0-9]+$",
+      "description": "Unique identifier in format 'type:name'"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["feature", "operator", "api", "env_var", "config", "quantization", "comm_group", "moe_comm_type", "device"],
+      "description": "Type of knowledge point"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category (e.g., 'vllm', 'vllm_ascend')"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name"
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Brief description (max 200 chars)"
+    },
+    "code_paths": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["repo", "path"],
+        "properties": {
+          "repo": {
+            "type": "string",
+            "enum": ["vllm", "vllm-ascend"]
+          },
+          "path": {
+            "type": "string"
+          },
+          "lines": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "related_env_vars": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "related_apis": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "related_features": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "domain_scope": {
+      "type": "string",
+      "enum": ["vllm", "vllm-ascend", "both"],
+      "description": "Semantic ownership of the knowledge point"
+    },
+    "knowledge_domain": {
+      "type": "string",
+      "enum": ["vllm-upstream", "vllm-ascend-core", "integration-core"],
+      "description": "Physical owner domain for canonical source storage"
+    },
+    "implementation_repos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["vllm", "vllm-ascend"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "domain_reason": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short adjudication reason for domain ownership"
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Canonical hash of the source payload without the source_hash field"
+    },
+    "perspectives": {
+      "type": "object",
+      "required": ["test", "deploy", "develop", "design"],
+      "properties": {
+        "test": {
+          "type": "object",
+          "properties": {
+            "interactions": {"type": "array", "items": {"type": "string"}},
+            "memory_impact": {"type": "string"},
+            "throughput_impact": {"type": "string"},
+            "latency_impact": {"type": "string"},
+            "test_cases": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "deploy": {
+          "type": "object",
+          "properties": {
+            "supported_models": {"type": "array", "items": {"type": "string"}},
+            "enable_config": {"type": "string"},
+            "unsuitable_scenarios": {"type": "array", "items": {"type": "string"}},
+            "best_practices": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "develop": {
+          "type": "object",
+          "properties": {
+            "code_locations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {"type": "string"},
+                  "function": {"type": "string"},
+                  "purpose": {"type": "string"}
+                }
+              }
+            },
+            "modification_points": {"type": "array", "items": {"type": "string"}},
+            "affected_features": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "design": {
+          "type": "object",
+          "properties": {
+            "principle": {"type": "string"},
+            "theory_analysis": {"type": "string"},
+            "design_decisions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "decision": {"type": "string"},
+                  "reason": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["created_at", "updated_at", "version", "commit_hash"],
+      "properties": {
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"},
+        "version": {"type": "string"},
+        "commit_hash": {"type": "string"},
+        "verified_range": {
+          "type": "object",
+          "description": "知识点验证过的版本范围",
+          "properties": {
+            "min_version": {"type": "string", "description": "最小验证版本，如0.14.0"},
+            "max_version": {"type": "string", "description": "最大验证版本，如0.16.0"},
+            "min_commit": {"type": "string", "description": "最小验证commit hash"},
+            "max_commit": {"type": "string", "description": "最大验证commit hash"},
+            "verified_commits": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "已验证的commit hash列表"
+            }
+          }
+        },
+        "compatibility": {
+          "type": "object",
+          "description": "版本兼容性信息",
+          "properties": {
+            "breaking_changes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "version": {"type": "string"},
+                  "reason": {"type": "string"},
+                  "migration": {"type": "string"}
+                }
+              }
+            },
+            "deprecated_in": {"type": "string", "description": "废弃版本"},
+            "removed_in": {"type": "string", "description": "移除版本"}
+          }
+        },
+        "version_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "version": {"type": "string"},
+              "commit_hash": {"type": "string"},
+              "updated_at": {"type": "string", "format": "date-time"},
+              "change_summary": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

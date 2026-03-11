@@ -1,0 +1,114 @@
+{
+  "id": "env_var:vllm_ascend_enable_custom_op",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_CUSTOM_OP",
+  "summary": "控制自定义算子开关，启用vllm-ascend自定义的NPU优化算子",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "N/A"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "256-287"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "enable_custom_op"
+  ],
+  "related_features": [
+    "custom_ops",
+    "acl_graph"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与batch_invariant模式互斥",
+        "影响vllm_ascend_C模块加载"
+      ],
+      "memory_impact": "自定义算子可能有不同的内存使用模式",
+      "throughput_impact": "自定义算子针对NPU优化，可提升吞吐量",
+      "latency_impact": "减少算子执行延迟",
+      "test_cases": [
+        {
+          "name": "自定义算子加载测试",
+          "description": "验证vllm_ascend_C模块正确加载",
+          "threshold": 0
+        },
+        {
+          "name": "batch_invariant互斥测试",
+          "description": "验证batch_invariant模式下禁用自定义算子",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "默认启用，通过enable_custom_op()函数控制",
+      "unsuitable_scenarios": [
+        "batch_invariant模式"
+      ],
+      "best_practices": [
+        "默认启用即可",
+        "确保vllm_ascend_C正确编译安装",
+        "batch_invariant模式会自动禁用"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "enable_custom_op",
+          "lines": "256-287",
+          "purpose": "控制自定义算子加载，避免CANN RTS组件过早初始化"
+        },
+        {
+          "file": "vllm_ascend/platform.py",
+          "function": "_register_custom_op",
+          "lines": "462-473",
+          "purpose": "注册自定义算子路径到ASCEND_CUSTOM_OPP_PATH"
+        }
+      ],
+      "modification_points": [
+        "utils.py: 修改启用条件",
+        "platform.py: 添加新的自定义算子路径"
+      ],
+      "affected_features": [
+        "所有NPU优化算子"
+      ]
+    },
+    "design": {
+      "principle": "自定义算子通过惰性加载避免CANN RTS组件过早初始化，确保ASCEND_RT_VISIBLE_DEVICES可以动态修改",
+      "theory_analysis": "CANN的RTS组件在初始化时会锁定设备可见性，惰性加载允许在set_device之前修改环境变量",
+      "design_decisions": [
+        {
+          "decision": "惰性加载设计",
+          "reason": "避免过早初始化导致设备可见性无法动态修改"
+        },
+        {
+          "decision": "batch_invariant模式禁用",
+          "reason": "部分自定义算子未实现batch_invariant支持"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c9c48ef41b2aa24ec0b494243ecd84f3bf708ab7a4f68ec5f2b10350db5a4c5f",
+  "knowledge_domain": "vllm-ascend-core"
+}

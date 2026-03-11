@@ -1,0 +1,171 @@
+{
+  "id": "feature:dsa_cp",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "DSA-CP",
+  "summary": "DeepSeek V3.2专用Context Parallel优化，结合FlashComm1和Layer Sharding实现长序列推理的内存优化和通信计算重叠。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "1127-1163"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "391-424"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/flashcomm2_oshard_manager.py",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "54-59"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM1"
+  ],
+  "related_apis": [
+    "enable_dsa_cp",
+    "enable_dsa_cp_with_layer_shard",
+    "enable_dsa_cp_with_o_proj_tp",
+    "Flashcomm2OShardManager"
+  ],
+  "related_features": [
+    "feature:flashcomm1",
+    "feature:flashcomm2",
+    "feature:layer_sharding",
+    "feature:finegrained_tp"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "仅支持DeepSeek V3.2（通过index_topk属性识别）",
+        "必须启用FlashComm1（enable_sp=True）",
+        "Layer Sharding仅在P节点生效",
+        "与MTP Speculative Decoding兼容"
+      ],
+      "memory_impact": "Layer Sharding将q_b_proj和o_proj权重按层分片存储，每设备仅存储1/num_layers的权重，显著降低61层模型的内存压力。",
+      "throughput_impact": "通过通信计算重叠隐藏权重广播开销，在Prefill阶段实现零开销权重加载。配合MTP可实现高吞吐推理。",
+      "latency_impact": "Layer Sharding的权重广播与attention计算重叠，不增加额外延迟。在长序列场景下TTFT显著降低。",
+      "test_cases": [
+        {
+          "name": "验证DeepSeek V3.2模型识别（index_topk属性）",
+          "description": ""
+        },
+        {
+          "name": "测试Layer Sharding在P节点的权重广播正确性",
+          "description": ""
+        },
+        {
+          "name": "验证FlashComm1启用的前置条件",
+          "description": ""
+        },
+        {
+          "name": "测试MTP Speculative Decoding与DSA-CP的组合",
+          "description": ""
+        },
+        {
+          "name": "验证多节点部署的权重同步",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3.2（W8A8量化版本）",
+        "DeepSeek-V3.2-MTP（带推测解码）"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1，并在additional_config中配置layer_sharding: [\"q_b_proj\", \"o_proj\"]",
+      "unsuitable_scenarios": [
+        "非DeepSeek V3.2模型（通过index_topk判断）",
+        "未启用FlashComm1的场景",
+        "D节点不支持Layer Sharding"
+      ],
+      "best_practices": [
+        "P节点启用Layer Sharding：{\"layer_sharding\": [\"q_b_proj\", \"o_proj\"]}",
+        "配合FlashComm1使用以获得最佳性能",
+        "A3硬件建议设置HCCL_OP_EXPANSION_MODE=AIV",
+        "PD分离场景：P节点使用DSA-CP+Layer Sharding，D节点使用标准配置",
+        "多节点场景配置HCCL_INTRA_PCIE_ENABLE=1, HCCL_INTRA_ROCE_ENABLE=0"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "enable_dsa_cp",
+          "description": "检测是否为DeepSeek V3.2模型并启用DSA-CP"
+        },
+        {
+          "file": "vllm_ascend/utils.py",
+          "function": "enable_dsa_cp_with_layer_shard",
+          "description": "判断是否启用Layer Sharding（仅P节点）"
+        },
+        {
+          "file": "vllm_ascend/ops/flashcomm2_oshard_manager.py",
+          "class": "Flashcomm2OShardManager",
+          "description": "管理O投影层的分片和广播"
+        },
+        {
+          "file": "vllm_ascend/attention/sfa_v1.py",
+          "class": "AscendSFA",
+          "description": "Sparse Fine-grained Attention实现，支持DSA-CP"
+        }
+      ],
+      "modification_points": [
+        "enable_dsa_cp：添加新模型识别逻辑",
+        "Flashcomm2OShardManager.register_layer：扩展支持更多层类型",
+        "Layer Shard Linear：修改权重广播和预取逻辑"
+      ],
+      "affected_features": [
+        "MLAPO算子：DSA-CP与MLAPO兼容",
+        "权重预取：Layer Sharding需要特殊的预取策略",
+        "通信组管理：需要独立的shard_weight_group"
+      ]
+    },
+    "design": {
+      "principle": "DSA-CP针对DeepSeek V3.2的Sparse Fine-grained Attention（SFA）架构优化，结合FlashComm1的通信优化和Layer Sharding的内存优化，实现长序列高效推理。",
+      "theory_analysis": "1. SFA架构：DeepSeek V3.2使用稀疏细粒度注意力，通过index_topk选择TopK专家。2. Layer Sharding原理：61层模型的q_b_proj和o_proj权重按层分片，每设备存储部分层的权重，通过异步广播在计算时获取所需权重。3. 通信计算重叠：权重广播与前一层attention计算并行执行，实现零开销权重加载。4. 内存优化：权重存储减少num_devices倍，使超大模型能够在有限显存中运行。",
+      "design_decisions": [
+        {
+          "decision": "仅支持DeepSeek V3.2：通过hf_config.index_topk属性识别，其他模型不支持SFA架构",
+          "reason": ""
+        },
+        {
+          "decision": "Layer Sharding仅P节点：D节点计算量小，广播开销无法被计算覆盖",
+          "reason": ""
+        },
+        {
+          "decision": "使用enable_sp判断：复用FlashComm1的启用逻辑，简化配置",
+          "reason": ""
+        },
+        {
+          "decision": "lru_cache缓存：enable_dsa_cp等函数使用缓存避免重复计算",
+          "reason": ""
+        },
+        {
+          "decision": "独立通信组：Layer Sharding使用shard_weight_group进行权重广播",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "072c5210a018cf143cdc448cffd680843431e852482475213c4a0e625ea3543a",
+  "knowledge_domain": "vllm-ascend-core"
+}

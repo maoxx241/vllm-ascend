@@ -1,0 +1,133 @@
+{
+  "id": "feature:layer_sharding",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Layer Sharding",
+  "summary": "线性层分片策略，支持o_proj等层的细粒度TP切分，优化PD disaggregation场景内存占用",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "54-59, 211-250"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "982-986"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "FinegrainedTPConfig",
+    "oproj_tp_enable",
+    "lmhead_tp_enable"
+  ],
+  "related_features": [
+    "feature:pd_disaggregation",
+    "feature:flashcomm2",
+    "feature:sequence_parallelism"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FLASHCOMM2集成测试",
+        "与DSA-CP集成测试",
+        "PD场景下的内存占用测试"
+      ],
+      "memory_impact": "减少Decode节点o_proj等层的显存占用",
+      "throughput_impact": "配合FLASHCOMM2和DSA-CP可获得最佳性能，否则可能性能下降",
+      "latency_impact": "需要额外的通信开销，但可被计算重叠",
+      "test_cases": [
+        {
+          "name": "测试layer_sharding=['o_proj']的PD场景推理",
+          "description": ""
+        },
+        {
+          "name": "测试不同TP配置下的内存节省",
+          "description": ""
+        },
+        {
+          "name": "测试与FLASHCOMM2的组合效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen系列"
+      ],
+      "enable_config": "additional_config: {layer_sharding: ['o_proj']}，推荐配合FLASHCOMM2和DSA-CP使用",
+      "unsuitable_scenarios": [
+        "未启用FLASHCOMM2的场景",
+        "非PD disaggregation场景",
+        "eager模式"
+      ],
+      "best_practices": [
+        "仅在PD场景的Decode节点启用",
+        "配合FLASHCOMM2使用",
+        "启用DSA-CP以获得最佳性能"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendConfig.layer_sharding：配置入口",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "FinegrainedTPConfig：细粒度TP配置",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "o_shard_enable()：启用状态查询",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多层类型",
+        "优化分片策略"
+      ],
+      "affected_features": [
+        "Attention层o_proj实现",
+        "TP通信流程",
+        "内存分配策略"
+      ]
+    },
+    "design": {
+      "principle": "在PD disaggregation场景，Decode节点的o_proj可以按更细粒度切分，减少显存占用。配合FLASHCOMM2的ReduceScatter+AllGather通信模式，实现计算-通信重叠。",
+      "theory_analysis": "传统TP方式下，o_proj权重按TP_size切分。Layer sharding允许按更小的组切分，减少每个rank的权重存储。代价是额外的通信，但可通过FLASHCOMM2优化。",
+      "design_decisions": [
+        {
+          "decision": "仅支持o_proj：其他层收益不明显",
+          "reason": ""
+        },
+        {
+          "decision": "需要graph模式：eager模式不支持",
+          "reason": ""
+        },
+        {
+          "decision": "警告性能下降：未配合FLASHCOMM2时可能性能下降",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "aaf4f8ea8bba8ccc7cd20065bdccda7a167ec26b286c123d197b944fd8a67f82",
+  "knowledge_domain": "vllm-ascend-core"
+}

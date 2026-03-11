@@ -1,0 +1,132 @@
+{
+  "id": "feature:multistream_overlap",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Multistream Overlap",
+  "summary": "多流计算重叠优化，支持共享专家和gate计算与主计算流的并行执行",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "85-86"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/utils.py",
+      "lines": "359-365"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "shared_experts_calculation_stream",
+    "torch_npu.npu.Stream"
+  ],
+  "related_features": [
+    "feature:shared_expert_dp",
+    "feature:weight_prefetch",
+    "feature:flashcomm2"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与共享专家计算重叠测试",
+        "与gate计算重叠测试",
+        "多stream同步正确性测试"
+      ],
+      "memory_impact": "增加stream资源占用，可能影响ACL graph捕获数量",
+      "throughput_impact": "MoE模型吞吐量提升10-20%，计算与通信重叠",
+      "latency_impact": "减少共享专家计算延迟",
+      "test_cases": [
+        {
+          "name": "测试multistream_overlap_shared_expert=true的性能提升",
+          "description": ""
+        },
+        {
+          "name": "测试multistream_overlap_gate=true的正确性",
+          "description": ""
+        },
+        {
+          "name": "测试多stream场景下的内存一致性",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen-MoE系列"
+      ],
+      "enable_config": "additional_config: {multistream_overlap_shared_expert: true, multistream_overlap_gate: true}",
+      "unsuitable_scenarios": [
+        "非MoE模型",
+        "stream资源紧张场景",
+        "与某些通信模式冲突"
+      ],
+      "best_practices": [
+        "MoE模型启用共享专家重叠",
+        "配合shared_expert_dp使用",
+        "注意ACL graph捕获数量限制"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendConfig.multistream_overlap_shared_expert：共享专家重叠配置",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendConfig.multistream_overlap_gate：gate重叠配置",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "shared_experts_calculation_stream()：专用stream获取",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多重叠场景",
+        "优化stream同步策略"
+      ],
+      "affected_features": [
+        "MoE前向计算流程",
+        "共享专家计算",
+        "Gate计算"
+      ]
+    },
+    "design": {
+      "principle": "利用NPU的多stream能力，将共享专家计算或gate计算放到独立stream执行，与主计算流并行，隐藏计算延迟。",
+      "theory_analysis": "MoE模型中，共享专家计算与routed expert计算可以并行。通过独立stream执行共享专家，主stream继续处理其他计算，实现计算重叠。",
+      "design_decisions": [
+        {
+          "decision": "独立配置：shared_expert和gate可分别启用",
+          "reason": ""
+        },
+        {
+          "decision": "专用stream：避免与其他计算冲突",
+          "reason": ""
+        },
+        {
+          "decision": "需要正确同步：使用dependency tensor确保正确性",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "10194d4e019c2b5be024be89a976b46ae0d28e096bef4b867bd83600cb74182f",
+  "knowledge_domain": "vllm-ascend-core"
+}

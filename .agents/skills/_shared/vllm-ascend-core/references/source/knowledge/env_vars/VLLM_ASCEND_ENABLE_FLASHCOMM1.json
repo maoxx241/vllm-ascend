@@ -1,0 +1,122 @@
+{
+  "id": "env_var:vllm_ascend_enable_flashcomm1",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "VLLM_ASCEND_ENABLE_FLASHCOMM1",
+  "summary": "控制FlashComm1通信优化开关，通过ReduceScatter+Allgather替代Allreduce提升高并发场景性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/envs.py",
+      "lines": "72-74"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FLASHCOMM",
+    "VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE"
+  ],
+  "related_apis": [
+    "enable_sp",
+    "select_moe_comm_method"
+  ],
+  "related_features": [
+    "flashcomm1",
+    "flashcomm2",
+    "sequence_parallelism"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与FlashComm2互斥，只能启用其中之一",
+        "与MC2通信选择逻辑交互",
+        "影响mmrs_fusion配置和pad_size计算"
+      ],
+      "memory_impact": "ReduceScatter后数据分散存储，激活内存略有降低；配合量化时通信量减半",
+      "throughput_impact": "高并发场景(>1000 tokens)吞吐量提升15-30%",
+      "latency_impact": "小batch场景(<1000 tokens)延迟可能增加5-10%",
+      "test_cases": [
+        {
+          "name": "高并发性能测试",
+          "description": "验证>1000 tokens时的性能提升",
+          "threshold": 1000
+        },
+        {
+          "name": "阈值边界测试",
+          "description": "验证1000 tokens阈值附近的切换行为",
+          "threshold": 1000
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "Qwen3",
+        "Llama系列"
+      ],
+      "enable_config": "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1",
+      "unsuitable_scenarios": [
+        "小batch场景（<1000 tokens）",
+        "VL类模型（需使用SP pass模式）",
+        "eager模式（SP仅支持graph模式）"
+      ],
+      "best_practices": [
+        "高并发场景(>1000 tokens)推荐启用",
+        "配合量化使用收益更大",
+        "推荐设置HCCL_OP_EXPANSION_MODE=AIV"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/envs.py",
+          "function": "env_variables",
+          "lines": "72-74",
+          "purpose": "环境变量定义"
+        },
+        {
+          "file": "vllm_ascend/ascend_forward_context.py",
+          "function": "set_ascend_forward_context",
+          "lines": "84-104",
+          "purpose": "动态启用FlashComm1"
+        }
+      ],
+      "modification_points": [
+        "envs.py: 修改默认值",
+        "ascend_forward_context.py: 修改启用阈值逻辑"
+      ],
+      "affected_features": [
+        "MC2通信",
+        "MoE通信模式",
+        "mmrs_fusion"
+      ]
+    },
+    "design": {
+      "principle": "将Allreduce拆分为ReduceScatter+Allgather，利用通信计算重叠减少同步开销",
+      "theory_analysis": "原始Allreduce延迟与TP size成正比。拆分后：1)ReduceScatter可与前序Matmul融合；2)Allgather可与后序Matmul融合；3)量化场景下通信量减半",
+      "design_decisions": [
+        {
+          "decision": "默认值设为0(禁用)",
+          "reason": "需要用户根据场景显式启用，避免小batch场景性能下降"
+        },
+        {
+          "decision": "阈值设为1000 tokens",
+          "reason": "低于此值时通信开销大于计算收益"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "8d8ba64980af3a75361fd711a85aca64a4f1c9033bc0203b3be5e70c52ef301c",
+  "knowledge_domain": "vllm-ascend-core"
+}

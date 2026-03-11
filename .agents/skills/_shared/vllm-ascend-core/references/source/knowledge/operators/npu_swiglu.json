@@ -1,0 +1,101 @@
+{
+  "id": "operator:npu_swiglu",
+  "type": "operator",
+  "category": "moe",
+  "name": "npu_swiglu",
+  "summary": "NPU SwiGLU激活算子，实现Swish门控线性单元激活函数，用于MoE和非MoE模型的激活层。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_mlp.py",
+      "lines": "234, 304, 357"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_swiglu"
+  ],
+  "related_features": [
+    "moe",
+    "activation",
+    "swiglu"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与npu_grouped_matmul配合",
+        "与npu_dequant_swiglu_quant配合"
+      ],
+      "memory_impact": "原地操作减少内存",
+      "throughput_impact": "专用硬件实现提升吞吐",
+      "latency_impact": "单算子完成激活",
+      "test_cases": [
+        {
+          "name": "MoE gate_up输出",
+          "description": ""
+        },
+        {
+          "name": "不同hidden_size",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有使用SwiGLU激活的模型"
+      ],
+      "enable_config": "自动启用",
+      "unsuitable_scenarios": [
+        "非SwiGLU激活模型"
+      ],
+      "best_practices": [
+        "输入需要正确shape"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "unquant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "quant_apply_mlp",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "激活计算效率"
+      ]
+    },
+    "design": {
+      "principle": "SwiGLU = Swish(gate) * up，其中Swish(x) = x * sigmoid(x)",
+      "theory_analysis": "SwiGLU是LLM常用的激活函数，具有平滑和非线性特性",
+      "design_decisions": [
+        {
+          "decision": "NPU专用实现",
+          "reason": ""
+        },
+        {
+          "decision": "支持分组输入",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "9e912e42c2c3423baec54d68178c8868f36a347733c8fbda3cbc07a9f6e0510a",
+  "knowledge_domain": "vllm-ascend-core"
+}

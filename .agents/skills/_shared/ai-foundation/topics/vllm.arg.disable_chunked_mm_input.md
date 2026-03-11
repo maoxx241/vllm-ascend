@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1142
-- read_ref: vllm/vllm/config/scheduler.py:108, vllm/vllm/config/scheduler.py:212, vllm/vllm/config/vllm.py:1109
-- effect_ref: vllm/vllm/engine/arg_utils.py:1143, vllm/vllm/engine/arg_utils.py:1143
+- definition_ref: vllm/engine/arg_utils.py:1147
+- read_ref: vllm/vllm/config/scheduler.py:108, vllm/vllm/config/scheduler.py:212, vllm/vllm/config/vllm.py:1127
+- effect_ref: vllm/vllm/engine/arg_utils.py:1148, vllm/vllm/engine/arg_utils.py:1148
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 输入解析失败; 处理时延过高
 - value_failure_signals: 输入解析失败; 处理时延过高
 - recommendation: 先限制每请求多模态资源，再放开。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

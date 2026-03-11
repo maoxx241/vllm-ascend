@@ -1,0 +1,159 @@
+{
+  "id": "feature:graph_fusion_passes",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Graph Fusion Passes",
+  "summary": "基于torch.compile的图融合优化passes，包括AllReduce-RMSNorm融合、Norm-Quant融合、QKNorm-RoPE融合等",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/allreduce_rmsnorm_fusion_pass.py",
+      "lines": "1-174"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/norm_quant_fusion_pass.py",
+      "lines": "1-513"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/qknorm_rope_fusion_pass.py",
+      "lines": "1-243"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/sequence_parallelism.py",
+      "lines": "1-198"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/passes/muls_add_pass.py",
+      "lines": "1-115"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "VllmInductorPass",
+    "PatternMatcherPass"
+  ],
+  "related_features": [
+    "feature:matmul_allreduce",
+    "feature:sequence_parallelism",
+    "feature:batch_invariant"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与torch.compile集成测试",
+        "不同fusion pass组合测试",
+        "graph capture正确性测试"
+      ],
+      "memory_impact": "减少中间tensor存储，降低内存峰值",
+      "throughput_impact": "减少kernel launch开销，提升计算密度，吞吐量提升10-30%",
+      "latency_impact": "减少端到端延迟",
+      "test_cases": [
+        {
+          "name": "测试各fusion pass的pattern匹配正确性",
+          "description": ""
+        },
+        {
+          "name": "测试compile_range阈值效果",
+          "description": ""
+        },
+        {
+          "name": "测试不同dtype下的fusion效果",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持graph模式的模型"
+      ],
+      "enable_config": "ascend_compilation_config: {fuse_norm_quant: true, fuse_qknorm_rope: true, fuse_allreduce_rms: false}",
+      "unsuitable_scenarios": [
+        "eager模式",
+        "不支持graph capture的模型"
+      ],
+      "best_practices": [
+        "启用graph模式",
+        "根据模型特点选择fusion passes",
+        "注意compile_range阈值"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "MatmulAllReduceAddRMSNormPass：Matmul+AllReduce+RMSNorm融合",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AddRMSNormQuantFusionPass：AddRMSNorm+Quant融合",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "QKNormRopeFusionPass：QKNorm+RoPE融合",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSequenceParallelismPass：SP通信融合",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "MulsAddFusionPass：Muls+Add融合",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "添加新的fusion pattern",
+        "调整fusion阈值",
+        "优化pattern匹配效率"
+      ],
+      "affected_features": [
+        "Graph编译流程",
+        "Kernel执行",
+        "内存访问模式"
+      ]
+    },
+    "design": {
+      "principle": "利用torch._inductor的pattern matcher，识别计算图中的可融合pattern，替换为高效的融合kernel，减少内存访问和kernel launch开销。",
+      "theory_analysis": "多个小kernel组合存在大量中间结果存储和kernel launch开销。融合后：1) 减少内存访问；2) 减少kernel launch；3) 增加计算密度；4) 更好利用NPU并行能力。",
+      "design_decisions": [
+        {
+          "decision": "基于PatternMatcher：利用torch.compile基础设施",
+          "reason": ""
+        },
+        {
+          "decision": "compile_range阈值：控制fusion启用条件",
+          "reason": ""
+        },
+        {
+          "decision": "多pattern支持：覆盖不同模型架构",
+          "reason": ""
+        },
+        {
+          "decision": "dtype检查：确保fusion kernel支持当前dtype",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c519a53b23dde272637ed0283621dd6d52e1cddefd4588527b0105c384dd37b0",
+  "knowledge_domain": "vllm-ascend-core"
+}

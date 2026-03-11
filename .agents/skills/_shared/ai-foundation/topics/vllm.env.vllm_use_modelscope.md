@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:543
-- read_ref: vllm/vllm/envs.py:18, vllm/vllm/envs.py:543, vllm/vllm/envs.py:544
+- definition_ref: vllm/envs.py:546
+- read_ref: vllm/vllm/envs.py:18, vllm/vllm/envs.py:546, vllm/vllm/envs.py:547
 - effect_ref: vllm/vllm/lora/utils.py:259, vllm/vllm/model_executor/model_loader/weight_utils.py:164, vllm/vllm/model_executor/model_loader/weight_utils.py:168
 - web_refs: 4
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

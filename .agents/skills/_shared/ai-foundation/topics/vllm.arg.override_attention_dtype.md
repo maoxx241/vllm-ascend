@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:723
-- read_ref: vllm/vllm/config/model.py:283, vllm/vllm/config/model.py:345, vllm/vllm/config/model.py:463
-- effect_ref: vllm/vllm/config/model.py:463
+- definition_ref: vllm/engine/arg_utils.py:722
+- read_ref: vllm/vllm/config/model.py:279, vllm/vllm/config/model.py:341, vllm/vllm/config/model.py:466
+- effect_ref: vllm/vllm/config/model.py:466
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

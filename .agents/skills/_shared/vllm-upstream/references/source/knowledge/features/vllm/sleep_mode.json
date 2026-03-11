@@ -1,0 +1,178 @@
+{
+  "id": "feature:sleep_mode",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Sleep Mode",
+  "summary": "GPU睡眠模式支持，允许在空闲时释放GPU显存供其他进程使用，通过CuMemAllocator实现权重和KV Cache的offload，支持两级睡眠深度。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/gpu_worker.py",
+      "lines": "157-203,205-217,550-557"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/config/model.py",
+      "lines": "268-270,471-472"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/platforms/interface.py",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/device_allocator/cumem.py",
+      "lines": "1-200"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "Worker.sleep",
+    "Worker.wake_up",
+    "CuMemAllocator",
+    "enable_sleep_mode"
+  ],
+  "related_features": [
+    "feature:kv_cache",
+    "feature:tensor_parallel",
+    "feature:speculative_decoding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与KV Cache交互：sleep释放KV Cache显存，wake_up需要重新初始化FP8 scale",
+        "与Tensor Parallel交互：所有TP ranks必须同步sleep/wake_up，确保一致性",
+        "与Speculative Decoding交互：draft model和target model需要同时sleep/wake_up",
+        "与CUDA Graph交互：sleep后CUDA Graph可能失效，需要重新捕获"
+      ],
+      "memory_impact": "Level 1 sleep仅offload权重，释放约70-80%显存。Level 2 sleep同时offload权重和KV Cache，释放约95%显存。唤醒时需要重新加载权重到GPU，增加启动延迟。Sleep模式使用CuMemAllocator管理内存池，避免内存碎片。",
+      "throughput_impact": "Sleep/wake_up操作本身有开销(约100-500ms)，频繁切换降低吞吐量。适合长时间空闲场景(如夜间低负载)。启用sleep mode不影响正常运行时的吞吐量。",
+      "latency_impact": "Wake up需要重新加载权重，增加首请求延迟约500ms-2s(取决于模型大小)。Level 2 wake up更慢，需要恢复KV Cache。建议在预期空闲前主动sleep，空闲结束后提前wake_up。",
+      "test_cases": [
+        {
+          "name": "test_sleep_mode_level1",
+          "description": "测试Level 1 sleep，验证权重offload和恢复"
+        },
+        {
+          "name": "test_sleep_mode_level2",
+          "description": "测试Level 2 sleep，验证权重和KV Cache同时offload"
+        },
+        {
+          "name": "test_sleep_mode_fp8_kv_cache",
+          "description": "测试FP8 KV Cache场景下sleep/wake_up的scale恢复"
+        },
+        {
+          "name": "test_sleep_mode_tp_consistency",
+          "description": "测试TP场景下所有ranks同步sleep/wake_up"
+        },
+        {
+          "name": "test_sleep_mode_memory_leak",
+          "description": "验证多次sleep/wake_up无内存泄漏"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM支持的模型",
+        "需要CUDA或HIP平台支持",
+        "不支持CPU和XPU平台"
+      ],
+      "enable_config": "通过--enable-sleep-mode启用。调用engine.sleep(level=1/2)进入睡眠，engine.wake_up()唤醒。Level 1仅offload权重，Level 2同时offload权重和KV Cache。可通过tags参数选择性wake_up特定组件。",
+      "unsuitable_scenarios": [
+        "高频请求场景(sleep/wake_up开销大)",
+        "CPU/XPU平台(不支持)",
+        "需要极低延迟的场景(wake_up有延迟)",
+        "多实例共享GPU场景(可能冲突)"
+      ],
+      "best_practices": [
+        "仅在预期长时间空闲(>30秒)时使用sleep",
+        "Level 1适合短时间空闲，Level 2适合长时间空闲",
+        "在低负载时段(如夜间)主动sleep节省资源",
+        "wake_up后执行预热请求避免首次推理延迟",
+        "监控GPU内存使用，避免与其他进程冲突"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/v1/worker/gpu_worker.py",
+          "function": "Worker.sleep",
+          "purpose": "执行sleep操作，调用CuMemAllocator释放显存"
+        },
+        {
+          "file": "vllm/v1/worker/gpu_worker.py",
+          "function": "Worker.wake_up",
+          "purpose": "执行wake_up操作，恢复GPU显存分配"
+        },
+        {
+          "file": "vllm/v1/worker/gpu_worker.py",
+          "function": "_maybe_get_memory_pool_context",
+          "purpose": "根据sleep mode配置创建内存池上下文"
+        },
+        {
+          "file": "vllm/device_allocator/cumem.py",
+          "function": "CuMemAllocator",
+          "purpose": "CUDA内存分配器，支持sleep/wake_up"
+        },
+        {
+          "file": "vllm/platforms/interface.py",
+          "function": "is_sleep_mode_available",
+          "purpose": "检查当前平台是否支持sleep mode"
+        }
+      ],
+      "modification_points": [
+        "扩展CuMemAllocator支持新的offload策略",
+        "添加新的sleep level支持更细粒度控制",
+        "实现异步wake_up减少延迟",
+        "支持选择性offload特定层",
+        "添加sleep mode的自动触发机制"
+      ],
+      "affected_features": [
+        "KV Cache: FP8 KV Cache的scale需要在wake_up后重新初始化",
+        "Memory Management: sleep mode改变内存分配策略",
+        "CUDA Graph: sleep可能影响CUDA Graph状态",
+        "Multi-Instance: 多实例场景需要协调sleep/wake_up"
+      ]
+    },
+    "design": {
+      "principle": "Sleep mode基于CUDA内存池和CuMemAllocator实现。Sleep时，将GPU内存池中的权重和KV Cache offload到CPU内存或释放，释放GPU显存供其他进程使用。Wake up时，重新分配GPU内存并恢复数据。两级sleep提供不同的offload深度：Level 1仅offload权重，Level 2同时offload权重和KV Cache。",
+      "theory_analysis": "GPU显存是稀缺资源，在低负载时段大量显存闲置浪费。Sleep mode通过显存虚拟化实现显存的时间复用：空闲时释放显存，需要时重新分配。这类似于操作系统的内存swap机制，但针对GPU显存优化。CuMemAllocator使用tagged memory pool管理不同类型的内存(weights/kv_cache)，支持选择性offload。Level设计权衡了offload深度和恢复速度：Level 1恢复快但释放少，Level 2释放多但恢复慢。",
+      "design_decisions": [
+        {
+          "decision": "使用CuMemAllocator而非直接CUDA内存管理",
+          "reason": "CuMemAllocator提供统一的内存池管理，支持tagged allocation和sleep/wake_up语义，简化实现"
+        },
+        {
+          "decision": "实现两级sleep depth",
+          "reason": "不同场景有不同需求：短时间空闲只需Level 1，长时间空闲需要Level 2，提供灵活性"
+        },
+        {
+          "decision": "Level 2保存buffers到CPU",
+          "reason": "模型buffers(如running mean/var)需要保存，否则wake_up后状态错误，保存到CPU避免GPU显存占用"
+        },
+        {
+          "decision": "FP8 KV Cache需要重新初始化scale",
+          "reason": "FP8 KV Cache的scale factor在sleep时丢失，wake_up后需要重新初始化，确保数值正确性"
+        },
+        {
+          "decision": "限制每个进程一个sleep mode实例",
+          "reason": "CuMemAllocator使用全局状态，多实例会冲突，限制确保正确性"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "988d69c9c3329c18b02cff2af1807cd65adfbf8c311f38a9a7a2360da1895d4f",
+  "knowledge_domain": "vllm-upstream"
+}

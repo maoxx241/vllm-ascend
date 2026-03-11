@@ -6,12 +6,12 @@
       "docs/source/tutorials/models/DeepSeek-V3.2.md:602",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:680",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:757",
-      "docs/source/user_guide/feature_guide/kv_pool.md:1057",
-      "docs/source/user_guide/feature_guide/kv_pool.md:149",
-      "docs/source/user_guide/feature_guide/kv_pool.md:222",
-      "docs/source/user_guide/feature_guide/kv_pool.md:333",
-      "docs/source/user_guide/feature_guide/kv_pool.md:762",
-      "docs/source/user_guide/feature_guide/kv_pool.md:836"
+      "docs/source/user_guide/feature_guide/kv_pool.md:1048",
+      "docs/source/user_guide/feature_guide/kv_pool.md:140",
+      "docs/source/user_guide/feature_guide/kv_pool.md:213",
+      "docs/source/user_guide/feature_guide/kv_pool.md:324",
+      "docs/source/user_guide/feature_guide/kv_pool.md:753",
+      "docs/source/user_guide/feature_guide/kv_pool.md:827"
     ],
     "default": "1",
     "type": "string",
@@ -61,10 +61,9 @@
       "docs/source/tutorials/models/DeepSeek-V3.1.md:376",
       "docs/source/tutorials/models/DeepSeek-V3.1.md:453",
       "docs/source/tutorials/models/DeepSeek-V3.1.md:529",
-      "docs/source/user_guide/feature_guide/kv_pool.md:152",
-      "docs/source/user_guide/feature_guide/kv_pool.md:223",
-      "docs/source/user_guide/feature_guide/kv_pool.md:334",
-      "docs/source/user_guide/feature_guide/kv_pool.md:95"
+      "docs/source/user_guide/feature_guide/kv_pool.md:143",
+      "docs/source/user_guide/feature_guide/kv_pool.md:214",
+      "docs/source/user_guide/feature_guide/kv_pool.md:325"
     ],
     "default": "4:8",
     "type": "string",
@@ -77,9 +76,9 @@
   "ASCEND_CONNECT_TIMEOUT": {
     "name": "ASCEND_CONNECT_TIMEOUT",
     "definition_ref": [
-      "docs/source/user_guide/feature_guide/kv_pool.md:157",
-      "docs/source/user_guide/feature_guide/kv_pool.md:224",
-      "docs/source/user_guide/feature_guide/kv_pool.md:335"
+      "docs/source/user_guide/feature_guide/kv_pool.md:148",
+      "docs/source/user_guide/feature_guide/kv_pool.md:215",
+      "docs/source/user_guide/feature_guide/kv_pool.md:326"
     ],
     "default": "10000",
     "type": "string",
@@ -103,27 +102,11 @@
       "code_reference"
     ]
   },
-  "ASCEND_ENABLE_USE_FABRIC_MEM": {
-    "name": "ASCEND_ENABLE_USE_FABRIC_MEM",
-    "definition_ref": [
-      "docs/source/user_guide/feature_guide/kv_pool.md:90",
-      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:39",
-      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:74"
-    ],
-    "default": "1",
-    "type": "string",
-    "valid_values": [],
-    "source": "code",
-    "source_tags": [
-      "code_reference",
-      "docs_export"
-    ]
-  },
   "ASCEND_HOME_PATH": {
     "name": "ASCEND_HOME_PATH",
     "definition_ref": [
       "vllm_ascend/envs.py:58",
-      "vllm_ascend/worker/worker.py:166"
+      "vllm_ascend/worker/worker.py:164"
     ],
     "default": null,
     "type": "string",
@@ -162,14 +145,14 @@
       "docs/source/tutorials/models/Qwen3-32B-W4A4.md:59",
       "docs/source/tutorials/models/Qwen3-8B-W4A8.md:53",
       "docs/source/tutorials/models/Qwen3-Dense.md:158",
-      "docs/source/user_guide/feature_guide/kv_pool.md:1056",
-      "docs/source/user_guide/feature_guide/kv_pool.md:148",
-      "docs/source/user_guide/feature_guide/kv_pool.md:221",
-      "docs/source/user_guide/feature_guide/kv_pool.md:331",
-      "docs/source/user_guide/feature_guide/kv_pool.md:761",
-      "docs/source/user_guide/feature_guide/kv_pool.md:835",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1047",
+      "docs/source/user_guide/feature_guide/kv_pool.md:139",
+      "docs/source/user_guide/feature_guide/kv_pool.md:212",
+      "docs/source/user_guide/feature_guide/kv_pool.md:322",
+      "docs/source/user_guide/feature_guide/kv_pool.md:752",
+      "docs/source/user_guide/feature_guide/kv_pool.md:826",
       "docs/source/user_guide/feature_guide/quantization.md:44",
-      "vllm_ascend/cpu_binding.py:17"
+      "vllm_ascend/cpu_binding.py:16"
     ],
     "default": "$1",
     "type": "string",
@@ -183,9 +166,9 @@
   "ASCEND_TRANSFER_TIMEOUT": {
     "name": "ASCEND_TRANSFER_TIMEOUT",
     "definition_ref": [
-      "docs/source/user_guide/feature_guide/kv_pool.md:160",
-      "docs/source/user_guide/feature_guide/kv_pool.md:225",
-      "docs/source/user_guide/feature_guide/kv_pool.md:336",
+      "docs/source/user_guide/feature_guide/kv_pool.md:151",
+      "docs/source/user_guide/feature_guide/kv_pool.md:216",
+      "docs/source/user_guide/feature_guide/kv_pool.md:327",
       "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py:1097",
       "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_layerwise_connector.py:809",
       "vllm_ascend/distributed/kv_transfer/utils/utils.py:52"
@@ -274,7 +257,7 @@
   "DYNAMIC_EPLB": {
     "name": "DYNAMIC_EPLB",
     "definition_ref": [
-      "vllm_ascend/ascend_config.py:429",
+      "vllm_ascend/ascend_config.py:422",
       "vllm_ascend/envs.py:105",
       "vllm_ascend/patch/platform/__init__.py:23"
     ],
@@ -290,7 +273,7 @@
   "EXPERT_MAP_RECORD": {
     "name": "EXPERT_MAP_RECORD",
     "definition_ref": [
-      "vllm_ascend/ascend_config.py:430",
+      "vllm_ascend/ascend_config.py:423",
       "vllm_ascend/patch/platform/__init__.py:23"
     ],
     "default": null,
@@ -349,13 +332,13 @@
       "docs/source/tutorials/models/Qwen3-235B-A22B.md:545",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:111",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:157",
-      "docs/source/user_guide/feature_guide/kv_pool.md:1061",
-      "docs/source/user_guide/feature_guide/kv_pool.md:604",
-      "docs/source/user_guide/feature_guide/kv_pool.md:687",
-      "docs/source/user_guide/feature_guide/kv_pool.md:766",
-      "docs/source/user_guide/feature_guide/kv_pool.md:840",
-      "docs/source/user_guide/feature_guide/kv_pool.md:932",
-      "docs/source/user_guide/feature_guide/kv_pool.md:995",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1052",
+      "docs/source/user_guide/feature_guide/kv_pool.md:595",
+      "docs/source/user_guide/feature_guide/kv_pool.md:678",
+      "docs/source/user_guide/feature_guide/kv_pool.md:757",
+      "docs/source/user_guide/feature_guide/kv_pool.md:831",
+      "docs/source/user_guide/feature_guide/kv_pool.md:923",
+      "docs/source/user_guide/feature_guide/kv_pool.md:986",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:124",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:191"
     ],
@@ -389,7 +372,7 @@
     "name": "HCCL_DETERMINISTIC",
     "definition_ref": [
       "docs/source/faqs.md:199",
-      "vllm_ascend/batch_invariant.py:85"
+      "vllm_ascend/batch_invariant.py:53"
     ],
     "default": "true",
     "type": "string",
@@ -463,10 +446,10 @@
       "docs/source/tutorials/models/Qwen3-235B-A22B.md:533",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:105",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:151",
-      "docs/source/user_guide/feature_guide/kv_pool.md:598",
-      "docs/source/user_guide/feature_guide/kv_pool.md:681",
-      "docs/source/user_guide/feature_guide/kv_pool.md:925",
-      "docs/source/user_guide/feature_guide/kv_pool.md:989",
+      "docs/source/user_guide/feature_guide/kv_pool.md:589",
+      "docs/source/user_guide/feature_guide/kv_pool.md:672",
+      "docs/source/user_guide/feature_guide/kv_pool.md:916",
+      "docs/source/user_guide/feature_guide/kv_pool.md:980",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:118",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:185"
     ],
@@ -487,7 +470,7 @@
       "docs/source/tutorials/models/DeepSeek-V3.1.md:225",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:308",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:362",
-      "vllm_ascend/utils.py:959"
+      "vllm_ascend/utils.py:931"
     ],
     "default": "1",
     "type": "string",
@@ -507,7 +490,7 @@
       "docs/source/tutorials/models/DeepSeek-V3.1.md:226",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:309",
       "docs/source/tutorials/models/DeepSeek-V3.2.md:363",
-      "vllm_ascend/utils.py:959"
+      "vllm_ascend/utils.py:931"
     ],
     "default": "0",
     "type": "string",
@@ -565,14 +548,7 @@
       "docs/source/tutorials/models/Qwen3-Dense.md:172",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:113",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:159",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:10",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:8",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:11",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:7",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:11",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:7",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:11",
-      "vllm_ascend/utils.py:499"
+      "vllm_ascend/utils.py:477"
     ],
     "default": "AIV",
     "type": "string",
@@ -580,8 +556,7 @@
     "source": "code",
     "source_tags": [
       "code_reference",
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "HCCL_RDMA_RETRY_CNT": {
@@ -655,10 +630,10 @@
       "docs/source/tutorials/models/Qwen3-235B-A22B.md:539",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:108",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:154",
-      "docs/source/user_guide/feature_guide/kv_pool.md:601",
-      "docs/source/user_guide/feature_guide/kv_pool.md:684",
-      "docs/source/user_guide/feature_guide/kv_pool.md:928",
-      "docs/source/user_guide/feature_guide/kv_pool.md:992",
+      "docs/source/user_guide/feature_guide/kv_pool.md:592",
+      "docs/source/user_guide/feature_guide/kv_pool.md:675",
+      "docs/source/user_guide/feature_guide/kv_pool.md:919",
+      "docs/source/user_guide/feature_guide/kv_pool.md:983",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:121",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:188"
     ],
@@ -687,7 +662,7 @@
   "LCCL_DETERMINISTIC": {
     "name": "LCCL_DETERMINISTIC",
     "definition_ref": [
-      "vllm_ascend/batch_invariant.py:86"
+      "vllm_ascend/batch_invariant.py:54"
     ],
     "default": null,
     "type": "string",
@@ -756,7 +731,7 @@
   "MOONCAKE_CONFIG_PATH": {
     "name": "MOONCAKE_CONFIG_PATH",
     "definition_ref": [
-      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:125"
+      "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py:121"
     ],
     "default": null,
     "type": "string",
@@ -830,23 +805,19 @@
       "docs/source/tutorials/models/Qwen3-235B-A22B.md:547",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:109",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:155",
-      "docs/source/user_guide/feature_guide/kv_pool.md:605",
-      "docs/source/user_guide/feature_guide/kv_pool.md:688",
-      "docs/source/user_guide/feature_guide/kv_pool.md:933",
-      "docs/source/user_guide/feature_guide/kv_pool.md:996",
+      "docs/source/user_guide/feature_guide/kv_pool.md:596",
+      "docs/source/user_guide/feature_guide/kv_pool.md:679",
+      "docs/source/user_guide/feature_guide/kv_pool.md:924",
+      "docs/source/user_guide/feature_guide/kv_pool.md:987",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:122",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md:189",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:7",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:12",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:10"
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:189"
     ],
     "default": "false",
     "type": "string",
     "valid_values": [],
     "source": "docs_export",
     "source_tags": [
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "OPENAI_API_KEY": {
@@ -860,19 +831,6 @@
     "source": "code",
     "source_tags": [
       "code_reference"
-    ]
-  },
-  "PAGED_ATTENTION_MASK_LEN": {
-    "name": "PAGED_ATTENTION_MASK_LEN",
-    "definition_ref": [
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:12"
-    ],
-    "default": "5500",
-    "type": "string",
-    "valid_values": [],
-    "source": "tests_yaml",
-    "source_tags": [
-      "tests_yaml"
     ]
   },
   "PYTORCH_NPU_ALLOC_CONF": {
@@ -934,13 +892,13 @@
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:142",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:99",
       "docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md:65",
-      "docs/source/user_guide/feature_guide/kv_pool.md:1058",
-      "docs/source/user_guide/feature_guide/kv_pool.md:607",
-      "docs/source/user_guide/feature_guide/kv_pool.md:690",
-      "docs/source/user_guide/feature_guide/kv_pool.md:763",
-      "docs/source/user_guide/feature_guide/kv_pool.md:837",
-      "docs/source/user_guide/feature_guide/kv_pool.md:935",
-      "docs/source/user_guide/feature_guide/kv_pool.md:998",
+      "docs/source/user_guide/feature_guide/kv_pool.md:1049",
+      "docs/source/user_guide/feature_guide/kv_pool.md:598",
+      "docs/source/user_guide/feature_guide/kv_pool.md:681",
+      "docs/source/user_guide/feature_guide/kv_pool.md:754",
+      "docs/source/user_guide/feature_guide/kv_pool.md:828",
+      "docs/source/user_guide/feature_guide/kv_pool.md:926",
+      "docs/source/user_guide/feature_guide/kv_pool.md:989",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:135",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:202",
       "docs/source/user_guide/feature_guide/quantization.md:45",
@@ -968,25 +926,6 @@
     "source": "code",
     "source_tags": [
       "code_reference"
-    ]
-  },
-  "SERVER_PORT": {
-    "name": "SERVER_PORT",
-    "definition_ref": [
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:11",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:10",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:12",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:9",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:14",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:9",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:13"
-    ],
-    "default": "DEFAULT_PORT",
-    "type": "string",
-    "valid_values": [],
-    "source": "tests_yaml",
-    "source_tags": [
-      "tests_yaml"
     ]
   },
   "SOC_VERSION": {
@@ -1038,28 +977,20 @@
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:112",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:158",
       "docs/source/user_guide/feature_guide/large_scale_ep.md:136",
-      "docs/source/user_guide/feature_guide/large_scale_ep.md:203",
-      "tests/e2e/nightly/single_node/models/configs/Prefix-Cache-Qwen3-32B-Int8.yaml:9",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:6",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:9",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:6",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:10",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:6",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml:9"
+      "docs/source/user_guide/feature_guide/large_scale_ep.md:203"
     ],
     "default": "2",
     "type": "string",
     "valid_values": [],
     "source": "docs_export",
     "source_tags": [
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "TRITON_ALL_BLOCKS_PARALLEL": {
     "name": "TRITON_ALL_BLOCKS_PARALLEL",
     "definition_ref": [
-      "vllm_ascend/ops/rotary_embedding.py:497"
+      "vllm_ascend/ops/rotary_embedding.py:489"
     ],
     "default": null,
     "type": "string",
@@ -1128,7 +1059,7 @@
   "VLLM_ASCEND_ENABLE_FLASHCOMM": {
     "name": "VLLM_ASCEND_ENABLE_FLASHCOMM",
     "definition_ref": [
-      "vllm_ascend/utils.py:765"
+      "vllm_ascend/utils.py:737"
     ],
     "default": null,
     "type": "string",
@@ -1167,10 +1098,6 @@
       "docs/source/tutorials/models/Qwen3-Dense.md:175",
       "docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md:197",
       "docs/source/user_guide/feature_guide/layer_sharding.md:68",
-      "tests/e2e/nightly/single_node/models/configs/QwQ-32B.yaml:9",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml:8",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:13",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml:8",
       "vllm_ascend/envs.py:74"
     ],
     "default": "0",
@@ -1180,8 +1107,7 @@
     "source_tags": [
       "code_definition",
       "code_reference",
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "VLLM_ASCEND_ENABLE_FUSED_MC2": {
@@ -1208,7 +1134,6 @@
   "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE": {
     "name": "VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE",
     "definition_ref": [
-      "vllm_ascend/batch_invariant.py:82",
       "vllm_ascend/envs.py:71"
     ],
     "default": "0",
@@ -1244,8 +1169,7 @@
     "name": "VLLM_ASCEND_ENABLE_NZ",
     "definition_ref": [
       "docs/source/user_guide/feature_guide/sleep_mode.md:81",
-      "tests/e2e/nightly/single_node/models/configs/Qwen2.5-VL-32B-Instruct.yaml:10",
-      "vllm_ascend/batch_invariant.py:80",
+      "vllm_ascend/batch_invariant.py:50",
       "vllm_ascend/envs.py:101"
     ],
     "default": 1,
@@ -1255,15 +1179,14 @@
     "source_tags": [
       "code_definition",
       "code_reference",
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "VLLM_ASCEND_ENABLE_PREFETCH_MLP": {
     "name": "VLLM_ASCEND_ENABLE_PREFETCH_MLP",
     "definition_ref": [
       "docs/source/tutorials/features/suffix_speculative_decoding.md:84",
-      "vllm_ascend/ascend_config.py:150",
+      "vllm_ascend/ascend_config.py:143",
       "vllm_ascend/envs.py:81"
     ],
     "default": "0",
@@ -1324,7 +1247,7 @@
   "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE": {
     "name": "VLLM_ASCEND_MLP_DOWN_PREFETCH_SIZE",
     "definition_ref": [
-      "vllm_ascend/ascend_config.py:153",
+      "vllm_ascend/ascend_config.py:146",
       "vllm_ascend/envs.py:87",
       "vllm_ascend/envs.py:88"
     ],
@@ -1340,7 +1263,7 @@
   "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE": {
     "name": "VLLM_ASCEND_MLP_GATE_UP_PREFETCH_SIZE",
     "definition_ref": [
-      "vllm_ascend/ascend_config.py:152",
+      "vllm_ascend/ascend_config.py:145",
       "vllm_ascend/envs.py:83",
       "vllm_ascend/envs.py:84"
     ],
@@ -1480,22 +1403,20 @@
       "docs/source/tutorials/models/GLM5.md:374",
       "docs/source/tutorials/models/GLM5.md:421",
       "docs/source/tutorials/models/Qwen-VL-Dense.md:401",
-      "docs/source/user_guide/feature_guide/kv_pool.md:1055",
-      "docs/source/user_guide/feature_guide/kv_pool.md:608",
-      "docs/source/user_guide/feature_guide/kv_pool.md:691",
-      "docs/source/user_guide/feature_guide/kv_pool.md:760",
-      "docs/source/user_guide/feature_guide/kv_pool.md:834",
-      "docs/source/user_guide/feature_guide/kv_pool.md:936",
-      "docs/source/user_guide/feature_guide/kv_pool.md:999",
-      "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A3-Feature-Stack3.yaml:9"
+      "docs/source/user_guide/feature_guide/kv_pool.md:1046",
+      "docs/source/user_guide/feature_guide/kv_pool.md:599",
+      "docs/source/user_guide/feature_guide/kv_pool.md:682",
+      "docs/source/user_guide/feature_guide/kv_pool.md:751",
+      "docs/source/user_guide/feature_guide/kv_pool.md:825",
+      "docs/source/user_guide/feature_guide/kv_pool.md:927",
+      "docs/source/user_guide/feature_guide/kv_pool.md:990"
     ],
     "default": "1",
     "type": "string",
     "valid_values": [],
     "source": "docs_export",
     "source_tags": [
-      "docs_export",
-      "tests_yaml"
+      "docs_export"
     ]
   },
   "VLLM_VERSION": {

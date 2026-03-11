@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:724
-- read_ref: vllm/vllm/envs.py:64, vllm/vllm/envs.py:724, vllm/vllm/envs.py:725
+- definition_ref: vllm/envs.py:736
+- read_ref: vllm/vllm/envs.py:64, vllm/vllm/envs.py:736, vllm/vllm/envs.py:737
 - effect_ref: vllm/vllm/transformers_utils/runai_utils.py:57
 - web_refs: 2
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 加载失败; 返回格式异常
 - value_failure_signals: 加载失败; 返回格式异常
 - recommendation: 固定模型版本并记录依赖。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

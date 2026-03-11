@@ -1,0 +1,114 @@
+{
+  "id": "api:fused_mc2_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "FusedMC2Method",
+  "summary": "融合MC2通信方法实现，将MC2通信与expert计算融合，进一步优化性能",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/fused_moe/moe_comm_method.py",
+      "lines": "296-394"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_FUSED_MC2"
+  ],
+  "related_apis": [
+    "MoECommMethod",
+    "TokenDispatcherWithMC2"
+  ],
+  "related_features": [
+    "moe",
+    "expert_parallel",
+    "mc2",
+    "quantization"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "fused_experts()执行融合计算"
+      ],
+      "memory_impact": "使用融合kernel减少内存访问",
+      "throughput_impact": "融合计算最大化吞吐量",
+      "latency_impact": "融合kernel降低延迟",
+      "test_cases": [
+        {
+          "name": "融合MC2测试",
+          "description": ""
+        },
+        {
+          "name": "量化测试",
+          "description": ""
+        },
+        {
+          "name": "decode模式测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有MoE模型"
+      ],
+      "enable_config": "设置VLLM_ASCEND_ENABLE_FUSED_MC2=1或2",
+      "unsuitable_scenarios": [
+        "非量化场景",
+        "EP=1"
+      ],
+      "best_practices": [
+        "配合量化使用",
+        "decode模式优化"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/fused_moe/moe_comm_method.py:296-394",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "fused_experts()实现",
+        "融合kernel调用"
+      ],
+      "affected_features": [
+        "MoE融合计算",
+        "量化支持"
+      ]
+    },
+    "design": {
+      "principle": "将通信和计算融合到单一kernel",
+      "theory_analysis": "减少kernel launch和内存访问开销",
+      "design_decisions": [
+        {
+          "decision": "支持两种模式(1和2)",
+          "reason": ""
+        },
+        {
+          "decision": "需要量化权重",
+          "reason": ""
+        },
+        {
+          "decision": "支持decode优化",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "e78aecce257085aa98ac61e8223d6a2f95d35a66a9fefecd130bcb0350e1045c",
+  "knowledge_domain": "integration-core"
+}

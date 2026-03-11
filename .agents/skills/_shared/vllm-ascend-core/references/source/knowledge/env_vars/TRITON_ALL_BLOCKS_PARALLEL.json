@@ -1,0 +1,101 @@
+{
+  "id": "env_var:triton_all_blocks_parallel",
+  "type": "env_var",
+  "category": "vllm_ascend",
+  "name": "TRITON_ALL_BLOCKS_PARALLEL",
+  "summary": "控制Triton内核并行执行模式，避免大grid场景下的调度器/运行时失败",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ops/rotary_embedding.py",
+      "lines": "494-497"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendMRotaryEmbedding.forward_triton"
+  ],
+  "related_features": [
+    "triton_kernels",
+    "rotary_embedding"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "影响Triton内核执行模式",
+        "与大token数量场景交互"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "大grid场景可避免调度失败",
+      "latency_impact": "大grid场景可避免超时",
+      "test_cases": [
+        {
+          "name": "大grid测试",
+          "description": "验证>65535 tokens时的Triton执行",
+          "threshold": 65535
+        },
+        {
+          "name": "mrope测试",
+          "description": "验证mrope场景下的并行执行",
+          "threshold": 0
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "多模态模型(使用mrope)"
+      ],
+      "enable_config": "export TRITON_ALL_BLOCKS_PARALLEL=1",
+      "unsuitable_scenarios": [],
+      "best_practices": [
+        "大token数量场景自动启用",
+        "无需手动配置"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/ops/rotary_embedding.py",
+          "function": "AscendMRotaryEmbedding.forward_triton",
+          "lines": "494-497",
+          "purpose": "当grid超过_ASCEND_TRITON_GRID_LIMIT时自动设置"
+        }
+      ],
+      "modification_points": [
+        "rotary_embedding.py: 修改阈值或启用逻辑"
+      ],
+      "affected_features": [
+        "triton_kernels",
+        "rotary_embedding",
+        "mrope"
+      ]
+    },
+    "design": {
+      "principle": "Ascend NPU对Triton grid大小有限制，超过限制时需要启用并行块执行模式",
+      "theory_analysis": "Triton grid超过65535时，Ascend调度器可能失败。启用TRITON_ALL_BLOCKS_PARALLEL可以避免此问题",
+      "design_decisions": [
+        {
+          "decision": "自动启用",
+          "reason": "当检测到grid超过阈值时自动设置，无需用户干预"
+        },
+        {
+          "decision": "阈值设为65535",
+          "reason": "经验值，超过此值时调度器可能出现问题"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "e711db29981d70b810770beccd56a1b71ff0133c98c87a6cde9ae8a27e0f308b",
+  "knowledge_domain": "vllm-ascend-core"
+}

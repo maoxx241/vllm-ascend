@@ -1,0 +1,126 @@
+{
+  "id": "operator:mla_preprocess",
+  "type": "operator",
+  "category": "attention",
+  "name": "mla_preprocess",
+  "summary": "MLA预处理融合算子，将W8A8量化的QKV投影、LayerNorm、RoPE和KV缓存写入融合为单一操作，专为MLAPO优化。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "1307-1365"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "784-841"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MLAPO"
+  ],
+  "related_apis": [
+    "torch.ops._C_ascend.mla_preprocess"
+  ],
+  "related_features": [
+    "mla_attention",
+    "mlapo",
+    "w8a8_quantization",
+    "fusion"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与W8A8量化权重配合",
+        "与KV缓存配合"
+      ],
+      "memory_impact": "减少中间张量，直接输出到缓存",
+      "throughput_impact": "融合多个操作提升吞吐",
+      "latency_impact": "单算子完成预处理全流程",
+      "test_cases": [
+        {
+          "name": "decode场景",
+          "description": ""
+        },
+        {
+          "name": "enable_inner_out模式",
+          "description": ""
+        },
+        {
+          "name": "不同cache_mode",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3",
+        "DeepSeek-R1",
+        "DeepSeek-V3.2"
+      ],
+      "enable_config": "VLLM_ASCEND_ENABLE_MLAPO=1且W8A8量化",
+      "unsuitable_scenarios": [
+        "非W8A8量化",
+        "token数>1024"
+      ],
+      "best_practices": [
+        "确保量化参数正确配置",
+        "token数控制在限制内"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendMLAImpl._mla_preprocess_only_decode",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "AscendSFAImpl._sfa_preprocess_with_mlapo",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "quant_mode配置",
+        "cache_mode选择",
+        "enable_inner_out标志"
+      ],
+      "affected_features": [
+        "MLAPO性能优化",
+        "量化精度"
+      ]
+    },
+    "design": {
+      "principle": "将QKV投影、量化/反量化、LayerNorm、RoPE和缓存写入融合为单一算子",
+      "theory_analysis": "MLAPO通过算子融合减少内存访问和kernel启动开销",
+      "design_decisions": [
+        {
+          "decision": "仅支持W8A8量化",
+          "reason": ""
+        },
+        {
+          "decision": "token数限制1024",
+          "reason": ""
+        },
+        {
+          "decision": "支持nzcache模式",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "eaedd16f763fcf98a3165ca6b2c49942fad17d4e916802cacdcc89fd7b2bc7a9",
+  "knowledge_domain": "vllm-ascend-core"
+}

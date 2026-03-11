@@ -1,0 +1,119 @@
+{
+  "id": "api:sampling_params",
+  "type": "api",
+  "category": "vllm",
+  "name": "SamplingParams",
+  "summary": "采样参数配置类，控制文本生成的采样策略，包括温度、top-k、top-p、惩罚等参数",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/sampling_params.py",
+      "lines": "155-890"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "RequestOutput",
+    "BeamSearchParams",
+    "StructuredOutputsParams",
+    "RepetitionDetectionParams"
+  ],
+  "related_features": [
+    "speculative_decoding",
+    "structured_output"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "构造函数设置参数",
+        "clone()克隆参数",
+        "verify()验证参数有效性"
+      ],
+      "memory_impact": "轻量级对象，内存占用可忽略",
+      "throughput_impact": "参数设置影响采样效率，如logprobs请求会增加计算开销",
+      "latency_impact": "复杂采样策略可能增加延迟",
+      "test_cases": [
+        {
+          "name": "贪心采样测试",
+          "description": ""
+        },
+        {
+          "name": "随机采样测试",
+          "description": ""
+        },
+        {
+          "name": "beam search测试",
+          "description": ""
+        },
+        {
+          "name": "结构化输出测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "直接实例化或使用from_optional()创建",
+      "unsuitable_scenarios": [
+        "speculative decoding不支持min_p和logit_bias"
+      ],
+      "best_practices": [
+        "使用temperature=0进行确定性输出",
+        "合理设置max_tokens控制输出长度",
+        "使用structured_outputs进行结构化生成"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/sampling_params.py:155-890",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "__post_init__()参数验证",
+        "verify()验证逻辑",
+        "新增采样参数"
+      ],
+      "affected_features": [
+        "采样策略",
+        "结构化输出",
+        "惩罚机制"
+      ]
+    },
+    "design": {
+      "principle": "使用msgspec.Struct实现高效序列化，支持OpenAI API兼容的参数",
+      "theory_analysis": "支持多种采样策略：贪心、随机、beam search，以及各种惩罚机制",
+      "design_decisions": [
+        {
+          "decision": "使用dataclass风格",
+          "reason": ""
+        },
+        {
+          "decision": "支持结构化输出",
+          "reason": ""
+        },
+        {
+          "decision": "支持重复检测",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "7a829f8ad026979d64a223c9411e90f2a005c3b4a2b320d1349ef776e99ab4d2",
+  "knowledge_domain": "vllm-upstream"
+}

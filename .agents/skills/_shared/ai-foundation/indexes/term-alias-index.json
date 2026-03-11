@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-06T00:35:38.577673+00:00",
+  "generated_at": "2026-03-11T07:50:27.715591+00:00",
   "feature_aliases": {
     "quantization": [
       "quantization",
@@ -867,6 +867,46 @@
       "alias": "memory-tuning",
       "canonical_term": "--cpu-offload-gb",
       "topic_id": "vllm.arg.cpu_offload_gb"
+    },
+    {
+      "alias": "--cpu-offload-params",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "cpu-offload-params",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "cpu_offload_params",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "cpu offload params",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "cpuoffloadparams",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "memory_tuning",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "memory tuning",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
+    },
+    {
+      "alias": "memory-tuning",
+      "canonical_term": "--cpu-offload-params",
+      "topic_id": "vllm.arg.cpu_offload_params"
     },
     {
       "alias": "--cudagraph-capture-sizes",
@@ -2674,6 +2714,46 @@
       "topic_id": "vllm.arg.expert_placement_strategy"
     },
     {
+      "alias": "--fail-on-environ-validation",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "fail-on-environ-validation",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "fail_on_environ_validation",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "fail on environ validation",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "failonenvironvalidation",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "--fail-on-environ-validation",
+      "topic_id": "vllm.arg.fail_on_environ_validation"
+    },
+    {
       "alias": "--fully-sharded-loras",
       "canonical_term": "--fully-sharded-loras",
       "topic_id": "vllm.arg.fully_sharded_loras"
@@ -3439,6 +3519,46 @@
       "topic_id": "vllm.arg.kv_transfer_config"
     },
     {
+      "alias": "--language-model-only",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "language-model-only",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "language_model_only",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "language model only",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "languagemodelonly",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "model_selection",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "model selection",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
+      "alias": "model-selection",
+      "canonical_term": "--language-model-only",
+      "topic_id": "vllm.arg.language_model_only"
+    },
+    {
       "alias": "--limit-mm-per-prompt",
       "canonical_term": "--limit-mm-per-prompt",
       "topic_id": "vllm.arg.limit_mm_per_prompt"
@@ -3507,46 +3627,6 @@
       "alias": "general-runtime",
       "canonical_term": "--load-format",
       "topic_id": "vllm.arg.load_format"
-    },
-    {
-      "alias": "--logits-processor-pattern",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logits-processor-pattern",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logits_processor_pattern",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logits processor pattern",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logitsprocessorpattern",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logging_debug",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logging debug",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
-    },
-    {
-      "alias": "logging-debug",
-      "canonical_term": "--logits-processor-pattern",
-      "topic_id": "vllm.arg.logits_processor_pattern"
     },
     {
       "alias": "--logits-processors",
@@ -8412,6 +8492,41 @@
       "alias": "data-parallel",
       "canonical_term": "VLLM_ENABLE_MOE_DP_CHUNK",
       "topic_id": "vllm.env.vllm_enable_moe_dp_chunk"
+    },
+    {
+      "alias": "VLLM_ENABLE_PREGRAD_PASSES",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "vllm_enable_pregrad_passes",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "vllm-enable-pregrad-passes",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "vllm enable pregrad passes",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "VLLM_ENABLE_PREGRAD_PASSES",
+      "topic_id": "vllm.env.vllm_enable_pregrad_passes"
     },
     {
       "alias": "VLLM_ENABLE_RESPONSES_API_STORE",
@@ -13419,6 +13534,76 @@
       "topic_id": "vllm.env.vllm_video_loader_backend"
     },
     {
+      "alias": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "vllm_weight_offloading_disable_pin_memory",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "vllm-weight-offloading-disable-pin-memory",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "vllm weight offloading disable pin memory",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_PIN_MEMORY",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_pin_memory"
+    },
+    {
+      "alias": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "vllm_weight_offloading_disable_uva",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "vllm-weight-offloading-disable-uva",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "vllm weight offloading disable uva",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "general_runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "general runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
+      "alias": "general-runtime",
+      "canonical_term": "VLLM_WEIGHT_OFFLOADING_DISABLE_UVA",
+      "topic_id": "vllm.env.vllm_weight_offloading_disable_uva"
+    },
+    {
       "alias": "VLLM_WORKER_MULTIPROC_METHOD",
       "canonical_term": "VLLM_WORKER_MULTIPROC_METHOD",
       "topic_id": "vllm.env.vllm_worker_multiproc_method"
@@ -15229,41 +15414,6 @@
       "topic_id": "vllm_ascend.env.ascend_custom_opp_path"
     },
     {
-      "alias": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "ascend_enable_use_fabric_mem",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "ascend-enable-use-fabric-mem",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "ascend enable use fabric mem",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "general_runtime",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "general runtime",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
-      "alias": "general-runtime",
-      "canonical_term": "ASCEND_ENABLE_USE_FABRIC_MEM",
-      "topic_id": "vllm_ascend.env.ascend_enable_use_fabric_mem"
-    },
-    {
       "alias": "ASCEND_HOME_PATH",
       "canonical_term": "ASCEND_HOME_PATH",
       "topic_id": "vllm_ascend.env.ascend_home_path"
@@ -16349,41 +16499,6 @@
       "topic_id": "vllm_ascend.env.openai_api_key"
     },
     {
-      "alias": "PAGED_ATTENTION_MASK_LEN",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "paged_attention_mask_len",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "paged-attention-mask-len",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "paged attention mask len",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "general_runtime",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "general runtime",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
-      "alias": "general-runtime",
-      "canonical_term": "PAGED_ATTENTION_MASK_LEN",
-      "topic_id": "vllm_ascend.env.paged_attention_mask_len"
-    },
-    {
       "alias": "PYTORCH_NPU_ALLOC_CONF",
       "canonical_term": "PYTORCH_NPU_ALLOC_CONF",
       "topic_id": "vllm_ascend.env.pytorch_npu_alloc_conf"
@@ -16442,41 +16557,6 @@
       "alias": "general-runtime",
       "canonical_term": "RANK",
       "topic_id": "vllm_ascend.env.rank"
-    },
-    {
-      "alias": "SERVER_PORT",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "server_port",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "server-port",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "server port",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "network_serving",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "network serving",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
-    },
-    {
-      "alias": "network-serving",
-      "canonical_term": "SERVER_PORT",
-      "topic_id": "vllm_ascend.env.server_port"
     },
     {
       "alias": "SOC_VERSION",

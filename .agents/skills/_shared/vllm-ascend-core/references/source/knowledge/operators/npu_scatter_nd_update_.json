@@ -1,0 +1,98 @@
+{
+  "id": "operator:npu_scatter_nd_update",
+  "type": "operator",
+  "category": "other",
+  "name": "npu_scatter_nd_update_",
+  "summary": "NPU分散ND更新算子，用于SFA架构中将k_li写入KV缓存，支持非连续索引更新。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/sfa_v1.py",
+      "lines": "1092-1099"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_scatter_nd_update_"
+  ],
+  "related_features": [
+    "sfa_attention",
+    "kv_cache",
+    "scatter_update"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与slot_mapping配合",
+        "与kv_cache[2]配合(k_li缓存)"
+      ],
+      "memory_impact": "原地更新缓存",
+      "throughput_impact": "非连续更新优化",
+      "latency_impact": "单算子完成缓存更新",
+      "test_cases": [
+        {
+          "name": "SFA场景",
+          "description": ""
+        },
+        {
+          "name": "不同k_li shape",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3.2",
+        "GLM-MoE-DSA"
+      ],
+      "enable_config": "SFA模型自动启用",
+      "unsuitable_scenarios": [
+        "非SFA模型"
+      ],
+      "best_practices": [
+        "确保slot_mapping view正确",
+        "k_li需要flatten"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendSFAImpl.forward",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [],
+      "affected_features": [
+        "SFA KV缓存更新效率"
+      ]
+    },
+    "design": {
+      "principle": "使用slot_mapping作为索引，将k_li更新到KV缓存的指定位置",
+      "theory_analysis": "SFA需要单独存储k_li用于专家选择，使用scatter更新",
+      "design_decisions": [
+        {
+          "decision": "原地更新",
+          "reason": ""
+        },
+        {
+          "decision": "支持is_kv_producer场景",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "c15895acd5f9ba39bf5e3db373417c25b767041dd5e510584bc95d3f98559c29",
+  "knowledge_domain": "vllm-ascend-core"
+}

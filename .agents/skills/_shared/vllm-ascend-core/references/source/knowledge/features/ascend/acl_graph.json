@@ -1,0 +1,177 @@
+{
+  "id": "feature:acl_graph",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "ACL Graph",
+  "summary": "Ascend计算图捕获和重放机制，通过torch.npu.graph捕获计算图并重放，消除Python和框架overhead，支持FULL和PIECEWISE两种模式。",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/compilation/acl_graph.py",
+      "lines": "1-290"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "252-302"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_LOGGING_LEVEL=DEBUG"
+  ],
+  "related_apis": [
+    "ACLGraphWrapper",
+    "ACLGraphEntry",
+    "GraphParams",
+    "update_full_graph_params",
+    "set_graph_params"
+  ],
+  "related_features": [
+    "xlite_graph",
+    "npugraph_ex",
+    "static_kernel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与torch.npu.NPUGraph深度集成，是PyTorch NPU的图执行机制",
+        "支持FULL模式(整个模型)和PIECEWISE模式(分段捕获)",
+        "与speculative decoding兼容，支持draft model图捕获"
+      ],
+      "memory_impact": "图捕获需要额外的graph_pool内存；每个batch_size对应一个图实例，内存占用与capture_sizes成正比；weak_ref机制可释放中间tensor节省内存",
+      "throughput_impact": "图重放可提升吞吐量30-50%；消除Python overhead和动态调度开销；PIECEWISE模式可针对热点层优化",
+      "latency_impact": "图重放延迟降低20-40%；消除首次执行的编译开销；固定shape避免动态shape开销",
+      "test_cases": [
+        {
+          "name": "测试FULL模式和PIECEWISE模式的性能差异",
+          "description": ""
+        },
+        {
+          "name": "验证不同batch_size的图捕获和重放正确性",
+          "description": ""
+        },
+        {
+          "name": "测试enable_static_kernel的性能影响",
+          "description": ""
+        },
+        {
+          "name": "验证weak_ref_output的内存释放效果",
+          "description": ""
+        },
+        {
+          "name": "测试与speculative decoding(eagle/eagle3)的兼容性",
+          "description": ""
+        },
+        {
+          "name": "验证input_addresses一致性检查(DEBUG模式)",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有vLLM支持的模型",
+        "特别适合固定shape的decode场景"
+      ],
+      "enable_config": "通过compilation_config启用；AscendCompilationConfig: {enable_npugraph_ex: true, enable_static_kernel: false}",
+      "unsuitable_scenarios": [
+        "动态shape频繁变化的场景(图捕获开销大)",
+        "内存紧张无法容纳多个图实例的场景",
+        "需要动态控制流的模型(图无法捕获)"
+      ],
+      "best_practices": [
+        "生产环境建议使用PIECEWISE模式，平衡性能和灵活性",
+        "合理设置compile_ranges_split_points，优化分段策略",
+        "监控图捕获时间和内存占用",
+        "enable_static_kernel适合shape完全固定的场景",
+        "使用DEBUG模式验证input_addresses一致性"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/compilation/acl_graph.py",
+          "description": "ACLGraphWrapper核心类，实现图捕获和重放",
+          "key_methods": [
+            "__init__",
+            "__call__",
+            "unwrap"
+          ]
+        },
+        {
+          "file": "vllm_ascend/compilation/acl_graph.py",
+          "description": "GraphParams数据结构，存储图执行参数",
+          "key_fields": [
+            "events",
+            "workspaces",
+            "handles",
+            "attn_params"
+          ]
+        },
+        {
+          "file": "vllm_ascend/ascend_config.py",
+          "description": "AscendCompilationConfig配置类",
+          "key_fields": [
+            "enable_npugraph_ex",
+            "enable_static_kernel",
+            "fuse_allreduce_rms"
+          ]
+        }
+      ],
+      "modification_points": [
+        "扩展图捕获逻辑：在__call__中添加新的判断条件",
+        "优化内存管理：调整weak_ref_workspaces和weak_ref_tensors的使用",
+        "添加新的融合优化：在AscendCompilationConfig中添加新字段",
+        "扩展GraphParams：添加新的参数类型支持"
+      ],
+      "affected_features": [
+        "xlite_graph: 两者为互补关系，需协调使用场景",
+        "attention: 需要通过update_full_graph_params更新图参数",
+        "speculative_decoding: 需要支持draft_graph_params"
+      ]
+    },
+    "design": {
+      "principle": "ACL Graph基于torch.npu.graph实现计算图捕获和重放。核心思想：1)首次执行时捕获计算图 2)缓存图实例和输出tensor 3)后续执行直接重放图 4)通过BatchDescriptor区分不同shape的图实例。FULL模式捕获整个模型，PIECEWISE模式分段捕获，提供灵活性。",
+      "theory_analysis": "图执行的核心优势在于消除动态开销：1)Python解释器overhead 2)动态图调度overhead 3)shape推导overhead 4)kernel selection overhead。代价是首次执行的捕获开销和额外的内存占用。PIECEWISE模式通过分段捕获，可以在热点层使用图执行，其他层保持动态执行，平衡性能和灵活性。",
+      "design_decisions": [
+        {
+          "decision": "FULL vs PIECEWISE模式",
+          "rationale": "FULL模式性能最优但灵活性差，适合shape完全固定的场景；PIECEWISE模式可以针对特定层优化，适合混合场景。用户可根据需求选择"
+        },
+        {
+          "decision": "weak_ref机制",
+          "rationale": "图捕获后，中间tensor不再需要，通过weak_ref释放内存。特别是PIECEWISE模式下，每个子图的输出都可以weak_ref，大幅节省内存"
+        },
+        {
+          "decision": "input_addresses检查",
+          "rationale": "图重放要求输入tensor地址与捕获时相同。DEBUG模式下检查地址一致性，帮助发现内存管理问题。生产环境可关闭以节省开销"
+        },
+        {
+          "decision": "graph_pool共享",
+          "rationale": "所有图实例共享一个graph_pool，避免内存碎片，提高内存利用率。通过current_platform.get_global_graph_pool()获取"
+        },
+        {
+          "decision": "synchronize策略",
+          "rationale": "图重放前需要synchronize，确保CPU的record event完成。但在特定场景(merge-eagle-graph)可以跳过，优化性能"
+        },
+        {
+          "decision": "enable_static_kernel",
+          "rationale": "静态kernel编译针对特定shape优化算子，性能更优但编译时间长。适合shape完全固定的生产环境"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "bf7faa13408dd90c151c6f12907e3bca41c99835b8243c1b78aa79d01a296086",
+  "knowledge_domain": "vllm-ascend-core"
+}

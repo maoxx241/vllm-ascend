@@ -1,0 +1,126 @@
+{
+  "id": "api:npumodel_runner",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "NPUModelRunner",
+  "summary": "NPU模型运行器V1版本，负责NPU上的模型执行、KV Cache管理、Attention计算和采样",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/worker/model_runner_v1.py",
+      "lines": "216-500"
+    }
+  ],
+  "related_env_vars": [
+    "VLLM_ASCEND_ENABLE_MLAPO",
+    "VLLM_ASCEND_ENABLE_NZ"
+  ],
+  "related_apis": [
+    "NPUInputBatch",
+    "AscendSampler",
+    "PCPManager",
+    "AscendAttentionBackend"
+  ],
+  "related_features": [
+    "acl_graph",
+    "context_parallel",
+    "speculative_decoding",
+    "eplb"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "load_model()加载模型",
+        "execute_model()执行推理",
+        "sample_tokens()采样",
+        "capture_model()捕获图"
+      ],
+      "memory_impact": "管理KV Cache、中间激活、采样缓冲区",
+      "throughput_impact": "支持PCP/DCP Context Parallel扩展，EPLB负载均衡",
+      "latency_impact": "ACL Graph优化降低延迟",
+      "test_cases": [
+        {
+          "name": "模型执行测试",
+          "description": ""
+        },
+        {
+          "name": "KV Cache管理测试",
+          "description": ""
+        },
+        {
+          "name": "采样测试",
+          "description": ""
+        },
+        {
+          "name": "ACL Graph测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有昇腾NPU支持的模型"
+      ],
+      "enable_config": "由NPUWorker创建，传入VllmConfig和device",
+      "unsuitable_scenarios": [
+        "需要V2 Model Runner的场景"
+      ],
+      "best_practices": [
+        "启用ACL Graph优化",
+        "配置PCP/DCP扩展",
+        "使用EPLB负载均衡"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/worker/model_runner_v1.py:216-500",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "execute_model()执行逻辑",
+        "initialize_kv_cache() KV Cache初始化",
+        "capture_model()图捕获"
+      ],
+      "affected_features": [
+        "模型执行",
+        "Attention",
+        "采样"
+      ]
+    },
+    "design": {
+      "principle": "继承GPUModelRunner，适配NPU特性",
+      "theory_analysis": "支持PCP/DCP Context Parallel，EPLB动态负载均衡",
+      "design_decisions": [
+        {
+          "decision": "使用AscendSampler采样",
+          "reason": ""
+        },
+        {
+          "decision": "支持MLAPO算子优化",
+          "reason": ""
+        },
+        {
+          "decision": "集成ACL Graph",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "4a4b63606d2b0ee4e0f082b262caef9addca78ea34a7f3d77c29cf22efd376fd",
+  "knowledge_domain": "integration-core"
+}

@@ -1,0 +1,135 @@
+{
+  "id": "feature:kv_nz_format",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "KV NZ Format",
+  "summary": "针对MLA模型的KV Cache NZ格式优化，减少PD disaggregation场景下Decode节点的内存占用",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/ascend_config.py",
+      "lines": "136-144"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/attention/mla_v1.py",
+      "lines": "1-100"
+    },
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py",
+      "lines": "1-100"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "torch_npu.npu_format_cast",
+    "ACL_FORMAT_FRACTAL_NZ"
+  ],
+  "related_features": [
+    "feature:pd_disaggregation",
+    "feature:device_adaptor"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与PD disaggregation集成测试",
+        "MLA模型KV cache格式转换测试",
+        "Decode节点内存占用测试"
+      ],
+      "memory_impact": "减少Decode节点KV cache内存占用约30-40%，NZ格式更适合NPU计算",
+      "throughput_impact": "Decode阶段吞吐量提升，减少内存带宽压力",
+      "latency_impact": "KV传输延迟略有增加（格式转换开销）",
+      "test_cases": [
+        {
+          "name": "测试enable_kv_nz=true的MLA模型推理正确性",
+          "description": ""
+        },
+        {
+          "name": "测试NZ格式下的KV cache传输一致性",
+          "description": ""
+        },
+        {
+          "name": "测试非MLA模型启用该功能的错误处理",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "DeepSeek-V3 MLA",
+        "DeepSeek-R1 MLA"
+      ],
+      "enable_config": "additional_config: {enable_kv_nz: true}，仅支持PD场景的Decode节点",
+      "unsuitable_scenarios": [
+        "非MLA模型",
+        "非PD disaggregation场景",
+        "Prefill节点"
+      ],
+      "best_practices": [
+        "仅在Decode节点启用",
+        "配合enable_sp=true使用",
+        "确保模型支持MLA架构"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "AscendConfig.enable_kv_nz：配置入口",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "MLA attention层：KV cache格式处理",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "Mooncake connector：KV传输格式转换",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "扩展支持更多MLA模型变体",
+        "优化NZ格式转换性能"
+      ],
+      "affected_features": [
+        "MLA attention实现",
+        "KV transfer机制",
+        "内存分配策略"
+      ]
+    },
+    "design": {
+      "principle": "NZ(FRACTAL_NZ)格式是NPU优化的数据布局，将数据按16x16分块存储，更适合矩阵运算。在Decode节点使用NZ格式存储KV cache，减少内存占用并提升计算效率。",
+      "theory_analysis": "MLA模型的KV cache压缩后仍占用大量内存。NZ格式通过分块存储优化，减少内存碎片，提升cache命中率。在PD分离场景，Decode节点内存更紧张，因此仅在D节点启用。",
+      "design_decisions": [
+        {
+          "decision": "仅支持MLA模型：其他模型的KV cache格式不同",
+          "reason": ""
+        },
+        {
+          "decision": "仅支持Decode节点：Prefill节点内存相对充足",
+          "reason": ""
+        },
+        {
+          "decision": "需要PD disaggregation：依赖KV传输机制",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "0ee72a02080bc66769e8be4f8625672420c8fa915dd1d6709670e991c61a1b82",
+  "knowledge_domain": "vllm-ascend-core"
+}

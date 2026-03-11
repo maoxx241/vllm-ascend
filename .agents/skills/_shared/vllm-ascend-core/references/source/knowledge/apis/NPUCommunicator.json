@@ -1,0 +1,107 @@
+{
+  "id": "api:npucommunicator",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "NPUCommunicator",
+  "summary": "NPU通信器，实现NPU设备间的分布式通信原语，如all_to_all、all_reduce等",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/distributed/device_communicators/npu_communicator.py",
+      "lines": "23-64"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "DeviceCommunicatorBase",
+    "HCCL"
+  ],
+  "related_features": [
+    "distributed_inference",
+    "tensor_parallel",
+    "expert_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "all_to_all()执行all-to-all通信",
+        "broadcast()广播",
+        "all_reduce()归约"
+      ],
+      "memory_impact": "管理通信缓冲区",
+      "throughput_impact": "通信效率影响分布式吞吐量",
+      "latency_impact": "通信开销影响延迟",
+      "test_cases": [
+        {
+          "name": "all_to_all测试",
+          "description": ""
+        },
+        {
+          "name": "all_reduce测试",
+          "description": ""
+        },
+        {
+          "name": "多卡通信测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有分布式模型"
+      ],
+      "enable_config": "分布式推理自动启用",
+      "unsuitable_scenarios": [
+        "单卡推理"
+      ],
+      "best_practices": [
+        "使用HCCL优化通信",
+        "合理配置通信组"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/distributed/device_communicators/npu_communicator.py:23-64",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "all_to_all()实现",
+        "新增通信原语"
+      ],
+      "affected_features": [
+        "分布式通信",
+        "TP/EP/DP"
+      ]
+    },
+    "design": {
+      "principle": "继承DeviceCommunicatorBase，适配NPU通信",
+      "theory_analysis": "使用HCCL实现高效通信",
+      "design_decisions": [
+        {
+          "decision": "支持scatter_sizes和gather_sizes",
+          "reason": ""
+        },
+        {
+          "decision": "使用torch.distributed接口",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "67f48e518a7842e4016ff4bd619c7803fc8111e88763251a97da5653d41ffb98",
+  "knowledge_domain": "vllm-ascend-core"
+}

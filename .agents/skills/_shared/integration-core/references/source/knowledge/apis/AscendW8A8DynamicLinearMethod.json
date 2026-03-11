@@ -1,0 +1,112 @@
+{
+  "id": "api:ascend_w8_a8_dynamic_linear_method",
+  "type": "api",
+  "category": "vllm-ascend",
+  "name": "AscendW8A8DynamicLinearMethod",
+  "summary": "昇腾W8A8动态量化线性层方法，实现INT8权重的动态per-token激活量化",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/quantization/methods/w8a8_dynamic.py",
+      "lines": "49-106"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "AscendLinearScheme",
+    "torch_npu.npu_dynamic_quant",
+    "torch_npu.npu_quant_matmul"
+  ],
+  "related_features": [
+    "quantization",
+    "w8a8",
+    "dynamic_quant"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "apply()执行量化线性计算",
+        "process_weights_after_loading()处理权重"
+      ],
+      "memory_impact": "INT8权重减少内存占用",
+      "throughput_impact": "量化计算提升吞吐量",
+      "latency_impact": "动态量化有额外开销",
+      "test_cases": [
+        {
+          "name": "量化计算测试",
+          "description": ""
+        },
+        {
+          "name": "权重处理测试",
+          "description": ""
+        },
+        {
+          "name": "精度验证测试",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有支持W8A8量化的模型"
+      ],
+      "enable_config": "配置quantization为W8A8_DYNAMIC",
+      "unsuitable_scenarios": [
+        "需要高精度的场景"
+      ],
+      "best_practices": [
+        "使用NZ格式优化",
+        "配置合理的scale"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm_ascend/quantization/methods/w8a8_dynamic.py:49-106",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "apply()量化逻辑",
+        "process_weights_after_loading()权重处理"
+      ],
+      "affected_features": [
+        "线性层量化",
+        "动态量化"
+      ]
+    },
+    "design": {
+      "principle": "使用动态per-token量化激活，per-channel量化权重",
+      "theory_analysis": "运行时动态计算激活scale，适应不同输入分布",
+      "design_decisions": [
+        {
+          "decision": "使用npu_dynamic_quant",
+          "reason": ""
+        },
+        {
+          "decision": "支持NZ格式",
+          "reason": ""
+        },
+        {
+          "decision": "INT8权重存储",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "both",
+  "implementation_repos": [
+    "vllm",
+    "vllm-ascend"
+  ],
+  "domain_reason": "Core implementation and resolved references span upstream vLLM and vLLM-Ascend.",
+  "source_hash": "ced72a56465744ac1ea4a59beb25f63b746728db619ad30e2b5d2e5b6c569787",
+  "knowledge_domain": "integration-core"
+}

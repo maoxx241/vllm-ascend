@@ -33,8 +33,8 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:530
-- read_ref: vllm/vllm/envs.py:15, vllm/vllm/envs.py:530, vllm/vllm/envs.py:530
+- definition_ref: vllm/envs.py:533
+- read_ref: vllm/vllm/envs.py:15, vllm/vllm/envs.py:533, vllm/vllm/envs.py:533
 - effect_ref: vllm/vllm/utils/network_utils.py:35, vllm/vllm/v1/executor/ray_executor.py:315
 - web_refs: 2
 
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: Address already in use; 健康检查 5xx
 - value_failure_signals: Address already in use; 健康检查 5xx
 - recommendation: 固定 host/port 并配套探活。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

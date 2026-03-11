@@ -1,0 +1,191 @@
+{
+  "id": "feature:multi_modal",
+  "type": "feature",
+  "category": "vllm",
+  "name": "Multi-Modal",
+  "summary": "多模态输入处理支持，统一处理图像、视频、音频等多种模态输入，通过模块化的processor架构实现模态特定的预处理和编码，支持encoder缓存和前缀缓存优化。",
+  "code_paths": [
+    {
+      "repo": "vllm",
+      "path": "vllm/config/multimodal.py",
+      "lines": "1-281"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/multimodal/inputs.py",
+      "lines": "1-1159"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/multimodal/processing/processor.py",
+      "lines": "1-500"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/multimodal/cache.py",
+      "lines": "1-200"
+    },
+    {
+      "repo": "vllm",
+      "path": "vllm/v1/worker/gpu/mm/encoder_runner.py",
+      "lines": "1-150"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "MultiModalConfig",
+    "MultiModalInputs",
+    "MultiModalKwargsItems",
+    "BaseMultiModalProcessor",
+    "MultiModalFeatureSpec",
+    "PlaceholderRange"
+  ],
+  "related_features": [
+    "feature:lora",
+    "feature:prefix_caching",
+    "feature:chunked_prefill",
+    "feature:tensor_parallel"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与LoRA交互：支持多模态模型的vision encoder LoRA，通过enable_tower_connector_lora启用",
+        "与Prefix Caching交互：多模态encoder输出可缓存，避免重复编码相同图像/视频",
+        "与Chunked Prefill交互：encoder输出在chunk边界需要正确处理，skip_mm_profiling可跳过MM内存分析",
+        "与Tensor Parallel交互：mm_encoder_tp_mode控制encoder的TP策略(weights/data)"
+      ],
+      "memory_impact": "多模态输入占用额外显存：图像约0.5-2MB/张，视频约10-50MB/段。mm_processor_cache_gb控制processor缓存大小(默认4GB)。encoder输出缓存占用与模型和输入尺寸相关。limit_mm_per_prompt限制每请求的模态输入数量。",
+      "throughput_impact": "启用encoder缓存可避免重复编码，提升吞吐量30-50%。mm_encoder_tp_mode=data可在TP ranks间并行编码，适合高分辨率输入。video_pruning_rate可剪枝视频帧，减少计算量。",
+      "latency_impact": "首次处理多模态输入需编码，增加50-200ms延迟。缓存命中后延迟降至<5ms。高分辨率图像/长视频编码时间更长，可通过limit_mm_per_prompt控制。",
+      "test_cases": [
+        {
+          "name": "test_multimodal_image_input",
+          "description": "测试图像输入的完整处理流程，包括预处理、编码、推理"
+        },
+        {
+          "name": "test_multimodal_video_input",
+          "description": "测试视频输入处理，验证帧采样和编码正确性"
+        },
+        {
+          "name": "test_multimodal_encoder_cache",
+          "description": "测试encoder输出缓存，验证缓存命中和淘汰"
+        },
+        {
+          "name": "test_multimodal_mixed_modalities",
+          "description": "测试同一请求中混合多种模态输入"
+        },
+        {
+          "name": "test_multimodal_interleaved_text",
+          "description": "测试文本和多模态输入交错场景"
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "LLaVA系列(LLaVA-1.5, LLaVA-NeXT, LLaVA-OneVision)",
+        "Qwen-VL系列(Qwen2-VL, Qwen2.5-VL)",
+        "InternVL系列",
+        "Phi-3-Vision",
+        "MiniCPM-V",
+        "IDEFICS",
+        "Pixtral",
+        "所有实现SupportsMultiModal接口的模型"
+      ],
+      "enable_config": "多模态模型自动启用。通过--limit-mm-per-prompt限制每请求的模态输入数量(如{\"image\": 5, \"video\": 1})。--mm-processor-cache-gb设置processor缓存大小。--mm-encoder-tp-mode设置encoder TP策略。--enable-mm-embeds允许直接传入预计算的embeddings。",
+      "unsuitable_scenarios": [
+        "纯文本任务(多模态支持增加开销)",
+        "极低延迟场景(encoder编码有额外延迟)",
+        "非标准模态输入(需要自定义processor)",
+        "内存受限场景(多模态输入占用额外显存)"
+      ],
+      "best_practices": [
+        "根据实际需求设置limit_mm_per_prompt，避免内存溢出",
+        "启用encoder缓存(mm_processor_cache_gb>0)提升重复输入场景性能",
+        "高分辨率输入场景使用mm_encoder_tp_mode=data并行编码",
+        "长视频使用video_pruning_rate剪枝减少计算量",
+        "使用mm_processor_kwargs传递模型特定的处理参数"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "vllm/config/multimodal.py",
+          "function": "MultiModalConfig",
+          "purpose": "多模态配置类，定义limit_per_prompt、encoder TP模式等参数"
+        },
+        {
+          "file": "vllm/multimodal/inputs.py",
+          "function": "MultiModalInputs",
+          "purpose": "多模态输入数据结构，包含prompt_token_ids、mm_kwargs、mm_placeholders"
+        },
+        {
+          "file": "vllm/multimodal/processing/processor.py",
+          "function": "BaseMultiModalProcessor",
+          "purpose": "多模态处理器基类，定义预处理和编码接口"
+        },
+        {
+          "file": "vllm/multimodal/cache.py",
+          "function": "EncoderCacheManager",
+          "purpose": "管理encoder输出缓存"
+        },
+        {
+          "file": "vllm/v1/worker/gpu/mm/encoder_runner.py",
+          "function": "EncoderRunner",
+          "purpose": "执行多模态encoder推理"
+        }
+      ],
+      "modification_points": [
+        "实现新的BaseMultiModalProcessor子类支持新模态",
+        "扩展MultiModalDataBuiltins添加新模态类型",
+        "自定义PlaceholderRange处理非标准token布局",
+        "实现新的EncoderCache策略(如LRU、FIFO)",
+        "添加新的MultiModalFieldConfig支持特殊数据格式"
+      ],
+      "affected_features": [
+        "LoRA: 多模态encoder的LoRA支持需要enable_tower_connector_lora",
+        "Prefix Caching: 多模态encoder输出需要独立的缓存键",
+        "Scheduler: 多模态请求需要额外的encoder预算规划",
+        "Memory Management: 多模态输入影响内存分析和KV Cache分配"
+      ]
+    },
+    "design": {
+      "principle": "多模态处理采用模块化架构：Input Parser解析原始输入，Processor执行模态特定预处理(如图像resize、归一化)，Encoder将处理后的输入编码为embedding，最后与文本embedding拼接输入LLM。这种设计支持灵活扩展新模态，同时通过缓存机制避免重复计算。",
+      "theory_analysis": "多模态模型的核心挑战是统一不同模态的表示。Vision-Language模型通常使用Vision Transformer(ViT)编码图像，将patch embedding映射到LLM的embedding空间。视频处理需要时序建模，可采用帧采样+位置编码或3D卷积。音频处理使用Audio Encoder(如Whisper)提取特征。vLLM的PlaceholderRange机制精确追踪多模态token在序列中的位置，支持prefix caching和chunked prefill。",
+      "design_decisions": [
+        {
+          "decision": "分离processor缓存和encoder缓存",
+          "reason": "processor输出(如pixel_values)和encoder输出(如image embeddings)缓存需求不同，分离管理提升效率"
+        },
+        {
+          "decision": "支持mm_encoder_tp_mode=data",
+          "reason": "高分辨率输入时，数据并行编码比权重并行更高效，避免通信瓶颈"
+        },
+        {
+          "decision": "实现PlaceholderRange追踪token位置",
+          "reason": "精确追踪多模态token位置，支持prefix caching和chunked prefill正确处理边界"
+        },
+        {
+          "decision": "支持enable_mm_embeds直接传入embeddings",
+          "reason": "允许跳过processor和encoder，支持外部预计算embeddings，提升灵活性"
+        },
+        {
+          "decision": "实现video_pruning_rate剪枝",
+          "reason": "长视频计算开销大，剪枝减少token数量，在精度和效率间取得平衡"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "ddbb0d230a3592106ac9f5f7f4e9a861863fcbee"
+  },
+  "domain_scope": "vllm",
+  "implementation_repos": [
+    "vllm"
+  ],
+  "domain_reason": "Upstream vLLM code paths define the core fact and Ascend only consumes the behavior.",
+  "source_hash": "0129f7c883a002c70b9a08d3746abdf2ea5c109b7fa6ba9615f8022f10af5f53",
+  "knowledge_domain": "vllm-upstream"
+}

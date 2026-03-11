@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/envs.py:819
-- read_ref: vllm/vllm/config/model.py:2017, vllm/vllm/config/model.py:2024, vllm/vllm/config/model.py:2029
-- effect_ref: vllm/vllm/config/model.py:2024, vllm/vllm/envs.py:815, vllm/vllm/envs.py:818
+- definition_ref: vllm/envs.py:831
+- read_ref: vllm/vllm/config/model.py:2025, vllm/vllm/config/model.py:2032, vllm/vllm/config/model.py:2037
+- effect_ref: vllm/vllm/config/model.py:2032, vllm/vllm/envs.py:827, vllm/vllm/envs.py:830
 - web_refs: 3
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: ValueError: User-specified max_model_len ... To allow overriding this maximum, set VLLM_ALLOW_LONG_MAX_MODEL_LEN=1; warning: positions exceeding derived_max_model_len may lead to NaN/OOB
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

@@ -1,0 +1,123 @@
+{
+  "id": "feature:dynamic_batch_scheduler",
+  "type": "feature",
+  "category": "vllm_ascend",
+  "name": "Dynamic Batch Scheduler",
+  "summary": "基于SLO约束的动态batch调度器，根据decode请求数量和token数动态调整prefill chunk大小",
+  "code_paths": [
+    {
+      "repo": "vllm-ascend",
+      "path": "vllm_ascend/core/scheduler_dynamic_batch.py",
+      "lines": "1-576"
+    }
+  ],
+  "related_env_vars": [],
+  "related_apis": [
+    "SchedulerDynamicBatch",
+    "BudgetRefiner"
+  ],
+  "related_features": [
+    "feature:recompute_scheduler",
+    "feature:balance_scheduling"
+  ],
+  "perspectives": {
+    "test": {
+      "interactions": [
+        "与chunked prefill集成测试",
+        "不同SLO约束下的调度测试",
+        "decode-first策略测试"
+      ],
+      "memory_impact": "无直接影响",
+      "throughput_impact": "在SLO约束下最大化吞吐量，避免超时请求",
+      "latency_impact": "保证decode请求的延迟约束",
+      "test_cases": [
+        {
+          "name": "测试SLO_limits_for_dynamic_batch参数效果",
+          "description": ""
+        },
+        {
+          "name": "测试decode-first chunked prefill策略",
+          "description": ""
+        },
+        {
+          "name": "测试BudgetRefiner的动态预算调整",
+          "description": ""
+        }
+      ]
+    },
+    "deploy": {
+      "supported_models": [
+        "所有模型"
+      ],
+      "enable_config": "additional_config: {SLO_limits_for_dynamic_batch: 100}，单位ms",
+      "unsuitable_scenarios": [
+        "无SLO约束的场景",
+        "纯prefill或纯decode场景"
+      ],
+      "best_practices": [
+        "设置合理的SLO约束",
+        "启用chunked prefill",
+        "监控调度效果"
+      ]
+    },
+    "develop": {
+      "code_locations": [
+        {
+          "file": "SchedulerDynamicBatch：动态batch调度器",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "BudgetRefiner：预算调整器",
+          "function": "",
+          "purpose": ""
+        },
+        {
+          "file": "profile_table.csv：性能查找表",
+          "function": "",
+          "purpose": ""
+        }
+      ],
+      "modification_points": [
+        "更新profile_table.csv以支持更多场景",
+        "优化预算调整算法"
+      ],
+      "affected_features": [
+        "请求调度流程",
+        "Chunked prefill",
+        "FCFS策略"
+      ]
+    },
+    "design": {
+      "principle": "根据当前decode请求的数量和token数，查询预制的性能表，动态调整prefill chunk大小，确保decode请求的延迟满足SLO约束。",
+      "theory_analysis": "decode请求对延迟敏感。通过限制prefill chunk大小，避免decode请求等待过久。性能表通过离线profiling获得，映射(ctx_len, d_num)到最优chunk_size。",
+      "design_decisions": [
+        {
+          "decision": "decode-first策略：优先调度decode请求",
+          "reason": ""
+        },
+        {
+          "decision": "查找表方式：避免在线计算开销",
+          "reason": ""
+        },
+        {
+          "decision": "强制启用chunked prefill：动态batch依赖它",
+          "reason": ""
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "created_at": "2026-03-10T00:00:00Z",
+    "updated_at": "2026-03-10T00:00:00Z",
+    "version": "1.0.0",
+    "commit_hash": "14c71b19e17dbe4d5d23a36cfc30c95c132b5374"
+  },
+  "domain_scope": "vllm-ascend",
+  "implementation_repos": [
+    "vllm-ascend"
+  ],
+  "domain_reason": "The fact depends on Ascend-specific code paths, platform behavior, or adaptation layers.",
+  "source_hash": "a58680e6b28a606b1f1bfbddbf3d0194f15ff75ca9550f6e28dcb3ba854f9e90",
+  "knowledge_domain": "vllm-ascend-core"
+}

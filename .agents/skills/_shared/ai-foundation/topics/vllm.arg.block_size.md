@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:924
+- definition_ref: vllm/engine/arg_utils.py:923
 - read_ref: vllm/vllm/_aiter_ops.py:1257, vllm/vllm/_aiter_ops.py:1270, vllm/vllm/_custom_ops.py:42
-- effect_ref: vllm/vllm/config/vllm.py:1111, vllm/vllm/distributed/kv_transfer/kv_connector/utils.py:429, vllm/vllm/distributed/kv_transfer/kv_connector/v1/example_connector.py:450
+- effect_ref: vllm/vllm/config/vllm.py:1129, vllm/vllm/distributed/kv_transfer/kv_connector/utils.py:429, vllm/vllm/distributed/kv_transfer/kv_connector/v1/example_connector.py:442
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: 启动或运行 OOM; 缓存不足导致吞吐下降
 - value_failure_signals: RuntimeError: Xlite graph mode is only compatible with block_size of 128; AssertionError: block_size should be divisible by cp_kv_cache_interleave_size
 - recommendation: 先保守设置，再渐进放大。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11

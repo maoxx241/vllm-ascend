@@ -33,9 +33,9 @@ topic_kind: parameter
 
 ## Development View
 
-- definition_ref: vllm/engine/arg_utils.py:1046
-- read_ref: vllm/vllm/config/lora.py:46, vllm/vllm/config/lora.py:52, vllm/vllm/engine/arg_utils.py:485
-- effect_ref: vllm/vllm/engine/arg_utils.py:1682, vllm/vllm/entrypoints/llm.py:469, vllm/vllm/entrypoints/llm.py:499
+- definition_ref: vllm/engine/arg_utils.py:1051
+- read_ref: vllm/vllm/config/lora.py:46, vllm/vllm/config/lora.py:52, vllm/vllm/engine/arg_utils.py:487
+- effect_ref: vllm/vllm/engine/arg_utils.py:1698, vllm/vllm/entrypoints/llm.py:557, vllm/vllm/entrypoints/llm.py:587
 - web_refs: 5
 
 ## Details/Edge Cases
@@ -43,4 +43,4 @@ topic_kind: parameter
 - failure_modes: LoRA 模块加载报错; 输出异常
 - value_failure_signals: LoRA 模块加载报错; 输出异常
 - recommendation: 先离线验证 LoRA 工件，再接入在线服务。
-- updated_at: 2026-03-06
+- updated_at: 2026-03-11
