@@ -31,6 +31,10 @@ This file maps runtime/deployment code paths to shared knowledge docs.
 | `.agents/skills/_shared/knowledge-governance/provenance/import_manifest.json` | [design-analysis index](knowledge-governance/generated/design_analysis_index.json) | Validated entries routed into developer/design-analysis retrieval surfaces |
 | `.agents/skills/_shared/{vllm-upstream,vllm-ascend-core,integration-core}/references/source/knowledge/*/*.json` | [domain index](knowledge-governance/generated/domain_index.json) | Canonical source knowledge split across domain-owned roots and indexed through governance |
 | `.agents/skills/vllm-ascend-debug-assistant/SKILL.md` | [task-index.md](task-index.md) | Composer workflow for crash, graph, env, and runtime debugging on vLLM Ascend |
+| `.agents/skills/vllm-ascend-perf-assistant/SKILL.md` | [task-index.md](task-index.md) | Composer workflow for profiling interpretation, bottleneck ranking, and next-step experiment planning |
+| `.agents/skills/vllm-ascend-perf-hunter/SKILL.md` | [design-analysis index](knowledge-governance/generated/design_analysis_index.json) | Atomic bottleneck attribution over profiling artifacts, benchmark logs, and service summaries |
+| `.agents/skills/vllm-ascend-test-matrix-planner/SKILL.md` | [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) | Minimal experiment-matrix planning for profiling and performance isolation |
+| `.agents/skills/vllm-ascend-graph-analyzer/SKILL.md` | [design-analysis index](knowledge-governance/generated/design_analysis_index.json) | Graph-mode, capture/replay, and shape-stability analysis for profiling and tuning |
 | `.agents/skills/vllm-ascend-developer-assistant/SKILL.md` | [task-index.md](task-index.md) | Development/design/debug/release/perf routing entry point |
 
 Back to [INDEX.md](INDEX.md).

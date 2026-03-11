@@ -18,6 +18,7 @@ This index is optimized for weak-reasoning models. Always resolve user language 
 | "做研发分析/设计分析/架构分析" | [task-index.md](task-index.md) | [design-analysis index](knowledge-governance/generated/design_analysis_index.json) | `vllm-ascend-developer-assistant` |
 | "模型适配/接口分析/接入新模型" | [task-index.md](task-index.md) | [imported knowledge manifest](knowledge-governance/generated/imported_knowledge_manifest.json) | `vllm-ascend-developer-assistant` |
 | "调试日志/崩溃/行为异常" | [task-index.md](task-index.md) | [task-skill index](knowledge-governance/generated/task_skill_index.json) | `vllm-ascend-developer-assistant -> vllm-ascend-debug-assistant` |
+| "profiling分析/性能瓶颈/回归归因" | [task-index.md](task-index.md) | [imported knowledge report](knowledge-governance/generated/imported_knowledge_report.json) | `vllm-ascend-developer-assistant -> vllm-ascend-perf-assistant` |
 | "上游同步/接口影响评估" | [task-index.md](task-index.md) | [imported knowledge report](knowledge-governance/generated/imported_knowledge_report.json) | `vllm-ascend-developer-assistant` |
 | "发布分析/变更归类" | [task-index.md](task-index.md) | [task-skill index](knowledge-governance/generated/task_skill_index.json) | `vllm-ascend-developer-assistant` |
 | "知识维护/索引漂移/导入新知识" | [task-index.md](task-index.md) | [verification handoff](knowledge-governance/provenance/verification_handoff.md) | `vllm-ascend-developer-assistant -> vllm-ascend-knowledge-index-maintainer` |
