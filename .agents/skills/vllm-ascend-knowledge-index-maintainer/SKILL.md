@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-knowledge-index-maintainer
-description: Validate, regenerate, and evolve the shared vLLM/vLLM-Ascend knowledge source, provenance, and generated retrieval indexes. Use when knowledge entries change, imports are added, domain ownership drifts, or `_shared` indexes need to be rebuilt.
+description: Internal atomic maintenance skill for validating and regenerating shared vLLM/vLLM-Ascend knowledge source, provenance, and generated retrieval indexes. Invoke only after routing through vllm-ascend-developer-assistant.
 ---
 
 # Knowledge Index Maintainer (A18)
@@ -8,6 +8,10 @@ description: Validate, regenerate, and evolve the shared vLLM/vLLM-Ascend knowle
 ## Purpose
 
 Own the machine-verifiable lifecycle of shared knowledge under `_shared`.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read Order
 

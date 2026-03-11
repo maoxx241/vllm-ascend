@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-debug-assistant
-description: Route vLLM Ascend debugging tasks across logs, crashes, graph failures, environment drift, distributed runtime issues, and performance regressions. Use when a user reports startup failures, request-time crashes, HCCL/runtime errors, graph replay mismatches, OOM, memory growth, or unexplained behavior on vLLM Ascend.
+description: Internal composer skill for vLLM Ascend debugging across logs, crashes, graph failures, environment drift, distributed runtime issues, and performance regressions. Invoke only after routing through vllm-ascend-developer-assistant.
 ---
 
 # vLLM Ascend Debug Assistant (C3)
@@ -8,6 +8,10 @@ description: Route vLLM Ascend debugging tasks across logs, crashes, graph failu
 ## Purpose
 
 Turn a vague failure report into a deterministic debug path, then deliver a diagnosis with evidence, workaround, permanent fix direction, and verification steps.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read Order
 

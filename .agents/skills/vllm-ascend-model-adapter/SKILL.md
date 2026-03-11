@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-model-adapter
-description: "Adapt and debug existing or new models for vLLM on Ascend NPU. Implement in /vllm-workspace/vllm and /vllm-workspace/vllm-ascend, validate via direct vllm serve from /workspace, and deliver one signed commit in the current repo."
+description: "Internal composer skill for adapting and debugging existing or new models for vLLM on Ascend NPU. Invoke only after routing through vllm-ascend-developer-assistant."
 ---
 
 # vLLM Ascend Model Adapter
@@ -8,6 +8,10 @@ description: "Adapt and debug existing or new models for vLLM on Ascend NPU. Imp
 ## Overview
 
 Adapt Hugging Face or local models to run on `vllm-ascend` with minimal changes, deterministic validation, and single-commit delivery. This skill is for both already-supported models and new architectures not yet registered in vLLM.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read order
 

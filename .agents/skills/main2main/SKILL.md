@@ -1,11 +1,15 @@
 ---
 name: main2main
-description: "The main2main skill guides an AI agent to adapt the latest vLLM main branch code for vLLM Ascend project."
+description: "Internal upstream-sync utility skill for adapting the latest vLLM main branch code for the vLLM Ascend project. Do not expose this as a top-level entry; invoke only after routing through vllm-ascend-developer-assistant."
 ---
 
 # main2main Skill
 
 This skill guides AI agents to adapt the latest vLLM main branch code for the vLLM Ascend project.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Workflow
 

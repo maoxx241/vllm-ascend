@@ -2,10 +2,12 @@
 
 This task index maps natural-language goals to deterministic task chains.
 
+Only `E1 vllm-ascend-developer-assistant` and `E2 vllm-ascend-deployment-assistant` are top-level entry skills. All other skills in the chain column are internal follow-on skills after entry routing.
+
 | Task type | Subtasks | Read order | Skill chain |
 | --- | --- | --- | --- |
 | Single-node deployment | normalize intent -> choose profile -> render package -> start -> validate | [feature dictionary](deployment-config/concepts/feature-semantic-dictionary.md) -> [deployment-playbook](deployment-config/procedures/deployment-playbook.md) | `E2 deployment-assistant` |
-| Environment bootstrap | inspect shell env -> install deps -> sanity checks -> summarize fixes | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) | `A1 env-bootstrap` |
+| Environment bootstrap | normalize env/bootstrap intent -> route through deployment entry -> inspect shell env -> install deps -> sanity checks -> summarize fixes | [env-bootstrap-baseline](ascend-foundation/procedures/env-bootstrap-baseline.md) | `E2 vllm-ascend-deployment-assistant -> A1 vllm-ascend-env-bootstrap` |
 | Feature tuning request | normalize feature aliases -> map to canonical topic -> conflict check | [ai-foundation index](ai-foundation/INDEX.md) -> [term alias index](ai-foundation/indexes/term-alias-index.json) | `E2 deployment-assistant` |
 | Global parameter explanation | normalize term -> map to topic_id -> return deployment/dev/detail views | [topic index](ai-foundation/indexes/topic-index.json) -> [view index](ai-foundation/indexes/view-index.json) | `E2 deployment-assistant` |
 | Parameter evidence verification | locate code refs -> check web refs -> mark confidence and conflict | [verification report](deployment-config/references/global-parameter-verification-report.md) -> [global parameter feature map](deployment-config/references/global-parameter-feature-map.md) | `E2 deployment-assistant` |

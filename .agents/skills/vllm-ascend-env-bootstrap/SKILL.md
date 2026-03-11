@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-env-bootstrap
-description: Bootstrap and validate vLLM-Ascend runtime environment with deterministic four-section outputs for weak-reasoning models.
+description: Internal atomic skill for environment bootstrap and validation on vLLM Ascend. Invoke only after routing through vllm-ascend-deployment-assistant.
 ---
 
 # vLLM Ascend Env Bootstrap (A1)
@@ -8,6 +8,10 @@ description: Bootstrap and validate vLLM-Ascend runtime environment with determi
 ## Purpose
 
 Provide a deterministic environment setup path before deployment.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-deployment-assistant`.
 
 ## Read Order
 

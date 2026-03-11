@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-graph-analyzer
-description: Analyze graph-mode, capture/replay, compile, and shape-stability signals that affect correctness or performance on vLLM Ascend. Use when profiling or logs implicate ACL graph, replay mismatch, batch invariance, or graph-related overhead.
+description: Internal atomic skill for graph-mode, capture/replay, compile, and shape-stability analysis on vLLM Ascend. Invoke only after routing through vllm-ascend-developer-assistant.
 ---
 
 # vLLM Ascend Graph Analyzer (A7)
@@ -8,6 +8,10 @@ description: Analyze graph-mode, capture/replay, compile, and shape-stability si
 ## Purpose
 
 Isolate graph-related bottlenecks or failure modes from general performance noise.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read Order
 

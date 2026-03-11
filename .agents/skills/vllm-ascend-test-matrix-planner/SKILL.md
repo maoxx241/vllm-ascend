@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-test-matrix-planner
-description: Build a minimal profiling or performance experiment matrix that isolates one bottleneck at a time for vLLM Ascend. Use when current evidence is not enough to prove the bottleneck and the next experiments need to be structured.
+description: Internal atomic skill for building minimal profiling or performance experiment matrices on vLLM Ascend. Invoke only after routing through vllm-ascend-developer-assistant.
 ---
 
 # vLLM Ascend Test Matrix Planner (A16)
@@ -8,6 +8,10 @@ description: Build a minimal profiling or performance experiment matrix that iso
 ## Purpose
 
 Convert a fuzzy performance hypothesis into a small, defensible experiment matrix.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read Order
 

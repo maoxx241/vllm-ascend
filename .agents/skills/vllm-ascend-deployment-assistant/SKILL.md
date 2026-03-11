@@ -9,6 +9,8 @@ description: Deploy models on vLLM-Ascend from natural language requests using d
 
 Convert natural-language deployment requests into deterministic deployment artifacts.
 
+This is one of the only two top-level entry skills. Environment bootstrap, compatibility checks, and deployment subflows should be reached through this assistant rather than exposed directly as first-hop entry points.
+
 ## Read Order
 
 1. `../_shared/INDEX.md`

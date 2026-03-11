@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-perf-hunter
-description: Analyze vLLM Ascend profiling artifacts, benchmark summaries, and service-level metrics to identify primary bottlenecks and hotspot categories. Use when performance evidence already exists and needs structured interpretation.
+description: Internal atomic skill for profiling artifact and benchmark interpretation on vLLM Ascend. Invoke only after routing through vllm-ascend-developer-assistant and usually via vllm-ascend-perf-assistant.
 ---
 
 # vLLM Ascend Perf Hunter (A6)
@@ -8,6 +8,10 @@ description: Analyze vLLM Ascend profiling artifacts, benchmark summaries, and s
 ## Purpose
 
 Read offline profiling and benchmark artifacts, then classify the dominant bottleneck with evidence and a short suspect list.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`, typically via `vllm-ascend-perf-assistant`.
 
 ## Read Order
 

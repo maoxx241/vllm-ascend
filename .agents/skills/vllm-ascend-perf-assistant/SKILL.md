@@ -1,6 +1,6 @@
 ---
 name: vllm-ascend-perf-assistant
-description: Route vLLM Ascend profiling and performance-analysis tasks across offline profiling artifacts, benchmark logs, graph signals, and experiment planning. Use when a user asks for throughput or latency analysis, regression attribution, hotspot analysis, memory-pressure investigation, or next-round tuning plans.
+description: Internal composer skill for vLLM Ascend profiling and performance analysis across offline profiling artifacts, benchmark logs, graph signals, and experiment planning. Invoke only after routing through vllm-ascend-developer-assistant.
 ---
 
 # vLLM Ascend Perf Assistant (C6)
@@ -8,6 +8,10 @@ description: Route vLLM Ascend profiling and performance-analysis tasks across o
 ## Purpose
 
 Turn profiling artifacts and benchmark evidence into a ranked bottleneck analysis, then organize the next tuning or validation loop.
+
+## Entry Policy
+
+This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## Read Order
 

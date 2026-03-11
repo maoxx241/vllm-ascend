@@ -9,6 +9,8 @@ description: Route development, design-analysis, debugging, adaptation, sync, re
 
 Classify engineering tasks and select the correct shared knowledge path before deeper execution.
 
+This is one of the only two top-level entry skills. Do not expose Composer or Atomic skills as direct user entry points when this skill can perform the first-hop routing.
+
 ## Read Order
 
 1. `../_shared/INDEX.md`
