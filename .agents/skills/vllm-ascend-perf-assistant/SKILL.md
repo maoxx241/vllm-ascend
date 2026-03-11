@@ -15,13 +15,20 @@ This is not a top-level entry skill. It must be invoked through `vllm-ascend-dev
 
 ## Read Order
 
-1. `../_shared/INDEX.md`
-2. `../_shared/task-index.md`
-3. `../_shared/code-knowledge-map.md`
-4. `../_shared/knowledge-governance/generated/imported_knowledge_report.json`
-5. `../_shared/knowledge-governance/generated/design_analysis_index.json`
-6. `../_shared/knowledge-governance/generated/task_skill_index.json`
-7. `references/perf-taxonomy.md`
+1. `references/perf-taxonomy.md`
+2. `references/minimal-evidence-gate.md`
+3. `../_shared/task-index.md`
+
+## Conditional Reads
+
+Load these only after the evidence threshold in `references/minimal-evidence-gate.md` is met:
+
+- `../_shared/code-knowledge-map.md` for likely code surfaces
+- `../_shared/knowledge-governance/generated/imported_knowledge_report.json` for lightweight evidence-status summary
+- `../_shared/knowledge-governance/generated/design_analysis_index.json` for graph, scheduler, parallel, or architecture-heavy perf issues
+- `../_shared/knowledge-governance/generated/imported_knowledge_manifest.json` for symbol, API, or code-location follow-up
+
+Avoid `task_skill_index.json` in normal perf analysis unless the chain itself is ambiguous.
 
 ## When To Use
 
@@ -37,24 +44,29 @@ Use this skill when the primary task type is `performance_analysis`, especially 
 
 ## Workflow
 
-1. Classify the request into exactly one primary perf class using `references/perf-taxonomy.md`.
-2. Normalize the evidence bundle:
+1. Use `references/perf-taxonomy.md` and `references/minimal-evidence-gate.md` to decide whether this is a low-evidence routing response or a real bottleneck analysis.
+2. If the request is low-evidence, stop early:
+   - classify the perf question
+   - list the missing evidence
+   - return the smallest next experiment or collection step
+   - do not load heavyweight shared knowledge
+3. Normalize the evidence bundle:
    - benchmark summary or SLA target
    - profiling artifact type and location
    - model, quantization, topology, and critical flags or env vars
    - baseline vs regression point
    - whether the issue is steady-state, warmup, or request-shape dependent
-3. Route the analysis:
+4. Route the analysis:
    - always start with `vllm-ascend-perf-hunter`
    - add `vllm-ascend-graph-analyzer` when graph/capture/replay/scheduler symptoms appear
    - add `vllm-ascend-test-matrix-planner` when the current evidence is not enough to isolate the bottleneck
    - add `repo-state-auditor` when the issue is explicitly a change-induced regression
-4. Use `_shared` knowledge to anchor the diagnosis:
+5. Use `_shared` knowledge to anchor the diagnosis only after the evidence threshold is met:
    - `design_analysis_index.json` for architecture surfaces
    - `imported_knowledge_report.json` for evidence-backed categories and gaps
    - `code-knowledge-map.md` for code-path jumps
-5. Converge on one primary bottleneck class. If the data is ambiguous, return ranked suspects rather than overcommitting.
-6. End with a minimal experiment loop that can prove or falsify the current hypothesis.
+6. Converge on one primary bottleneck class. If the data is ambiguous, return ranked suspects rather than overcommitting.
+7. End with a minimal experiment loop that can prove or falsify the current hypothesis.
 
 ## Output Contract
 
@@ -77,3 +89,4 @@ Always return these sections:
 - Do not recommend wide parameter sweeps before isolating one control variable.
 - If only one noisy run exists, treat the result as suggestive, not conclusive.
 - If profiling coverage is incomplete, say what is missing before giving a high-confidence tuning recommendation.
+- Do not load heavyweight shared indexes for a one-line profiling request with no artifacts or metrics.
