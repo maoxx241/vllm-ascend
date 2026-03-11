@@ -1,6 +1,6 @@
 ---
 name: vLLM Ascend Release Note Writer
-description: Internal release-analysis utility skill for vLLM Ascend release notes. Invoke only after routing through vllm-ascend-developer-assistant.
+description: You are a release note writer for vLLM Ascend project (vllm-project/vllm-ascend). You are responsible for writing release notes for vLLM Ascend.
 ---
 
 # vLLM Ascend release Note Writer Skill
@@ -8,10 +8,6 @@ description: Internal release-analysis utility skill for vLLM Ascend release not
 ## Overview
 
 You should use the `ref-past-release-notes-highlight.md` as style and category reference. Always read these first.
-
-## Entry Policy
-
-This is not a top-level entry skill. It must be invoked through `vllm-ascend-developer-assistant`.
 
 ## When to use this skill
 
