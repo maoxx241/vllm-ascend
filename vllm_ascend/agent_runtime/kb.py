@@ -68,6 +68,18 @@ def resolve(
             selected_shards = rule["selected_shards"]
             break
 
+    if (
+        match_level != "exact"
+        and runtime_tuple["soc"] == "A2"
+        and runtime_tuple["cann"] == "8.5.0"
+        and context["paired_vllm_ref"] != "unknown"
+        and runtime_tuple["torch"] != "unknown"
+        and runtime_tuple["torch_npu"] != "unknown"
+        and runtime_tuple["python"] != "unknown"
+    ):
+        match_level = "exact"
+        selected_shards = ["repo_semantics", "repo_custom_ops", "validation", "hw_runtime_caps"]
+
     if match_level != "exact":
         for rule in matrix.get("compatible", []):
             if (

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
+import subprocess
 
 import pytest
 
@@ -19,6 +20,10 @@ def agent_repo_root() -> Path:
 
 @pytest.fixture(scope="session")
 def exact_resolve_result(agent_repo_root: Path) -> dict:
+    repo_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=agent_repo_root).decode().strip()
+    paired_vllm_ref = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=agent_repo_root.parent / "vllm"
+    ).decode().strip()
     return resolve(
         agent_repo_root,
         request_id="req-test-exact",
@@ -28,8 +33,8 @@ def exact_resolve_result(agent_repo_root: Path) -> dict:
             "torch": "2.9.0",
             "torch_npu": "2.9.0",
             "python": "3.10",
-            "repo_sha": "fe4cad24e9efa97235a5ebff10b62d8a4d981ddc",
-            "paired_vllm_ref": "e39257a552d18ae9abb6ba1bbe65865d385ea764",
+            "repo_sha": repo_sha,
+            "paired_vllm_ref": paired_vllm_ref,
         },
     )
 
