@@ -1,0 +1,325 @@
+version: v3.3-final
+package: vllm-ascend-agent-design-package-v3_3-final
+source_of_truth:
+  - schema/*.json
+  - docs/06-interface-contracts.md
+  - docs/01-master-spec.md
+  - docs/02-routing-and-family-boundaries.md
+  - docs/03-runtime-object-model.md
+  - docs/04-context-governor-and-persistence.md
+  - docs/05-knowledge-base-architecture.md
+  - docs/07-examples-and-acceptance.md
+  - docs/08-codex-development-plan.md
+  - docs/09-supersede-and-migration.md
+  - examples/*.json
+  - sql/merged_pack.sql
+  - requirements.txt
+execution_policy:
+  order: sequential_by_phase
+  parallelism: only_for_independent_tasks_after_contract_is_frozen
+  priority: mvp_first
+  unknown_policy: return_unknown_instead_of_guessing
+phases:
+  - id: P0
+    name: contract-freeze-and-validator
+    goal: Freeze schemas, examples, SQL, validator, and package-level acceptance.
+    deliverables:
+      - schema/*.json
+      - examples/*.json
+      - sql/merged_pack.sql
+      - tools/validate_design_package.py
+      - requirements.txt
+      - tests/schema_validation/*
+      - tests/sql_init/*
+    tasks:
+      - id: K001
+        name: create-package-skeleton-in-repo
+        outputs:
+          - .agents/skills/_shared/
+          - .agents/kb/schema/
+          - .agents/kb/sql/
+          - .agents/kb/tools/
+          - .agents/kb/local/.gitkeep
+        acceptance:
+          - directories exist
+          - local/ is gitignored
+      - id: K002
+        name: install-runtime-schemas-and-examples
+        outputs:
+          - .agents/kb/schema/selector-seed.schema.json
+          - .agents/kb/schema/selector-plan.schema.json
+          - .agents/kb/schema/atomic-result-card.schema.json
+          - .agents/kb/schema/continuation-state.schema.json
+        acceptance:
+          - all examples validate against schemas
+          - selector_seed is v3
+          - selector_plan is v4
+          - atomic_result_card is v3
+          - continuation_state is v4
+      - id: K003
+        name: install-interface-schemas
+        outputs:
+          - .agents/kb/schema/governor-decision.schema.json
+          - .agents/kb/schema/kb-resolve-result.schema.json
+          - .agents/kb/schema/kb-pack-request.schema.json
+          - .agents/kb/schema/kb-pack-response.schema.json
+        acceptance:
+          - all interface examples validate
+          - kb-pack-request is v2
+          - schema loader can discover all files
+      - id: K004
+        name: install-sql-and-smoke-test
+        outputs:
+          - .agents/kb/sql/merged_pack.sql
+          - tests/sql_init/test_init_db.py
+        acceptance:
+          - empty SQLite DB initializes successfully
+          - all core tables exist
+      - id: K005
+        name: install-package-validator
+        outputs:
+          - tools/validate_design_package.py
+          - requirements.txt
+          - tests/contract_negative_cases/*
+        acceptance:
+          - invalid intake plan is rejected
+          - invalid reroute card is rejected
+          - invalid confirmation seed is rejected
+          - invalid intake-origin atomic spec_plan_workflow is rejected
+          - invalid continuation_state persistence mode is rejected
+          - validator lints the single-stage-source governor contract
+  - id: P1
+    name: shared-runtime-minimum
+    goal: Implement the minimum shared runtime used by every family.
+    depends_on:
+      - P0
+    deliverables:
+      - .agents/skills/_shared/evidence-normalizer/
+      - .agents/skills/_shared/context-governor/
+      - .agents/skills/_shared/repo-kb-loader/
+      - .agents/skills/generic-task-intake/
+      - .agents/skills/generic-spec/
+      - .agents/skills/generic-analysis-checklist/
+    tasks:
+      - id: S101
+        name: implement-evidence-normalizer
+        depends_on:
+          - K002
+        acceptance:
+          - raw request -> selector_seed/v3 is deterministic
+          - unknown aliases become unresolved_slots instead of silent guesses
+          - confirmation gate is computed deterministically
+      - id: S102
+        name: implement-context-governor
+        depends_on:
+          - K003
+        acceptance:
+          - query_stage matrix is enforced
+          - governor derives stage only from selector_plan.query_stage
+          - public_entry and intake no-query paths do not call governor
+          - intake/spec/atomic caps are enforced
+          - pending confirmation blocks query_stage atomic/spec_plan
+          - flush_required blocks query until bundle update is complete
+          - origin_stage + query_stage + execution_mode mismatches are rejected
+      - id: S103
+        name: implement-repo-kb-loader-shell
+        depends_on:
+          - S102
+          - K003
+        acceptance:
+          - selector_plan/v4 compiles to kb-pack-request/v2 deterministically
+          - loader never bypasses governor
+          - loader returns match_level, warnings, unknowns
+      - id: S104
+        name: implement-generic-fallback-skills
+        depends_on:
+          - S101
+          - S102
+          - S103
+        acceptance:
+          - generic-task-intake emits selector_plan/v4 when query is needed
+          - generic-task-intake enforces confirmation gate
+          - generic-spec emits continuation_state/v4
+          - generic-analysis-checklist emits atomic_result_card/v3
+  - id: P2
+    name: repo-only-kb-loop
+    goal: Build a deterministic repo-only knowledge loop before adding upstream or substrate complexity.
+    depends_on:
+      - P1
+    deliverables:
+      - .agents/kb/extractors/repo_semantics.py
+      - .agents/kb/extractors/repo_custom_ops.py
+      - .agents/kb/extractors/minimal_validation.py
+      - .agents/kb/tools/kb.py
+    tasks:
+      - id: K201
+        name: implement-repo-semantics-extractor
+        acceptance:
+          - extracts feature/config/policy facts into entities+facts
+          - writes provenance into sources
+      - id: K202
+        name: implement-repo-custom-ops-extractor
+        acceptance:
+          - extracts custom op overlay facts
+          - records build/meta/capture related metadata
+      - id: K203
+        name: implement-minimal-validation-extractor
+        acceptance:
+          - extracts CI/local validation summaries into validations table
+          - supports failure mode summaries and artifact refs
+      - id: K204
+        name: implement-resolve-command
+        acceptance:
+          - returns kb-resolve-result/v1
+          - supports exact/compatible/unknown
+          - works in repo-only mode
+      - id: K205
+        name: implement-build-local-command
+        depends_on:
+          - K201
+          - K202
+          - K203
+          - K204
+        acceptance:
+          - produces deterministic SQLite pack
+          - writes pack_meta provenance
+          - does not mutate catalog
+      - id: K206
+        name: implement-pack-command
+        depends_on:
+          - K205
+          - S103
+        acceptance:
+          - consumes kb-pack-request/v2
+          - returns kb-pack-response/v1
+          - honors must_have / nice_to_have / budget_token_cap / max_hops
+          - returns unknowns on misses
+          - supports perf_breakdown and model_expectation intents
+      - id: K207
+        name: implement-doctor-command
+        depends_on:
+          - K205
+          - K206
+        acceptance:
+          - checks schemas, examples, resolve, sqlite health
+          - returns non-zero exit code on failures
+  - id: P3
+    name: first-wave-mvp-capability-integration
+    goal: "Deliver the first user-complete loop: deploy, explain, estimate, validate."
+    depends_on:
+      - P2
+    deliverables:
+      - .agents/skills/deployment_execution/
+      - .agents/skills/performance_analysis/
+      - .agents/skills/validation_strategy/
+    tasks:
+      - id: F301
+        name: integrate-deployment-execution
+        acceptance:
+          - deployment-intake uses selector_seed/v3
+          - feature-policy-resolver uses repo-kb-loader
+          - crossing into code change produces needs_reroute
+      - id: F302
+        name: integrate-performance-profile-breakdown
+        acceptance:
+          - single-profile-breakdown works on one work package
+          - comparative-profile-breakdown works when baseline/current exist
+          - evidence shortage degrades to partial breakdown
+      - id: F303
+        name: integrate-model-expected-performance-analysis
+        acceptance:
+          - model-expected-performance-estimator uses model_expectation intent
+          - outputs expected TTFT/throughput/memory envelope with assumptions
+          - does not present expectation as measured fact
+      - id: F304
+        name: integrate-validation-strategy
+        acceptance:
+          - change-impact-test-selector selects minimum test set
+          - coverage-gap-analyzer produces low-confidence gaps when assets are incomplete
+          - family does not drift into bug root cause analysis
+  - id: P3B
+    name: deferred-debugging-integration
+    goal: Add debugging after the first-wave MVP capability set is stable.
+    depends_on:
+      - P3
+    deliverables:
+      - .agents/skills/debugging/
+    tasks:
+      - id: F3B01
+        name: integrate-debugging
+        acceptance:
+          - log-triage uses debug_triage intent
+          - cross-log-correlation can request a second source only after flush
+          - exact-vs-compatible evidence is surfaced
+  - id: P4
+    name: vllm-pair-enrichment
+    goal: Add upstream semantics and release delta support for advanced planning and sync tasks.
+    depends_on:
+      - P3B
+    deliverables:
+      - .agents/kb/extractors/vllm_semantics_ingest.py
+      - .agents/kb/extractors/vllm_symbols_ingest.py
+      - .agents/kb/extractors/vllm_release_delta_ingest.py
+    tasks:
+      - id: K401
+        name: implement-vllm-semantics-ingest
+        acceptance:
+          - extracts feature/config/engine facts needed by vllm-ascend
+          - writes provenance and version scopes
+      - id: K402
+        name: implement-vllm-symbols-ingest
+        acceptance:
+          - extracts qualname/file/signature index
+          - captures patch/import/override targets
+      - id: K403
+        name: implement-vllm-release-delta-ingest
+        acceptance:
+          - stores from_version/to_version changes
+          - annotates impact tags
+  - id: P5
+    name: advanced-family-integration
+    goal: Extend to code-change and complex planning families.
+    depends_on:
+      - P4
+    deliverables:
+      - .agents/skills/adaptation/
+      - .agents/skills/upstream_sync/
+      - .agents/skills/design_analysis/
+      - .agents/skills/operator_development/
+    tasks:
+      - id: F501
+        name: integrate-adaptation
+        acceptance:
+          - code-change path requires confirmation gate
+          - route-unknown cases reroute to design_analysis
+      - id: F502
+        name: integrate-upstream-sync
+        acceptance:
+          - single delta can be direct atomic
+          - release sync can be spec_plan
+      - id: F503
+        name: integrate-design-analysis
+        acceptance:
+          - multi-work-package planning writes continuation_state/v4
+          - reroute to adaptation/operator_development is explicit
+      - id: F504
+        name: integrate-operator-development
+        acceptance:
+          - operator capability gap routes correctly
+          - code-change path requires confirmation gate
+  - id: P6
+    name: substrate-and-hardening
+    goal: Finish substrate facts, doctor coverage, and system hardening.
+    depends_on:
+      - P5
+    tasks:
+      - id: H601
+        name: integrate-substrate-shards
+        acceptance:
+          - resolve can include substrate families when available
+          - repo-only fallback still works
+      - id: H602
+        name: harden-validator-and-doctor
+        acceptance:
+          - package validator and kb.py doctor agree on failures
+          - negative contract cases are stable in CI

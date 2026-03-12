@@ -1,0 +1,53 @@
+{
+  "schema_version": "kb-pack-response/v1",
+  "request_id": "req-20260312-debug-003",
+  "pack_id": "pack-20260312-debug-003",
+  "created_at": "2026-03-12T10:40:02Z",
+  "match_level": "compatible",
+  "selected_shards": [
+    "repo_semantics",
+    "validation"
+  ],
+  "warnings": [
+    "exact runtime tuple unavailable"
+  ],
+  "unknowns": [
+    "是否与当前固件版本完全一致"
+  ],
+  "budget_token_cap": 1500,
+  "estimated_tokens": 1180,
+  "capsule_type": "atomic_capsule",
+  "logical_domains": [
+    "troubleshooting",
+    "vllm_ascend_core"
+  ],
+  "capsule_text": "RuntimeError 161001 常见于 rotary path 与特定 kernel/shape 组合；现有兼容 workaround 是禁用相关 path 或收窄 shape。",
+  "atoms": [
+    {
+      "atom_id": "atom-161001-signature",
+      "atom_kind": "fact",
+      "summary": "161001 与 rotary 相关 fastpath 组合存在已知失败模式。",
+      "source_refs": [
+        "repo_semantics:error-signature:161001"
+      ]
+    },
+    {
+      "atom_id": "atom-161001-workaround",
+      "atom_kind": "validation",
+      "summary": "兼容 workaround 是禁用相关 fastpath 或收窄输入 shape。",
+      "source_refs": [
+        "validation:known-failure-161001"
+      ]
+    }
+  ],
+  "deep_reference_stubs": [
+    {
+      "stub_id": "stub-161001-validation",
+      "source_ref": "validation/known-failure-161001.md",
+      "estimated_tokens": 220,
+      "reason": "需要查看完整失败上下文与版本说明"
+    }
+  ],
+  "cache_hit": false,
+  "capsule_path": ".agents/kb/local/capsules/debug-003.json"
+}

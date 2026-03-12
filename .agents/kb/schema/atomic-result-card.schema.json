@@ -1,0 +1,515 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/vllm-ascend/schema/atomic-result-card.schema.json",
+  "title": "AtomicResultCard",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "card_id",
+    "request_id",
+    "task_id",
+    "created_at",
+    "task_family",
+    "atomic_skill",
+    "work_package_id",
+    "source_plan_id",
+    "result_status",
+    "resolution_code",
+    "finding_summary",
+    "evidence_summary",
+    "confidence",
+    "impacted_surfaces",
+    "deliverable_fragment_summary",
+    "residual_unknowns",
+    "source_refs",
+    "next_action",
+    "flush_required",
+    "update_bundle_files",
+    "reroute"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "atomic-result-card/v3"
+    },
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_family": {
+      "type": "string",
+      "enum": [
+        "deployment_execution",
+        "performance_analysis",
+        "debugging",
+        "design_analysis",
+        "adaptation",
+        "operator_development",
+        "upstream_sync",
+        "validation_strategy"
+      ]
+    },
+    "atomic_skill": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_plan_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "partial",
+        "blocked",
+        "needs_more_evidence",
+        "needs_reroute"
+      ]
+    },
+    "resolution_code": {
+      "type": "string",
+      "enum": [
+        "work_package_closed",
+        "partial_findings_only",
+        "blocker_confirmed",
+        "evidence_gap",
+        "reroute_family_boundary",
+        "reroute_stage_boundary",
+        "kb_miss",
+        "resolver_unknown",
+        "validation_gap",
+        "unknown_failure_mode"
+      ]
+    },
+    "finding_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_summary": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "impacted_surfaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deliverable_fragment_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "residual_unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "required": [
+        "kind",
+        "owner_stage",
+        "summary"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "answer_user",
+            "continue_atomic",
+            "update_plan",
+            "reroute_task",
+            "request_more_evidence",
+            "stop"
+          ]
+        },
+        "owner_stage": {
+          "type": "string",
+          "enum": [
+            "public_entry",
+            "intake",
+            "spec_plan",
+            "atomic",
+            "none"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "flush_required": {
+      "type": "boolean"
+    },
+    "update_bundle_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "spec.md",
+          "plan.md",
+          "checklist.md",
+          "progress.md"
+        ]
+      }
+    },
+    "reroute": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "target_family": {
+          "type": "string",
+          "enum": [
+            "deployment_execution",
+            "performance_analysis",
+            "debugging",
+            "design_analysis",
+            "adaptation",
+            "operator_development",
+            "upstream_sync",
+            "validation_strategy"
+          ]
+        },
+        "target_stage": {
+          "type": "string",
+          "enum": [
+            "intake",
+            "spec_plan"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "carry_over_unknowns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "target_family",
+        "target_stage",
+        "reason",
+        "carry_over_unknowns"
+      ],
+      "additionalProperties": false
+    },
+    "produced_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "token_estimate": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "flush_required": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "update_bundle_files": {
+            "minItems": 1,
+            "contains": {
+              "const": "progress.md"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "needs_reroute"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution_code": {
+            "enum": [
+              "reroute_family_boundary",
+              "reroute_stage_boundary"
+            ]
+          },
+          "reroute": {
+            "type": "object"
+          },
+          "next_action": {
+            "properties": {
+              "kind": {
+                "const": "reroute_task"
+              },
+              "owner_stage": {
+                "enum": [
+                  "intake",
+                  "spec_plan"
+                ]
+              }
+            }
+          },
+          "flush_required": {
+            "const": true
+          },
+          "update_bundle_files": {
+            "contains": {
+              "const": "progress.md"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "resolution_code": {
+            "enum": [
+              "reroute_family_boundary",
+              "reroute_stage_boundary"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result_status": {
+            "const": "needs_reroute"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution_code": {
+            "const": "work_package_closed"
+          },
+          "reroute": {
+            "const": null
+          },
+          "flush_required": {
+            "const": true
+          },
+          "update_bundle_files": {
+            "contains": {
+              "const": "progress.md"
+            }
+          },
+          "next_action": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "answer_user",
+                  "continue_atomic",
+                  "update_plan",
+                  "stop"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "partial"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution_code": {
+            "const": "partial_findings_only"
+          },
+          "reroute": {
+            "const": null
+          },
+          "next_action": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "continue_atomic",
+                  "update_plan",
+                  "request_more_evidence",
+                  "answer_user",
+                  "stop"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "blocked"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution_code": {
+            "enum": [
+              "blocker_confirmed",
+              "unknown_failure_mode"
+            ]
+          },
+          "reroute": {
+            "const": null
+          },
+          "flush_required": {
+            "const": true
+          },
+          "update_bundle_files": {
+            "contains": {
+              "const": "progress.md"
+            }
+          },
+          "next_action": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "request_more_evidence",
+                  "update_plan",
+                  "answer_user",
+                  "stop"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "needs_more_evidence"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "resolution_code": {
+            "enum": [
+              "evidence_gap",
+              "kb_miss",
+              "resolver_unknown",
+              "validation_gap"
+            ]
+          },
+          "reroute": {
+            "const": null
+          },
+          "next_action": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "request_more_evidence",
+                  "continue_atomic",
+                  "update_plan",
+                  "stop"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "enum": [
+              "complete",
+              "partial",
+              "blocked",
+              "needs_more_evidence"
+            ]
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "properties": {
+            "next_action": {
+              "properties": {
+                "kind": {
+                  "const": "reroute_task"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

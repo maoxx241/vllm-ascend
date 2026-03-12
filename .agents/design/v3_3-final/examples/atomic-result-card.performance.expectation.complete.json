@@ -1,0 +1,48 @@
+{
+  "schema_version": "atomic-result-card/v3",
+  "card_id": "card-20260313-perf-exp-003",
+  "request_id": "req-20260313-perf-exp-003",
+  "task_id": "task-20260313-perf-exp-003",
+  "created_at": "2026-03-13T13:04:30Z",
+  "task_family": "performance_analysis",
+  "atomic_skill": "model-expected-performance-estimator",
+  "work_package_id": "wp-estimate-performance-envelope",
+  "source_plan_id": "plan-20260313-perf-exp-003",
+  "result_status": "complete",
+  "resolution_code": "work_package_closed",
+  "finding_summary": "已给出基于 comparable baseline 与硬件上限约束的预期 TTFT、吞吐和显存范围，但结论仍受 batch size 与 graph mode 开关影响。",
+  "evidence_summary": [
+    "validation 中存在同 A2 / TP4 / BF16 路径的 compatible baseline",
+    "repo policy 与硬件约束可限定 prefill/decode 的主要瓶颈范围"
+  ],
+  "confidence": "medium",
+  "impacted_surfaces": [
+    "prefill",
+    "decode",
+    "memory headroom"
+  ],
+  "deliverable_fragment_summary": "可直接向用户返回预期性能区间、关键假设和需要补齐的两个输入。",
+  "residual_unknowns": [
+    "batch size 尚未冻结",
+    "graph mode 是否开启"
+  ],
+  "source_refs": [
+    "validation:baseline:qwen3-next-32b:a2:tp4",
+    "repo_semantics:policy/prefill"
+  ],
+  "next_action": {
+    "kind": "answer_user",
+    "owner_stage": "none",
+    "summary": "返回预期性能范围和假设列表，并说明与真实测量的差异边界"
+  },
+  "flush_required": true,
+  "update_bundle_files": [
+    "progress.md"
+  ],
+  "reroute": null,
+  "produced_artifacts": [
+    "artifacts/perf/expected-envelope.md"
+  ],
+  "token_estimate": 362,
+  "notes": "这是 expectation estimate，不可冒充实测结果。"
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": "atomic-result-card/v3",
+  "card_id": "card-20260313-val-004",
+  "request_id": "req-20260313-val-004",
+  "task_id": "task-20260313-val-004",
+  "created_at": "2026-03-13T12:16:30Z",
+  "task_family": "validation_strategy",
+  "atomic_skill": "change-impact-test-selector",
+  "work_package_id": "wp-select-minimum-tests",
+  "source_plan_id": "plan-20260313-val-004",
+  "result_status": "complete",
+  "resolution_code": "work_package_closed",
+  "finding_summary": "已收口最小必跑集，并识别出一项需要人工补采的缺失资产。",
+  "evidence_summary": [
+    "diff 命中了 dynamic_batching 相关代码面",
+    "validation 资产中存在可复用的 smoke 与 regression 集"
+  ],
+  "confidence": "high",
+  "impacted_surfaces": [
+    "dynamic_batching",
+    "smoke suite",
+    "regression suite"
+  ],
+  "deliverable_fragment_summary": "可直接输出最小测试清单与补采建议。",
+  "residual_unknowns": [
+    "A3 拓扑下是否需要额外并行度 smoke"
+  ],
+  "source_refs": [
+    "diff:1234abcd",
+    "validation:matrix:prefill"
+  ],
+  "next_action": {
+    "kind": "answer_user",
+    "owner_stage": "none",
+    "summary": "返回最小测试集与一条低置信补采建议"
+  },
+  "flush_required": true,
+  "update_bundle_files": [
+    "progress.md"
+  ],
+  "reroute": null,
+  "produced_artifacts": [
+    "artifacts/validation/minimal-test-set.md"
+  ],
+  "token_estimate": 328,
+  "notes": null
+}

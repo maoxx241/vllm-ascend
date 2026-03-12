@@ -1,0 +1,670 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/vllm-ascend/schema/selector-plan.schema.json",
+  "title": "SelectorPlan",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "plan_id",
+    "request_id",
+    "created_at",
+    "origin_stage",
+    "query_stage",
+    "task_family",
+    "execution_mode",
+    "analysis_depth",
+    "deliverable_contract",
+    "work_package_id",
+    "work_package_goal",
+    "consumer_id",
+    "logical_domains",
+    "budget_class",
+    "capsule_type",
+    "query_trigger_codes",
+    "selectors",
+    "must_have",
+    "nice_to_have",
+    "requested_token_cap",
+    "max_capsules",
+    "max_deep_refs",
+    "hop_limit",
+    "stop_after_first_sufficient",
+    "why_this_query_now"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "selector-plan/v4"
+    },
+    "plan_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "origin_stage": {
+      "type": "string",
+      "enum": [
+        "intake",
+        "spec_plan"
+      ]
+    },
+    "query_stage": {
+      "type": "string",
+      "enum": [
+        "intake",
+        "spec_plan",
+        "atomic"
+      ],
+      "description": "The only formal stage input consumed by context-governor. No external stage override exists in the contract."
+    },
+    "task_family": {
+      "type": "string",
+      "enum": [
+        "deployment_execution",
+        "performance_analysis",
+        "debugging",
+        "design_analysis",
+        "adaptation",
+        "operator_development",
+        "upstream_sync",
+        "validation_strategy"
+      ]
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "direct_answer",
+        "direct_atomic_workflow",
+        "spec_plan_workflow"
+      ]
+    },
+    "analysis_depth": {
+      "type": "string",
+      "enum": [
+        "none",
+        "lightweight_design_note",
+        "full_spec_plan"
+      ]
+    },
+    "deliverable_contract": {
+      "type": "string",
+      "enum": [
+        "reference_answer",
+        "deployment_artifact_pack",
+        "analysis_report",
+        "design_note",
+        "spec_plan",
+        "code_change_pack"
+      ]
+    },
+    "work_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "work_package_goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "logical_domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "knowledge_governance",
+          "vllm_upstream",
+          "vllm_ascend_core",
+          "ascend_foundation",
+          "integration_core",
+          "deployment_config",
+          "troubleshooting",
+          "validation_evidence"
+        ]
+      }
+    },
+    "physical_shard_hints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget_class": {
+      "type": "string",
+      "enum": [
+        "intake",
+        "spec",
+        "atomic",
+        "burst_spec",
+        "burst_atomic"
+      ]
+    },
+    "capsule_type": {
+      "type": "string",
+      "enum": [
+        "intake_capsule",
+        "spec_capsule",
+        "atomic_capsule",
+        "delta_capsule",
+        "evidence_capsule"
+      ]
+    },
+    "query_trigger_codes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "route_disambiguation",
+          "artifact_requirement_lookup",
+          "baseline_or_policy_lookup",
+          "error_signature_lookup",
+          "code_surface_lookup",
+          "operator_constraint_lookup",
+          "validation_matrix_lookup",
+          "release_delta_lookup",
+          "cross_surface_conflict_check",
+          "evidence_gap_followup"
+        ]
+      }
+    },
+    "selectors": {
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "hw": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "commits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "prs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "configs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "must_have": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nice_to_have": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requested_token_cap": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16000
+    },
+    "max_capsules": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
+    "max_deep_refs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "hop_limit": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "stop_after_first_sufficient": {
+      "type": "boolean"
+    },
+    "why_this_query_now": {
+      "type": "string",
+      "minLength": 1
+    },
+    "why_default_focus_not_enough": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "burst_reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "cross_surface_conflict",
+        "multi_version_delta",
+        "operator_constraint_dense",
+        "validation_matrix_dense",
+        "upstream_release_dense",
+        "topology_policy_dense"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "origin_stage": {
+            "const": "intake"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "enum": [
+              "intake",
+              "atomic"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "origin_stage": {
+            "const": "spec_plan"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "enum": [
+              "spec_plan",
+              "atomic"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "origin_stage": {
+            "const": "intake"
+          },
+          "query_stage": {
+            "const": "atomic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "direct_atomic_workflow"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "origin_stage": {
+            "const": "spec_plan"
+          },
+          "query_stage": {
+            "const": "atomic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "const": "spec_plan_workflow"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "query_stage": {
+            "const": "intake"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "origin_stage": {
+            "const": "intake"
+          },
+          "budget_class": {
+            "const": "intake"
+          },
+          "capsule_type": {
+            "const": "intake_capsule"
+          },
+          "requested_token_cap": {
+            "maximum": 1200
+          },
+          "max_capsules": {
+            "const": 1
+          },
+          "max_deep_refs": {
+            "const": 0
+          },
+          "stop_after_first_sufficient": {
+            "const": true
+          },
+          "burst_reason_code": {
+            "const": null
+          },
+          "why_default_focus_not_enough": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "query_stage": {
+            "const": "spec_plan"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "origin_stage": {
+            "const": "spec_plan"
+          },
+          "execution_mode": {
+            "const": "spec_plan_workflow"
+          },
+          "budget_class": {
+            "enum": [
+              "spec",
+              "burst_spec"
+            ]
+          },
+          "capsule_type": {
+            "enum": [
+              "spec_capsule",
+              "delta_capsule"
+            ]
+          },
+          "requested_token_cap": {
+            "maximum": 16000
+          },
+          "max_capsules": {
+            "minimum": 1,
+            "maximum": 2
+          },
+          "max_deep_refs": {
+            "maximum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "query_stage": {
+            "const": "atomic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "execution_mode": {
+            "enum": [
+              "direct_atomic_workflow",
+              "spec_plan_workflow"
+            ]
+          },
+          "budget_class": {
+            "enum": [
+              "atomic",
+              "burst_atomic"
+            ]
+          },
+          "capsule_type": {
+            "enum": [
+              "atomic_capsule",
+              "evidence_capsule"
+            ]
+          },
+          "requested_token_cap": {
+            "maximum": 4800
+          },
+          "max_capsules": {
+            "minimum": 1,
+            "maximum": 2
+          },
+          "max_deep_refs": {
+            "maximum": 2
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "budget_class": {
+            "const": "spec"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "const": "spec_plan"
+          },
+          "requested_token_cap": {
+            "maximum": 2400
+          },
+          "burst_reason_code": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "budget_class": {
+            "const": "burst_spec"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "const": "spec_plan"
+          },
+          "requested_token_cap": {
+            "minimum": 2401,
+            "maximum": 16000
+          },
+          "burst_reason_code": {
+            "type": "string",
+            "enum": [
+              "cross_surface_conflict",
+              "multi_version_delta",
+              "operator_constraint_dense",
+              "validation_matrix_dense",
+              "upstream_release_dense",
+              "topology_policy_dense"
+            ]
+          },
+          "why_default_focus_not_enough": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "budget_class": {
+            "const": "atomic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "const": "atomic"
+          },
+          "requested_token_cap": {
+            "maximum": 1500
+          },
+          "burst_reason_code": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "budget_class": {
+            "const": "burst_atomic"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "const": "atomic"
+          },
+          "requested_token_cap": {
+            "minimum": 1501,
+            "maximum": 4800
+          },
+          "burst_reason_code": {
+            "type": "string",
+            "enum": [
+              "cross_surface_conflict",
+              "multi_version_delta",
+              "operator_constraint_dense",
+              "validation_matrix_dense",
+              "upstream_release_dense",
+              "topology_policy_dense"
+            ]
+          },
+          "why_default_focus_not_enough": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "max_capsules": {
+            "const": 2
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "query_stage": {
+            "enum": [
+              "spec_plan",
+              "atomic"
+            ]
+          },
+          "why_default_focus_not_enough": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$comment": "Contract rule: query_stage is the only formal stage input consumed by context-governor."
+}

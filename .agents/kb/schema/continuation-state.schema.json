@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/vllm-ascend/schema/continuation-state.schema.json",
+  "title": "ContinuationState",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "task_id",
+    "request_id",
+    "updated_at",
+    "goal",
+    "task_family",
+    "execution_mode",
+    "analysis_depth",
+    "deliverable_contract",
+    "persistence_mode",
+    "current_stage",
+    "bundle_root",
+    "canonical_source_files",
+    "selected_atomics",
+    "execution_order",
+    "completed_work_packages",
+    "pending_work_packages",
+    "success_criteria",
+    "stop_conditions",
+    "reroute_conditions",
+    "unresolved_risks",
+    "open_questions",
+    "latest_selector_plan_refs",
+    "latest_atomic_card_refs",
+    "compacted_history_refs",
+    "session_budget_used",
+    "last_flush_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "continuation-state/v4"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_family": {
+      "type": "string",
+      "enum": [
+        "deployment_execution",
+        "performance_analysis",
+        "debugging",
+        "design_analysis",
+        "adaptation",
+        "operator_development",
+        "upstream_sync",
+        "validation_strategy"
+      ]
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "direct_answer",
+        "direct_atomic_workflow",
+        "spec_plan_workflow"
+      ]
+    },
+    "analysis_depth": {
+      "type": "string",
+      "enum": [
+        "none",
+        "lightweight_design_note",
+        "full_spec_plan"
+      ]
+    },
+    "deliverable_contract": {
+      "type": "string",
+      "enum": [
+        "reference_answer",
+        "deployment_artifact_pack",
+        "analysis_report",
+        "design_note",
+        "spec_plan",
+        "code_change_pack"
+      ]
+    },
+    "persistence_mode": {
+      "type": "string",
+      "const": "full_bundle"
+    },
+    "current_stage": {
+      "type": "string",
+      "enum": [
+        "public_entry",
+        "intake",
+        "spec_plan",
+        "atomic"
+      ]
+    },
+    "bundle_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonical_source_files": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string"
+      }
+    },
+    "selected_atomics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "execution_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "completed_work_packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pending_work_packages": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reroute_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unresolved_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "latest_selector_plan_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "latest_atomic_card_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "compacted_history_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "session_budget_used": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_flush_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "properties": {
+        "canonical_source_files": {
+          "contains": {
+            "pattern": "(^|/)spec\\.md$"
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "canonical_source_files": {
+          "contains": {
+            "pattern": "(^|/)plan\\.md$"
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "canonical_source_files": {
+          "contains": {
+            "pattern": "(^|/)checklist\\.md$"
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "canonical_source_files": {
+          "contains": {
+            "pattern": "(^|/)progress\\.md$"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

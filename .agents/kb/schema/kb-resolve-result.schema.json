@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/vllm-ascend/schema/kb-resolve-result.schema.json",
+  "title": "KbResolveResult",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "request_id",
+    "created_at",
+    "repo_branch",
+    "repo_sha",
+    "paired_vllm_ref",
+    "runtime_tuple",
+    "match_level",
+    "selected_shards",
+    "warnings",
+    "missing"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "kb-resolve-result/v1"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "paired_vllm_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_tuple": {
+      "type": "object",
+      "required": [
+        "soc",
+        "cann",
+        "torch",
+        "torch_npu",
+        "python"
+      ],
+      "properties": {
+        "soc": {
+          "type": "string"
+        },
+        "cann": {
+          "type": "string"
+        },
+        "torch": {
+          "type": "string"
+        },
+        "torch_npu": {
+          "type": "string"
+        },
+        "python": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "match_level": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "compatible",
+        "unknown"
+      ]
+    },
+    "selected_shards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

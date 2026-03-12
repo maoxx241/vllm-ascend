@@ -1,0 +1,85 @@
+{
+  "schema_version": "selector-seed/v3",
+  "request_id": "req-20260313-adapt-001",
+  "created_at": "2026-03-13T09:00:00Z",
+  "objective": "为 qwen3-next 增加新的运行时接入路径，并给出代码改动包",
+  "requested_artifact": "code_change_pack",
+  "target_object": {
+    "kind": "model",
+    "id": "model:qwen3-next",
+    "display_name": "qwen3-next"
+  },
+  "task_family_candidates": [
+    "adaptation",
+    "design_analysis"
+  ],
+  "family_confidence": "medium",
+  "execution_mode_hint": "direct_atomic_workflow",
+  "analysis_depth_hint": "lightweight_design_note",
+  "deliverable_contract_hint": "code_change_pack",
+  "normalized_entities": {
+    "files": [
+      "vllm_ascend/platform.py"
+    ],
+    "symbols": [
+      "Platform.initialize"
+    ],
+    "entities": [
+      "repo.feature.qwen3_next"
+    ],
+    "errors": [],
+    "models": [
+      "qwen3-next"
+    ],
+    "features": [
+      "runtime_integration"
+    ],
+    "hw": [
+      "A2"
+    ],
+    "commits": [],
+    "prs": [],
+    "versions": [
+      "vllm-ascend@main"
+    ],
+    "configs": []
+  },
+  "evidence_inventory": {
+    "evidence_kinds": [
+      "user_request_only",
+      "code_or_diff",
+      "runtime_tuple"
+    ],
+    "has_runtime_tuple": true,
+    "has_baseline": false,
+    "has_validation_assets": false,
+    "inline_refs": []
+  },
+  "evidence_level": "minimal_intake_ready",
+  "execution_context": "local_only",
+  "code_change_expectation": "code_change_required",
+  "constraints": {
+    "hard_constraints": [
+      "需要修改 vllm-ascend 仓库代码"
+    ],
+    "soft_constraints": [
+      "优先最小改动面"
+    ]
+  },
+  "unresolved_slots": [
+    "acceptance_criteria",
+    "exact_code_surface"
+  ],
+  "confirmation_required": true,
+  "confirmation_status": "pending",
+  "confirmation_reason_codes": [
+    "code_change_scope",
+    "repo_mutation_scope"
+  ],
+  "smallest_next_step": "等待用户确认进入 code-change workflow；未确认前不得进入 Atomic 或 Spec/Plan",
+  "what_is_missing": [
+    "用户确认",
+    "验收标准"
+  ],
+  "notes": "若用户只要路线分析，应改走 design_analysis"
+}

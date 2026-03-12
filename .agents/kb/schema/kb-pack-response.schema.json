@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://openai.local/vllm-ascend/schema/kb-pack-response.schema.json",
+  "title": "KbPackResponse",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "request_id",
+    "pack_id",
+    "created_at",
+    "match_level",
+    "selected_shards",
+    "warnings",
+    "unknowns",
+    "budget_token_cap",
+    "estimated_tokens",
+    "capsule_type",
+    "logical_domains",
+    "capsule_text",
+    "atoms",
+    "deep_reference_stubs",
+    "cache_hit"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "kb-pack-response/v1"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pack_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "match_level": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "compatible",
+        "unknown"
+      ]
+    },
+    "selected_shards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget_token_cap": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16000
+    },
+    "estimated_tokens": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 16000
+    },
+    "capsule_type": {
+      "type": "string",
+      "enum": [
+        "routing_capsule",
+        "intake_capsule",
+        "spec_capsule",
+        "atomic_capsule",
+        "delta_capsule",
+        "evidence_capsule"
+      ]
+    },
+    "logical_domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "knowledge_governance",
+          "vllm_upstream",
+          "vllm_ascend_core",
+          "ascend_foundation",
+          "integration_core",
+          "deployment_config",
+          "troubleshooting",
+          "validation_evidence"
+        ]
+      }
+    },
+    "capsule_text": {
+      "type": "string"
+    },
+    "atoms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "atom_id",
+          "atom_kind",
+          "summary",
+          "source_refs"
+        ],
+        "properties": {
+          "atom_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "atom_kind": {
+            "type": "string",
+            "enum": [
+              "fact",
+              "symbol",
+              "validation",
+              "delta",
+              "constraint",
+              "unknown"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "deep_reference_stubs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stub_id",
+          "source_ref",
+          "estimated_tokens",
+          "reason"
+        ],
+        "properties": {
+          "stub_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "estimated_tokens": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 800
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "cache_hit": {
+      "type": "boolean"
+    },
+    "capsule_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

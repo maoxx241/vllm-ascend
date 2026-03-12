@@ -1,0 +1,44 @@
+{
+  "schema_version": "atomic-result-card/v3",
+  "card_id": "card-20260313-perf-002",
+  "request_id": "req-20260313-perf-002",
+  "task_id": "task-20260313-perf-002",
+  "created_at": "2026-03-13T11:07:00Z",
+  "task_family": "performance_analysis",
+  "atomic_skill": "single-profile-breakdown",
+  "work_package_id": "wp-breakdown-prefill-regression",
+  "source_plan_id": "plan-20260313-perf-002",
+  "result_status": "partial",
+  "resolution_code": "partial_findings_only",
+  "finding_summary": "当前 profile 指向 prefill 阶段的 kernel 占比异常，但缺少可比 baseline，因此只能给出局部解释。",
+  "evidence_summary": [
+    "profile 中 prefill kernel 占比异常升高",
+    "deployment config 与历史 baseline 未完全对齐"
+  ],
+  "confidence": "medium",
+  "impacted_surfaces": [
+    "prefill",
+    "runtime config"
+  ],
+  "deliverable_fragment_summary": "已给出局部瓶颈线索，并列出补齐 baseline 的最小清单。",
+  "residual_unknowns": [
+    "缺少同拓扑 baseline profile"
+  ],
+  "source_refs": [
+    "profile:prefill-regression-001",
+    "config:profile_prefill_a2.yaml"
+  ],
+  "next_action": {
+    "kind": "request_more_evidence",
+    "owner_stage": "atomic",
+    "summary": "补采 baseline profile 后再做对照拆解"
+  },
+  "flush_required": true,
+  "update_bundle_files": [
+    "progress.md"
+  ],
+  "reroute": null,
+  "produced_artifacts": [],
+  "token_estimate": 410,
+  "notes": "partial 不是失败；禁止把缺失 baseline 时的猜测当成根因"
+}

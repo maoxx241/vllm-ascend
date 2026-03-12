@@ -1,0 +1,55 @@
+{
+  "schema_version": "kb-pack-response/v1",
+  "request_id": "req-20260313-perf-exp-003",
+  "pack_id": "pack-20260313-perf-exp-003",
+  "created_at": "2026-03-13T13:03:02Z",
+  "match_level": "compatible",
+  "selected_shards": [
+    "validation",
+    "repo_semantics",
+    "hw_runtime_caps"
+  ],
+  "warnings": [
+    "batch size not fixed; returning envelope instead of single-point estimate"
+  ],
+  "unknowns": [
+    "graph mode enabled/disabled"
+  ],
+  "budget_token_cap": 1500,
+  "estimated_tokens": 1020,
+  "capsule_type": "atomic_capsule",
+  "logical_domains": [
+    "validation_evidence",
+    "deployment_config",
+    "ascend_foundation"
+  ],
+  "capsule_text": "在 A2 / TP4 / BF16 / 8k 约束下，qwen3-next-32b 的性能应落在一个可解释区间内；若 batch size 和 graph mode 不固定，结果应以范围而非单点返回。",
+  "atoms": [
+    {
+      "atom_id": "atom-baseline-qwen3-next-32b-a2",
+      "atom_kind": "validation",
+      "summary": "存在 compatible baseline，可为 TTFT/throughput 估计提供量级锚点。",
+      "source_refs": [
+        "validation:baseline:qwen3-next-32b:a2:tp4"
+      ]
+    },
+    {
+      "atom_id": "atom-a2-prefill-policy",
+      "atom_kind": "fact",
+      "summary": "A2 上的 prefill policy 与 memory headroom 约束限定了预期性能上界。",
+      "source_refs": [
+        "repo_semantics:policy/prefill"
+      ]
+    }
+  ],
+  "deep_reference_stubs": [
+    {
+      "stub_id": "stub-baseline-qwen3-next-32b-a2",
+      "source_ref": "validation/baselines/qwen3-next-32b-a2-tp4.md",
+      "estimated_tokens": 260,
+      "reason": "需要查看更完整的 baseline 条件说明"
+    }
+  ],
+  "cache_hit": false,
+  "capsule_path": ".agents/kb/local/capsules/perf-exp-003.json"
+}

@@ -149,6 +149,8 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.agents/kb/local/
+.agents/tasks/
 env/
 venv/
 ENV/
