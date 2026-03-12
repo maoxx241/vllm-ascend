@@ -663,6 +663,28 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "properties": {
+          "task_family": {
+            "enum": [
+              "adaptation",
+              "operator_development"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "analysis_depth": {
+            "enum": [
+              "lightweight_design_note",
+              "full_spec_plan"
+            ]
+          }
+        }
+      }
     }
   ],
   "additionalProperties": false,

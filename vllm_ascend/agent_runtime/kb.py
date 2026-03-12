@@ -4,13 +4,70 @@ import argparse
 import hashlib
 import json
 import sqlite3
+import subprocess
 from pathlib import Path
 from typing import Any
 
-from .contracts import (dump_json, kb_path, load_json, now_utc,
+from .contracts import (ContractError, dump_json, kb_path, load_json, now_utc,
                         run_contract_checks, validate_instance)
 from .detector import collect_runtime_context
+from .extractors import (extract_minimal_validation, extract_repo_custom_ops,
+                         extract_repo_semantics, extract_runtime_caps,
+                         merge_shard_rows)
 from .paths import kb_root, repo_root
+
+TABLE_COLUMNS: dict[str, list[str]] = {
+    "sources": [
+        "source_id",
+        "source_kind",
+        "path",
+        "uri",
+        "repo_sha",
+        "paired_vllm_ref",
+        "shard_family",
+        "excerpt_hash",
+        "metadata_json",
+    ],
+    "entities": ["entity_id", "entity_type", "canonical_name", "aliases_json", "tags_json", "metadata_json"],
+    "facts": [
+        "fact_id",
+        "subject_id",
+        "predicate",
+        "object_id",
+        "literal_text",
+        "confidence",
+        "valid_from",
+        "valid_to",
+        "scope_json",
+        "source_id",
+        "shard_family",
+        "metadata_json",
+    ],
+    "edges": ["edge_id", "src_entity_id", "edge_type", "dst_entity_id", "weight", "source_id", "metadata_json"],
+    "symbol_index": [
+        "symbol_id",
+        "qualname",
+        "kind",
+        "file_path",
+        "signature",
+        "owner_module",
+        "repo_path",
+        "paired_vllm_ref",
+        "metadata_json",
+    ],
+    "validations": [
+        "validation_id",
+        "target_id",
+        "target_kind",
+        "mode",
+        "result",
+        "env_json",
+        "artifact_refs_json",
+        "summary",
+        "source_id",
+        "metadata_json",
+    ],
+}
 
 
 def _load_matrix(root: Path | None = None) -> dict[str, Any]:
@@ -29,6 +86,56 @@ def _insert_json(conn: sqlite3.Connection, table: str, columns: list[str], value
     conn.execute(f"INSERT OR REPLACE INTO {table} ({', '.join(columns)}) VALUES ({placeholders})", values)
 
 
+def _git_head(root: Path) -> str:
+    result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=root, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
+
+
+def _rule_matches(expected: str | None, actual: str, *, self_value: str | None = None) -> bool:
+    if expected is None:
+        return actual != "unknown"
+    if expected == "@self":
+        return self_value is not None and actual == self_value
+    return actual == expected
+
+
+def _prefix_matches(expected_prefix: str | None, actual: str) -> bool:
+    if expected_prefix is None:
+        return actual != "unknown"
+    return actual != "unknown" and actual.startswith(expected_prefix)
+
+
+def _exact_rule_matches(rule: dict[str, Any], context: dict[str, Any], *, self_repo_sha: str) -> bool:
+    runtime_tuple = context["runtime_tuple"]
+    return all(
+        [
+            _rule_matches(rule.get("soc"), runtime_tuple["soc"]),
+            _rule_matches(rule.get("cann"), runtime_tuple["cann"]),
+            _rule_matches(rule.get("repo_sha"), context["repo_sha"], self_value=self_repo_sha),
+            _rule_matches(rule.get("paired_vllm_ref"), context["paired_vllm_ref"]),
+            _prefix_matches(rule.get("python_prefix"), runtime_tuple["python"]),
+            _prefix_matches(rule.get("torch_prefix"), runtime_tuple["torch"]),
+            _prefix_matches(rule.get("torch_npu_prefix"), runtime_tuple["torch_npu"]),
+        ]
+    )
+
+
+def _rows_for_selected_shards(root: Path, resolve_result: dict[str, Any]) -> dict[str, list[tuple[Any, ...]]]:
+    selected = set(resolve_result["selected_shards"])
+    shards = []
+    if "repo_semantics" in selected:
+        shards.append(extract_repo_semantics(root=root, resolve_result=resolve_result))
+    if "repo_custom_ops" in selected:
+        shards.append(extract_repo_custom_ops(root=root, resolve_result=resolve_result))
+    if "validation" in selected:
+        shards.append(extract_minimal_validation(root=root, resolve_result=resolve_result))
+    if "hw_runtime_caps" in selected:
+        shards.append(extract_runtime_caps(resolve_result))
+    return merge_shard_rows(*shards)
+
+
 def resolve(
     root: Path | None = None,
     *,
@@ -41,6 +148,7 @@ def resolve(
     context = collect_runtime_context(root=root, overrides=overrides)
     matrix = _load_matrix(root=root)
     request_id = request_id or overrides.get("request_id") or f"resolve-{context['repo_sha'][:8]}"
+    self_repo_sha = _git_head(root) or context["repo_sha"]
 
     match_level = "unknown"
     selected_shards = ["repo_semantics", "repo_custom_ops", "validation"]
@@ -58,27 +166,10 @@ def resolve(
         missing.append("torch_npu")
 
     for rule in matrix.get("exact", []):
-        if (
-            rule["soc"] == runtime_tuple["soc"]
-            and rule["cann"] == runtime_tuple["cann"]
-            and rule["repo_sha"] == context["repo_sha"]
-            and rule["paired_vllm_ref"] == context["paired_vllm_ref"]
-        ):
+        if _exact_rule_matches(rule, context, self_repo_sha=self_repo_sha):
             match_level = "exact"
             selected_shards = rule["selected_shards"]
             break
-
-    if (
-        match_level != "exact"
-        and runtime_tuple["soc"] == "A2"
-        and runtime_tuple["cann"] == "8.5.0"
-        and context["paired_vllm_ref"] != "unknown"
-        and runtime_tuple["torch"] != "unknown"
-        and runtime_tuple["torch_npu"] != "unknown"
-        and runtime_tuple["python"] != "unknown"
-    ):
-        match_level = "exact"
-        selected_shards = ["repo_semantics", "repo_custom_ops", "validation", "hw_runtime_caps"]
 
     if match_level != "exact":
         for rule in matrix.get("compatible", []):
@@ -92,10 +183,10 @@ def resolve(
                 break
 
     if match_level == "unknown" and context["repo_sha"] != "unknown":
-        match_level = "compatible" if runtime_tuple["soc"] in {"A2", "A3"} else "unknown"
+        match_level = "compatible" if runtime_tuple["soc"] in {"A2", "A3"} and runtime_tuple["cann"] != "unknown" else "unknown"
         if match_level == "compatible":
             warnings.append("runtime tuple exact match unavailable; using repo-only fallback")
-    if runtime_tuple["soc"] == "A2" and runtime_tuple["cann"] == "8.5.0":
+    if match_level == "exact" and runtime_tuple["soc"] == "A2" and runtime_tuple["cann"] == "8.5.0":
         selected_shards = sorted(set(selected_shards + ["hw_runtime_caps"]))
 
     result = {
@@ -132,7 +223,7 @@ def build_local(
     conn = sqlite3.connect(emit_sqlite)
     try:
         conn.executescript(kb_path("sql", "merged_pack.sql", root=root).read_text(encoding="utf-8"))
-        now = now_utc()
+        now = resolve_result["created_at"]
         runtime_hash = hashlib.sha256(json.dumps(resolve_result, sort_keys=True).encode("utf-8")).hexdigest()
         pack_meta = {
             "build_created_at": now,
@@ -143,282 +234,10 @@ def build_local(
         }
         for key, value in pack_meta.items():
             _insert_json(conn, "pack_meta", ["meta_key", "value_json"], [key, json.dumps(value)])
-
-        sources = [
-            (
-                "source-repo-prefill",
-                "repo_file",
-                "vllm_ascend/ascend_forward_context.py",
-                None,
-                resolve_result["repo_sha"],
-                resolve_result["paired_vllm_ref"],
-                "repo_semantics",
-                None,
-                json.dumps({"summary": "A2/A3 prefill and communication selection rules"}),
-            ),
-            (
-                "source-repo-envs",
-                "repo_file",
-                "vllm_ascend/envs.py",
-                None,
-                resolve_result["repo_sha"],
-                resolve_result["paired_vllm_ref"],
-                "repo_semantics",
-                None,
-                json.dumps({"summary": "Ascend runtime env variables"}),
-            ),
-            (
-                "source-val-async",
-                "repo_test",
-                "tests/e2e/singlecard/test_async_scheduling.py",
-                None,
-                resolve_result["repo_sha"],
-                resolve_result["paired_vllm_ref"],
-                "validation",
-                None,
-                json.dumps({"summary": "single-card async scheduling smoke/regression"}),
-            ),
-            (
-                "source-val-dynamic-batch",
-                "repo_test",
-                "tests/ut/core/test_scheduler_dynamic_batch.py",
-                None,
-                resolve_result["repo_sha"],
-                resolve_result["paired_vllm_ref"],
-                "validation",
-                None,
-                json.dumps({"summary": "dynamic batch unit tests"}),
-            ),
-            (
-                "source-runtime-tuple",
-                "runtime",
-                None,
-                None,
-                resolve_result["repo_sha"],
-                resolve_result["paired_vllm_ref"],
-                "hw_runtime_caps",
-                None,
-                json.dumps(resolve_result["runtime_tuple"], ensure_ascii=False),
-            ),
-        ]
-        for row in sources:
-            _insert_json(
-                conn,
-                "sources",
-                [
-                    "source_id",
-                    "source_kind",
-                    "path",
-                    "uri",
-                    "repo_sha",
-                    "paired_vllm_ref",
-                    "shard_family",
-                    "excerpt_hash",
-                    "metadata_json",
-                ],
-                list(row),
-            )
-
-        entities = [
-            ("entity-model-qwen3-next", "model", "qwen3-next", json.dumps([]), json.dumps(["deployment"]), json.dumps({})),
-            ("entity-model-qwen3-next-32b", "model", "qwen3-next-32b", json.dumps([]), json.dumps(["performance"]), json.dumps({})),
-            ("entity-hw-a2", "hardware", "A2", json.dumps(["910B4"]), json.dumps(["ascend"]), json.dumps({})),
-            ("entity-feature-prefill", "feature", "prefill", json.dumps([]), json.dumps(["runtime"]), json.dumps({})),
-            ("entity-feature-decode", "feature", "decode", json.dumps([]), json.dumps(["runtime"]), json.dumps({})),
-            ("entity-feature-allgather-ep", "feature", "allgather_ep", json.dumps(["allgather ep"]), json.dumps(["deployment"]), json.dumps({})),
-            ("entity-feature-dynamic-batching", "feature", "dynamic_batching", json.dumps(["dynamic batch"]), json.dumps(["validation"]), json.dumps({})),
-            ("entity-policy-prefill", "policy", "repo.policy.prefill", json.dumps([]), json.dumps(["repo"]), json.dumps({})),
-            ("entity-config-tp4-bf16-ctx8k", "config", "tp4_bf16_ctx8k", json.dumps([]), json.dumps(["performance"]), json.dumps({})),
-        ]
-        for row in entities:
-            _insert_json(
-                conn,
-                "entities",
-                ["entity_id", "entity_type", "canonical_name", "aliases_json", "tags_json", "metadata_json"],
-                list(row),
-            )
-
-        facts = [
-            (
-                "fact-prefill-a2",
-                "entity-policy-prefill",
-                "supports_hw",
-                "entity-hw-a2",
-                "A2 prefill/decode path is bounded by MC2 capacity and may fall back to all-gather.",
-                0.92,
-                None,
-                None,
-                json.dumps({"models": ["qwen3-next"], "features": ["prefill", "decode"]}, ensure_ascii=False),
-                "source-repo-prefill",
-                "repo_semantics",
-                json.dumps({}),
-            ),
-            (
-                "fact-allgather-ep",
-                "entity-feature-allgather-ep",
-                "deployment_usage",
-                None,
-                "Without expert parallel or world_size=1, the runtime falls back to all-gather communication.",
-                0.88,
-                None,
-                None,
-                json.dumps({"hw": ["A2"]}, ensure_ascii=False),
-                "source-repo-prefill",
-                "repo_semantics",
-                json.dumps({}),
-            ),
-            (
-                "fact-runtime-cann",
-                "entity-hw-a2",
-                "runtime_constraint",
-                None,
-                "Current validated runtime tuple uses CANN 8.5.0 on A2/910B4.",
-                1.0,
-                None,
-                None,
-                json.dumps(resolve_result["runtime_tuple"], ensure_ascii=False),
-                "source-runtime-tuple",
-                "hw_runtime_caps",
-                json.dumps({}),
-            ),
-        ]
-        for row in facts:
-            _insert_json(
-                conn,
-                "facts",
-                [
-                    "fact_id",
-                    "subject_id",
-                    "predicate",
-                    "object_id",
-                    "literal_text",
-                    "confidence",
-                    "valid_from",
-                    "valid_to",
-                    "scope_json",
-                    "source_id",
-                    "shard_family",
-                    "metadata_json",
-                ],
-                list(row),
-            )
-
-        edges = [
-            ("edge-policy-prefill-a2", "entity-policy-prefill", "targets", "entity-hw-a2", 1.0, "source-repo-prefill", json.dumps({})),
-            ("edge-dynamic-batching-prefill", "entity-feature-dynamic-batching", "touches", "entity-feature-prefill", 0.8, "source-val-dynamic-batch", json.dumps({})),
-        ]
-        for row in edges:
-            _insert_json(
-                conn,
-                "edges",
-                ["edge_id", "src_entity_id", "edge_type", "dst_entity_id", "weight", "source_id", "metadata_json"],
-                list(row),
-            )
-
-        symbols = [
-            (
-                "symbol-select-moe-comm-method",
-                "select_moe_comm_method",
-                "function",
-                "vllm_ascend/ascend_forward_context.py",
-                "select_moe_comm_method(num_tokens, vllm_config, is_draft_model=False)",
-                "vllm_ascend.ascend_forward_context",
-                "vllm_ascend/ascend_forward_context.py",
-                resolve_result["paired_vllm_ref"],
-                json.dumps({"surfaces": ["prefill", "decode", "allgather_ep"]}, ensure_ascii=False),
-            ),
-            (
-                "symbol-dynamic-batch-scheduler",
-                "SchedulerDynamicBatch",
-                "class",
-                "vllm_ascend/core/scheduler_dynamic_batch.py",
-                None,
-                "vllm_ascend.core.scheduler_dynamic_batch",
-                "vllm_ascend/core/scheduler_dynamic_batch.py",
-                resolve_result["paired_vllm_ref"],
-                json.dumps({"surfaces": ["dynamic_batching", "prefill"]}, ensure_ascii=False),
-            ),
-        ]
-        for row in symbols:
-            _insert_json(
-                conn,
-                "symbol_index",
-                [
-                    "symbol_id",
-                    "qualname",
-                    "kind",
-                    "file_path",
-                    "signature",
-                    "owner_module",
-                    "repo_path",
-                    "paired_vllm_ref",
-                    "metadata_json",
-                ],
-                list(row),
-            )
-
-        validations = [
-            (
-                "validation:baseline:qwen3-next:a2",
-                "entity-model-qwen3-next",
-                "model",
-                "compatible_baseline",
-                "pass",
-                json.dumps({"hw": "A2", "cann": resolve_result["runtime_tuple"]["cann"]}, ensure_ascii=False),
-                json.dumps(["tests/e2e/singlecard/test_async_scheduling.py"], ensure_ascii=False),
-                "compatible baseline for deployment policy lookups",
-                "source-val-async",
-                json.dumps({}),
-            ),
-            (
-                "validation:baseline:qwen3-next-32b:a2:tp4",
-                "entity-model-qwen3-next-32b",
-                "model",
-                "compatible_baseline",
-                "pass",
-                json.dumps({"hw": "A2", "config": "tp4_bf16_ctx8k"}, ensure_ascii=False),
-                json.dumps(["tests/e2e/singlecard/test_async_scheduling.py"], ensure_ascii=False),
-                "comparable baseline for expected TTFT and throughput envelope",
-                "source-val-async",
-                json.dumps({}),
-            ),
-            (
-                "validation:matrix:prefill",
-                "entity-feature-prefill",
-                "feature",
-                "matrix",
-                "pass",
-                json.dumps({"hw": "A2"}, ensure_ascii=False),
-                json.dumps(
-                    [
-                        "tests/ut/core/test_scheduler_dynamic_batch.py",
-                        "tests/e2e/singlecard/test_async_scheduling.py",
-                    ],
-                    ensure_ascii=False,
-                ),
-                "prefill and scheduler validation assets available",
-                "source-val-dynamic-batch",
-                json.dumps({}),
-            ),
-        ]
-        for row in validations:
-            _insert_json(
-                conn,
-                "validations",
-                [
-                    "validation_id",
-                    "target_id",
-                    "target_kind",
-                    "mode",
-                    "result",
-                    "env_json",
-                    "artifact_refs_json",
-                    "summary",
-                    "source_id",
-                    "metadata_json",
-                ],
-                list(row),
-            )
+        extracted_rows = _rows_for_selected_shards(root, resolve_result)
+        for table_name, columns in TABLE_COLUMNS.items():
+            for row in extracted_rows[table_name]:
+                _insert_json(conn, table_name, columns, list(row))
         conn.commit()
     finally:
         conn.close()
@@ -438,6 +257,34 @@ def _query_rows(conn: sqlite3.Connection, sql: str, args: tuple[Any, ...] = ()) 
     return list(conn.execute(sql, args))
 
 
+def _estimate_tokens(atoms: list[dict[str, Any]], deep_refs: list[dict[str, Any]]) -> int:
+    return max(220, 220 + len(atoms) * 120 + len(deep_refs) * 80)
+
+
+def _apply_budget(
+    *,
+    budget_token_cap: int,
+    atoms: list[dict[str, Any]],
+    deep_refs: list[dict[str, Any]],
+    warnings: list[str],
+    unknowns: list[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
+    trimmed_atoms = list(atoms)
+    trimmed_refs = list(deep_refs)
+    while trimmed_refs and _estimate_tokens(trimmed_atoms, trimmed_refs) > budget_token_cap:
+        trimmed_refs.pop()
+    while len(trimmed_atoms) > 1 and _estimate_tokens(trimmed_atoms, trimmed_refs) > budget_token_cap:
+        trimmed_atoms.pop()
+    estimated = _estimate_tokens(trimmed_atoms, trimmed_refs)
+    if estimated > budget_token_cap:
+        warnings.append("budget cap too small; returning explicit miss")
+        unknowns.append("budget cap prevented a sufficient capsule")
+        return [], [], min(budget_token_cap, 220)
+    if len(trimmed_atoms) != len(atoms) or len(trimmed_refs) != len(deep_refs):
+        warnings.append("budget cap forced a smaller capsule")
+    return trimmed_atoms, trimmed_refs, estimated
+
+
 def pack(
     root: Path | None = None,
     *,
@@ -451,9 +298,7 @@ def pack(
         emit_path = root / emit_path
     conn = sqlite3.connect(merged_pack)
     try:
-        runtime_rows = _query_rows(conn, "SELECT literal_text FROM facts WHERE fact_id = 'fact-runtime-cann'")
         policy_rows = _query_rows(conn, "SELECT literal_text FROM facts WHERE subject_id = 'entity-policy-prefill'")
-        validation_rows = _query_rows(conn, "SELECT validation_id, summary, artifact_refs_json FROM validations")
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
@@ -461,6 +306,7 @@ def pack(
         deep_refs: list[dict[str, Any]] = []
         intent = request["intent"]
         selectors = request["selectors"]
+        evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
             capsule_text = "baseline 存在，当前需求仍位于 deployment_execution 边界内，可继续输出配置、脚本和最小验证步骤。"
@@ -490,25 +336,49 @@ def pack(
                 }
             )
         elif intent == "perf_breakdown":
-            capsule_text = "当前 profile 指向 prefill 阶段的异常，但缺少同拓扑 baseline，只能先做 partial breakdown。"
-            warnings.append("baseline profile missing; expect partial findings only")
-            unknowns.append("缺少同拓扑 baseline profile")
-            atoms.extend(
-                [
-                    {
-                        "atom_id": "atom-profile-regression",
-                        "atom_kind": "validation",
-                        "summary": "当前输入描述符合 prefill regression 场景，但仓库内没有对应 baseline profile 产物。",
-                        "source_refs": ["validation:matrix:prefill"],
-                    },
-                    {
-                        "atom_id": "atom-runtime-config",
-                        "atom_kind": "fact",
-                        "summary": "dynamic batching 与 prefill 调度路径会直接影响 profile 解释边界。",
-                        "source_refs": ["repo_semantics:policy/prefill"],
-                    },
-                ]
+            comparative_requested = len(evidence_refs) >= 2 or any(
+                re_term in " ".join(request["must_have"] + request["nice_to_have"]).lower()
+                for re_term in ["baseline", "compare", "versus", "对照", "current"]
             )
+            if comparative_requested:
+                capsule_text = "baseline/current profile 已形成对照条件，可输出 comparative breakdown，并保留少量配置敏感项。"
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-profile-current",
+                            "atom_kind": "validation",
+                            "summary": "当前 profile 指向 prefill 阶段，热点集中在调度与通信交界面。",
+                            "source_refs": ["validation:matrix:prefill"],
+                        },
+                        {
+                            "atom_id": "atom-profile-baseline",
+                            "atom_kind": "validation",
+                            "summary": "baseline/current 对照已满足 comparative breakdown 的最小证据门槛。",
+                            "source_refs": ["validation:baseline:qwen3-next-32b:a2:tp4"],
+                        },
+                    ]
+                )
+                unknowns.append("graph mode 与 capture 边界仍可能影响局部归因")
+            else:
+                capsule_text = "当前 profile 指向 prefill 阶段的异常，但缺少同拓扑 baseline，只能先做 partial breakdown。"
+                warnings.append("baseline profile missing; expect partial findings only")
+                unknowns.append("缺少同拓扑 baseline profile")
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-profile-regression",
+                            "atom_kind": "validation",
+                            "summary": "当前输入描述符合 prefill regression 场景，但仓库内没有对应 baseline profile 产物。",
+                            "source_refs": ["validation:matrix:prefill"],
+                        },
+                        {
+                            "atom_id": "atom-runtime-config",
+                            "atom_kind": "fact",
+                            "summary": "dynamic batching 与 prefill 调度路径会直接影响 profile 解释边界。",
+                            "source_refs": ["repo_semantics:policy/prefill"],
+                        },
+                    ]
+                )
         elif intent == "model_expectation":
             capsule_text = (
                 "在 A2 / TP4 / BF16 / 8k 约束下，qwen3-next-32b 的 TTFT、throughput 和 memory headroom "
@@ -563,17 +433,28 @@ def pack(
             if not impacted:
                 warnings.append("diff paths missing; using feature-based fallback")
             unknowns.append("A3 拓扑下是否需要额外并行度 smoke")
+        elif intent in {"design_lookup", "upstream_delta", "debug_triage", "adaptation_codegen", "operator_codegen"}:
+            capsule_text = "当前 repo-only KB 无法充分支持该 intent，返回显式 miss。"
+            unknowns.append(f"intent {intent} requires deferred family support or richer substrate")
         else:
             capsule_text = "知识未命中明确 intent，返回 repo-only fallback。"
             unknowns.append("intent unsupported")
 
         logical_domains = request["logical_domains"]
-        estimated_tokens = min(request["budget_token_cap"], max(256, 220 + len(atoms) * 120))
+        if not request["include_evidence_stubs"]:
+            deep_refs = []
+        atoms, deep_refs, estimated_tokens = _apply_budget(
+            budget_token_cap=request["budget_token_cap"],
+            atoms=atoms,
+            deep_refs=deep_refs,
+            warnings=warnings,
+            unknowns=unknowns,
+        )
         response = {
             "schema_version": "kb-pack-response/v1",
             "request_id": request["request_id"],
             "pack_id": f"pack-{request['request_id']}",
-            "created_at": now_utc(),
+            "created_at": request["created_at"],
             "match_level": resolve_result["match_level"],
             "selected_shards": resolve_result["selected_shards"],
             "warnings": warnings,
@@ -673,7 +554,7 @@ def _parse_request_from_args(args: argparse.Namespace) -> dict[str, Any]:
         },
         "must_have": args.must_have or [],
         "nice_to_have": args.nice_to_have or [],
-        "evidence_refs": [],
+        "evidence_refs": args.evidence_refs or [],
         "budget_token_cap": args.budget_token_cap,
         "max_atoms": args.max_atoms,
         "max_hops": args.max_hops,
@@ -726,6 +607,7 @@ def main(argv: list[str] | None = None) -> int:
     pack_parser.add_argument("--configs", nargs="*", default=[])
     pack_parser.add_argument("--must-have", nargs="*", default=[])
     pack_parser.add_argument("--nice-to-have", nargs="*", default=[])
+    pack_parser.add_argument("--evidence-refs", nargs="*", default=[])
     pack_parser.add_argument("--budget-token-cap", type=int, default=1500)
     pack_parser.add_argument("--max-atoms", type=int, default=10)
     pack_parser.add_argument("--max-hops", type=int, default=1)
@@ -736,49 +618,53 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = (repo_root() / args.repo_root).resolve() if args.repo_root != "." else repo_root()
 
-    if args.command == "doctor":
-        for message in doctor(root):
-            print(message)
-        return 0
+    try:
+        if args.command == "doctor":
+            for message in doctor(root):
+                print(message)
+            return 0
 
-    if args.command == "resolve":
-        overrides = {
-            key: value
-            for key, value in {
-                "soc": args.soc,
-                "cann": args.cann,
-                "torch": args.torch,
-                "torch_npu": args.torch_npu,
-                "python": args.python,
-                "repo_sha": args.repo_sha,
-                "paired_vllm_ref": args.paired_vllm_ref,
-            }.items()
-            if value
-        }
-        emit_path = Path(args.emit) if args.emit else None
-        result = resolve(root, request_id=args.request_id, overrides=overrides, emit_path=emit_path)
-        print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0
+        if args.command == "resolve":
+            overrides = {
+                key: value
+                for key, value in {
+                    "soc": args.soc,
+                    "cann": args.cann,
+                    "torch": args.torch,
+                    "torch_npu": args.torch_npu,
+                    "python": args.python,
+                    "repo_sha": args.repo_sha,
+                    "paired_vllm_ref": args.paired_vllm_ref,
+                }.items()
+                if value
+            }
+            emit_path = Path(args.emit) if args.emit else None
+            result = resolve(root, request_id=args.request_id, overrides=overrides, emit_path=emit_path)
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0
 
-    if args.command == "build-local":
-        resolve_result = load_json(Path(args.resolve))
-        path = build_local(root, resolve_result=resolve_result, emit_sqlite=Path(args.emit_sqlite))
-        print(path)
-        return 0
+        if args.command == "build-local":
+            resolve_result = load_json(Path(args.resolve))
+            path = build_local(root, resolve_result=resolve_result, emit_sqlite=Path(args.emit_sqlite))
+            print(path)
+            return 0
 
-    if args.command == "pack":
-        resolve_result = load_json(Path(args.resolve))
-        request = _parse_request_from_args(args)
-        validate_instance(request, "kb-pack-request.schema.json", root=root)
-        response = pack(
-            root,
-            request=request,
-            resolve_result=resolve_result,
-            merged_pack=Path(args.merged_pack),
-            emit_path=Path(args.emit) if args.emit else None,
-        )
-        print(json.dumps(response, ensure_ascii=False, indent=2))
-        return 0
+        if args.command == "pack":
+            resolve_result = load_json(Path(args.resolve))
+            request = _parse_request_from_args(args)
+            validate_instance(request, "kb-pack-request.schema.json", root=root)
+            response = pack(
+                root,
+                request=request,
+                resolve_result=resolve_result,
+                merged_pack=Path(args.merged_pack),
+                emit_path=Path(args.emit) if args.emit else None,
+            )
+            print(json.dumps(response, ensure_ascii=False, indent=2))
+            return 0
+    except ContractError as exc:
+        print(f"FAIL {exc}")
+        return 1
 
     return 1
 

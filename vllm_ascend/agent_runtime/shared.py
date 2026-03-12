@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from typing import Any, NamedTuple, TypedDict
+from typing import Any, Literal, NamedTuple, TypedDict
 
 from .bundle import build_continuation_state
 from .contracts import copy_example, now_utc, validate_instance
@@ -18,6 +18,7 @@ class RawRequest(NamedTuple):
     inline_symbols: list[str]
     inline_errors: list[str]
     execution_context_hint: str | None = None
+    created_at_hint: str | None = None
 
 
 class ProgressState(TypedDict):
@@ -28,6 +29,14 @@ class ProgressState(TypedDict):
     seen_dedupe_keys: list[str]
     last_flush_at: str | None
     session_budget_used: int
+
+
+class IntakeResult(TypedDict):
+    selector_seed: dict[str, Any]
+    selector_plan: dict[str, Any] | None
+    blocked: bool
+    response_kind: Literal["query_plan", "direct_answer", "confirmation_gate"]
+    direct_answer: str | None
 
 
 HW_TOKENS = {
@@ -78,23 +87,31 @@ def _detect_features(text: str) -> list[str]:
 
 
 def _requested_artifact(text: str) -> str:
+    if re.search(r"(family|workflow|governor|schema|contract|direct answer|什么是|哪些阶段|public entry)", text, re.I):
+        return "reference_answer"
     if re.search(r"(deploy|deployment|config|prefill policy)", text, re.I):
         return "deployment_artifact_pack"
     if re.search(r"(spec|plan|design)", text, re.I):
         return "spec_plan"
-    if re.search(r"(diff|test|validation)", text, re.I):
+    if re.search(r"(diff|test|validation|coverage|补采)", text, re.I):
         return "analysis_report"
     return "analysis_report"
 
 
 def _classify(text: str, inline_paths: list[str], inline_errors: list[str]) -> str:
+    if (
+        not inline_paths
+        and not inline_errors
+        and re.search(r"(family|workflow|governor|schema|contract|什么是|哪些阶段|public entry)", text, re.I)
+    ):
+        return "reference"
     if re.search(r"(expect|estimate|ttft|throughput|headroom)", text, re.I) and "profile" not in text.lower():
         return "performance_expectation"
     if re.search(r"(profile|regression|kernel)", text, re.I):
         return "performance_breakdown"
     if inline_errors:
         return "performance_breakdown"
-    if inline_paths or re.search(r"(diff|validation|test)", text, re.I):
+    if inline_paths or re.search(r"(diff|validation|test|coverage|补采)", text, re.I):
         return "validation"
     if re.search(r"(deploy|deployment|policy|prefill)", text, re.I):
         return "deployment"
@@ -130,6 +147,32 @@ def _base_seed_for_kind(kind: str, root: Any) -> dict[str, Any]:
     return copy_example("selector-seed.performance.expectation.json", root=root)
 
 
+def _target_object(kind: str, raw_request: RawRequest, models: list[str], features: list[str]) -> dict[str, str]:
+    if kind in {"deployment", "performance_expectation", "performance_breakdown"} and models:
+        return {"kind": "model", "id": models[0], "display_name": models[0]}
+    if kind == "validation" and raw_request.inline_paths:
+        return {"kind": "validation_scope", "id": raw_request.inline_paths[0], "display_name": raw_request.inline_paths[0]}
+    if kind == "adaptation":
+        return {"kind": "code_surface", "id": raw_request.request_id, "display_name": "code-change path"}
+    if kind == "reference":
+        return {"kind": "other", "id": raw_request.request_id, "display_name": "reference answer"}
+    if features:
+        return {"kind": "feature", "id": features[0], "display_name": features[0]}
+    return {"kind": "other", "id": raw_request.request_id, "display_name": raw_request.user_text[:80]}
+
+
+def _direct_answer_text(selector_seed: dict[str, Any]) -> str:
+    if selector_seed["confirmation_status"] == "pending":
+        return "当前路径需要确认后才能继续，不会进入 Atomic 或 Spec/Plan。"
+    if selector_seed["confirmation_status"] == "user_declined":
+        return "用户已拒绝高成本路径；当前只保留分析说明，不继续查询。"
+    return "当前问题可以在 Intake 直接回答，无需调用 governor 或 KB 查询。"
+
+
+def _should_direct_answer(selector_seed: dict[str, Any]) -> bool:
+    return selector_seed["execution_mode_hint"] == "direct_answer"
+
+
 def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
     kind = _classify(raw_request.user_text, raw_request.inline_paths, raw_request.inline_errors)
@@ -140,6 +183,7 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
     confirmation_required, confirmation_status = _confirmation_status(kind, raw_request.user_text)
 
     family_candidates = {
+        "reference": ["design_analysis"],
         "deployment": ["deployment_execution", "design_analysis"],
         "performance_expectation": ["performance_analysis"],
         "performance_breakdown": ["performance_analysis"],
@@ -147,24 +191,30 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         "adaptation": ["adaptation", "design_analysis"],
         "design": ["design_analysis"],
     }[kind]
-    execution_mode = "direct_atomic_workflow" if kind != "design" else "spec_plan_workflow"
-    deliverable = (
-        "deployment_artifact_pack"
-        if kind == "deployment"
-        else "code_change_pack"
-        if kind == "adaptation"
-        else "analysis_report"
-    )
+    deliverable = _requested_artifact(raw_request.user_text)
+    if kind == "reference":
+        execution_mode = "direct_answer"
+        analysis_depth = "none"
+        deliverable_hint = "reference_answer"
+    elif kind == "design":
+        execution_mode = "spec_plan_workflow"
+        analysis_depth = "full_spec_plan"
+        deliverable_hint = "spec_plan" if deliverable == "spec_plan" else "design_note"
+    else:
+        execution_mode = "direct_atomic_workflow"
+        analysis_depth = "lightweight_design_note"
+        deliverable_hint = deliverable
     seed.update(
         {
             "request_id": raw_request.request_id,
-            "created_at": now_utc(),
+            "created_at": raw_request.created_at_hint or now_utc(),
             "objective": raw_request.user_text,
             "requested_artifact": deliverable,
+            "target_object": _target_object(kind, raw_request, models, features),
             "task_family_candidates": family_candidates,
             "execution_mode_hint": execution_mode,
-            "deliverable_contract_hint": deliverable if deliverable != "analysis_report" else "analysis_report",
-            "analysis_depth_hint": "full_spec_plan" if execution_mode == "spec_plan_workflow" else "lightweight_design_note",
+            "deliverable_contract_hint": deliverable_hint,
+            "analysis_depth_hint": analysis_depth,
             "normalized_entities": {
                 "files": raw_request.inline_paths,
                 "symbols": raw_request.inline_symbols,
@@ -208,8 +258,18 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
             "confirmation_required": confirmation_required,
             "confirmation_status": confirmation_status,
             "confirmation_reason_codes": ["code_change_scope"] if confirmation_required else [],
-            "smallest_next_step": "查一个正式 capsule 再决定是否继续推进",
-            "what_is_missing": ["baseline"] if kind == "performance_breakdown" else seed["what_is_missing"],
+            "smallest_next_step": (
+                "直接回答，无需查询。"
+                if execution_mode == "direct_answer"
+                else "查一个正式 capsule 再决定是否继续推进"
+            ),
+            "what_is_missing": (
+                []
+                if execution_mode == "direct_answer"
+                else ["baseline"]
+                if kind == "performance_breakdown"
+                else seed["what_is_missing"]
+            ),
         }
     )
     validate_instance(seed, "selector-seed.schema.json", root=root)
@@ -220,16 +280,32 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
     root = root or repo_root()
     if selector_seed["confirmation_required"] and selector_seed["confirmation_status"] in {"pending", "user_declined"}:
         return None
+    if selector_seed["execution_mode_hint"] == "direct_answer":
+        return None
     family = selector_seed["task_family_candidates"][0]
     objective = selector_seed["objective"]
     if family == "deployment_execution":
         plan = copy_example("selector-plan.deployment.intake.json", root=root)
-    elif family == "performance_analysis" and re.search(r"(expect|estimate|ttft|throughput)", objective, re.I):
+    elif (
+        family == "performance_analysis"
+        and re.search(r"(expect|estimate|ttft|throughput)", objective, re.I)
+        and not re.search(r"(profile|regression|kernel)", objective, re.I)
+        and not selector_seed["normalized_entities"]["errors"]
+    ):
         plan = copy_example("selector-plan.performance.expectation.atomic.json", root=root)
+    elif family == "performance_analysis" and re.search(r"(compare|versus|vs\.?|对照|baseline/current)", objective, re.I):
+        plan = copy_example("selector-plan.performance.atomic.json", root=root)
+        plan["consumer_id"] = "comparative-profile-breakdown"
+        plan["work_package_id"] = "wp-compare-profile-vs-baseline"
+        plan["work_package_goal"] = "对 baseline/current profile 做对照拆解"
     elif family == "performance_analysis":
         plan = copy_example("selector-plan.performance.atomic.json", root=root)
     elif family == "validation_strategy":
         plan = copy_example("selector-plan.validation.atomic.json", root=root)
+        if re.search(r"(coverage gap|补采|缺少资产|coverage)", objective, re.I):
+            plan["consumer_id"] = "coverage-gap-analyzer"
+            plan["work_package_id"] = "wp-analyze-validation-gaps"
+            plan["work_package_goal"] = "识别验证覆盖缺口并输出低置信补采建议"
     else:
         plan = copy_example("selector-plan.design.spec.json", root=root)
 
@@ -238,7 +314,7 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
         {
             "plan_id": f"plan-{slug}",
             "request_id": selector_seed["request_id"],
-            "created_at": now_utc(),
+            "created_at": selector_seed["created_at"],
             "task_family": family,
             "selectors": selector_seed["normalized_entities"],
             "work_package_goal": selector_seed["objective"],
@@ -269,6 +345,8 @@ def evaluate_governor(
     root: Any | None = None,
 ) -> dict[str, Any]:
     root = root or repo_root()
+    validate_instance(selector_seed, "selector-seed.schema.json", root=root)
+    validate_instance(selector_plan, "selector-plan.schema.json", root=root)
     stage = selector_plan["query_stage"]
     budget_map = {
         "intake": ("intake", 1200),
@@ -282,6 +360,12 @@ def evaluate_governor(
 
     if not selector_plan.get("query_trigger_codes"):
         denial_reason_code = "missing_trigger_code"
+    elif stage == "intake" and progress_state["opened_deep_refs_in_stage"] > 0:
+        denial_reason_code = "stage_disallows_query"
+        warnings.append("intake stage cannot open deep refs")
+    elif progress_state["opened_deep_refs_in_stage"] > selector_plan["max_deep_refs"]:
+        denial_reason_code = "stage_disallows_query"
+        warnings.append("deep ref cap exceeded for current stage")
     elif selector_seed["confirmation_status"] in {"pending", "user_declined"} and stage in {"atomic", "spec_plan"}:
         denial_reason_code = "stage_disallows_query"
     elif flush_required:
@@ -329,10 +413,13 @@ def compile_pack_request(
     mapping = {
         ("intake", "deployment_execution", "deployment-intake"): "intake_lookup",
         ("atomic", "deployment_execution", "feature-policy-resolver"): "deployment_lookup",
+        ("atomic", "deployment_execution", "deployment-config-synthesizer"): "deployment_lookup",
+        ("atomic", "deployment_execution", "deployment-artifact-packager"): "deployment_lookup",
         ("atomic", "performance_analysis", "single-profile-breakdown"): "perf_breakdown",
         ("atomic", "performance_analysis", "comparative-profile-breakdown"): "perf_breakdown",
         ("atomic", "performance_analysis", "model-expected-performance-estimator"): "model_expectation",
         ("atomic", "validation_strategy", "change-impact-test-selector"): "validation_selection",
+        ("atomic", "validation_strategy", "coverage-gap-analyzer"): "validation_selection",
         ("spec_plan", "design_analysis", "design-spec"): "design_lookup",
     }
     intent = mapping.get(
@@ -388,12 +475,38 @@ def load_capsule(
     return pack(repo_root_path, request=request, resolve_result=resolve_result, merged_pack=merge_path)
 
 
-def generic_task_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+def intake_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> IntakeResult:
+    root = root or repo_root()
+    plan = plan_from_seed(selector_seed, root=root)
+    if selector_seed["confirmation_status"] in {"pending", "user_declined"}:
+        return {
+            "selector_seed": selector_seed,
+            "selector_plan": None,
+            "blocked": True,
+            "response_kind": "confirmation_gate",
+            "direct_answer": _direct_answer_text(selector_seed),
+        }
+    if _should_direct_answer(selector_seed):
+        return {
+            "selector_seed": selector_seed,
+            "selector_plan": None,
+            "blocked": False,
+            "response_kind": "direct_answer",
+            "direct_answer": _direct_answer_text(selector_seed),
+        }
+    return {
+        "selector_seed": selector_seed,
+        "selector_plan": plan,
+        "blocked": plan is None,
+        "response_kind": "query_plan",
+        "direct_answer": None,
+    }
+
+
+def generic_task_intake(raw_request: RawRequest, root: Any | None = None) -> IntakeResult:
     root = root or repo_root()
     seed = build_selector_seed(raw_request, root=root)
-    plan = plan_from_seed(seed, root=root)
-    blocked = plan is None
-    return {"selector_seed": seed, "selector_plan": plan, "blocked": blocked}
+    return intake_from_seed(seed, root=root)
 
 
 def generic_spec(selector_plan: dict[str, Any], root: Any | None = None) -> dict[str, Any]:

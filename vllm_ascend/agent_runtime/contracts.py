@@ -136,6 +136,13 @@ def validate_negative_cases(root: Path | None = None) -> list[str]:
     invalid_cont["persistence_mode"] = "none"
     assert list(cont_schema.iter_errors(invalid_cont))
     messages.append("OK negative continuation persistence")
+
+    invalid_code_change = copy.deepcopy(load_example("selector-plan.performance.atomic.json", root=root))
+    invalid_code_change["task_family"] = "adaptation"
+    invalid_code_change["deliverable_contract"] = "code_change_pack"
+    invalid_code_change["analysis_depth"] = "none"
+    assert list(plan_schema.iter_errors(invalid_code_change))
+    messages.append("OK negative code-change analysis depth")
     return messages
 
 

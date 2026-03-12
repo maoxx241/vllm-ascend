@@ -1,15 +1,23 @@
 from .bundle import (append_progress_entry, ensure_task_bundle,
+                     flush_atomic_result, refresh_continuation_state,
                      save_atomic_card, save_continuation_state,
-                     update_plan_section)
+                     save_selector_plan, update_plan_section)
 from .capabilities import (change_impact_test_selector,
+                           comparative_profile_breakdown,
+                           coverage_gap_analyzer,
+                           deployment_artifact_packager,
+                           deployment_config_synthesizer,
                            feature_policy_resolver,
                            model_expected_performance_estimator,
                            single_profile_breakdown)
+from .entrypoints import (deployment_intake, perf_intake, public_entry,
+                          validation_strategy_intake,
+                          vllm_ascend_assistant)
 from .kb import build_local, doctor, pack, resolve
 from .shared import (RawRequest, build_selector_seed, compile_pack_request,
                      evaluate_governor, generic_analysis_checklist,
-                     generic_spec, generic_task_intake, load_capsule,
-                     plan_from_seed)
+                     generic_spec, generic_task_intake, intake_from_seed,
+                     load_capsule, plan_from_seed)
 
 __all__ = [
     "RawRequest",
@@ -17,21 +25,34 @@ __all__ = [
     "build_local",
     "build_selector_seed",
     "change_impact_test_selector",
+    "comparative_profile_breakdown",
     "compile_pack_request",
+    "coverage_gap_analyzer",
+    "deployment_artifact_packager",
+    "deployment_config_synthesizer",
+    "deployment_intake",
     "doctor",
     "ensure_task_bundle",
     "evaluate_governor",
     "feature_policy_resolver",
+    "flush_atomic_result",
     "generic_analysis_checklist",
     "generic_spec",
     "generic_task_intake",
+    "intake_from_seed",
     "load_capsule",
     "model_expected_performance_estimator",
     "pack",
+    "perf_intake",
     "plan_from_seed",
+    "public_entry",
+    "refresh_continuation_state",
     "resolve",
     "save_atomic_card",
     "save_continuation_state",
+    "save_selector_plan",
     "single_profile_breakdown",
     "update_plan_section",
+    "validation_strategy_intake",
+    "vllm_ascend_assistant",
 ]

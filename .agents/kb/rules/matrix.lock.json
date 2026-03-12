@@ -3,8 +3,11 @@
     {
       "soc": "A2",
       "cann": "8.5.0",
-      "repo_sha": "fe4cad24e9efa97235a5ebff10b62d8a4d981ddc",
+      "repo_sha": "@self",
       "paired_vllm_ref": "e39257a552d18ae9abb6ba1bbe65865d385ea764",
+      "python_prefix": "3.",
+      "torch_prefix": "2.9",
+      "torch_npu_prefix": "2.9",
       "selected_shards": [
         "repo_semantics",
         "repo_custom_ops",

@@ -42,6 +42,15 @@ def update_plan_section(task_id: str, patch: dict[str, Any], root: Path | None =
     plan_file.write_text("# Plan\n\n```json\n" + payload + "\n```\n", encoding="utf-8")
 
 
+def save_selector_plan(task_id: str, selector_plan: dict[str, Any], root: Path | None = None) -> str:
+    root = root or repo_root()
+    bundle_root = Path(ensure_task_bundle(task_id, "full_bundle", root=root))
+    output = root / bundle_root / "runtime" / "plans" / f"{selector_plan['plan_id']}.json"
+    validate_instance(selector_plan, "selector-plan.schema.json", root=root)
+    dump_json(output, selector_plan)
+    return str(output.relative_to(root))
+
+
 def save_atomic_card(task_id: str, card: dict[str, Any], root: Path | None = None) -> str:
     root = root or repo_root()
     bundle_root = Path(ensure_task_bundle(task_id, "full_bundle", root=root))
@@ -60,6 +69,38 @@ def save_continuation_state(task_id: str, state: dict[str, Any], root: Path | No
     return str(output.relative_to(root))
 
 
+def flush_atomic_result(selector_plan: dict[str, Any], card: dict[str, Any], root: Path | None = None) -> dict[str, str]:
+    root = root or repo_root()
+    task_id = card["task_id"]
+    plan_ref = save_selector_plan(task_id, selector_plan, root=root)
+    card_ref = save_atomic_card(task_id, card, root=root)
+    append_progress_entry(
+        task_id,
+        "\n".join(
+            [
+                f"- atomic_skill: {card['atomic_skill']}",
+                f"- result_status: {card['result_status']}",
+                f"- resolution_code: {card['resolution_code']}",
+                f"- summary: {card['finding_summary']}",
+                f"- plan_ref: {plan_ref}",
+                f"- card_ref: {card_ref}",
+            ]
+        ),
+        root=root,
+    )
+    return {"plan_ref": plan_ref, "card_ref": card_ref}
+
+
+def refresh_continuation_state(task_id: str, state: dict[str, Any], root: Path | None = None) -> str:
+    root = root or repo_root()
+    bundle_root = Path(ensure_task_bundle(task_id, "full_bundle", root=root))
+    progress_file = root / bundle_root / "progress.md"
+    progress_text = progress_file.read_text(encoding="utf-8")
+    if progress_text.strip() == "# Progress":
+        raise ValueError("bundle must be flushed before continuation refresh")
+    return save_continuation_state(task_id, state, root=root)
+
+
 def build_continuation_state(
     *,
     task_id: str,
@@ -71,6 +112,7 @@ def build_continuation_state(
 ) -> dict[str, Any]:
     root = root or repo_root()
     bundle_root = ensure_task_bundle(task_id, "full_bundle", root=root)
+    save_selector_plan(task_id, selector_plan, root=root)
     state = copy_example("continuation-state.upstream-sync.json", root=root)
     state.update(
         {
