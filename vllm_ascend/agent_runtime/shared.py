@@ -47,17 +47,22 @@ HW_TOKENS = {
     "910_9391": "A3",
 }
 MODEL_PATTERNS = [
+    (re.compile(r"deepseek[\s\-_]*v3(?:\.\d+)?(?:[\s\-_]*w8a8)?", re.I), "deepseek-v3"),
+    (re.compile(r"qwen3[\s\-_]*32b[\s\-_]*w8a8", re.I), "qwen3-32b-w8a8"),
+    (re.compile(r"qwen3[\s\-_]*32b", re.I), "qwen3-32b"),
     (re.compile(r"qwen3-next-32b", re.I), "qwen3-next-32b"),
     (re.compile(r"qwen3-next", re.I), "qwen3-next"),
 ]
 FEATURE_PATTERNS = {
     "allgather_ep": re.compile(r"allgather[_ -]?ep", re.I),
-    "prefill": re.compile(r"prefill", re.I),
-    "decode": re.compile(r"decode", re.I),
+    "prefill": re.compile(r"(prefill|预填充)", re.I),
+    "decode": re.compile(r"(decode|解码)", re.I),
     "tp4": re.compile(r"\btp\s*=?\s*4\b", re.I),
     "bf16": re.compile(r"bf16", re.I),
     "ctx8k": re.compile(r"(8k|8192)", re.I),
-    "dynamic_batching": re.compile(r"dynamic[_ -]?batch", re.I),
+    "dynamic_batching": re.compile(r"(dynamic[_ -]?batch|动态批处理)", re.I),
+    "release_sync": re.compile(r"(release[_ -]?sync|版本同步|回灌|同步)", re.I),
+    "single_card": re.compile(r"(single[- ]?card|单卡)", re.I),
 }
 
 
@@ -74,6 +79,9 @@ def _detect_models(text: str) -> list[str]:
     hits = []
     for pattern, model in MODEL_PATTERNS:
         if pattern.search(text):
+            if any(model == existing or model in existing for existing in hits):
+                continue
+            hits = [existing for existing in hits if existing not in model]
             hits.append(model)
     return hits
 
@@ -89,33 +97,45 @@ def _detect_features(text: str) -> list[str]:
 def _requested_artifact(text: str) -> str:
     if re.search(r"(family|workflow|governor|schema|contract|direct answer|什么是|哪些阶段|public entry)", text, re.I):
         return "reference_answer"
-    if re.search(r"(deploy|deployment|config|prefill policy)", text, re.I):
+    if re.search(r"(deploy|deployment|config|prefill policy|部署|命令|脚本|启动参数|启动命令)", text, re.I):
         return "deployment_artifact_pack"
-    if re.search(r"(spec|plan|design)", text, re.I):
+    if re.search(r"(spec|plan|design|路线|方案)", text, re.I):
         return "spec_plan"
+    if re.search(r"(patch|backport|回灌到.*release|代码改动包)", text, re.I):
+        return "code_change_pack"
     if re.search(r"(diff|test|validation|coverage|补采)", text, re.I):
         return "analysis_report"
     return "analysis_report"
 
 
 def _classify(text: str, inline_paths: list[str], inline_errors: list[str]) -> str:
+    if re.search(r"(路线|怎么选|route|which path|冲突|trade[- ]?off)", text, re.I):
+        return "design"
     if (
         not inline_paths
         and not inline_errors
         and re.search(r"(family|workflow|governor|schema|contract|什么是|哪些阶段|public entry)", text, re.I)
     ):
         return "reference"
-    if re.search(r"(expect|estimate|ttft|throughput|headroom)", text, re.I) and "profile" not in text.lower():
+    if re.search(r"(expect|estimate|ttft|throughput|headroom|理论性能|预期性能|估算|吞吐|显存)", text, re.I) and "profile" not in text.lower():
         return "performance_expectation"
-    if re.search(r"(profile|regression|kernel)", text, re.I):
+    if re.search(r"(runtimeerror|traceback|error|failed|崩溃|报错|日志|triage|分诊|correlation)", text, re.I):
+        return "debugging"
+    if re.search(r"(profile|regression|kernel|回归|剖析)", text, re.I):
         return "performance_breakdown"
     if inline_errors:
+        if re.search(r"(runtimeerror|traceback|error|failed|崩溃|报错|日志)", text, re.I):
+            return "debugging"
         return "performance_breakdown"
     if inline_paths or re.search(r"(diff|validation|test|coverage|补采)", text, re.I):
         return "validation"
-    if re.search(r"(deploy|deployment|policy|prefill)", text, re.I):
+    if re.search(r"(deploy|deployment|policy|prefill|部署|命令|脚本|启动参数|启动命令)", text, re.I):
         return "deployment"
-    if re.search(r"(adapt|operator|code change|patch|modify)", text, re.I):
+    if re.search(r"(upstream|delta|release sync|上游|同步|回灌)", text, re.I):
+        return "upstream_sync"
+    if re.search(r"(operator|custom op|算子|自定义算子)", text, re.I):
+        return "operator_development"
+    if re.search(r"(adapt|适配|code change|patch|modify|代码改动|修改代码)", text, re.I):
         return "adaptation"
     return "design"
 
@@ -126,13 +146,17 @@ def _query_trigger_codes(kind: str) -> list[str]:
         "performance_expectation": ["baseline_or_policy_lookup", "operator_constraint_lookup"],
         "performance_breakdown": ["baseline_or_policy_lookup", "evidence_gap_followup"],
         "validation": ["validation_matrix_lookup", "code_surface_lookup"],
+        "upstream_sync": ["release_delta_lookup", "code_surface_lookup"],
+        "operator_development": ["operator_constraint_lookup", "code_surface_lookup"],
         "design": ["route_disambiguation", "cross_surface_conflict_check"],
     }
     return mapping.get(kind, ["baseline_or_policy_lookup"])
 
 
 def _confirmation_status(kind: str, text: str) -> tuple[bool, str]:
-    if kind == "adaptation" or re.search(r"(code change|modify|mutation|destructive)", text, re.I):
+    if kind in {"adaptation", "operator_development"} or re.search(r"(code change|modify|mutation|destructive|代码改动|修改代码)", text, re.I):
+        return True, "pending"
+    if kind == "upstream_sync" and re.search(r"(backport|patch|回灌到.*release|代码改动包)", text, re.I):
         return True, "pending"
     return False, "not_needed"
 
@@ -142,8 +166,10 @@ def _base_seed_for_kind(kind: str, root: Any) -> dict[str, Any]:
         return copy_example("selector-seed.deployment.json", root=root)
     if kind == "performance_expectation":
         return copy_example("selector-seed.performance.expectation.json", root=root)
-    if kind == "adaptation":
+    if kind in {"adaptation", "operator_development"}:
         return copy_example("selector-seed.adaptation.pending-confirmation.json", root=root)
+    if kind == "upstream_sync":
+        return copy_example("selector-seed.upstream.user-declined.json", root=root)
     return copy_example("selector-seed.performance.expectation.json", root=root)
 
 
@@ -187,7 +213,10 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         "deployment": ["deployment_execution", "design_analysis"],
         "performance_expectation": ["performance_analysis"],
         "performance_breakdown": ["performance_analysis"],
+        "debugging": ["debugging"],
         "validation": ["validation_strategy"],
+        "upstream_sync": ["upstream_sync", "design_analysis"],
+        "operator_development": ["operator_development", "design_analysis"],
         "adaptation": ["adaptation", "design_analysis"],
         "design": ["design_analysis"],
     }[kind]
@@ -196,6 +225,10 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         execution_mode = "direct_answer"
         analysis_depth = "none"
         deliverable_hint = "reference_answer"
+    elif kind == "upstream_sync" and re.search(r"(release sync|版本同步|验证窗口|方案|plan)", raw_request.user_text, re.I):
+        execution_mode = "spec_plan_workflow"
+        analysis_depth = "full_spec_plan"
+        deliverable_hint = "spec_plan"
     elif kind == "design":
         execution_mode = "spec_plan_workflow"
         analysis_depth = "full_spec_plan"
@@ -288,7 +321,7 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
         plan = copy_example("selector-plan.deployment.intake.json", root=root)
     elif (
         family == "performance_analysis"
-        and re.search(r"(expect|estimate|ttft|throughput)", objective, re.I)
+        and re.search(r"(expect|estimate|ttft|throughput|理论性能|预期性能|估算|吞吐)", objective, re.I)
         and not re.search(r"(profile|regression|kernel)", objective, re.I)
         and not selector_seed["normalized_entities"]["errors"]
     ):
@@ -306,6 +339,51 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
             plan["consumer_id"] = "coverage-gap-analyzer"
             plan["work_package_id"] = "wp-analyze-validation-gaps"
             plan["work_package_goal"] = "识别验证覆盖缺口并输出低置信补采建议"
+    elif family == "debugging":
+        plan = copy_example("selector-plan.performance.atomic.json", root=root)
+        plan.update(
+            {
+                "task_family": "debugging",
+                "logical_domains": ["troubleshooting", "vllm_ascend_core"],
+                "physical_shard_hints": ["repo_semantics", "validation"],
+                "query_trigger_codes": ["error_signature_lookup", "workaround_lookup"],
+                "work_package_id": "wp-triage-runtime-error",
+                "deliverable_contract": "analysis_report",
+            }
+        )
+        if re.search(r"(compare|correlation|对照|两份日志|两个日志|baseline log)", objective, re.I) or len(selector_seed["evidence_inventory"]["inline_refs"]) >= 2:
+            plan["consumer_id"] = "cross-log-correlation"
+            plan["work_package_id"] = "wp-cross-log-correlation"
+            plan["work_package_goal"] = "对照多份日志并收口共同失败签名"
+        else:
+            plan["consumer_id"] = "log-triage"
+    elif family == "upstream_sync":
+        if selector_seed["execution_mode_hint"] == "spec_plan_workflow":
+            plan = copy_example("selector-plan.design.spec.json", root=root)
+            plan.update(
+                {
+                    "task_family": "upstream_sync",
+                    "consumer_id": "upstream-sync-spec",
+                    "logical_domains": ["vllm_upstream", "integration_core", "validation_evidence"],
+                    "physical_shard_hints": ["vllm_release_delta", "vllm_symbols", "repo_semantics"],
+                    "query_trigger_codes": ["release_delta_lookup", "code_surface_lookup", "validation_matrix_lookup"],
+                    "work_package_id": "wp-plan-upstream-sync",
+                    "deliverable_contract": "spec_plan",
+                }
+            )
+        else:
+            plan = copy_example("selector-plan.performance.atomic.json", root=root)
+            plan.update(
+                {
+                    "task_family": "upstream_sync",
+                    "consumer_id": "upstream-delta-mapper",
+                    "logical_domains": ["vllm_upstream", "integration_core"],
+                    "physical_shard_hints": ["vllm_release_delta", "vllm_symbols", "repo_semantics"],
+                    "query_trigger_codes": ["release_delta_lookup", "code_surface_lookup"],
+                    "work_package_id": "wp-map-single-upstream-delta",
+                    "deliverable_contract": "analysis_report",
+                }
+            )
     else:
         plan = copy_example("selector-plan.design.spec.json", root=root)
 
@@ -418,9 +496,15 @@ def compile_pack_request(
         ("atomic", "performance_analysis", "single-profile-breakdown"): "perf_breakdown",
         ("atomic", "performance_analysis", "comparative-profile-breakdown"): "perf_breakdown",
         ("atomic", "performance_analysis", "model-expected-performance-estimator"): "model_expectation",
+        ("atomic", "debugging", "log-triage"): "debug_triage",
+        ("atomic", "debugging", "cross-log-correlation"): "debug_triage",
         ("atomic", "validation_strategy", "change-impact-test-selector"): "validation_selection",
         ("atomic", "validation_strategy", "coverage-gap-analyzer"): "validation_selection",
         ("spec_plan", "design_analysis", "design-spec"): "design_lookup",
+        ("spec_plan", "upstream_sync", "upstream-sync-spec"): "upstream_delta",
+        ("atomic", "upstream_sync", "upstream-delta-mapper"): "upstream_delta",
+        ("atomic", "adaptation", "adaptation-scope-planner"): "adaptation_codegen",
+        ("atomic", "operator_development", "operator-gap-analyzer"): "operator_codegen",
     }
     intent = mapping.get(
         (selector_plan["query_stage"], selector_plan["task_family"], selector_plan["consumer_id"]),

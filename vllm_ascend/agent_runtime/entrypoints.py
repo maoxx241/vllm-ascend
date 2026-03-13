@@ -38,10 +38,41 @@ def validation_strategy_intake(raw_request: RawRequest, root: Any | None = None)
     return _enforce_family(vllm_ascend_assistant(raw_request, root=root), "validation_strategy")
 
 
+def debug_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+    return _enforce_family(vllm_ascend_assistant(raw_request, root=root), "debugging")
+
+
+def design_analysis_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+    return _enforce_family(vllm_ascend_assistant(raw_request, root=root), "design_analysis")
+
+
+def upstream_sync_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+    return _enforce_family(vllm_ascend_assistant(raw_request, root=root), "upstream_sync")
+
+
+def adaptation_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+    result = vllm_ascend_assistant(raw_request, root=root)
+    if result["selector_plan"] is None:
+        return result
+    return _enforce_family(result, "adaptation")
+
+
+def operator_development_intake(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
+    result = vllm_ascend_assistant(raw_request, root=root)
+    if result["selector_plan"] is None:
+        return result
+    return _enforce_family(result, "operator_development")
+
+
 __all__ = [
+    "adaptation_intake",
+    "debug_intake",
+    "design_analysis_intake",
     "deployment_intake",
+    "operator_development_intake",
     "perf_intake",
     "public_entry",
+    "upstream_sync_intake",
     "validation_strategy_intake",
     "vllm_ascend_assistant",
 ]

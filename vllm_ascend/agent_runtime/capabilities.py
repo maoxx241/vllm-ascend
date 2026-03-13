@@ -164,6 +164,25 @@ def change_impact_test_selector(
     return card
 
 
+def log_triage(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
+    root = root or repo_root()
+    card = _base_card("atomic-result-card.complete.json", selector_plan, "log-triage", root=root)
+    card = _apply_pack(card, pack_response)
+    card["task_family"] = "debugging"
+    validate_instance(card, "atomic-result-card.schema.json", root=root)
+    return card
+
+
+def cross_log_correlation(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
+    root = root or repo_root()
+    card = _base_card("atomic-result-card.complete.json", selector_plan, "cross-log-correlation", root=root)
+    card = _apply_pack(card, pack_response)
+    card["task_family"] = "debugging"
+    card["deliverable_fragment_summary"] = "已对照多份日志并收口共同失败签名，可继续回给用户或进入下一轮 flush。"
+    validate_instance(card, "atomic-result-card.schema.json", root=root)
+    return card
+
+
 def coverage_gap_analyzer(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
     card = _base_card("atomic-result-card.performance.partial.json", selector_plan, "coverage-gap-analyzer", root=root)

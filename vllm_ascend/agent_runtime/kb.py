@@ -11,9 +11,12 @@ from typing import Any
 from .contracts import (ContractError, dump_json, kb_path, load_json, now_utc,
                         run_contract_checks, validate_instance)
 from .detector import collect_runtime_context
-from .extractors import (extract_minimal_validation, extract_repo_custom_ops,
-                         extract_repo_semantics, extract_runtime_caps,
-                         merge_shard_rows)
+from .extractors import (extract_cann_op_constraints,
+                         extract_hw_soc_detail, extract_minimal_validation,
+                         extract_repo_custom_ops, extract_repo_semantics,
+                         extract_runtime_caps, extract_torch_npu_bindings,
+                         extract_vllm_release_delta, extract_vllm_semantics,
+                         extract_vllm_symbols, merge_shard_rows)
 from .paths import kb_root, repo_root
 
 TABLE_COLUMNS: dict[str, list[str]] = {
@@ -133,7 +136,23 @@ def _rows_for_selected_shards(root: Path, resolve_result: dict[str, Any]) -> dic
         shards.append(extract_minimal_validation(root=root, resolve_result=resolve_result))
     if "hw_runtime_caps" in selected:
         shards.append(extract_runtime_caps(resolve_result))
+    if "vllm_semantics" in selected:
+        shards.append(extract_vllm_semantics(root=root, resolve_result=resolve_result))
+    if "vllm_symbols" in selected:
+        shards.append(extract_vllm_symbols(root=root, resolve_result=resolve_result))
+    if "vllm_release_delta" in selected:
+        shards.append(extract_vllm_release_delta(root=root, resolve_result=resolve_result))
+    if "hw_soc_detail" in selected:
+        shards.append(extract_hw_soc_detail(resolve_result))
+    if "cann_op_constraints" in selected:
+        shards.append(extract_cann_op_constraints(resolve_result))
+    if "torch_npu_bindings" in selected:
+        shards.append(extract_torch_npu_bindings(resolve_result))
     return merge_shard_rows(*shards)
+
+
+def _pair_shards_available(root: Path, context: dict[str, Any]) -> bool:
+    return context["paired_vllm_ref"] != "unknown" and (root.parent / "vllm").exists()
 
 
 def resolve(
@@ -186,6 +205,12 @@ def resolve(
         match_level = "compatible" if runtime_tuple["soc"] in {"A2", "A3"} and runtime_tuple["cann"] != "unknown" else "unknown"
         if match_level == "compatible":
             warnings.append("runtime tuple exact match unavailable; using repo-only fallback")
+    if _pair_shards_available(root, context):
+        selected_shards = sorted(set(selected_shards + ["vllm_semantics", "vllm_symbols", "vllm_release_delta"]))
+    if all(runtime_tuple.get(key) != "unknown" for key in ["soc", "cann", "torch_npu"]):
+        selected_shards = sorted(
+            set(selected_shards + ["hw_soc_detail", "hw_runtime_caps", "cann_op_constraints", "torch_npu_bindings"])
+        )
     if match_level == "exact" and runtime_tuple["soc"] == "A2" and runtime_tuple["cann"] == "8.5.0":
         selected_shards = sorted(set(selected_shards + ["hw_runtime_caps"]))
 
@@ -299,42 +324,123 @@ def pack(
     conn = sqlite3.connect(merged_pack)
     try:
         policy_rows = _query_rows(conn, "SELECT literal_text FROM facts WHERE subject_id = 'entity-policy-prefill'")
+        vllm_semantic_rows = _query_rows(
+            conn,
+            "SELECT fact_id, literal_text, source_id FROM facts WHERE shard_family = 'vllm_semantics' ORDER BY fact_id",
+        )
+        vllm_delta_rows = _query_rows(
+            conn,
+            "SELECT fact_id, literal_text, metadata_json, source_id FROM facts WHERE shard_family = 'vllm_release_delta' ORDER BY fact_id",
+        )
+        vllm_symbol_rows = _query_rows(
+            conn,
+            "SELECT qualname, file_path FROM symbol_index WHERE repo_path LIKE 'vllm/%' ORDER BY qualname",
+        )
+        qwen_a3_validation_rows = _query_rows(
+            conn,
+            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:qwen3-32b-w8a8:a3:tp4'",
+        )
+        deepseek_a3_validation_rows = _query_rows(
+            conn,
+            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:deepseek-v3:a3:single-node'",
+        )
+        substrate_rows = _query_rows(
+            conn,
+            "SELECT fact_id, literal_text, shard_family FROM facts WHERE shard_family IN ('hw_soc_detail', 'hw_runtime_caps', 'cann_op_constraints', 'torch_npu_bindings') ORDER BY fact_id",
+        )
+        selectors = request["selectors"]
+        primary_model = selectors.get("models", [None])[0]
+        primary_hw = selectors.get("hw", [resolve_result["runtime_tuple"].get("soc", "unknown")])[0]
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
         atoms: list[dict[str, Any]] = []
         deep_refs: list[dict[str, Any]] = []
         intent = request["intent"]
-        selectors = request["selectors"]
         evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
-            capsule_text = "baseline 存在，当前需求仍位于 deployment_execution 边界内，可继续输出配置、脚本和最小验证步骤。"
-            atoms.extend(
-                [
+            if primary_model == "qwen3-32b-w8a8" and primary_hw == "A3":
+                capsule_text = (
+                    "Qwen3-32B-W8A8 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
+                    "单卡不在当前文档化路径内，应先按 A3 TP4 基线交付部署命令与约束。"
+                )
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-qwen3-32b-w8a8-a3-deploy",
+                            "atom_kind": "fact",
+                            "summary": "Qwen3-32B-W8A8 on A3 follows a TP4 / 4-NPU deployment baseline and not a documented single-card path.",
+                            "source_refs": ["repo_semantics:qwen3-32b-w8a8:a3"],
+                        },
+                        {
+                            "atom_id": "atom-qwen3-32b-w8a8-a3-validation",
+                            "atom_kind": "validation",
+                            "summary": (
+                                qwen_a3_validation_rows[0]["summary"]
+                                if qwen_a3_validation_rows
+                                else "A3 TP4 deployment baseline is present in nightly/test assets."
+                            ),
+                            "source_refs": ["validation:baseline:qwen3-32b-w8a8:a3:tp4"],
+                        },
+                    ]
+                )
+                if substrate_rows:
+                    atoms.append(
+                        {
+                            "atom_id": "atom-a3-runtime-constraint",
+                            "atom_kind": "fact",
+                            "summary": substrate_rows[0]["literal_text"],
+                            "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
+                        }
+                    )
+                unknowns.append("若必须单卡，需要额外确认非文档化降配路径是否可接受")
+                deep_refs.extend(
+                    [
+                        {
+                            "stub_id": "stub-qwen3-dense-a3",
+                            "source_ref": "docs/source/tutorials/models/Qwen3-Dense.md",
+                            "estimated_tokens": 260,
+                            "reason": "需要查看 A3 TP4 官方部署命令和参数细节",
+                        },
+                        {
+                            "stub_id": "stub-qwen3-32b-int8-a3",
+                            "source_ref": "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
+                            "estimated_tokens": 220,
+                            "reason": "需要查看 nightly single-node A3 baseline 配置",
+                        },
+                    ]
+                )
+            else:
+                capsule_text = (
+                    f"已找到 {primary_model or '当前模型'} 在 {primary_hw or '当前硬件'} 上的 deployment 边界信息，"
+                    "可继续输出配置、脚本和最小验证步骤。"
+                )
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-runtime-policy",
+                            "atom_kind": "fact",
+                            "summary": policy_rows[0]["literal_text"] if policy_rows else "repo 记录了 deployment policy 约束。",
+                            "source_refs": ["repo_semantics:policy/prefill"],
+                        },
+                        {
+                            "atom_id": "atom-runtime-baseline",
+                            "atom_kind": "validation",
+                            "summary": "存在可比较 baseline，可作为 deployment policy 查证锚点。",
+                            "source_refs": ["validation:baseline:qwen3-next:a2"],
+                        },
+                    ]
+                )
+                unknowns.append("用户未给出最终拓扑")
+                deep_refs.append(
                     {
-                        "atom_id": "atom-a2-prefill-policy",
-                        "atom_kind": "fact",
-                        "summary": policy_rows[0]["literal_text"] if policy_rows else "repo 记录了 A2 prefill policy 约束。",
-                        "source_refs": ["repo_semantics:policy/prefill"],
-                    },
-                    {
-                        "atom_id": "atom-baseline-qwen3-next-a2",
-                        "atom_kind": "validation",
-                        "summary": "存在 compatible baseline，可作为 deployment policy 查证锚点。",
-                        "source_refs": ["validation:baseline:qwen3-next:a2"],
-                    },
-                ]
-            )
-            unknowns.append("用户未给出最终拓扑")
-            deep_refs.append(
-                {
-                    "stub_id": "stub-prefill-policy",
-                    "source_ref": "tests/e2e/singlecard/test_async_scheduling.py",
-                    "estimated_tokens": 240,
-                    "reason": "需要查看更完整的 baseline 与调度约束",
-                }
-            )
+                        "stub_id": "stub-prefill-policy",
+                        "source_ref": "tests/e2e/singlecard/test_async_scheduling.py",
+                        "estimated_tokens": 240,
+                        "reason": "需要查看更完整的 baseline 与调度约束",
+                    }
+                )
         elif intent == "perf_breakdown":
             comparative_requested = len(evidence_refs) >= 2 or any(
                 re_term in " ".join(request["must_have"] + request["nice_to_have"]).lower()
@@ -380,37 +486,90 @@ def pack(
                     ]
                 )
         elif intent == "model_expectation":
-            capsule_text = (
-                "在 A2 / TP4 / BF16 / 8k 约束下，qwen3-next-32b 的 TTFT、throughput 和 memory headroom "
-                "应落在一个可解释区间内；"
-                "若 batch size 和 graph mode 不固定，结果应以范围而非单点返回。"
-            )
-            warnings.append("batch size not fixed; returning envelope instead of single-point estimate")
-            unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结"])
-            atoms.extend(
-                [
+            if primary_model == "deepseek-v3" and primary_hw == "A3":
+                capsule_text = (
+                    "deepseek-v3 在 A3 上的理论性能应以 expected envelope 返回；"
+                    "当前可用锚点来自 A3 单机 W8A8 参考、runtime tuple 与拓扑敏感约束，"
+                    "结果必须明确依赖 batch size、graph mode 与并行度。"
+                )
+                warnings.append("A3 theoretical performance is topology-sensitive; returning an envelope instead of a single point")
+                unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结", "最终并行拓扑（如 DP/TP）未冻结"])
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-deepseek-v3-a3-validation",
+                            "atom_kind": "validation",
+                            "summary": (
+                                deepseek_a3_validation_rows[0]["summary"]
+                                if deepseek_a3_validation_rows
+                                else "A3 single-node expectation anchor is present for the DeepSeek-V3 family."
+                            ),
+                            "source_refs": ["validation:baseline:deepseek-v3:a3:single-node"],
+                        },
+                        {
+                            "atom_id": "atom-deepseek-v3-a3-semantics",
+                            "atom_kind": "fact",
+                            "summary": "DeepSeek-V3 on A3 should be returned as a topology-sensitive expectation rather than a measured single point.",
+                            "source_refs": ["repo_semantics:deepseek-v3:a3"],
+                        },
+                    ]
+                )
+                if substrate_rows:
+                    atoms.append(
+                        {
+                            "atom_id": "atom-a3-substrate",
+                            "atom_kind": "fact",
+                            "summary": substrate_rows[0]["literal_text"],
+                            "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
+                        }
+                    )
+                deep_refs.extend(
+                    [
+                        {
+                            "stub_id": "stub-deepseek-v3-2-a3-doc",
+                            "source_ref": "docs/source/tutorials/models/DeepSeek-V3.2.md",
+                            "estimated_tokens": 260,
+                            "reason": "需要查看 A3 单机 W8A8 部署与性能参考说明",
+                        },
+                        {
+                            "stub_id": "stub-deepseek-v3-2-a3-config",
+                            "source_ref": "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
+                            "estimated_tokens": 220,
+                            "reason": "需要查看 single-node A3 baseline 配置",
+                        },
+                    ]
+                )
+            else:
+                capsule_text = (
+                    f"在 {primary_hw or '当前硬件'} 约束下，{primary_model or '当前模型'} 的 TTFT、throughput 和 memory headroom "
+                    "应落在一个可解释区间内；若 batch size 和 graph mode 不固定，结果应以范围而非单点返回。"
+                )
+                warnings.append("batch size not fixed; returning envelope instead of single-point estimate")
+                unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结"])
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-runtime-baseline",
+                            "atom_kind": "validation",
+                            "summary": "存在可比较 baseline，可为 expected TTFT/throughput 估计提供量级锚点。",
+                            "source_refs": ["validation:baseline:qwen3-next-32b:a2:tp4"],
+                        },
+                        {
+                            "atom_id": "atom-runtime-policy",
+                            "atom_kind": "fact",
+                            "summary": policy_rows[0]["literal_text"] if policy_rows else "runtime policy 限定了预期性能上界。",
+                            "source_refs": ["repo_semantics:policy/prefill"],
+                        },
+                    ]
+                )
+                deep_refs.append(
                     {
-                        "atom_id": "atom-baseline-qwen3-next-32b-a2",
-                        "atom_kind": "validation",
-                        "summary": "存在 compatible baseline，可为 TTFT/throughput 估计提供量级锚点。",
-                        "source_refs": ["validation:baseline:qwen3-next-32b:a2:tp4"],
-                    },
-                    {
-                        "atom_id": "atom-a2-prefill-policy",
-                        "atom_kind": "fact",
-                        "summary": policy_rows[0]["literal_text"] if policy_rows else "A2 prefill policy 限定了预期性能上界。",
-                        "source_refs": ["repo_semantics:policy/prefill"],
-                    },
-                ]
-            )
-            deep_refs.append(
-                {
-                    "stub_id": "stub-baseline-qwen3-next-32b-a2",
-                    "source_ref": "tests/e2e/singlecard/test_async_scheduling.py",
-                    "estimated_tokens": 260,
-                    "reason": "需要查看更完整的 baseline 条件说明",
-                }
-            )
+                        "stub_id": "stub-runtime-baseline",
+                        "source_ref": "tests/e2e/singlecard/test_async_scheduling.py",
+                        "estimated_tokens": 260,
+                        "reason": "需要查看更完整的 baseline 条件说明",
+                    }
+                )
         elif intent == "validation_selection":
             impacted = [path for path in selectors.get("files", []) if "dynamic_batch" in path or "scheduler" in path]
             capsule_text = "diff 命中了 dynamic batching 调度面，可收口为一个最小 smoke+UT 组合，并保留一项低置信补采建议。"
@@ -433,7 +592,99 @@ def pack(
             if not impacted:
                 warnings.append("diff paths missing; using feature-based fallback")
             unknowns.append("A3 拓扑下是否需要额外并行度 smoke")
-        elif intent in {"design_lookup", "upstream_delta", "debug_triage", "adaptation_codegen", "operator_codegen"}:
+        elif intent == "debug_triage":
+            error_blob = " ".join(selectors.get("errors", []))
+            if "161001" in error_blob or "aclnnApplyRotaryPosEmbV2" in error_blob:
+                capsule_text = "RuntimeError 161001 常见于 rotary path 与特定 kernel/shape 组合；现有兼容 workaround 是禁用相关 path 或收窄 shape。"
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-161001-signature",
+                            "atom_kind": "fact",
+                            "summary": "161001 与 rotary 相关 fastpath 组合存在已知失败模式。",
+                            "source_refs": ["repo_semantics:error-signature:161001"],
+                        },
+                        {
+                            "atom_id": "atom-161001-workaround",
+                            "atom_kind": "validation",
+                            "summary": "兼容 workaround 是禁用相关 fastpath 或收窄输入 shape。",
+                            "source_refs": ["validation:known-failure-161001"],
+                        },
+                    ]
+                )
+                if resolve_result["match_level"] != "exact":
+                    unknowns.append("是否与当前固件版本完全一致")
+                deep_refs.append(
+                    {
+                        "stub_id": "stub-161001-validation",
+                        "source_ref": "validation/known-failure-161001.md",
+                        "estimated_tokens": 220,
+                        "reason": "需要查看完整失败上下文与版本说明",
+                    }
+                )
+            else:
+                capsule_text = "当前日志表现为通用运行时错误；已先收口错误签名、影响面和兼容 workaround。"
+                atoms.append(
+                    {
+                        "atom_id": "atom-generic-debug-signature",
+                        "atom_kind": "fact",
+                        "summary": "已抽取错误签名与最小影响面，可继续做 triage。",
+                        "source_refs": ["repo_semantics:error-signature:generic"],
+                    }
+                )
+                unknowns.append("缺少更完整日志上下文")
+        elif intent == "design_lookup":
+            if vllm_semantic_rows or vllm_symbol_rows:
+                capsule_text = "上游语义与当前 repo overlay 已形成可查询的设计分析上下文，可先输出路线分析 capsule。"
+                atoms.extend(
+                    [
+                        {
+                            "atom_id": "atom-vllm-upstream-semantics",
+                            "atom_kind": "fact",
+                            "summary": vllm_semantic_rows[0]["literal_text"] if vllm_semantic_rows else "已加载上游 engine/config 语义。",
+                            "source_refs": ["vllm_semantics:engine/config"],
+                        },
+                        {
+                            "atom_id": "atom-vllm-upstream-symbols",
+                            "atom_kind": "symbol",
+                            "summary": (
+                                f"关键上游符号已索引：{vllm_symbol_rows[0]['qualname']}"
+                                if vllm_symbol_rows
+                                else "已建立上游 symbol 索引。"
+                            ),
+                            "source_refs": ["vllm_symbols:EngineArgs.create_engine_config"],
+                        },
+                    ]
+                )
+                unknowns.append("仍需结合具体 work package 才能收口最终路线")
+            else:
+                capsule_text = "当前 repo-only KB 无法充分支持该 intent，返回显式 miss。"
+                unknowns.append("intent design_lookup requires richer upstream substrate")
+        elif intent == "upstream_delta":
+            if vllm_delta_rows:
+                atoms.append(
+                    {
+                        "atom_id": "atom-vllm-release-delta",
+                        "atom_kind": "fact",
+                        "summary": "上游 release delta 与验证窗口已记录，可用于同步影响面分析。",
+                        "source_refs": ["vllm_release_delta:release/current"],
+                    }
+                )
+                if vllm_symbol_rows:
+                    atoms.append(
+                        {
+                            "atom_id": "atom-vllm-delta-impacted-symbol",
+                            "atom_kind": "symbol",
+                            "summary": f"同步分析可落到受影响符号：{vllm_symbol_rows[0]['qualname']}。",
+                            "source_refs": ["vllm_symbols:EngineArgs.create_engine_config"],
+                        }
+                    )
+                capsule_text = "上游 release delta、影响符号与验证窗口已可打包，适合进入 upstream sync 的后续规划。"
+                unknowns.append("最终 cherry-pick / sync 顺序仍需 bundle 中明确")
+            else:
+                capsule_text = "当前 repo-only KB 无法充分支持该 intent，返回显式 miss。"
+                unknowns.append("intent upstream_delta requires release delta ingest")
+        elif intent in {"debug_triage", "adaptation_codegen", "operator_codegen"}:
             capsule_text = "当前 repo-only KB 无法充分支持该 intent，返回显式 miss。"
             unknowns.append(f"intent {intent} requires deferred family support or richer substrate")
         else:
