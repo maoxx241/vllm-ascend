@@ -4,7 +4,23 @@ from typing import Any
 
 from .contracts import copy_example, now_utc, validate_instance
 from .paths import repo_root
-from .topology import logical_npus_for_hw, requested_card_count_from_features, visible_devices
+from .strategy import (alternative_strategies_from_atoms,
+                       documented_strategy_from_atoms,
+                       selected_strategy_from_atoms)
+from .topology import visible_devices
+
+RENDER_PRESETS = {
+    "qwen3_32b_a3_bf16": {
+        "model_path": "/model/Qwen3-32B",
+        "model_name": "qwen3-32b",
+        "is_quantized": False,
+    },
+    "qwen3_32b_a3_w8a8": {
+        "model_path": "/model/Qwen3-32B-W8A8",
+        "model_name": "qwen3-32b-w8a8",
+        "is_quantized": True,
+    },
+}
 
 
 def _base_card(template_name: str, selector_plan: dict[str, Any], atomic_skill: str, root: Any | None = None) -> dict[str, Any]:
@@ -39,18 +55,42 @@ def _apply_pack(card: dict[str, Any], pack_response: dict[str, Any]) -> dict[str
     return card
 
 
-def _documented_qwen3_a3_topology() -> dict[str, int]:
-    return {
-        "physical_cards": 2,
-        "logical_npus": 4,
-        "tensor_parallel": 4,
-    }
+def _as_int(value: str | None) -> int | None:
+    if value in {None, "", "none"}:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
 
 
-def _render_qwen3_a3_launch_block(
+def _strategy_topology_label(strategy: dict[str, str] | None) -> str:
+    if strategy is None:
+        return "未冻结拓扑"
+    parts: list[str] = []
+    tp = _as_int(strategy.get("tp"))
+    dp = _as_int(strategy.get("dp"))
+    ep = _as_int(strategy.get("ep"))
+    cards = _as_int(strategy.get("cards"))
+    logical = _as_int(strategy.get("logical"))
+    if tp:
+        parts.append(f"TP{tp}")
+    if dp and dp != 1:
+        parts.append(f"DP{dp}")
+    if ep and ep != 1:
+        parts.append(f"EP{ep}")
+    if cards:
+        parts.append(f"{cards} cards")
+    if logical:
+        parts.append(f"{logical} logical NPUs")
+    return " / ".join(parts) if parts else "未冻结拓扑"
+
+
+def _render_qwen3_launch_block(
     *,
     model_path: str,
     model_name: str,
+    tensor_parallel: int,
     logical_npus: int,
     is_quantized: bool,
     conservative: bool,
@@ -87,7 +127,7 @@ def _render_qwen3_a3_launch_block(
     lines.extend(
         [
             "  --distributed-executor-backend mp \\",
-            f"  --tensor-parallel-size {logical_npus} \\",
+            f"  --tensor-parallel-size {tensor_parallel} \\",
         ]
     )
     if not is_quantized:
@@ -126,71 +166,80 @@ def _render_qwen3_a3_launch_block(
     return "```bash\n" + "\n".join(lines) + "\n```"
 
 
-def _deployment_notes(selector_plan: dict[str, Any]) -> str | None:
-    selectors = selector_plan.get("selectors", {})
-    models = selectors.get("models", [])
-    hardware = selectors.get("hw", [])
-    features = selectors.get("features", [])
-    if not models or not hardware:
+def _render_strategy_script(strategy: dict[str, str]) -> str | None:
+    preset_name = strategy.get("preset")
+    if preset_name in {None, "", "none"}:
         return None
-
-    primary_model = models[0]
-    primary_hw = hardware[0]
-    if primary_hw != "A3" or primary_model not in {"qwen3-32b", "qwen3-32b-w8a8"}:
+    preset = RENDER_PRESETS.get(preset_name)
+    if preset is None:
         return None
-
-    is_quantized = primary_model == "qwen3-32b-w8a8"
-    model_path = "/model/Qwen3-32B-W8A8" if is_quantized else "/model/Qwen3-32B"
-    model_name = "qwen3-32b-w8a8" if is_quantized else "qwen3-32b"
-    documented_topology = _documented_qwen3_a3_topology()
-    requested_card_count = requested_card_count_from_features(features)
-    requested_logical_npus = logical_npus_for_hw(primary_hw, requested_card_count)
-    if requested_card_count is not None and requested_card_count != documented_topology["physical_cards"]:
-        conservative = requested_logical_npus is not None and requested_logical_npus < documented_topology["logical_npus"]
-        assert requested_logical_npus is not None
-        topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count}-card"
-        requested_card_phrase = "1 card" if requested_card_count == 1 else f"{requested_card_count} cards"
-        return (
-            f"unverified {topology_label} attempt for the requested A3 topology. "
-            f"On A3, 1 card = 2 logical NPUs, so {requested_card_phrase} = {requested_logical_npus} logical NPUs. "
-            "The documented best-performance baseline is TP4 / 2 cards / 4 logical NPUs. "
-            "The script below keeps the requested physical-card topology instead of silently collapsing it to the documented baseline, "
-            "so it must be treated as inferred and unvalidated.\n\n"
-            + _render_qwen3_a3_launch_block(
-                model_path=model_path,
-                model_name=model_name,
-                logical_npus=requested_logical_npus,
-                is_quantized=is_quantized,
-                conservative=conservative,
-            )
-            + "\n\n"
-            "documented best-performance baseline for comparison: TP4 / 2 cards / 4 logical NPUs on A3."
-        )
-
-    if is_quantized:
-        return (
-            "documented best-performance baseline for Qwen3-32B-W8A8 on A3 "
-            "(TP4 / 2 cards / 4 logical NPUs):\n\n"
-            + _render_qwen3_a3_launch_block(
-                model_path=model_path,
-                model_name=model_name,
-                logical_npus=documented_topology["logical_npus"],
-                is_quantized=True,
-                conservative=False,
-            )
-        )
-
-    return (
-        "documented best-performance baseline for Qwen3-32B on A3 "
-        "(TP4 / 2 cards / 4 logical NPUs):\n\n"
-        + _render_qwen3_a3_launch_block(
-            model_path=model_path,
-            model_name=model_name,
-            logical_npus=documented_topology["logical_npus"],
-            is_quantized=False,
-            conservative=False,
-        )
+    logical_npus = _as_int(strategy.get("logical"))
+    tensor_parallel = _as_int(strategy.get("tp"))
+    if logical_npus is None or tensor_parallel is None:
+        return None
+    return _render_qwen3_launch_block(
+        model_path=preset["model_path"],
+        model_name=preset["model_name"],
+        tensor_parallel=tensor_parallel,
+        logical_npus=logical_npus,
+        is_quantized=preset["is_quantized"],
+        conservative=strategy.get("kind") == "inferred_preserve_topology",
     )
+
+
+def _deployment_notes(pack_response: dict[str, Any]) -> str | None:
+    selected = selected_strategy_from_atoms(pack_response["atoms"])
+    if selected is None or selected.get("kind") == "unknown_or_reroute":
+        return None
+    script = _render_strategy_script(selected)
+    if script is None:
+        return None
+    documented = documented_strategy_from_atoms(pack_response["atoms"])
+    cards = _as_int(selected.get("cards"))
+    topology_name = "single-card" if cards == 1 else _strategy_topology_label(selected)
+    if selected.get("kind") == "inferred_preserve_topology":
+        return (
+            f"inferred unvalidated deployment script preserving the requested topology "
+            f"({topology_name}; {_strategy_topology_label(selected)}).\n\n{script}\n\n"
+            f"documented best-performance baseline for comparison: {_strategy_topology_label(documented)}."
+        )
+    return f"documented deployment script for {_strategy_topology_label(selected)}:\n\n{script}"
+
+
+def _deployment_reroute_card(
+    selector_plan: dict[str, Any],
+    pack_response: dict[str, Any],
+    *,
+    atomic_skill: str,
+    root: Any | None = None,
+) -> dict[str, Any]:
+    root = root or repo_root()
+    card = _base_card("atomic-result-card.reroute.json", selector_plan, atomic_skill, root=root)
+    card = _apply_pack(card, pack_response)
+    alternatives = alternative_strategies_from_atoms(pack_response["atoms"])
+    alternative_labels = ", ".join(_strategy_topology_label(item) for item in alternatives) or "多个未冻结候选"
+    card.update(
+        {
+            "task_family": "deployment_execution",
+            "resolution_code": "reroute_family_boundary",
+            "deliverable_fragment_summary": "当前 deployment 请求无法稳定收敛到单个 artifact；需要进入 design_analysis 收口策略。",
+            "next_action": {
+                "kind": "reroute_task",
+                "owner_stage": "intake",
+                "summary": "重新进入 Intake，转 design_analysis 收口并行策略",
+            },
+            "reroute": {
+                "target_family": "design_analysis",
+                "target_stage": "intake",
+                "reason": f"deployment family cannot safely choose between {alternative_labels}.",
+                "carry_over_unknowns": pack_response["unknowns"] or ["需要在设计分析阶段收口并行策略"],
+            },
+            "produced_artifacts": [],
+            "notes": None,
+        }
+    )
+    validate_instance(card, "atomic-result-card.schema.json", root=root)
+    return card
 
 
 def feature_policy_resolver(
@@ -201,11 +250,10 @@ def feature_policy_resolver(
     root: Any | None = None,
 ) -> dict[str, Any]:
     root = root or repo_root()
-    if code_change_required:
-        card = _base_card("atomic-result-card.reroute.json", selector_plan, "feature-policy-resolver", root=root)
-        card["reroute"]["carry_over_unknowns"] = pack_response["unknowns"] or ["需要代码改动后再重新路由"]
-    else:
-        card = _base_card("atomic-result-card.complete.json", selector_plan, "feature-policy-resolver", root=root)
+    selected = selected_strategy_from_atoms(pack_response["atoms"])
+    if code_change_required or (selected and selected.get("kind") == "unknown_or_reroute"):
+        return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="feature-policy-resolver", root=root)
+    card = _base_card("atomic-result-card.complete.json", selector_plan, "feature-policy-resolver", root=root)
     card = _apply_pack(card, pack_response)
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
@@ -213,6 +261,10 @@ def feature_policy_resolver(
 
 def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
+    selected = selected_strategy_from_atoms(pack_response["atoms"])
+    if selected and selected.get("kind") == "unknown_or_reroute":
+        return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-config-synthesizer", root=root)
+
     card = _base_card("atomic-result-card.complete.json", selector_plan, "deployment-config-synthesizer", root=root)
     card = _apply_pack(card, pack_response)
     card.update(
@@ -226,7 +278,7 @@ def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: 
             },
         }
     )
-    notes = _deployment_notes(selector_plan)
+    notes = _deployment_notes(pack_response)
     if notes:
         card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)
@@ -235,6 +287,10 @@ def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: 
 
 def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
+    selected = selected_strategy_from_atoms(pack_response["atoms"])
+    if selected and selected.get("kind") == "unknown_or_reroute":
+        return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-artifact-packager", root=root)
+
     card = _base_card("atomic-result-card.complete.json", selector_plan, "deployment-artifact-packager", root=root)
     card = _apply_pack(card, pack_response)
     card.update(
@@ -252,13 +308,17 @@ def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: d
             },
         }
     )
-    notes = _deployment_notes(selector_plan)
-    if notes:
-        requested_card_count = requested_card_count_from_features(selector_plan.get("selectors", {}).get("features", []))
-        if requested_card_count is not None and requested_card_count != _documented_qwen3_a3_topology()["physical_cards"]:
+    if selected:
+        if selected.get("kind") == "inferred_preserve_topology":
             card["deliverable_fragment_summary"] = (
-                f"{requested_card_count} 卡请求未命中文档化基线；已基于用户要求返回未验证的 A3 拓扑推断脚本，并附带文档化 TP4 / 2 cards / 4 logical NPUs 对照基线。"
+                f"已按用户锁定拓扑 {_strategy_topology_label(selected)} 生成未验证脚本，并附带文档化对照基线。"
             )
+        else:
+            card["deliverable_fragment_summary"] = (
+                f"已按 {_strategy_topology_label(selected)} 收口文档化 deployment artifact。"
+            )
+    notes = _deployment_notes(pack_response)
+    if notes:
         card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
@@ -308,7 +368,13 @@ def model_expected_performance_estimator(
         root=root,
     )
     card = _apply_pack(card, pack_response)
-    card["confidence"] = "medium" if pack_response["unknowns"] else "high"
+    selected = selected_strategy_from_atoms(pack_response["atoms"])
+    if selected and selected.get("kind") == "unknown_or_reroute":
+        card["confidence"] = "low"
+    elif selected and selected.get("kind") == "inferred_preserve_topology":
+        card["confidence"] = "medium"
+    else:
+        card["confidence"] = "medium" if pack_response["unknowns"] else "high"
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
 

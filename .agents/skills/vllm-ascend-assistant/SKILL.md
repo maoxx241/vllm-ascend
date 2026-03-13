@@ -12,5 +12,5 @@ Workflow:
   and then the deployment atomic skills instead of answering from raw docs.
 - Stable skills should answer from runtime objects and capsule output, not by
   reading raw sqlite or fabricating missing launch paths.
-- For A3 deployment requests, physical cards are not logical NPUs:
-  `1 card = 2 logical NPUs`. Preserve that mapping before inferring TP.
+- Hardware topology facts must come from runtime normalization and capsule
+  output, not from ad hoc rules embedded in this skill text.

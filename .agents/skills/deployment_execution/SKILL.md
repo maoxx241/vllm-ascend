@@ -16,6 +16,6 @@ an inferred script that still satisfies the user's requested topology, such as
 `single-card`, but mark it as unvalidated and list the risks. If the user did
 not specify topology or priority, default to the documented best-performance baseline.
 
-On A3, 1 card = 2 logical NPUs on A3. Translate physical card counts to
-logical NPUs before proposing `ASCEND_RT_VISIBLE_DEVICES` or
-`--tensor-parallel-size`. Do not collapse `4 cards` into `TP4`.
+Use the capsule as the source of truth for topology facts and selected
+strategies. If the selected strategy is `unknown_or_reroute`, do not fabricate a
+script inside this family; reroute to `design_analysis` instead.

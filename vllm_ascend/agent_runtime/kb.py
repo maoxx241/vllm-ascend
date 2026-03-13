@@ -18,6 +18,10 @@ from .extractors import (extract_cann_op_constraints,
                          extract_vllm_release_delta, extract_vllm_semantics,
                          extract_vllm_symbols, merge_shard_rows)
 from .paths import kb_root, repo_root
+from .strategy import (baselines_from_rows, build_strategy_atom,
+                       select_deployment_strategy,
+                       selector_context_from_selectors,
+                       topology_multiplier_from_rows)
 from .topology import logical_npus_for_hw, requested_card_count_from_features
 
 TABLE_COLUMNS: dict[str, list[str]] = {
@@ -154,14 +158,6 @@ def _rows_for_selected_shards(root: Path, resolve_result: dict[str, Any]) -> dic
 
 def _pair_shards_available(root: Path, context: dict[str, Any]) -> bool:
     return context["paired_vllm_ref"] != "unknown" and (root.parent / "vllm").exists()
-
-
-def _documented_qwen3_a3_topology() -> dict[str, int]:
-    return {
-        "physical_cards": 2,
-        "logical_npus": 4,
-        "tensor_parallel": 4,
-    }
 
 
 def resolve(
@@ -319,6 +315,112 @@ def _apply_budget(
     return trimmed_atoms, trimmed_refs, estimated
 
 
+def _entity_name_map(conn: sqlite3.Connection) -> dict[str, str]:
+    rows = _query_rows(conn, "SELECT entity_id, canonical_name FROM entities")
+    return {row["entity_id"]: row["canonical_name"] for row in rows}
+
+
+def _strategy_validation_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return _query_rows(
+        conn,
+        "SELECT validation_id, target_id, mode, result, env_json, artifact_refs_json, summary, source_id, metadata_json "
+        "FROM validations WHERE result = 'pass' ORDER BY validation_id",
+    )
+
+
+def _strategy_fact_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return _query_rows(
+        conn,
+        "SELECT fact_id, subject_id, predicate, object_id, literal_text, source_id, scope_json, metadata_json "
+        "FROM facts WHERE predicate IN ('topology_mapping', 'deployment_baseline', 'performance_baseline', 'model_traits') "
+        "ORDER BY fact_id",
+    )
+
+
+def _has_rich_strategy_data(matches: list[Any]) -> bool:
+    return any(
+        baseline.render_preset
+        or baseline.physical_cards is not None
+        or baseline.logical_npus is not None
+        or baseline.tensor_parallel is not None
+        or baseline.model_traits
+        for baseline in matches
+    )
+
+
+def _model_label(model_base: str | None, traits: tuple[str, ...]) -> str:
+    if model_base == "qwen3-32b":
+        return "Qwen3-32B-W8A8" if "quant_w8a8" in traits else "Qwen3-32B"
+    if model_base == "deepseek-v3":
+        return "DeepSeek-V3"
+    return model_base or "当前模型"
+
+
+def _matching_strategy_facts(
+    fact_rows: list[sqlite3.Row],
+    entity_names: dict[str, str],
+    *,
+    context: Any,
+    predicate: str,
+) -> list[sqlite3.Row]:
+    matches: list[sqlite3.Row] = []
+    for row in fact_rows:
+        if row["predicate"] != predicate:
+            continue
+        metadata = json.loads(row["metadata_json"] or "{}")
+        scope = json.loads(row["scope_json"] or "{}")
+        subject_name = entity_names.get(row["subject_id"])
+        model_base = metadata.get("model_base")
+        if predicate == "topology_mapping":
+            hw_values = metadata.get("hw") or metadata.get("soc") or scope.get("hw")
+            if isinstance(hw_values, list):
+                if context.hw in hw_values:
+                    matches.append(row)
+            elif hw_values == context.hw:
+                matches.append(row)
+            continue
+        normalized_subject = subject_name.removesuffix("-w8a8") if isinstance(subject_name, str) else subject_name
+        if model_base == context.model_base or normalized_subject == context.model_base:
+            matches.append(row)
+    return matches
+
+
+def _strategy_deep_refs(
+    *,
+    request_id: str,
+    refs: Iterable[str],
+    reason: str,
+) -> list[dict[str, Any]]:
+    stubs: list[dict[str, Any]] = []
+    for index, ref in enumerate(dict.fromkeys(refs)):
+        stubs.append(
+            {
+                "stub_id": f"stub-{request_id}-{index}",
+                "source_ref": ref,
+                "estimated_tokens": 220 if ref.endswith(".yaml") else 260,
+                "reason": reason,
+            }
+        )
+        if len(stubs) >= 2:
+            break
+    return stubs
+
+
+def _strategy_topology_label(candidate: Any) -> str:
+    parts: list[str] = []
+    if getattr(candidate, "tensor_parallel", None):
+        parts.append(f"TP{candidate.tensor_parallel}")
+    if getattr(candidate, "data_parallel", None) and candidate.data_parallel not in {None, 1}:
+        parts.append(f"DP{candidate.data_parallel}")
+    if getattr(candidate, "expert_parallel", None) and candidate.expert_parallel not in {None, 1}:
+        parts.append(f"EP{candidate.expert_parallel}")
+    if getattr(candidate, "physical_cards", None):
+        parts.append(f"{candidate.physical_cards} cards")
+    if getattr(candidate, "logical_npus", None):
+        parts.append(f"{candidate.logical_npus} logical NPUs")
+    return " / ".join(parts) if parts else "未冻结拓扑"
+
+
 def pack(
     root: Path | None = None,
     *,
@@ -345,29 +447,51 @@ def pack(
             conn,
             "SELECT qualname, file_path FROM symbol_index WHERE repo_path LIKE 'vllm/%' ORDER BY qualname",
         )
-        qwen_a3_dense_validation_rows = _query_rows(
-            conn,
-            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:qwen3-32b:a3:tp4'",
-        )
-        qwen_a3_validation_rows = _query_rows(
-            conn,
-            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:qwen3-32b-w8a8:a3:tp4'",
-        )
-        deepseek_a3_validation_rows = _query_rows(
-            conn,
-            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:deepseek-v3:a3:single-node'",
-        )
+        entity_names = _entity_name_map(conn)
+        strategy_validation_rows = _strategy_validation_rows(conn)
+        strategy_fact_rows = _strategy_fact_rows(conn)
         substrate_rows = _query_rows(
             conn,
             "SELECT fact_id, literal_text, shard_family FROM facts WHERE shard_family IN ('hw_soc_detail', 'hw_runtime_caps', 'cann_op_constraints', 'torch_npu_bindings') ORDER BY fact_id",
         )
         selectors = request["selectors"]
-        primary_model = selectors.get("models", [None])[0]
-        primary_hw = selectors.get("hw", [resolve_result["runtime_tuple"].get("soc", "unknown")])[0]
-        base_model = primary_model[:-5] if primary_model and primary_model.endswith("-w8a8") else primary_model
-        quantized_variant = bool(primary_model and primary_model.endswith("-w8a8"))
-        requested_card_count = requested_card_count_from_features(selectors.get("features", []))
-        requested_logical_npus = logical_npus_for_hw(primary_hw, requested_card_count)
+        selector_context = selector_context_from_selectors(selectors, resolve_result["runtime_tuple"].get("soc", "unknown"))
+        primary_model = selector_context.model_base or (selectors.get("models", [None])[0] if selectors.get("models") else None)
+        primary_hw = selector_context.hw or resolve_result["runtime_tuple"].get("soc", "unknown")
+        requested_card_count = selector_context.physical_cards
+        requested_logical_npus = selector_context.logical_npus
+        strategy_baselines = baselines_from_rows(strategy_validation_rows, entity_names)
+        matching_strategy_baselines = [
+            baseline
+            for baseline in strategy_baselines
+            if baseline.model_base == selector_context.model_base and baseline.hw == selector_context.hw
+        ]
+        topology_fact_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="topology_mapping",
+        )
+        trait_fact_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="model_traits",
+        )
+        perf_fact_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="performance_baseline",
+        )
+        topology_multiplier = topology_multiplier_from_rows(topology_fact_rows, hw=selector_context.hw)
+        strategy_selection = None
+        if _has_rich_strategy_data(matching_strategy_baselines):
+            strategy_selection = select_deployment_strategy(
+                selector_context,
+                tuple(matching_strategy_baselines),
+                topology_multiplier=topology_multiplier,
+            )
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
@@ -377,105 +501,86 @@ def pack(
         evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
-            if base_model == "qwen3-32b" and primary_hw == "A3":
-                model_label = "Qwen3-32B-W8A8" if quantized_variant else "Qwen3-32B"
-                validation_rows = qwen_a3_validation_rows if quantized_variant else qwen_a3_dense_validation_rows
-                documented_topology = _documented_qwen3_a3_topology()
-                documented_cards = documented_topology["physical_cards"]
-                documented_logical_npus = documented_topology["logical_npus"]
-                documented_tp = documented_topology["tensor_parallel"]
-                requested_topology_matches_doc = requested_card_count == documented_cards
-                if requested_card_count is not None and not requested_topology_matches_doc:
-                    topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count} cards"
-                    capsule_text = (
-                        f"{model_label} 在 A3 上收到 {topology_label} 请求（{requested_card_count} 卡）；"
-                        f"A3 上 1 card = 2 logical NPUs，因此该请求对应 {requested_logical_npus} logical NPUs。"
-                        f"当前文档化基线是 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs。"
-                        "如果必须保持当前物理卡数拓扑，只能返回未验证的推断脚本，并明确列出容量或性能风险。"
-                    )
-                    warnings.append(
-                        "requested A3 card topology does not match the documented baseline; returning an inferred script with explicit risk"
-                    )
-                    unknowns.extend(
-                        [
-                            f"{requested_card_count}-card path is unvalidated on the current repo/doc matrix",
-                            "目标负载下的实际吞吐和稳定性仍未知",
-                            "当前脚本是按物理卡数推断出的 logical NPU 拓扑，不是 nightly 已验证配置",
-                        ]
-                    )
-                else:
-                    capsule_text = (
-                        f"{model_label} 在 A3 上的文档化部署基线围绕 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs 展开；"
-                        "若用户未指定拓扑，应默认返回该最优性能版本。"
-                    )
-                atoms.extend(
-                    [
-                        {
-                            "atom_id": f"atom-{primary_model}-a3-deploy",
-                            "atom_kind": "fact",
-                            "summary": (
-                                f"{model_label} on A3 follows a TP{documented_tp} / {documented_cards}-card / "
-                                f"{documented_logical_npus}-logical-NPU deployment baseline, and requests for other "
-                                "physical card counts must first convert A3 cards to logical NPUs."
-                            ),
-                            "source_refs": [f"repo_semantics:{primary_model}:a3"],
-                        },
-                        {
-                            "atom_id": f"atom-{primary_model}-a3-validation",
-                            "atom_kind": "validation",
-                            "summary": (
-                                validation_rows[0]["summary"]
-                                if validation_rows
-                                else "A3 TP4 deployment baseline is present in nightly/test assets."
-                            ),
-                            "source_refs": [f"validation:baseline:{primary_model}:a3:tp4"],
-                        },
-                    ]
-                )
-                if requested_card_count is not None and requested_logical_npus is not None:
+            if strategy_selection is not None:
+                selected = strategy_selection.selected
+                documented = strategy_selection.documented
+                model_label = _model_label(selected.model_base, selected.model_traits)
+                warnings.extend(strategy_selection.warnings)
+                unknowns.extend(strategy_selection.unknowns)
+                atoms.append(build_strategy_atom("selected", selected))
+                if documented is not None:
+                    atoms.append(build_strategy_atom("documented", documented))
                     atoms.append(
                         {
-                            "atom_id": f"atom-{primary_model}-a3-requested-topology",
+                            "atom_id": f"atom-{selected.model_base or 'model'}-documented-validation",
+                            "atom_kind": "validation",
+                            "summary": documented.summary,
+                            "source_refs": list(documented.source_refs),
+                        }
+                    )
+                for alternative in strategy_selection.alternatives:
+                    atoms.append(build_strategy_atom("alternative", alternative))
+                if topology_fact_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-topology-{primary_hw.lower()}",
                             "atom_kind": "fact",
-                            "summary": (
-                                f"Requested A3 topology uses {requested_card_count} physical cards, which expands to "
-                                f"{requested_logical_npus} logical NPUs because A3 maps 1 card to 2 dies."
-                            ),
-                            "source_refs": ["hw_soc_detail:runtime"],
+                            "summary": topology_fact_rows[0]["literal_text"],
+                            "source_refs": [topology_fact_rows[0]["fact_id"]],
+                        }
+                    )
+                if trait_fact_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-model-traits-{selected.model_base or 'unknown'}",
+                            "atom_kind": "fact",
+                            "summary": trait_fact_rows[0]["literal_text"],
+                            "source_refs": [trait_fact_rows[0]["fact_id"]],
                         }
                     )
                 if substrate_rows:
                     atoms.append(
                         {
-                            "atom_id": "atom-a3-runtime-constraint",
+                            "atom_id": "atom-runtime-constraint",
                             "atom_kind": "fact",
                             "summary": substrate_rows[0]["literal_text"],
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
-                if requested_card_count is None:
-                    unknowns.append(
-                        f"若用户对拓扑未指定，应默认选择 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs 最优性能基线"
+                if selected.decision_kind == "best_perf_default":
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上未锁定拓扑；默认返回文档化最佳性能基线 "
+                        f"{_strategy_topology_label(selected)}。"
                     )
+                elif selected.decision_kind == "documented_baseline":
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上命中文档化部署基线 "
+                        f"{_strategy_topology_label(selected)}，可以直接生成推荐脚本。"
+                    )
+                elif selected.decision_kind == "inferred_preserve_topology":
+                    topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count} cards"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上收到 {topology_label} 请求；"
+                        f"当前文档化基线是 {_strategy_topology_label(documented)}。"
+                        f"为保持用户请求的物理拓扑，返回推断的未验证策略 {_strategy_topology_label(selected)}，"
+                        "并显式暴露风险。"
+                    )
+                else:
+                    alternative_labels = ", ".join(_strategy_topology_label(candidate) for candidate in strategy_selection.alternatives) or "无稳定候选"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的当前请求无法稳定收敛到单个 deployment artifact；"
+                        f"文档化基线是 {_strategy_topology_label(documented)}，但锁定拓扑下仍存在 {alternative_labels} 等候选。"
+                        "当前应该显式保留 unknown，并允许 reroute 到 design_analysis。"
+                    )
+                refs = selected.artifact_refs
+                if not refs and documented is not None:
+                    refs = documented.artifact_refs
                 deep_refs.extend(
-                    [
-                        {
-                            "stub_id": "stub-qwen3-dense-a3",
-                            "source_ref": "docs/source/tutorials/models/Qwen3-Dense.md",
-                            "estimated_tokens": 260,
-                            "reason": "需要查看 A3 2-card / 4-logical-NPU TP4 官方部署命令和参数细节",
-                        },
-                            {
-                                "stub_id": "stub-qwen3-32b-a3-config",
-                                "source_ref": (
-                                    "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
-                                    if quantized_variant
-                                    else "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
-                                ),
-                                "estimated_tokens": 220,
-                                "reason": "需要查看 nightly A3 2-card / 4-logical-NPU baseline 配置",
-                            },
-                    ]
+                    _strategy_deep_refs(
+                        request_id=request["request_id"],
+                        refs=refs,
+                        reason="需要查看文档化基线或候选策略的完整脚本与配置",
+                    )
                 )
             else:
                 capsule_text = (
@@ -552,58 +657,81 @@ def pack(
                     ]
                 )
         elif intent == "model_expectation":
-            if primary_model == "deepseek-v3" and primary_hw == "A3":
-                capsule_text = (
-                    "deepseek-v3 在 A3 上的理论性能应以 expected envelope 返回；"
-                    "当前可用锚点来自 A3 单机 W8A8 参考、runtime tuple 与拓扑敏感约束，"
-                    "结果必须明确依赖 batch size、graph mode 与并行度。"
-                )
-                warnings.append("A3 theoretical performance is topology-sensitive; returning an envelope instead of a single point")
-                unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结", "最终并行拓扑（如 DP/TP）未冻结"])
-                atoms.extend(
-                    [
+            if strategy_selection is not None:
+                selected = strategy_selection.selected
+                documented = strategy_selection.documented
+                model_label = _model_label(selected.model_base, selected.model_traits)
+                warnings.extend(strategy_selection.warnings)
+                warnings.append("returning an expected envelope rather than a measured single point")
+                unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结"])
+                if selected.decision_kind in {"inferred_preserve_topology", "unknown_or_reroute"}:
+                    unknowns.append("最终并行拓扑仍未完全冻结")
+                atoms.append(build_strategy_atom("selected", selected))
+                if documented is not None:
+                    atoms.append(build_strategy_atom("documented", documented))
+                    atoms.append(
                         {
-                            "atom_id": "atom-deepseek-v3-a3-validation",
+                            "atom_id": f"atom-{selected.model_base or 'model'}-expectation-validation",
                             "atom_kind": "validation",
-                            "summary": (
-                                deepseek_a3_validation_rows[0]["summary"]
-                                if deepseek_a3_validation_rows
-                                else "A3 single-node expectation anchor is present for the DeepSeek-V3 family."
-                            ),
-                            "source_refs": ["validation:baseline:deepseek-v3:a3:single-node"],
-                        },
+                            "summary": documented.summary,
+                            "source_refs": list(documented.source_refs),
+                        }
+                    )
+                for alternative in strategy_selection.alternatives:
+                    atoms.append(build_strategy_atom("alternative", alternative))
+                if perf_fact_rows:
+                    atoms.append(
                         {
-                            "atom_id": "atom-deepseek-v3-a3-semantics",
+                            "atom_id": f"atom-performance-{selected.model_base or 'unknown'}",
                             "atom_kind": "fact",
-                            "summary": "DeepSeek-V3 on A3 should be returned as a topology-sensitive expectation rather than a measured single point.",
-                            "source_refs": ["repo_semantics:deepseek-v3:a3"],
-                        },
-                    ]
-                )
+                            "summary": perf_fact_rows[0]["literal_text"],
+                            "source_refs": [perf_fact_rows[0]["fact_id"]],
+                        }
+                    )
+                if topology_fact_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-topology-{primary_hw.lower()}",
+                            "atom_kind": "fact",
+                            "summary": topology_fact_rows[0]["literal_text"],
+                            "source_refs": [topology_fact_rows[0]["fact_id"]],
+                        }
+                    )
                 if substrate_rows:
                     atoms.append(
                         {
-                            "atom_id": "atom-a3-substrate",
+                            "atom_id": "atom-runtime-constraint",
                             "atom_kind": "fact",
                             "summary": substrate_rows[0]["literal_text"],
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
+                if selected.decision_kind == "unknown_or_reroute":
+                    alternative_labels = ", ".join(_strategy_topology_label(candidate) for candidate in strategy_selection.alternatives) or "多个未冻结候选"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的理论性能需要按 topology-sensitive envelope 返回；"
+                        f"当前文档化锚点是 {_strategy_topology_label(documented)}，但锁定请求下仍存在 {alternative_labels} 等候选，"
+                        "因此不能给出单一性能点。"
+                    )
+                elif selected.decision_kind == "inferred_preserve_topology":
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的理论性能应锚定到推断 topology {_strategy_topology_label(selected)}；"
+                        f"当前文档化锚点是 {_strategy_topology_label(documented)}，结果必须以下界/上界范围而不是单点返回。"
+                    )
+                else:
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的理论性能应围绕 {_strategy_topology_label(selected)} 返回 expected envelope；"
+                        "若 graph mode、batch size 或 context length 未冻结，结论必须保留区间和假设。"
+                    )
+                refs = selected.artifact_refs
+                if not refs and documented is not None:
+                    refs = documented.artifact_refs
                 deep_refs.extend(
-                    [
-                        {
-                            "stub_id": "stub-deepseek-v3-2-a3-doc",
-                            "source_ref": "docs/source/tutorials/models/DeepSeek-V3.2.md",
-                            "estimated_tokens": 260,
-                            "reason": "需要查看 A3 单机 W8A8 部署与性能参考说明",
-                        },
-                        {
-                            "stub_id": "stub-deepseek-v3-2-a3-config",
-                            "source_ref": "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8.yaml",
-                            "estimated_tokens": 220,
-                            "reason": "需要查看 single-node A3 baseline 配置",
-                        },
-                    ]
+                    _strategy_deep_refs(
+                        request_id=request["request_id"],
+                        refs=refs,
+                        reason="需要查看 expectation anchor 的配置、部署与性能参考",
+                    )
                 )
             else:
                 capsule_text = (

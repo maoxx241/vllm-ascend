@@ -3,18 +3,34 @@ from __future__ import annotations
 import re
 
 CARD_COUNT_RE = re.compile(r"(?:(?<!\d)(\d+)\s*卡|(?<!\d)(\d+)\s*cards?\b)", re.I)
+CHINESE_CARD_COUNT_RE = re.compile(r"(一|二|两|三|四|五|六|七|八|九|十)\s*卡")
+CHINESE_CARD_VALUES = {
+    "一": 1,
+    "二": 2,
+    "两": 2,
+    "三": 3,
+    "四": 4,
+    "五": 5,
+    "六": 6,
+    "七": 7,
+    "八": 8,
+    "九": 9,
+    "十": 10,
+}
 
 
 def detect_requested_card_count(text: str) -> int | None:
     match = CARD_COUNT_RE.search(text)
-    if not match:
-        if re.search(r"(single[- ]?card|单卡)", text, re.I):
-            return 1
-        return None
-    value = match.group(1) or match.group(2)
-    if value is None:
-        return None
-    return int(value)
+    if match:
+        value = match.group(1) or match.group(2)
+        if value is not None:
+            return int(value)
+    chinese_match = CHINESE_CARD_COUNT_RE.search(text)
+    if chinese_match:
+        return CHINESE_CARD_VALUES[chinese_match.group(1)]
+    if re.search(r"(single[- ]?card|单卡)", text, re.I):
+        return 1
+    return None
 
 
 def requested_card_count_from_features(features: list[str]) -> int | None:

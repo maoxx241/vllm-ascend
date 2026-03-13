@@ -135,8 +135,9 @@ def test_p6_qwen3_a3_deployment_request_routes_to_deployment() -> None:
         )
     )
     assert result["selector_plan"]["task_family"] == "deployment_execution"
-    assert result["selector_seed"]["normalized_entities"]["models"] == ["qwen3-32b-w8a8"]
+    assert result["selector_seed"]["normalized_entities"]["models"] == ["qwen3-32b"]
     assert result["selector_seed"]["normalized_entities"]["hw"] == ["A3"]
+    assert "quant_w8a8" in result["selector_seed"]["normalized_entities"]["features"]
 
 
 def test_p6_qwen3_dense_a3_single_card_request_stays_qwen3_32b() -> None:
@@ -335,13 +336,12 @@ def test_p6_qwen3_dense_pack_infers_single_card_attempt_with_warning(a3_resolve_
     assert "2 logical npus" in lower or "2 dies" in lower
     assert "single-card" in lower or "单卡" in response["capsule_text"]
     assert card["notes"] is not None
-    assert "unverified" in card["notes"].lower() or "未验证" in card["notes"]
+    assert "unvalidated" in card["notes"].lower() or "未验证" in card["notes"]
     assert "vllm serve" in card["notes"]
     assert "--tensor-parallel-size 2" in card["notes"]
     assert "ASCEND_RT_VISIBLE_DEVICES=0,1" in card["notes"]
     assert "--quantization ascend" not in card["notes"]
     assert "single-card" in card["notes"].lower() or "单卡" in card["notes"]
-    assert "1 card = 2 logical npus" in card["notes"].lower() or "1 card = 2 dies" in card["notes"].lower()
     assert "tp4 / 2 cards / 4 logical npus" in card["notes"].lower()
 
 
@@ -413,12 +413,10 @@ def test_p6_qwen3_dense_pack_infers_four_card_attempt_with_a3_logical_npus(
     assert "4 cards" in lower or "4-card" in lower or "4卡" in response["capsule_text"]
     assert "8 logical npus" in lower or "8 dies" in lower
     assert "tp4 / 2 cards / 4 logical npus" in lower
-    assert card["notes"] is not None
-    assert "unverified" in card["notes"].lower() or "未验证" in card["notes"]
-    assert "--tensor-parallel-size 8" in card["notes"]
-    assert "ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7" in card["notes"]
-    assert "--tensor-parallel-size 4" not in card["notes"]
-    assert "4 cards = 8 logical npus" in card["notes"].lower() or "4 cards = 8 dies" in card["notes"].lower()
+    assert card["result_status"] == "needs_reroute"
+    assert card["reroute"] is not None
+    assert card["reroute"]["target_family"] == "design_analysis"
+    assert card["notes"] is None
 
 
 def test_p6_qwen3_dense_pack_defaults_to_documented_best_perf_when_topology_unspecified(
@@ -507,4 +505,5 @@ def test_p6_skill_docs_force_runtime_first_for_deployment(agent_repo_root) -> No
     assert "Do not silently substitute" in deployment_skill
     assert "single-card" in deployment_skill
     assert "best-performance baseline" in deployment_skill
-    assert "1 card = 2 logical NPUs on A3" in deployment_skill
+    assert "unknown_or_reroute" in deployment_skill
+    assert "1 card = 2 logical NPUs on A3" not in deployment_skill

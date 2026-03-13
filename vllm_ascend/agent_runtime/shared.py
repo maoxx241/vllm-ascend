@@ -49,7 +49,6 @@ HW_TOKENS = {
 }
 MODEL_PATTERNS = [
     (re.compile(r"deepseek[\s\-_]*v3(?:\.\d+)?(?:[\s\-_]*w8a8)?", re.I), "deepseek-v3"),
-    (re.compile(r"qwen3[\s\-_]*32b[\s\-_]*w8a8", re.I), "qwen3-32b-w8a8"),
     (re.compile(r"qwen3[\s\-_]*32b", re.I), "qwen3-32b"),
     (re.compile(r"qwen3-next-32b", re.I), "qwen3-next-32b"),
     (re.compile(r"qwen3-next", re.I), "qwen3-next"),
@@ -64,6 +63,13 @@ FEATURE_PATTERNS = {
     "dynamic_batching": re.compile(r"(dynamic[_ -]?batch|动态批处理)", re.I),
     "release_sync": re.compile(r"(release[_ -]?sync|版本同步|回灌|同步)", re.I),
     "single_card": re.compile(r"(single[- ]?card|单卡)", re.I),
+    "quant_w8a8": re.compile(r"w8a8", re.I),
+    "priority_validated_only": re.compile(r"(validated only|只要已验证|官方推荐|recommended baseline|推荐配置)", re.I),
+}
+CONFIG_PATTERNS = {
+    "tp": re.compile(r"\btp\s*=?\s*(\d+)\b", re.I),
+    "dp": re.compile(r"\bdp\s*=?\s*(\d+)\b", re.I),
+    "ep": re.compile(r"\bep\s*=?\s*(\d+)\b", re.I),
 }
 
 
@@ -80,14 +86,23 @@ def _detect_models(text: str) -> list[str]:
     hits = []
     for pattern, model in MODEL_PATTERNS:
         if pattern.search(text):
-            if any(model == existing or model in existing for existing in hits):
+            if model in hits:
                 continue
-            hits = [existing for existing in hits if existing not in model]
             hits.append(model)
     return hits
 
 
-def _detect_features(text: str) -> list[str]:
+def _detect_configs(text: str) -> list[str]:
+    configs: list[str] = []
+    for prefix, pattern in CONFIG_PATTERNS.items():
+        for match in pattern.findall(text):
+            configs.append(f"{prefix}_{match}")
+    if not configs:
+        configs.append("parallelism_unspecified")
+    return sorted(dict.fromkeys(configs))
+
+
+def _detect_features(text: str, *, kind: str, configs: list[str]) -> list[str]:
     hits = []
     for feature, pattern in FEATURE_PATTERNS.items():
         if pattern.search(text):
@@ -97,6 +112,11 @@ def _detect_features(text: str) -> list[str]:
         if requested_cards == 1 and "single_card" not in hits:
             hits.append("single_card")
         hits.append(f"cards_{requested_cards}")
+    if requested_cards is not None or any(config.startswith(("tp_", "dp_", "ep_")) for config in configs):
+        hits.append("topology_locked")
+        hits.append("priority_keep_topology")
+    elif kind in {"deployment", "performance_expectation"}:
+        hits.append("priority_best_perf")
     return hits
 
 
@@ -209,7 +229,8 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
     root = root or repo_root()
     kind = _classify(raw_request.user_text, raw_request.inline_paths, raw_request.inline_errors)
     seed = _base_seed_for_kind(kind, root=root)
-    features = _detect_features(raw_request.user_text)
+    configs = _detect_configs(raw_request.user_text)
+    features = _detect_features(raw_request.user_text, kind=kind, configs=configs)
     models = _detect_models(raw_request.user_text)
     hw = _detect_hw(raw_request.user_text)
     confirmation_required, confirmation_status = _confirmation_status(kind, raw_request.user_text)
@@ -247,6 +268,9 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
     if not normalized_features and kind == "deployment":
         normalized_features = []
     feature_entities = normalized_features if normalized_features or kind == "deployment" else seed["normalized_entities"]["features"]
+    normalized_models = models if models or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["models"]
+    normalized_hw = hw if hw or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["hw"]
+    normalized_configs = configs if configs or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["configs"]
     seed.update(
         {
             "request_id": raw_request.request_id,
@@ -263,13 +287,13 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
                 "symbols": raw_request.inline_symbols,
                 "entities": seed["normalized_entities"]["entities"],
                 "errors": raw_request.inline_errors,
-                "models": models or seed["normalized_entities"]["models"],
+                "models": normalized_models,
                 "features": feature_entities,
-                "hw": hw or seed["normalized_entities"]["hw"],
+                "hw": normalized_hw,
                 "commits": [],
                 "prs": [],
                 "versions": seed["normalized_entities"]["versions"],
-                "configs": seed["normalized_entities"]["configs"],
+                "configs": normalized_configs,
             },
             "evidence_inventory": {
                 "evidence_kinds": sorted(
