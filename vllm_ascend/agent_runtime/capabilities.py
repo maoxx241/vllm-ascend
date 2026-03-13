@@ -4,8 +4,11 @@ from typing import Any
 
 from .contracts import copy_example, now_utc, validate_instance
 from .paths import repo_root
-from .strategy import (alternative_strategies_from_atoms,
+from .strategy import (alternative_artifacts_from_atoms,
+                       alternative_strategies_from_atoms,
+                       documented_artifact_from_atoms,
                        documented_strategy_from_atoms,
+                       selected_artifact_from_atoms,
                        selected_strategy_from_atoms)
 from .topology import visible_devices
 
@@ -84,6 +87,32 @@ def _strategy_topology_label(strategy: dict[str, str] | None) -> str:
     if logical:
         parts.append(f"{logical} logical NPUs")
     return " / ".join(parts) if parts else "未冻结拓扑"
+
+
+def _artifact_label(artifact: dict[str, str] | None) -> str:
+    if artifact is None:
+        return "未冻结产物路径"
+    kind = artifact.get("kind")
+    if kind == "documented_native_deploy":
+        return "documented native deploy"
+    if kind == "documented_convert_then_deploy":
+        return "documented convert-then-deploy"
+    if kind == "inferred_convert_then_deploy":
+        return "inferred convert-then-deploy"
+    if kind == "unsupported_requires_choice":
+        return "route choice required"
+    return kind or "未冻结产物路径"
+
+
+def _quantized_output_path(model_name: str, artifact: dict[str, str] | None) -> str:
+    quant = artifact.get("quant") if artifact else None
+    if quant == "quant_w8a8":
+        return f"/model/{model_name}-W8A8"
+    if quant == "quant_w4a8":
+        return f"/model/{model_name}-W4A8"
+    if quant == "quant_w4a4":
+        return f"/model/{model_name}-W4A4"
+    return f"/model/{model_name}-Quantized"
 
 
 def _render_qwen3_launch_block(
@@ -166,6 +195,30 @@ def _render_qwen3_launch_block(
     return "```bash\n" + "\n".join(lines) + "\n```"
 
 
+def _render_modelslim_conversion_block(
+    *,
+    model_path: str,
+    model_name: str,
+    output_path: str,
+    logical_npus: int,
+) -> str:
+    lines = [
+        "# Runbook only: choose the closest official ModelSlim example for the target model family.",
+        "git clone https://gitcode.com/Ascend/msit.git -b br_release_MindStudio_8.3.0_20261231",
+        "cd msit/msmodelslim",
+        "bash install.sh",
+        f"export ASCEND_RT_VISIBLE_DEVICES={visible_devices(logical_npus)}",
+        "export PYTORCH_NPU_ALLOC_CONF=expandable_segments:False",
+        f"export MODEL_PATH={model_path}",
+        f"export SAVE_PATH={output_path}",
+        "python3 /path/to/msmodelslim/example/<closest_example>.py \\",
+        "  --model_path $MODEL_PATH \\",
+        "  --save_path $SAVE_PATH \\",
+        "  --trust_remote_code True",
+    ]
+    return "```bash\n" + "\n".join(lines) + "\n```"
+
+
 def _render_strategy_script(strategy: dict[str, str]) -> str | None:
     preset_name = strategy.get("preset")
     if preset_name in {None, "", "none"}:
@@ -187,16 +240,50 @@ def _render_strategy_script(strategy: dict[str, str]) -> str | None:
     )
 
 
+def _selected_deployment_inputs(
+    pack_response: dict[str, Any],
+) -> tuple[dict[str, str] | None, dict[str, str] | None]:
+    return (
+        selected_strategy_from_atoms(pack_response["atoms"]),
+        selected_artifact_from_atoms(pack_response["atoms"]),
+    )
+
+
 def _deployment_notes(pack_response: dict[str, Any]) -> str | None:
-    selected = selected_strategy_from_atoms(pack_response["atoms"])
-    if selected is None or selected.get("kind") == "unknown_or_reroute":
+    selected, selected_artifact = _selected_deployment_inputs(pack_response)
+    if selected is None or selected_artifact is None:
+        return None
+    if selected.get("kind") == "unknown_or_reroute":
+        return None
+    if selected_artifact.get("kind") == "unsupported_requires_choice":
         return None
     script = _render_strategy_script(selected)
     if script is None:
         return None
     documented = documented_strategy_from_atoms(pack_response["atoms"])
+    documented_artifact = documented_artifact_from_atoms(pack_response["atoms"])
     cards = _as_int(selected.get("cards"))
     topology_name = "single-card" if cards == 1 else _strategy_topology_label(selected)
+    if selected_artifact.get("kind") in {"documented_convert_then_deploy", "inferred_convert_then_deploy"}:
+        preset = RENDER_PRESETS.get(selected.get("preset") or "")
+        logical_npus = _as_int(selected.get("logical"))
+        if preset is None or logical_npus is None:
+            return None
+        conversion = _render_modelslim_conversion_block(
+            model_path="/model/Qwen3-32B",
+            model_name="Qwen3-32B",
+            output_path=_quantized_output_path("Qwen3-32B", selected_artifact),
+            logical_npus=logical_npus,
+        )
+        route_label = "documented" if selected_artifact.get("kind") == "documented_convert_then_deploy" else "inferred unvalidated"
+        return (
+            f"{route_label} conversion + deployment runbook preserving {topology_name} "
+            f"({_strategy_topology_label(selected)}).\n\n"
+            f"ModelSlim conversion runbook:\n\n{conversion}\n\n"
+            f"Serve runbook for the converted artifact:\n\n{script}\n\n"
+            f"documented comparison anchors: strategy={_strategy_topology_label(documented)}; "
+            f"artifact={_artifact_label(documented_artifact)}."
+        )
     if selected.get("kind") == "inferred_preserve_topology":
         return (
             f"inferred unvalidated deployment script preserving the requested topology "
@@ -216,28 +303,53 @@ def _deployment_reroute_card(
     root = root or repo_root()
     card = _base_card("atomic-result-card.reroute.json", selector_plan, atomic_skill, root=root)
     card = _apply_pack(card, pack_response)
+    selected_artifact = selected_artifact_from_atoms(pack_response["atoms"])
+    artifact_alternatives = alternative_artifacts_from_atoms(pack_response["atoms"])
     alternatives = alternative_strategies_from_atoms(pack_response["atoms"])
-    alternative_labels = ", ".join(_strategy_topology_label(item) for item in alternatives) or "多个未冻结候选"
-    card.update(
-        {
-            "task_family": "deployment_execution",
-            "resolution_code": "reroute_family_boundary",
-            "deliverable_fragment_summary": "当前 deployment 请求无法稳定收敛到单个 artifact；需要进入 design_analysis 收口策略。",
-            "next_action": {
-                "kind": "reroute_task",
-                "owner_stage": "intake",
-                "summary": "重新进入 Intake，转 design_analysis 收口并行策略",
-            },
-            "reroute": {
-                "target_family": "design_analysis",
-                "target_stage": "intake",
-                "reason": f"deployment family cannot safely choose between {alternative_labels}.",
-                "carry_over_unknowns": pack_response["unknowns"] or ["需要在设计分析阶段收口并行策略"],
-            },
-            "produced_artifacts": [],
-            "notes": None,
-        }
-    )
+    if selected_artifact and selected_artifact.get("kind") == "unsupported_requires_choice":
+        artifact_labels = ", ".join(_artifact_label(item) for item in artifact_alternatives) or "ModelSlim conversion / fp8-origin adaptation"
+        card.update(
+            {
+                "task_family": "deployment_execution",
+                "resolution_code": "reroute_family_boundary",
+                "deliverable_fragment_summary": "当前 deployment 请求先要收口 artifact 路线：native FP8 直跑不受支持。",
+                "next_action": {
+                    "kind": "reroute_task",
+                    "owner_stage": "intake",
+                    "summary": "重新进入 Intake，转 design_analysis 收口 conversion 与 adaptation 路线",
+                },
+                "reroute": {
+                    "target_family": "design_analysis",
+                    "target_stage": "intake",
+                    "reason": f"deployment family cannot emit a runbook until it chooses among {artifact_labels}.",
+                    "carry_over_unknowns": pack_response["unknowns"] or ["需要先收口支持的量化产物路线"],
+                },
+                "produced_artifacts": [],
+                "notes": None,
+            }
+        )
+    else:
+        alternative_labels = ", ".join(_strategy_topology_label(item) for item in alternatives) or "多个未冻结候选"
+        card.update(
+            {
+                "task_family": "deployment_execution",
+                "resolution_code": "reroute_family_boundary",
+                "deliverable_fragment_summary": "当前 deployment 请求无法稳定收敛到单个 artifact；需要进入 design_analysis 收口策略。",
+                "next_action": {
+                    "kind": "reroute_task",
+                    "owner_stage": "intake",
+                    "summary": "重新进入 Intake，转 design_analysis 收口并行策略",
+                },
+                "reroute": {
+                    "target_family": "design_analysis",
+                    "target_stage": "intake",
+                    "reason": f"deployment family cannot safely choose between {alternative_labels}.",
+                    "carry_over_unknowns": pack_response["unknowns"] or ["需要在设计分析阶段收口并行策略"],
+                },
+                "produced_artifacts": [],
+                "notes": None,
+            }
+        )
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
 
@@ -262,6 +374,9 @@ def feature_policy_resolver(
 def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
     selected = selected_strategy_from_atoms(pack_response["atoms"])
+    selected_artifact = selected_artifact_from_atoms(pack_response["atoms"])
+    if selected_artifact and selected_artifact.get("kind") == "unsupported_requires_choice":
+        return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-config-synthesizer", root=root)
     if selected and selected.get("kind") == "unknown_or_reroute":
         return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-config-synthesizer", root=root)
 
@@ -288,6 +403,9 @@ def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: 
 def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: dict[str, Any], root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
     selected = selected_strategy_from_atoms(pack_response["atoms"])
+    selected_artifact = selected_artifact_from_atoms(pack_response["atoms"])
+    if selected_artifact and selected_artifact.get("kind") == "unsupported_requires_choice":
+        return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-artifact-packager", root=root)
     if selected and selected.get("kind") == "unknown_or_reroute":
         return _deployment_reroute_card(selector_plan, pack_response, atomic_skill="deployment-artifact-packager", root=root)
 
@@ -309,7 +427,16 @@ def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: d
         }
     )
     if selected:
-        if selected.get("kind") == "inferred_preserve_topology":
+        if selected_artifact and selected_artifact.get("kind") in {"documented_convert_then_deploy", "inferred_convert_then_deploy"}:
+            if selected.get("kind") == "inferred_preserve_topology":
+                card["deliverable_fragment_summary"] = (
+                    f"已按用户锁定拓扑 {_strategy_topology_label(selected)} 生成 conversion + serve 两阶段未验证 runbook。"
+                )
+            else:
+                card["deliverable_fragment_summary"] = (
+                    f"已按 {_strategy_topology_label(selected)} 收口 conversion + serve 两阶段 runbook。"
+                )
+        elif selected.get("kind") == "inferred_preserve_topology":
             card["deliverable_fragment_summary"] = (
                 f"已按用户锁定拓扑 {_strategy_topology_label(selected)} 生成未验证脚本，并附带文档化对照基线。"
             )
@@ -369,9 +496,18 @@ def model_expected_performance_estimator(
     )
     card = _apply_pack(card, pack_response)
     selected = selected_strategy_from_atoms(pack_response["atoms"])
-    if selected and selected.get("kind") == "unknown_or_reroute":
+    selected_artifact = selected_artifact_from_atoms(pack_response["atoms"])
+    if selected_artifact and selected_artifact.get("kind") == "unsupported_requires_choice":
+        card["confidence"] = "low"
+        card["notes"] = (
+            "expected envelope remains conditional because native FP8 direct deployment is unsupported on A2/A3; "
+            "choose ModelSlim conversion or fp8-origin adaptation before collapsing to a single route."
+        )
+    elif selected and selected.get("kind") == "unknown_or_reroute":
         card["confidence"] = "low"
     elif selected and selected.get("kind") == "inferred_preserve_topology":
+        card["confidence"] = "medium"
+    elif selected_artifact and selected_artifact.get("kind") == "inferred_convert_then_deploy":
         card["confidence"] = "medium"
     else:
         card["confidence"] = "medium" if pack_response["unknowns"] else "high"

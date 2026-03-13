@@ -20,6 +20,7 @@ from .entrypoints import (adaptation_intake, debug_intake,
                           validation_strategy_intake,
                           vllm_ascend_assistant)
 from .kb import build_local, doctor, pack, resolve
+from .skill_lint import lint_runtime_first_skills
 from .shared import (RawRequest, build_selector_seed, compile_pack_request,
                      evaluate_governor, generic_analysis_checklist,
                      generic_spec, generic_task_intake, intake_from_seed,
@@ -52,6 +53,7 @@ __all__ = [
     "intake_from_seed",
     "load_capsule",
     "log_triage",
+    "lint_runtime_first_skills",
     "model_expected_performance_estimator",
     "operator_development_intake",
     "pack",

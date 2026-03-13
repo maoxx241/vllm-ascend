@@ -58,12 +58,18 @@ FEATURE_PATTERNS = {
     "prefill": re.compile(r"(prefill|预填充)", re.I),
     "decode": re.compile(r"(decode|解码)", re.I),
     "tp4": re.compile(r"\btp\s*=?\s*4\b", re.I),
+    "tp8": re.compile(r"\btp\s*=?\s*8\b", re.I),
     "bf16": re.compile(r"bf16", re.I),
     "ctx8k": re.compile(r"(8k|8192)", re.I),
     "dynamic_batching": re.compile(r"(dynamic[_ -]?batch|动态批处理)", re.I),
     "release_sync": re.compile(r"(release[_ -]?sync|版本同步|回灌|同步)", re.I),
     "single_card": re.compile(r"(single[- ]?card|单卡)", re.I),
+    "artifact_modelslim": re.compile(r"(modelslim|msmodelslim)", re.I),
+    "weight_quantized": re.compile(r"(quantized|量化(后)?权重|量化模型|转换后的量化权重)", re.I),
+    "weight_fp8_origin": re.compile(r"(fp8[-_ ]?origin|原始fp8|保留fp8|不转换fp8)", re.I),
     "quant_w8a8": re.compile(r"w8a8", re.I),
+    "quant_w4a8": re.compile(r"w4a8", re.I),
+    "quant_w4a4": re.compile(r"w4a4", re.I),
     "priority_validated_only": re.compile(r"(validated only|只要已验证|官方推荐|recommended baseline|推荐配置)", re.I),
 }
 CONFIG_PATTERNS = {
@@ -107,6 +113,16 @@ def _detect_features(text: str, *, kind: str, configs: list[str]) -> list[str]:
     for feature, pattern in FEATURE_PATTERNS.items():
         if pattern.search(text):
             hits.append(feature)
+    if re.search(r"(?<![a-z0-9])fp8(?![a-z0-9])|fp8权重|fp8 weights?", text, re.I):
+        hits.append("weight_fp8_native")
+    if "weight_fp8_origin" in hits and "weight_fp8_native" not in hits:
+        hits.append("weight_fp8_native")
+    if (
+        "artifact_modelslim" in hits
+        or "weight_quantized" in hits
+        or any(token in hits for token in ("quant_w8a8", "quant_w4a8", "quant_w4a4"))
+    ) and "weight_quantized" not in hits:
+        hits.append("weight_quantized")
     requested_cards = detect_requested_card_count(text)
     if requested_cards is not None:
         if requested_cards == 1 and "single_card" not in hits:
@@ -117,7 +133,27 @@ def _detect_features(text: str, *, kind: str, configs: list[str]) -> list[str]:
         hits.append("priority_keep_topology")
     elif kind in {"deployment", "performance_expectation"}:
         hits.append("priority_best_perf")
-    return hits
+    return sorted(dict.fromkeys(hits))
+
+
+def _primary_hw(hw: list[str]) -> str | None:
+    return hw[0] if hw else None
+
+
+def _native_fp8_requires_route_choice(features: list[str], hw: list[str]) -> bool:
+    primary_hw = _primary_hw(hw)
+    feature_set = set(features)
+    return (
+        primary_hw in {"A2", "A3"}
+        and "weight_fp8_native" in feature_set
+        and "artifact_modelslim" not in feature_set
+        and "weight_quantized" not in feature_set
+        and "weight_fp8_origin" not in feature_set
+    )
+
+
+def _explicit_fp8_origin_path(features: list[str], hw: list[str]) -> bool:
+    return _primary_hw(hw) in {"A2", "A3"} and "weight_fp8_origin" in set(features)
 
 
 def _requested_artifact(text: str) -> str:
@@ -179,7 +215,9 @@ def _query_trigger_codes(kind: str) -> list[str]:
     return mapping.get(kind, ["baseline_or_policy_lookup"])
 
 
-def _confirmation_status(kind: str, text: str) -> tuple[bool, str]:
+def _confirmation_status(kind: str, text: str, *, features: list[str], hw: list[str]) -> tuple[bool, str]:
+    if _explicit_fp8_origin_path(features, hw):
+        return True, "pending"
     if kind in {"adaptation", "operator_development"} or re.search(r"(code change|modify|mutation|destructive|代码改动|修改代码)", text, re.I):
         return True, "pending"
     if kind == "upstream_sync" and re.search(r"(backport|patch|回灌到.*release|代码改动包)", text, re.I):
@@ -228,12 +266,22 @@ def _should_direct_answer(selector_seed: dict[str, Any]) -> bool:
 def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dict[str, Any]:
     root = root or repo_root()
     kind = _classify(raw_request.user_text, raw_request.inline_paths, raw_request.inline_errors)
-    seed = _base_seed_for_kind(kind, root=root)
     configs = _detect_configs(raw_request.user_text)
     features = _detect_features(raw_request.user_text, kind=kind, configs=configs)
     models = _detect_models(raw_request.user_text)
     hw = _detect_hw(raw_request.user_text)
-    confirmation_required, confirmation_status = _confirmation_status(kind, raw_request.user_text)
+    effective_kind = kind
+    if _native_fp8_requires_route_choice(features, hw):
+        effective_kind = "design"
+    elif _explicit_fp8_origin_path(features, hw):
+        effective_kind = "adaptation"
+    seed = _base_seed_for_kind(effective_kind, root=root)
+    confirmation_required, confirmation_status = _confirmation_status(
+        effective_kind,
+        raw_request.user_text,
+        features=features,
+        hw=hw,
+    )
 
     family_candidates = {
         "reference": ["design_analysis"],
@@ -246,17 +294,21 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         "operator_development": ["operator_development", "design_analysis"],
         "adaptation": ["adaptation", "design_analysis"],
         "design": ["design_analysis"],
-    }[kind]
+    }[effective_kind]
     deliverable = _requested_artifact(raw_request.user_text)
-    if kind == "reference":
+    if effective_kind == "reference":
         execution_mode = "direct_answer"
         analysis_depth = "none"
         deliverable_hint = "reference_answer"
-    elif kind == "upstream_sync" and re.search(r"(release sync|版本同步|验证窗口|方案|plan)", raw_request.user_text, re.I):
+    elif _native_fp8_requires_route_choice(features, hw):
         execution_mode = "spec_plan_workflow"
         analysis_depth = "full_spec_plan"
         deliverable_hint = "spec_plan"
-    elif kind == "design":
+    elif effective_kind == "upstream_sync" and re.search(r"(release sync|版本同步|验证窗口|方案|plan)", raw_request.user_text, re.I):
+        execution_mode = "spec_plan_workflow"
+        analysis_depth = "full_spec_plan"
+        deliverable_hint = "spec_plan"
+    elif effective_kind == "design":
         execution_mode = "spec_plan_workflow"
         analysis_depth = "full_spec_plan"
         deliverable_hint = "spec_plan" if deliverable == "spec_plan" else "design_note"
@@ -265,19 +317,19 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         analysis_depth = "lightweight_design_note"
         deliverable_hint = deliverable
     normalized_features = features
-    if not normalized_features and kind == "deployment":
+    if not normalized_features and effective_kind == "deployment":
         normalized_features = []
-    feature_entities = normalized_features if normalized_features or kind == "deployment" else seed["normalized_entities"]["features"]
-    normalized_models = models if models or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["models"]
-    normalized_hw = hw if hw or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["hw"]
-    normalized_configs = configs if configs or kind in {"deployment", "performance_expectation", "performance_breakdown"} else seed["normalized_entities"]["configs"]
+    feature_entities = normalized_features if normalized_features or effective_kind == "deployment" else seed["normalized_entities"]["features"]
+    normalized_models = models if models or effective_kind in {"deployment", "performance_expectation", "performance_breakdown", "design", "adaptation"} else seed["normalized_entities"]["models"]
+    normalized_hw = hw if hw or effective_kind in {"deployment", "performance_expectation", "performance_breakdown", "design", "adaptation"} else seed["normalized_entities"]["hw"]
+    normalized_configs = configs if configs or effective_kind in {"deployment", "performance_expectation", "performance_breakdown", "design", "adaptation"} else seed["normalized_entities"]["configs"]
     seed.update(
         {
             "request_id": raw_request.request_id,
             "created_at": raw_request.created_at_hint or now_utc(),
             "objective": raw_request.user_text,
             "requested_artifact": deliverable,
-            "target_object": _target_object(kind, raw_request, models, features),
+            "target_object": _target_object(effective_kind, raw_request, models, features),
             "task_family_candidates": family_candidates,
             "execution_mode_hint": execution_mode,
             "deliverable_contract_hint": deliverable_hint,
@@ -328,13 +380,17 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
             "smallest_next_step": (
                 "直接回答，无需查询。"
                 if execution_mode == "direct_answer"
+                else "先确认 native fp8 直跑不受支持，并收口 ModelSlim 转换部署还是 fp8-origin 适配路线"
+                if _native_fp8_requires_route_choice(features, hw)
                 else "查一个正式 capsule 再决定是否继续推进"
             ),
             "what_is_missing": (
                 []
                 if execution_mode == "direct_answer"
+                else ["native fp8 support status", "route choice", "serving constraints"]
+                if _native_fp8_requires_route_choice(features, hw)
                 else ["baseline"]
-                if kind == "performance_breakdown"
+                if effective_kind == "performance_breakdown"
                 else seed["what_is_missing"]
             ),
         }
@@ -346,6 +402,10 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
     ]
     if hw:
         hard_constraints.append(f"目标硬件是 {hw[0]}")
+    if _native_fp8_requires_route_choice(features, hw):
+        hard_constraints.append("A2/A3 上 native FP8 不是已支持的直接部署路径")
+    if _explicit_fp8_origin_path(features, hw):
+        hard_constraints.append("fp8-origin 路线预期涉及代码适配或加载路径变更")
     seed["constraints"]["hard_constraints"] = hard_constraints
     validate_instance(seed, "selector-seed.schema.json", root=root)
     return seed
@@ -359,6 +419,9 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
         return None
     family = selector_seed["task_family_candidates"][0]
     objective = selector_seed["objective"]
+    selector_features = set(selector_seed["normalized_entities"]["features"])
+    selector_hw = selector_seed["normalized_entities"]["hw"]
+    native_fp8_route_gap = _native_fp8_requires_route_choice(list(selector_features), selector_hw)
     if family == "deployment_execution":
         plan = copy_example("selector-plan.deployment.intake.json", root=root)
     elif (
@@ -447,6 +510,19 @@ def plan_from_seed(selector_seed: dict[str, Any], root: Any | None = None) -> di
     )
     if family == "validation_strategy":
         plan["selectors"]["files"] = selector_seed["normalized_entities"]["files"]
+    if family == "design_analysis" and native_fp8_route_gap:
+        plan.update(
+            {
+                "must_have": ["native fp8 support status", "route choice"],
+                "nice_to_have": ["conversion path", "serving constraints"],
+                "query_trigger_codes": ["route_disambiguation", "artifact_requirement_lookup"],
+                "why_this_query_now": "先确认 native fp8 直跑不受支持，再收口 ModelSlim 转换部署还是 fp8-origin 适配路线",
+                "notes": (
+                    "A2/A3 上 native FP8 不是已支持的直接部署路径；"
+                    "需在 ModelSlim 转换后部署 与 fp8-origin 适配之间收口路线。"
+                ),
+            }
+        )
     validate_instance(plan, "selector-plan.schema.json", root=root)
     return plan
 

@@ -18,11 +18,11 @@ from .extractors import (extract_cann_op_constraints,
                          extract_vllm_release_delta, extract_vllm_semantics,
                          extract_vllm_symbols, merge_shard_rows)
 from .paths import kb_root, repo_root
-from .strategy import (baselines_from_rows, build_strategy_atom,
+from .strategy import (baselines_from_rows, build_artifact_atom,
+                       build_strategy_atom, select_artifact_path,
                        select_deployment_strategy,
                        selector_context_from_selectors,
                        topology_multiplier_from_rows)
-from .topology import logical_npus_for_hw, requested_card_count_from_features
 
 TABLE_COLUMNS: dict[str, list[str]] = {
     "sources": [
@@ -332,7 +332,9 @@ def _strategy_fact_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     return _query_rows(
         conn,
         "SELECT fact_id, subject_id, predicate, object_id, literal_text, source_id, scope_json, metadata_json "
-        "FROM facts WHERE predicate IN ('topology_mapping', 'deployment_baseline', 'performance_baseline', 'model_traits') "
+        "FROM facts WHERE predicate IN "
+        "('topology_mapping', 'deployment_baseline', 'performance_baseline', 'model_traits', "
+        "'artifact_path', 'tool_recipe', 'runtime_constraint', 'communication_profile') "
         "ORDER BY fact_id",
     )
 
@@ -371,16 +373,25 @@ def _matching_strategy_facts(
         scope = json.loads(row["scope_json"] or "{}")
         subject_name = entity_names.get(row["subject_id"])
         model_base = metadata.get("model_base")
-        if predicate == "topology_mapping":
-            hw_values = metadata.get("hw") or metadata.get("soc") or scope.get("hw")
-            if isinstance(hw_values, list):
-                if context.hw in hw_values:
-                    matches.append(row)
-            elif hw_values == context.hw:
+        hw_values = metadata.get("hw") or metadata.get("soc") or scope.get("hw")
+        hw_matches = False
+        if isinstance(hw_values, list):
+            hw_matches = context.hw in hw_values
+        elif isinstance(hw_values, str):
+            hw_matches = hw_values == context.hw
+        elif hw_values is None:
+            hw_matches = True
+        if predicate in {"topology_mapping", "communication_profile"}:
+            if hw_matches:
                 matches.append(row)
             continue
         normalized_subject = subject_name.removesuffix("-w8a8") if isinstance(subject_name, str) else subject_name
-        if model_base == context.model_base or normalized_subject == context.model_base:
+        model_matches = model_base == context.model_base or normalized_subject == context.model_base
+        if predicate == "runtime_constraint":
+            if hw_matches and (model_matches or model_base is None):
+                matches.append(row)
+            continue
+        if model_matches and hw_matches:
             matches.append(row)
     return matches
 
@@ -484,6 +495,30 @@ def pack(
             context=selector_context,
             predicate="performance_baseline",
         )
+        artifact_fact_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="artifact_path",
+        )
+        tool_recipe_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="tool_recipe",
+        )
+        runtime_constraint_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="runtime_constraint",
+        )
+        comm_profile_rows = _matching_strategy_facts(
+            strategy_fact_rows,
+            entity_names,
+            context=selector_context,
+            predicate="communication_profile",
+        )
         topology_multiplier = topology_multiplier_from_rows(topology_fact_rows, hw=selector_context.hw)
         strategy_selection = None
         if _has_rich_strategy_data(matching_strategy_baselines):
@@ -492,6 +527,13 @@ def pack(
                 tuple(matching_strategy_baselines),
                 topology_multiplier=topology_multiplier,
             )
+        artifact_selection = select_artifact_path(
+            selector_context,
+            tuple(matching_strategy_baselines),
+            artifact_fact_rows=artifact_fact_rows,
+            tool_recipe_rows=tool_recipe_rows,
+            runtime_constraint_rows=runtime_constraint_rows,
+        )
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
@@ -501,25 +543,50 @@ def pack(
         evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
-            if strategy_selection is not None:
-                selected = strategy_selection.selected
-                documented = strategy_selection.documented
-                model_label = _model_label(selected.model_base, selected.model_traits)
-                warnings.extend(strategy_selection.warnings)
-                unknowns.extend(strategy_selection.unknowns)
-                atoms.append(build_strategy_atom("selected", selected))
-                if documented is not None:
-                    atoms.append(build_strategy_atom("documented", documented))
-                    atoms.append(
-                        {
-                            "atom_id": f"atom-{selected.model_base or 'model'}-documented-validation",
-                            "atom_kind": "validation",
-                            "summary": documented.summary,
-                            "source_refs": list(documented.source_refs),
-                        }
-                    )
-                for alternative in strategy_selection.alternatives:
-                    atoms.append(build_strategy_atom("alternative", alternative))
+            if strategy_selection is not None or artifact_selection is not None:
+                selected = strategy_selection.selected if strategy_selection is not None else None
+                documented = strategy_selection.documented if strategy_selection is not None else None
+                selected_artifact = artifact_selection.selected if artifact_selection is not None else None
+                documented_artifact = artifact_selection.documented if artifact_selection is not None else None
+                model_base = (
+                    selected.model_base
+                    if selected is not None
+                    else selected_artifact.model_base
+                    if selected_artifact is not None
+                    else primary_model
+                )
+                model_traits = (
+                    selected.model_traits
+                    if selected is not None
+                    else selected_artifact.model_traits
+                    if selected_artifact is not None
+                    else tuple()
+                )
+                model_label = _model_label(model_base, model_traits)
+                if strategy_selection is not None:
+                    warnings.extend(strategy_selection.warnings)
+                    unknowns.extend(strategy_selection.unknowns)
+                    atoms.append(build_strategy_atom("selected", selected))
+                    if documented is not None:
+                        atoms.append(build_strategy_atom("documented", documented))
+                        atoms.append(
+                            {
+                                "atom_id": f"atom-{selected.model_base or 'model'}-documented-validation",
+                                "atom_kind": "validation",
+                                "summary": documented.summary,
+                                "source_refs": list(documented.source_refs),
+                            }
+                        )
+                    for alternative in strategy_selection.alternatives:
+                        atoms.append(build_strategy_atom("alternative", alternative))
+                if artifact_selection is not None:
+                    warnings.extend(artifact_selection.warnings)
+                    unknowns.extend(artifact_selection.unknowns)
+                    atoms.append(build_artifact_atom("selected", selected_artifact))
+                    if documented_artifact is not None:
+                        atoms.append(build_artifact_atom("documented", documented_artifact))
+                    for alternative in artifact_selection.alternatives:
+                        atoms.append(build_artifact_atom("alternative", alternative))
                 if topology_fact_rows:
                     atoms.append(
                         {
@@ -529,16 +596,43 @@ def pack(
                             "source_refs": [topology_fact_rows[0]["fact_id"]],
                         }
                     )
+                if comm_profile_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-comm-profile-{primary_hw.lower()}",
+                            "atom_kind": "fact",
+                            "summary": comm_profile_rows[0]["literal_text"],
+                            "source_refs": [comm_profile_rows[0]["fact_id"]],
+                        }
+                    )
                 if trait_fact_rows:
                     atoms.append(
                         {
-                            "atom_id": f"atom-model-traits-{selected.model_base or 'unknown'}",
+                            "atom_id": f"atom-model-traits-{model_base or 'unknown'}",
                             "atom_kind": "fact",
                             "summary": trait_fact_rows[0]["literal_text"],
                             "source_refs": [trait_fact_rows[0]["fact_id"]],
                         }
                     )
-                if substrate_rows:
+                if tool_recipe_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-tool-recipe-{model_base or 'unknown'}",
+                            "atom_kind": "fact",
+                            "summary": tool_recipe_rows[0]["literal_text"],
+                            "source_refs": [tool_recipe_rows[0]["fact_id"]],
+                        }
+                    )
+                if runtime_constraint_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-runtime-constraint-{model_base or 'unknown'}",
+                            "atom_kind": "constraint",
+                            "summary": runtime_constraint_rows[0]["literal_text"],
+                            "source_refs": [runtime_constraint_rows[0]["fact_id"]],
+                        }
+                    )
+                elif substrate_rows:
                     atoms.append(
                         {
                             "atom_id": "atom-runtime-constraint",
@@ -547,17 +641,36 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
-                if selected.decision_kind == "best_perf_default":
+                if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上收到 native FP8 直跑请求，但该路径当前不受支持；"
+                        "需要先在 ModelSlim 转换后部署 与 fp8-origin 适配之间收口路线。"
+                    )
+                elif selected_artifact is not None and selected_artifact.decision_kind.endswith("convert_then_deploy"):
+                    if selected is not None and selected.decision_kind == "inferred_preserve_topology":
+                        topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count} cards"
+                        capsule_text = (
+                            f"{model_label} 在 {primary_hw} 上已选择 conversion + deployment 路线；"
+                            f"当前为保持 {topology_label} 物理拓扑，返回推断的未验证策略 {_strategy_topology_label(selected)}，"
+                            "并同时保留 conversion runbook。"
+                        )
+                    else:
+                        selected_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待运行时补齐"
+                        capsule_text = (
+                            f"{model_label} 在 {primary_hw} 上已选择 conversion + deployment 路线；"
+                            f"后续应按 {selected_label} 输出 conversion + serve 两阶段 runbook。"
+                        )
+                elif selected is not None and selected.decision_kind == "best_perf_default":
                     capsule_text = (
                         f"{model_label} 在 {primary_hw} 上未锁定拓扑；默认返回文档化最佳性能基线 "
                         f"{_strategy_topology_label(selected)}。"
                     )
-                elif selected.decision_kind == "documented_baseline":
+                elif selected is not None and selected.decision_kind == "documented_baseline":
                     capsule_text = (
                         f"{model_label} 在 {primary_hw} 上命中文档化部署基线 "
                         f"{_strategy_topology_label(selected)}，可以直接生成推荐脚本。"
                     )
-                elif selected.decision_kind == "inferred_preserve_topology":
+                elif selected is not None and selected.decision_kind == "inferred_preserve_topology":
                     topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count} cards"
                     capsule_text = (
                         f"{model_label} 在 {primary_hw} 上收到 {topology_label} 请求；"
@@ -566,20 +679,24 @@ def pack(
                         "并显式暴露风险。"
                     )
                 else:
-                    alternative_labels = ", ".join(_strategy_topology_label(candidate) for candidate in strategy_selection.alternatives) or "无稳定候选"
+                    alternative_labels = ", ".join(_strategy_topology_label(candidate) for candidate in (strategy_selection.alternatives if strategy_selection else ())) or "无稳定候选"
                     capsule_text = (
                         f"{model_label} 在 {primary_hw} 上的当前请求无法稳定收敛到单个 deployment artifact；"
                         f"文档化基线是 {_strategy_topology_label(documented)}，但锁定拓扑下仍存在 {alternative_labels} 等候选。"
                         "当前应该显式保留 unknown，并允许 reroute 到 design_analysis。"
                     )
-                refs = selected.artifact_refs
-                if not refs and documented is not None:
+                refs: tuple[str, ...] | list[str] = ()
+                if selected_artifact is not None and selected_artifact.artifact_refs:
+                    refs = selected_artifact.artifact_refs
+                elif selected is not None and selected.artifact_refs:
+                    refs = selected.artifact_refs
+                elif documented is not None:
                     refs = documented.artifact_refs
                 deep_refs.extend(
                     _strategy_deep_refs(
                         request_id=request["request_id"],
                         refs=refs,
-                        reason="需要查看文档化基线或候选策略的完整脚本与配置",
+                        reason="需要查看文档化基线、conversion 说明或候选策略的完整脚本与配置",
                     )
                 )
             else:
@@ -657,32 +774,57 @@ def pack(
                     ]
                 )
         elif intent == "model_expectation":
-            if strategy_selection is not None:
-                selected = strategy_selection.selected
-                documented = strategy_selection.documented
-                model_label = _model_label(selected.model_base, selected.model_traits)
-                warnings.extend(strategy_selection.warnings)
+            if strategy_selection is not None or artifact_selection is not None:
+                selected = strategy_selection.selected if strategy_selection is not None else None
+                documented = strategy_selection.documented if strategy_selection is not None else None
+                selected_artifact = artifact_selection.selected if artifact_selection is not None else None
+                documented_artifact = artifact_selection.documented if artifact_selection is not None else None
+                model_base = (
+                    selected.model_base
+                    if selected is not None
+                    else selected_artifact.model_base
+                    if selected_artifact is not None
+                    else primary_model
+                )
+                model_traits = (
+                    selected.model_traits
+                    if selected is not None
+                    else selected_artifact.model_traits
+                    if selected_artifact is not None
+                    else tuple()
+                )
+                model_label = _model_label(model_base, model_traits)
                 warnings.append("returning an expected envelope rather than a measured single point")
                 unknowns.extend(["graph mode enabled/disabled", "batch size 尚未冻结"])
-                if selected.decision_kind in {"inferred_preserve_topology", "unknown_or_reroute"}:
-                    unknowns.append("最终并行拓扑仍未完全冻结")
-                atoms.append(build_strategy_atom("selected", selected))
-                if documented is not None:
-                    atoms.append(build_strategy_atom("documented", documented))
-                    atoms.append(
-                        {
-                            "atom_id": f"atom-{selected.model_base or 'model'}-expectation-validation",
-                            "atom_kind": "validation",
-                            "summary": documented.summary,
-                            "source_refs": list(documented.source_refs),
-                        }
-                    )
-                for alternative in strategy_selection.alternatives:
-                    atoms.append(build_strategy_atom("alternative", alternative))
+                if artifact_selection is not None:
+                    warnings.extend(artifact_selection.warnings)
+                    unknowns.extend(artifact_selection.unknowns)
+                    atoms.append(build_artifact_atom("selected", selected_artifact))
+                    if documented_artifact is not None:
+                        atoms.append(build_artifact_atom("documented", documented_artifact))
+                    for alternative in artifact_selection.alternatives:
+                        atoms.append(build_artifact_atom("alternative", alternative))
+                if strategy_selection is not None:
+                    warnings.extend(strategy_selection.warnings)
+                    if selected.decision_kind in {"inferred_preserve_topology", "unknown_or_reroute"}:
+                        unknowns.append("最终并行拓扑仍未完全冻结")
+                    atoms.append(build_strategy_atom("selected", selected))
+                    if documented is not None:
+                        atoms.append(build_strategy_atom("documented", documented))
+                        atoms.append(
+                            {
+                                "atom_id": f"atom-{selected.model_base or 'model'}-expectation-validation",
+                                "atom_kind": "validation",
+                                "summary": documented.summary,
+                                "source_refs": list(documented.source_refs),
+                            }
+                        )
+                    for alternative in strategy_selection.alternatives:
+                        atoms.append(build_strategy_atom("alternative", alternative))
                 if perf_fact_rows:
                     atoms.append(
                         {
-                            "atom_id": f"atom-performance-{selected.model_base or 'unknown'}",
+                            "atom_id": f"atom-performance-{model_base or 'unknown'}",
                             "atom_kind": "fact",
                             "summary": perf_fact_rows[0]["literal_text"],
                             "source_refs": [perf_fact_rows[0]["fact_id"]],
@@ -697,7 +839,34 @@ def pack(
                             "source_refs": [topology_fact_rows[0]["fact_id"]],
                         }
                     )
-                if substrate_rows:
+                if comm_profile_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-comm-profile-{primary_hw.lower()}",
+                            "atom_kind": "fact",
+                            "summary": comm_profile_rows[0]["literal_text"],
+                            "source_refs": [comm_profile_rows[0]["fact_id"]],
+                        }
+                    )
+                if tool_recipe_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-tool-recipe-{model_base or 'unknown'}",
+                            "atom_kind": "fact",
+                            "summary": tool_recipe_rows[0]["literal_text"],
+                            "source_refs": [tool_recipe_rows[0]["fact_id"]],
+                        }
+                    )
+                if runtime_constraint_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-runtime-constraint-{model_base or 'unknown'}",
+                            "atom_kind": "constraint",
+                            "summary": runtime_constraint_rows[0]["literal_text"],
+                            "source_refs": [runtime_constraint_rows[0]["fact_id"]],
+                        }
+                    )
+                elif substrate_rows:
                     atoms.append(
                         {
                             "atom_id": "atom-runtime-constraint",
@@ -706,25 +875,43 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
-                if selected.decision_kind == "unknown_or_reroute":
+                if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
+                    topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待收口"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的 TTFT、throughput 和 memory headroom 仍是 route-sensitive 的条件区间；"
+                        f"native FP8 直跑当前不受支持，且请求只冻结到 {topology_label}，"
+                        "因此必须先在 ModelSlim conversion 与 fp8-origin adaptation 之间收口路线，再讨论更窄的 envelope。"
+                    )
+                elif selected_artifact is not None and selected_artifact.decision_kind.endswith("convert_then_deploy"):
+                    topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待运行时补齐"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的 TTFT、throughput 和 memory headroom 应锚定到 converted artifact 路线；"
+                        f"当前以 {topology_label} 为 topology anchor，结果必须显式保留 conversion 产物、graph mode 和 batch size 假设。"
+                    )
+                elif selected is not None and selected.decision_kind == "unknown_or_reroute":
                     alternative_labels = ", ".join(_strategy_topology_label(candidate) for candidate in strategy_selection.alternatives) or "多个未冻结候选"
                     capsule_text = (
-                        f"{model_label} 在 {primary_hw} 上的理论性能需要按 topology-sensitive envelope 返回；"
+                        f"{model_label} 在 {primary_hw} 上的 TTFT、throughput 和 memory headroom 需要按 topology-sensitive envelope 返回；"
                         f"当前文档化锚点是 {_strategy_topology_label(documented)}，但锁定请求下仍存在 {alternative_labels} 等候选，"
                         "因此不能给出单一性能点。"
                     )
-                elif selected.decision_kind == "inferred_preserve_topology":
+                elif selected is not None and selected.decision_kind == "inferred_preserve_topology":
                     capsule_text = (
-                        f"{model_label} 在 {primary_hw} 上的理论性能应锚定到推断 topology {_strategy_topology_label(selected)}；"
+                        f"{model_label} 在 {primary_hw} 上的 TTFT、throughput 和 memory headroom 应锚定到推断 topology {_strategy_topology_label(selected)}；"
                         f"当前文档化锚点是 {_strategy_topology_label(documented)}，结果必须以下界/上界范围而不是单点返回。"
                     )
                 else:
+                    topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待运行时补齐"
                     capsule_text = (
-                        f"{model_label} 在 {primary_hw} 上的理论性能应围绕 {_strategy_topology_label(selected)} 返回 expected envelope；"
+                        f"{model_label} 在 {primary_hw} 上的 TTFT、throughput 和 memory headroom 应围绕 {topology_label} 返回 expected envelope；"
                         "若 graph mode、batch size 或 context length 未冻结，结论必须保留区间和假设。"
                     )
-                refs = selected.artifact_refs
-                if not refs and documented is not None:
+                refs: tuple[str, ...] | list[str] = ()
+                if selected_artifact is not None and selected_artifact.artifact_refs:
+                    refs = selected_artifact.artifact_refs
+                elif selected is not None and selected.artifact_refs:
+                    refs = selected.artifact_refs
+                elif documented is not None:
                     refs = documented.artifact_refs
                 deep_refs.extend(
                     _strategy_deep_refs(
@@ -828,29 +1015,143 @@ def pack(
                 )
                 unknowns.append("缺少更完整日志上下文")
         elif intent == "design_lookup":
-            if vllm_semantic_rows or vllm_symbol_rows:
-                capsule_text = "上游语义与当前 repo overlay 已形成可查询的设计分析上下文，可先输出路线分析 capsule。"
-                atoms.extend(
-                    [
-                        {
-                            "atom_id": "atom-vllm-upstream-semantics",
-                            "atom_kind": "fact",
-                            "summary": vllm_semantic_rows[0]["literal_text"] if vllm_semantic_rows else "已加载上游 engine/config 语义。",
-                            "source_refs": ["vllm_semantics:engine/config"],
-                        },
-                        {
-                            "atom_id": "atom-vllm-upstream-symbols",
-                            "atom_kind": "symbol",
-                            "summary": (
-                                f"关键上游符号已索引：{vllm_symbol_rows[0]['qualname']}"
-                                if vllm_symbol_rows
-                                else "已建立上游 symbol 索引。"
-                            ),
-                            "source_refs": ["vllm_symbols:EngineArgs.create_engine_config"],
-                        },
-                    ]
+            if (
+                artifact_selection is not None
+                or strategy_selection is not None
+                or vllm_semantic_rows
+                or vllm_symbol_rows
+            ):
+                selected = strategy_selection.selected if strategy_selection is not None else None
+                documented = strategy_selection.documented if strategy_selection is not None else None
+                selected_artifact = artifact_selection.selected if artifact_selection is not None else None
+                documented_artifact = artifact_selection.documented if artifact_selection is not None else None
+                model_base = (
+                    selected.model_base
+                    if selected is not None
+                    else selected_artifact.model_base
+                    if selected_artifact is not None
+                    else primary_model
                 )
+                model_traits = (
+                    selected.model_traits
+                    if selected is not None
+                    else selected_artifact.model_traits
+                    if selected_artifact is not None
+                    else tuple()
+                )
+                model_label = _model_label(model_base, model_traits)
+                if artifact_selection is not None:
+                    warnings.extend(artifact_selection.warnings)
+                    unknowns.extend(artifact_selection.unknowns)
+                    atoms.append(build_artifact_atom("selected", selected_artifact))
+                    if documented_artifact is not None:
+                        atoms.append(build_artifact_atom("documented", documented_artifact))
+                    for alternative in artifact_selection.alternatives:
+                        atoms.append(build_artifact_atom("alternative", alternative))
+                if strategy_selection is not None:
+                    warnings.extend(strategy_selection.warnings)
+                    unknowns.extend(strategy_selection.unknowns)
+                    atoms.append(build_strategy_atom("selected", selected))
+                    if documented is not None:
+                        atoms.append(build_strategy_atom("documented", documented))
+                    for alternative in strategy_selection.alternatives:
+                        atoms.append(build_strategy_atom("alternative", alternative))
+                if topology_fact_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-topology-{primary_hw.lower()}",
+                            "atom_kind": "fact",
+                            "summary": topology_fact_rows[0]["literal_text"],
+                            "source_refs": [topology_fact_rows[0]["fact_id"]],
+                        }
+                    )
+                if comm_profile_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-comm-profile-{primary_hw.lower()}",
+                            "atom_kind": "fact",
+                            "summary": comm_profile_rows[0]["literal_text"],
+                            "source_refs": [comm_profile_rows[0]["fact_id"]],
+                        }
+                    )
+                if trait_fact_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-model-traits-{model_base or 'unknown'}",
+                            "atom_kind": "fact",
+                            "summary": trait_fact_rows[0]["literal_text"],
+                            "source_refs": [trait_fact_rows[0]["fact_id"]],
+                        }
+                    )
+                if tool_recipe_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-tool-recipe-{model_base or 'unknown'}",
+                            "atom_kind": "fact",
+                            "summary": tool_recipe_rows[0]["literal_text"],
+                            "source_refs": [tool_recipe_rows[0]["fact_id"]],
+                        }
+                    )
+                if runtime_constraint_rows:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-runtime-constraint-{model_base or 'unknown'}",
+                            "atom_kind": "constraint",
+                            "summary": runtime_constraint_rows[0]["literal_text"],
+                            "source_refs": [runtime_constraint_rows[0]["fact_id"]],
+                        }
+                    )
+                if vllm_semantic_rows or vllm_symbol_rows:
+                    atoms.extend(
+                        [
+                            {
+                                "atom_id": "atom-vllm-upstream-semantics",
+                                "atom_kind": "fact",
+                                "summary": vllm_semantic_rows[0]["literal_text"] if vllm_semantic_rows else "已加载上游 engine/config 语义。",
+                                "source_refs": ["vllm_semantics:engine/config"],
+                            },
+                            {
+                                "atom_id": "atom-vllm-upstream-symbols",
+                                "atom_kind": "symbol",
+                                "summary": (
+                                    f"关键上游符号已索引：{vllm_symbol_rows[0]['qualname']}"
+                                    if vllm_symbol_rows
+                                    else "已建立上游 symbol 索引。"
+                                ),
+                                "source_refs": ["vllm_symbols:EngineArgs.create_engine_config"],
+                            },
+                        ]
+                    )
+                if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
+                    topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待收口"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的 native FP8 直跑路线当前不受支持；"
+                        f"设计分析阶段应先在 {topology_label} 这一拓扑前提下，"
+                        "比较 ModelSlim conversion 与 fp8-origin adaptation 两条路线，再决定后续 deployment/adaptation 入口。"
+                    )
+                elif selected_artifact is not None and selected_artifact.decision_kind.endswith("convert_then_deploy"):
+                    topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待运行时补齐"
+                    capsule_text = (
+                        f"{model_label} 在 {primary_hw} 上的设计分析已收口到 conversion + deployment 路线；"
+                        f"当前 topology anchor 是 {topology_label}，后续只需要把 conversion runbook 和 serve runbook 进一步细化。"
+                    )
+                else:
+                    capsule_text = "上游语义与当前 repo overlay 已形成可查询的设计分析上下文，可先输出路线分析 capsule。"
                 unknowns.append("仍需结合具体 work package 才能收口最终路线")
+                refs: tuple[str, ...] | list[str] = ()
+                if selected_artifact is not None and selected_artifact.artifact_refs:
+                    refs = selected_artifact.artifact_refs
+                elif selected is not None and selected.artifact_refs:
+                    refs = selected.artifact_refs
+                elif documented is not None:
+                    refs = documented.artifact_refs
+                deep_refs.extend(
+                    _strategy_deep_refs(
+                        request_id=request["request_id"],
+                        refs=refs,
+                        reason="需要查看 route choice、tool recipe 和相关基线配置",
+                    )
+                )
             else:
                 capsule_text = "当前 repo-only KB 无法充分支持该 intent，返回显式 miss。"
                 unknowns.append("intent design_lookup requires richer upstream substrate")

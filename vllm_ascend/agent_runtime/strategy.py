@@ -8,6 +8,7 @@ from typing import Any, Iterable
 from .topology import logical_npus_for_hw, requested_card_count_from_features
 
 STRATEGY_ATOM_PREFIX = "strategy:"
+ARTIFACT_ATOM_PREFIX = "artifact:"
 PARALLELISM_RE = re.compile(r"^(tp|dp|ep)_(\d+)$")
 
 
@@ -15,6 +16,8 @@ PARALLELISM_RE = re.compile(r"^(tp|dp|ep)_(\d+)$")
 class SelectorContext:
     model_base: str | None
     model_traits: tuple[str, ...]
+    features: tuple[str, ...]
+    configs: tuple[str, ...]
     hw: str | None
     physical_cards: int | None
     logical_npus: int | None
@@ -43,6 +46,35 @@ class StrategyCandidate:
     documented: bool
     unvalidated: bool
     confidence: str
+    comm_profile: str | None
+    env_profile: str | None
+
+
+@dataclass(frozen=True)
+class ArtifactCandidate:
+    decision_kind: str
+    model_base: str | None
+    model_traits: tuple[str, ...]
+    hw: str | None
+    artifact_path_kind: str
+    quantization_trait: str | None
+    tool_name: str | None
+    serving_quantization: str | None
+    summary: str
+    source_refs: tuple[str, ...]
+    artifact_refs: tuple[str, ...]
+    documented: bool
+    unvalidated: bool
+    confidence: str
+
+
+@dataclass(frozen=True)
+class ArtifactSelection:
+    selected: ArtifactCandidate
+    documented: ArtifactCandidate | None
+    alternatives: tuple[ArtifactCandidate, ...]
+    warnings: tuple[str, ...]
+    unknowns: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -87,6 +119,10 @@ def selector_context_from_selectors(selectors: dict[str, Any], runtime_soc: str 
         model_traits.add("quant_w8a8")
     if "quant_w8a8" in features or "quant_w8a8" in configs:
         model_traits.add("quant_w8a8")
+    if "quant_w4a8" in features or "quant_w4a8" in configs:
+        model_traits.add("quant_w4a8")
+    if "quant_w4a4" in features or "quant_w4a4" in configs:
+        model_traits.add("quant_w4a4")
     if "bf16" in features or "precision_bf16" in configs:
         model_traits.add("precision_bf16")
 
@@ -125,6 +161,8 @@ def selector_context_from_selectors(selectors: dict[str, Any], runtime_soc: str 
     return SelectorContext(
         model_base=base_model,
         model_traits=_sorted_traits(model_traits),
+        features=tuple(sorted(set(features))),
+        configs=tuple(sorted(set(configs))),
         hw=hw,
         physical_cards=physical_cards,
         logical_npus=logical_npus,
@@ -228,6 +266,84 @@ def _matching_baselines(context: SelectorContext, baselines: tuple[BaselineValid
     return matches
 
 
+def _requested_quantization_trait(context: SelectorContext) -> str | None:
+    for trait in ("quant_w8a8", "quant_w4a8", "quant_w4a4"):
+        if trait in context.model_traits:
+            return trait
+    return None
+
+
+def _comm_profile(
+    *,
+    logical_npus: int | None,
+    tensor_parallel: int | None,
+    data_parallel: int | None,
+    expert_parallel: int | None,
+) -> str | None:
+    if logical_npus is None:
+        return None
+    tp = tensor_parallel or 1
+    dp = data_parallel or 1
+    ep = expert_parallel or 1
+    if max(tp, dp, ep) > 1 and logical_npus > 1:
+        return "local_multi_logical_npu"
+    return "single_device"
+
+
+def _env_profile(
+    *,
+    logical_npus: int | None,
+    tensor_parallel: int | None,
+    data_parallel: int | None,
+    expert_parallel: int | None,
+    quantization_trait: str | None,
+) -> str | None:
+    comm = _comm_profile(
+        logical_npus=logical_npus,
+        tensor_parallel=tensor_parallel,
+        data_parallel=data_parallel,
+        expert_parallel=expert_parallel,
+    )
+    if comm != "local_multi_logical_npu":
+        return "single_device_env" if logical_npus else None
+    if quantization_trait:
+        return "local_tp_quantized_env"
+    return "local_tp_env"
+
+
+def _artifact_candidate(
+    *,
+    decision_kind: str,
+    context: SelectorContext,
+    artifact_path_kind: str,
+    quantization_trait: str | None,
+    tool_name: str | None,
+    serving_quantization: str | None,
+    summary: str,
+    source_refs: Iterable[str],
+    artifact_refs: Iterable[str],
+    documented: bool,
+    unvalidated: bool,
+    confidence: str,
+) -> ArtifactCandidate:
+    return ArtifactCandidate(
+        decision_kind=decision_kind,
+        model_base=context.model_base,
+        model_traits=context.model_traits,
+        hw=context.hw,
+        artifact_path_kind=artifact_path_kind,
+        quantization_trait=quantization_trait,
+        tool_name=tool_name,
+        serving_quantization=serving_quantization,
+        summary=summary,
+        source_refs=tuple(source_refs),
+        artifact_refs=tuple(artifact_refs),
+        documented=documented,
+        unvalidated=unvalidated,
+        confidence=confidence,
+    )
+
+
 def _candidate(
     *,
     decision_kind: str,
@@ -269,6 +385,19 @@ def _candidate(
         documented=documented,
         unvalidated=unvalidated,
         confidence=confidence,
+        comm_profile=_comm_profile(
+            logical_npus=logical_npus,
+            tensor_parallel=tensor_parallel,
+            data_parallel=data_parallel,
+            expert_parallel=expert_parallel,
+        ),
+        env_profile=_env_profile(
+            logical_npus=logical_npus,
+            tensor_parallel=tensor_parallel,
+            data_parallel=data_parallel,
+            expert_parallel=expert_parallel,
+            quantization_trait=_requested_quantization_trait(context),
+        ),
     )
 
 
@@ -298,6 +427,133 @@ def _documented_candidate(context: SelectorContext, baseline: BaselineValidation
     )
 
 
+def select_artifact_path(
+    context: SelectorContext,
+    baselines: tuple[BaselineValidation, ...],
+    *,
+    artifact_fact_rows: Iterable[dict[str, Any] | Any] = (),
+    tool_recipe_rows: Iterable[dict[str, Any] | Any] = (),
+    runtime_constraint_rows: Iterable[dict[str, Any] | Any] = (),
+) -> ArtifactSelection | None:
+    if context.model_base is None or context.hw is None:
+        return None
+
+    matches = _matching_baselines(context, baselines)
+    baseline = matches[0] if matches else None
+    quant_trait = _requested_quantization_trait(context)
+    features = set(context.features)
+    warnings: list[str] = []
+    unknowns: list[str] = []
+    alternatives: list[ArtifactCandidate] = []
+    tool_source_refs = [row["fact_id"] for row in tool_recipe_rows]
+    artifact_source_refs = [row["fact_id"] for row in artifact_fact_rows]
+    runtime_source_refs = [row["fact_id"] for row in runtime_constraint_rows]
+
+    documented: ArtifactCandidate | None = None
+    if baseline is not None:
+        documented = _artifact_candidate(
+            decision_kind="documented_native_deploy",
+            context=context,
+            artifact_path_kind="native_deploy",
+            quantization_trait=quant_trait,
+            tool_name=None,
+            serving_quantization="ascend" if quant_trait else None,
+            summary="documented direct deployment path for a deployable artifact",
+            source_refs=baseline.source_refs,
+            artifact_refs=baseline.artifact_refs,
+            documented=True,
+            unvalidated=False,
+            confidence="high",
+        )
+
+    native_fp8_requested = (
+        "weight_fp8_native" in features
+        and "weight_quantized" not in features
+        and "artifact_modelslim" not in features
+        and "weight_fp8_origin" not in features
+        and context.hw in {"A2", "A3"}
+    )
+    if native_fp8_requested:
+        unknowns.append("native fp8 direct deployment is unsupported on A2/A3")
+        unknowns.append("choose between ModelSlim conversion and fp8-origin adaptation before generating a runbook")
+        if quant_trait is None:
+            quant_trait = "quant_w8a8"
+        if tool_source_refs:
+            alternatives.append(
+                _artifact_candidate(
+                    decision_kind="inferred_convert_then_deploy",
+                    context=context,
+                    artifact_path_kind="convert_then_deploy",
+                    quantization_trait=quant_trait,
+                    tool_name="ModelSlim",
+                    serving_quantization="ascend",
+                    summary="ModelSlim conversion is the supported quantized-artifact route on Ascend, but this exact model recipe is inferred rather than documented.",
+                    source_refs=tool_source_refs,
+                    artifact_refs=baseline.artifact_refs if baseline else (),
+                    documented=False,
+                    unvalidated=True,
+                    confidence="medium",
+                )
+            )
+        selected = _artifact_candidate(
+            decision_kind="unsupported_requires_choice",
+            context=context,
+            artifact_path_kind="native_deploy",
+            quantization_trait="fp8_native",
+            tool_name=None,
+            serving_quantization=None,
+            summary="native fp8 direct deployment is unsupported on A2/A3 and requires a route decision before any runbook can be emitted",
+            source_refs=artifact_source_refs or runtime_source_refs,
+            artifact_refs=(),
+            documented=False,
+            unvalidated=True,
+            confidence="low",
+        )
+        return ArtifactSelection(
+            selected=selected,
+            documented=documented,
+            alternatives=tuple(alternatives),
+            warnings=tuple(warnings),
+            unknowns=tuple(unknowns),
+        )
+
+    if "artifact_modelslim" in features:
+        selected = _artifact_candidate(
+            decision_kind="inferred_convert_then_deploy",
+            context=context,
+            artifact_path_kind="convert_then_deploy",
+            quantization_trait=quant_trait or "quant_w8a8",
+            tool_name="ModelSlim",
+            serving_quantization="ascend",
+            summary="selected ModelSlim conversion + deployment route",
+            source_refs=tool_source_refs or artifact_source_refs,
+            artifact_refs=baseline.artifact_refs if baseline else (),
+            documented=False,
+            unvalidated=True,
+            confidence="medium",
+        )
+        if not tool_source_refs:
+            warnings.append("ModelSlim route is selected but tool recipe facts are sparse; keeping the runbook inferred")
+        return ArtifactSelection(
+            selected=selected,
+            documented=documented,
+            alternatives=(),
+            warnings=tuple(warnings),
+            unknowns=tuple(unknowns),
+        )
+
+    if documented is not None:
+        return ArtifactSelection(
+            selected=documented,
+            documented=documented,
+            alternatives=(),
+            warnings=tuple(warnings),
+            unknowns=tuple(unknowns),
+        )
+
+    return None
+
+
 def select_deployment_strategy(
     context: SelectorContext,
     baselines: tuple[BaselineValidation, ...],
@@ -321,6 +577,8 @@ def select_deployment_strategy(
         context = SelectorContext(
             model_base=context.model_base,
             model_traits=context.model_traits,
+            features=context.features,
+            configs=context.configs,
             hw=context.hw,
             physical_cards=context.physical_cards,
             logical_npus=logical_npus,
@@ -599,6 +857,8 @@ def build_strategy_atom(role: str, candidate: StrategyCandidate) -> dict[str, An
         f"confidence={candidate.confidence}",
         f"documented={_serialize_value(candidate.documented)}",
         f"unvalidated={_serialize_value(candidate.unvalidated)}",
+        f"comm={_serialize_value(candidate.comm_profile)}",
+        f"env={_serialize_value(candidate.env_profile)}",
     ]
     return {
         "atom_id": f"{STRATEGY_ATOM_PREFIX}{role}|" + "|".join(parts),
@@ -608,8 +868,42 @@ def build_strategy_atom(role: str, candidate: StrategyCandidate) -> dict[str, An
     }
 
 
+def build_artifact_atom(role: str, candidate: ArtifactCandidate) -> dict[str, Any]:
+    parts = [
+        f"kind={candidate.decision_kind}",
+        f"model={_serialize_value(candidate.model_base)}",
+        f"traits={_join_traits(candidate.model_traits)}",
+        f"hw={_serialize_value(candidate.hw)}",
+        f"path={_serialize_value(candidate.artifact_path_kind)}",
+        f"quant={_serialize_value(candidate.quantization_trait)}",
+        f"tool={_serialize_value(candidate.tool_name)}",
+        f"serve_quant={_serialize_value(candidate.serving_quantization)}",
+        f"confidence={candidate.confidence}",
+        f"documented={_serialize_value(candidate.documented)}",
+        f"unvalidated={_serialize_value(candidate.unvalidated)}",
+    ]
+    return {
+        "atom_id": f"{ARTIFACT_ATOM_PREFIX}{role}|" + "|".join(parts),
+        "atom_kind": "constraint",
+        "summary": candidate.summary,
+        "source_refs": list(candidate.source_refs or candidate.artifact_refs),
+    }
+
+
 def parse_strategy_atom_id(atom_id: str) -> dict[str, str]:
     if not atom_id.startswith(STRATEGY_ATOM_PREFIX):
+        return {}
+    prefix, _, payload = atom_id.partition("|")
+    values = {"role": prefix.split(":", 1)[1]}
+    for item in payload.split("|"):
+        key, _, value = item.partition("=")
+        if key:
+            values[key] = value
+    return values
+
+
+def parse_artifact_atom_id(atom_id: str) -> dict[str, str]:
+    if not atom_id.startswith(ARTIFACT_ATOM_PREFIX):
         return {}
     prefix, _, payload = atom_id.partition("|")
     values = {"role": prefix.split(":", 1)[1]}
@@ -644,3 +938,27 @@ def alternative_strategies_from_atoms(atoms: Iterable[dict[str, Any]]) -> list[d
             alternatives.append(parse_strategy_atom_id(atom_id))
     return alternatives
 
+
+def selected_artifact_from_atoms(atoms: Iterable[dict[str, Any]]) -> dict[str, str] | None:
+    for atom in atoms:
+        atom_id = atom.get("atom_id", "")
+        if atom_id.startswith("artifact:selected|"):
+            return parse_artifact_atom_id(atom_id)
+    return None
+
+
+def documented_artifact_from_atoms(atoms: Iterable[dict[str, Any]]) -> dict[str, str] | None:
+    for atom in atoms:
+        atom_id = atom.get("atom_id", "")
+        if atom_id.startswith("artifact:documented|"):
+            return parse_artifact_atom_id(atom_id)
+    return None
+
+
+def alternative_artifacts_from_atoms(atoms: Iterable[dict[str, Any]]) -> list[dict[str, str]]:
+    alternatives: list[dict[str, str]] = []
+    for atom in atoms:
+        atom_id = atom.get("atom_id", "")
+        if atom_id.startswith("artifact:alternative|"):
+            alternatives.append(parse_artifact_atom_id(atom_id))
+    return alternatives
