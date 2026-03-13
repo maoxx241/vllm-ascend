@@ -77,6 +77,17 @@ def extract_repo_semantics(root: Path | None = None, resolve_result: dict[str, A
                 json.dumps({"summary": "Ascend runtime config and prefill/decode parallel ratios"}, ensure_ascii=False),
             ),
             (
+                "source-repo-cpu-binding",
+                "repo_file",
+                "vllm_ascend/cpu_binding.py",
+                None,
+                repo_sha,
+                paired_vllm_ref,
+                "repo_semantics",
+                None,
+                json.dumps({"summary": "A3 logical NPU numbering and physical-card topology mapping"}, ensure_ascii=False),
+            ),
+            (
                 "source-doc-qwen3-dense",
                 "repo_doc",
                 "docs/source/tutorials/models/Qwen3-Dense.md",
@@ -204,15 +215,29 @@ def extract_repo_semantics(root: Path | None = None, resolve_result: dict[str, A
                 json.dumps({}),
             ),
             (
+                "fact-a3-card-die-topology",
+                "entity-hw-a3",
+                "topology_mapping",
+                None,
+                "On A3, logical npu_id is computed as card_id*2 + chip_id, so one physical card exposes 2 logical NPUs (dies).",
+                0.97,
+                None,
+                None,
+                json.dumps({"hw": ["A3"], "physical_card_to_logical_npus": 2}, ensure_ascii=False),
+                "source-repo-cpu-binding",
+                "repo_semantics",
+                json.dumps({}),
+            ),
+            (
                 "fact-qwen3-32b-a3-deployment",
                 "entity-model-qwen3-32b",
                 "deployment_baseline",
                 "entity-hw-a3",
-                "Qwen3-32B on A3 is documented around a TP4 / 4-NPU baseline; single-card is outside the documented launch path.",
+                "Qwen3-32B on A3 is documented around a TP4 / 2-card / 4-logical-NPU baseline; requests for other A3 card counts should first convert 1 card to 2 logical NPUs.",
                 0.94,
                 None,
                 None,
-                json.dumps({"hw": ["A3"], "configs": ["tp4", "bf16"]}, ensure_ascii=False),
+                json.dumps({"hw": ["A3"], "configs": ["tp4", "bf16"], "physical_cards": 2, "logical_npus": 4}, ensure_ascii=False),
                 "source-doc-qwen3-dense",
                 "repo_semantics",
                 json.dumps({}),
@@ -222,11 +247,11 @@ def extract_repo_semantics(root: Path | None = None, resolve_result: dict[str, A
                 "entity-model-qwen3-32b-w8a8",
                 "deployment_baseline",
                 "entity-hw-a3",
-                "Qwen3-32B-W8A8 on A3 is documented around a TP4 / 4-NPU baseline; single-card is outside the documented launch path.",
+                "Qwen3-32B-W8A8 on A3 is documented around a TP4 / 2-card / 4-logical-NPU baseline; requests for other A3 card counts should first convert 1 card to 2 logical NPUs.",
                 0.95,
                 None,
                 None,
-                json.dumps({"hw": ["A3"], "configs": ["tp4", "w8a8"]}, ensure_ascii=False),
+                json.dumps({"hw": ["A3"], "configs": ["tp4", "w8a8"], "physical_cards": 2, "logical_npus": 4}, ensure_ascii=False),
                 "source-doc-qwen3-dense",
                 "repo_semantics",
                 json.dumps({}),
@@ -725,7 +750,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                 paired_vllm_ref,
                 "validation",
                 None,
-                json.dumps({"summary": "Qwen3-32B BF16 TP4 single-node/nightly baseline"}, ensure_ascii=False),
+                json.dumps({"summary": "Qwen3-32B BF16 A3 2-card / 4-logical-NPU TP4 single-node/nightly baseline"}, ensure_ascii=False),
             ),
             (
                 "source-val-qwen3-32b-int8-a3",
@@ -736,7 +761,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                 paired_vllm_ref,
                 "validation",
                 None,
-                json.dumps({"summary": "Qwen3-32B-W8A8 A3 single-node/nightly baseline"}, ensure_ascii=False),
+                json.dumps({"summary": "Qwen3-32B-W8A8 A3 2-card / 4-logical-NPU TP4 single-node/nightly baseline"}, ensure_ascii=False),
             ),
             (
                 "source-val-deepseek-v3-a3",
@@ -801,7 +826,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                 "model",
                 "documented_baseline",
                 "pass",
-                json.dumps({"hw": "A3", "config": "tp4", "topology": "4_npu"}, ensure_ascii=False),
+                json.dumps({"hw": "A3", "config": "tp4", "topology": "2_cards_4_logical_npus", "physical_cards": 2, "logical_npus": 4}, ensure_ascii=False),
                 json.dumps(
                     [
                         "docs/source/tutorials/models/Qwen3-Dense.md",
@@ -809,7 +834,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                     ],
                     ensure_ascii=False,
                 ),
-                "documented A3 deployment baseline for Qwen3-32B",
+                "documented A3 2-card / 4-logical-NPU deployment baseline for Qwen3-32B",
                 "source-val-qwen3-32b-a3",
                 json.dumps({}),
             ),
@@ -819,7 +844,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                 "model",
                 "documented_baseline",
                 "pass",
-                json.dumps({"hw": "A3", "config": "tp4", "topology": "4_npu"}, ensure_ascii=False),
+                json.dumps({"hw": "A3", "config": "tp4", "topology": "2_cards_4_logical_npus", "physical_cards": 2, "logical_npus": 4}, ensure_ascii=False),
                 json.dumps(
                     [
                         "docs/source/tutorials/models/Qwen3-Dense.md",
@@ -827,7 +852,7 @@ def extract_minimal_validation(root: Path | None = None, resolve_result: dict[st
                     ],
                     ensure_ascii=False,
                 ),
-                "documented A3 deployment baseline for Qwen3-32B-W8A8",
+                "documented A3 2-card / 4-logical-NPU deployment baseline for Qwen3-32B-W8A8",
                 "source-val-qwen3-32b-int8-a3",
                 json.dumps({}),
             ),
@@ -912,6 +937,23 @@ def extract_hw_soc_detail(resolve_result: dict[str, Any]) -> ShardRows:
             json.dumps({"soc": soc}, ensure_ascii=False),
         )
     )
+    if soc == "A3":
+        shard["facts"].append(
+            (
+                "fact-a3-card-die-topology",
+                "entity-hw-a3",
+                "soc_profile",
+                None,
+                "A3 topology uses logical npu_id = card_id*2 + chip_id, so one physical card maps to 2 logical NPUs (dies).",
+                1.0,
+                None,
+                None,
+                json.dumps({"soc": soc, "physical_card_to_logical_npus": 2}, ensure_ascii=False),
+                "source-hw-soc-detail",
+                "hw_soc_detail",
+                json.dumps({}),
+            )
+        )
     shard["facts"].append(
         (
             f"fact-hw-soc-{soc.lower()}",

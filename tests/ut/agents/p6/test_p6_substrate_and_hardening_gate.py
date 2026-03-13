@@ -154,6 +154,27 @@ def test_p6_qwen3_dense_a3_single_card_request_stays_qwen3_32b() -> None:
     assert result["selector_plan"]["task_family"] == "deployment_execution"
     assert result["selector_seed"]["normalized_entities"]["models"] == ["qwen3-32b"]
     assert result["selector_seed"]["normalized_entities"]["hw"] == ["A3"]
+    assert "single_card" in result["selector_seed"]["normalized_entities"]["features"]
+    assert "cards_1" in result["selector_seed"]["normalized_entities"]["features"]
+
+
+def test_p6_qwen3_dense_a3_four_card_request_tracks_physical_cards() -> None:
+    result = vllm_ascend_assistant(
+        RawRequest(
+            request_id="req-p6-qwen-dense-4card-deploy",
+            user_text="帮我看看qwen3 32b在A3 4卡上怎么部署",
+            attachment_refs=[],
+            inline_paths=[],
+            inline_symbols=[],
+            inline_errors=[],
+            created_at_hint="2026-03-13T14:40:02Z",
+        )
+    )
+    assert result["selector_plan"]["task_family"] == "deployment_execution"
+    assert result["selector_seed"]["normalized_entities"]["models"] == ["qwen3-32b"]
+    assert result["selector_seed"]["normalized_entities"]["hw"] == ["A3"]
+    assert "cards_4" in result["selector_seed"]["normalized_entities"]["features"]
+    assert "tp4" not in result["selector_seed"]["normalized_entities"]["features"]
 
 
 def test_p6_model_expectation_pack_uses_deepseek_a3_envelope(a3_resolve_result, agent_repo_root, tmp_path) -> None:
@@ -311,16 +332,93 @@ def test_p6_qwen3_dense_pack_infers_single_card_attempt_with_warning(a3_resolve_
     )
     lower = response["capsule_text"].lower()
     assert "qwen3-32b" in lower
-    assert "tp4" in lower
+    assert "2 logical npus" in lower or "2 dies" in lower
     assert "single-card" in lower or "单卡" in response["capsule_text"]
     assert card["notes"] is not None
     assert "unverified" in card["notes"].lower() or "未验证" in card["notes"]
     assert "vllm serve" in card["notes"]
-    assert "--tensor-parallel-size 1" in card["notes"]
-    assert "ASCEND_RT_VISIBLE_DEVICES=0" in card["notes"]
+    assert "--tensor-parallel-size 2" in card["notes"]
+    assert "ASCEND_RT_VISIBLE_DEVICES=0,1" in card["notes"]
     assert "--quantization ascend" not in card["notes"]
     assert "single-card" in card["notes"].lower() or "单卡" in card["notes"]
-    assert "tp4 / 4-npu" in card["notes"].lower()
+    assert "1 card = 2 logical npus" in card["notes"].lower() or "1 card = 2 dies" in card["notes"].lower()
+    assert "tp4 / 2 cards / 4 logical npus" in card["notes"].lower()
+
+
+def test_p6_qwen3_dense_pack_infers_four_card_attempt_with_a3_logical_npus(
+    a3_resolve_result, agent_repo_root, tmp_path
+) -> None:
+    emit_sqlite = tmp_path / "a3-dense-4card.sqlite"
+    build_local(agent_repo_root, resolve_result=a3_resolve_result, emit_sqlite=emit_sqlite)
+    response = pack(
+        agent_repo_root,
+        request={
+            "schema_version": "kb-pack-request/v2",
+            "request_id": "req-p6-qwen-dense-4card-pack",
+            "created_at": "2026-03-13T14:40:05Z",
+            "intent": "deployment_lookup",
+            "repo_root": ".",
+            "resolve_policy": "auto",
+            "logical_domains": ["deployment_config", "validation_evidence", "ascend_foundation"],
+            "physical_shard_hints": ["validation", "repo_semantics", "hw_runtime_caps", "hw_soc_detail"],
+            "selectors": {
+                "files": [],
+                "symbols": [],
+                "entities": [],
+                "errors": [],
+                "models": ["qwen3-32b"],
+                "features": ["cards_4"],
+                "hw": ["A3"],
+                "commits": [],
+                "prs": [],
+                "versions": [],
+                "configs": [],
+            },
+            "must_have": ["deployment baseline", "4-card support"],
+            "nice_to_have": ["launch command"],
+            "evidence_refs": [],
+            "budget_token_cap": 1500,
+            "max_atoms": 10,
+            "max_hops": 1,
+            "include_evidence_stubs": True,
+            "stop_after_first_sufficient": True,
+            "emit_path": ".agents/kb/local/capsules/req-p6-qwen-dense-4card-pack.json",
+        },
+        resolve_result=a3_resolve_result,
+        merged_pack=emit_sqlite,
+    )
+    card = deployment_artifact_packager(
+        {
+            "request_id": "req-p6-qwen-dense-4card-pack",
+            "plan_id": "plan-req-p6-qwen-dense-4card-pack",
+            "task_family": "deployment_execution",
+            "work_package_id": "wp-qwen3-dense-a3-4card-script",
+            "selectors": {
+                "files": [],
+                "symbols": [],
+                "entities": [],
+                "errors": [],
+                "models": ["qwen3-32b"],
+                "features": ["cards_4"],
+                "hw": ["A3"],
+                "commits": [],
+                "prs": [],
+                "versions": [],
+                "configs": [],
+            },
+        },
+        response,
+    )
+    lower = response["capsule_text"].lower()
+    assert "4 cards" in lower or "4-card" in lower or "4卡" in response["capsule_text"]
+    assert "8 logical npus" in lower or "8 dies" in lower
+    assert "tp4 / 2 cards / 4 logical npus" in lower
+    assert card["notes"] is not None
+    assert "unverified" in card["notes"].lower() or "未验证" in card["notes"]
+    assert "--tensor-parallel-size 8" in card["notes"]
+    assert "ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7" in card["notes"]
+    assert "--tensor-parallel-size 4" not in card["notes"]
+    assert "4 cards = 8 logical npus" in card["notes"].lower() or "4 cards = 8 dies" in card["notes"].lower()
 
 
 def test_p6_qwen3_dense_pack_defaults_to_documented_best_perf_when_topology_unspecified(
@@ -388,9 +486,11 @@ def test_p6_qwen3_dense_pack_defaults_to_documented_best_perf_when_topology_unsp
         response,
     )
     assert "tp4" in response["capsule_text"].lower()
+    assert "2 cards" in response["capsule_text"].lower() or "4 logical npus" in response["capsule_text"].lower()
     assert card["notes"] is not None
     assert "--tensor-parallel-size 4" in card["notes"]
     assert "--tensor-parallel-size 1" not in card["notes"]
+    assert "--tensor-parallel-size 8" not in card["notes"]
 
 
 def test_p6_skill_docs_force_runtime_first_for_deployment(agent_repo_root) -> None:
@@ -407,3 +507,4 @@ def test_p6_skill_docs_force_runtime_first_for_deployment(agent_repo_root) -> No
     assert "Do not silently substitute" in deployment_skill
     assert "single-card" in deployment_skill
     assert "best-performance baseline" in deployment_skill
+    assert "1 card = 2 logical NPUs on A3" in deployment_skill

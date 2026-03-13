@@ -18,6 +18,7 @@ from .extractors import (extract_cann_op_constraints,
                          extract_vllm_release_delta, extract_vllm_semantics,
                          extract_vllm_symbols, merge_shard_rows)
 from .paths import kb_root, repo_root
+from .topology import logical_npus_for_hw, requested_card_count_from_features
 
 TABLE_COLUMNS: dict[str, list[str]] = {
     "sources": [
@@ -153,6 +154,14 @@ def _rows_for_selected_shards(root: Path, resolve_result: dict[str, Any]) -> dic
 
 def _pair_shards_available(root: Path, context: dict[str, Any]) -> bool:
     return context["paired_vllm_ref"] != "unknown" and (root.parent / "vllm").exists()
+
+
+def _documented_qwen3_a3_topology() -> dict[str, int]:
+    return {
+        "physical_cards": 2,
+        "logical_npus": 4,
+        "tensor_parallel": 4,
+    }
 
 
 def resolve(
@@ -357,7 +366,8 @@ def pack(
         primary_hw = selectors.get("hw", [resolve_result["runtime_tuple"].get("soc", "unknown")])[0]
         base_model = primary_model[:-5] if primary_model and primary_model.endswith("-w8a8") else primary_model
         quantized_variant = bool(primary_model and primary_model.endswith("-w8a8"))
-        requested_single_card = "single_card" in selectors.get("features", [])
+        requested_card_count = requested_card_count_from_features(selectors.get("features", []))
+        requested_logical_npus = logical_npus_for_hw(primary_hw, requested_card_count)
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
@@ -370,23 +380,32 @@ def pack(
             if base_model == "qwen3-32b" and primary_hw == "A3":
                 model_label = "Qwen3-32B-W8A8" if quantized_variant else "Qwen3-32B"
                 validation_rows = qwen_a3_validation_rows if quantized_variant else qwen_a3_dense_validation_rows
-                if requested_single_card:
+                documented_topology = _documented_qwen3_a3_topology()
+                documented_cards = documented_topology["physical_cards"]
+                documented_logical_npus = documented_topology["logical_npus"]
+                documented_tp = documented_topology["tensor_parallel"]
+                requested_topology_matches_doc = requested_card_count == documented_cards
+                if requested_card_count is not None and not requested_topology_matches_doc:
+                    topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count} cards"
                     capsule_text = (
-                        f"{model_label} 在 A3 上的单卡请求未命中文档化基线；"
-                        "当前文档化的最优性能版本是 TP4 / 4-NPU。"
-                        "如果必须保持单卡拓扑，只能给出未验证的推断脚本，并明确存在 OOM 或性能显著退化风险。"
+                        f"{model_label} 在 A3 上收到 {topology_label} 请求（{requested_card_count} 卡）；"
+                        f"A3 上 1 card = 2 logical NPUs，因此该请求对应 {requested_logical_npus} logical NPUs。"
+                        f"当前文档化基线是 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs。"
+                        "如果必须保持当前物理卡数拓扑，只能返回未验证的推断脚本，并明确列出容量或性能风险。"
                     )
-                    warnings.append("requested single-card topology is undocumented; returning an inferred script with explicit risk")
+                    warnings.append(
+                        "requested A3 card topology does not match the documented baseline; returning an inferred script with explicit risk"
+                    )
                     unknowns.extend(
                         [
-                            "single-card path is unvalidated on the current repo/doc matrix",
-                            "单卡 BF16/W8A8 是否能在目标负载下装入显存仍未知",
-                            "max_model_len 和 max_num_batched_tokens 只能做保守推断",
+                            f"{requested_card_count}-card path is unvalidated on the current repo/doc matrix",
+                            "目标负载下的实际吞吐和稳定性仍未知",
+                            "当前脚本是按物理卡数推断出的 logical NPU 拓扑，不是 nightly 已验证配置",
                         ]
                     )
                 else:
                     capsule_text = (
-                        f"{model_label} 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
+                        f"{model_label} 在 A3 上的文档化部署基线围绕 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs 展开；"
                         "若用户未指定拓扑，应默认返回该最优性能版本。"
                     )
                 atoms.extend(
@@ -395,8 +414,9 @@ def pack(
                             "atom_id": f"atom-{primary_model}-a3-deploy",
                             "atom_kind": "fact",
                             "summary": (
-                                f"{model_label} on A3 follows a TP4 / 4-NPU deployment baseline "
-                                "and not a documented single-card path."
+                                f"{model_label} on A3 follows a TP{documented_tp} / {documented_cards}-card / "
+                                f"{documented_logical_npus}-logical-NPU deployment baseline, and requests for other "
+                                "physical card counts must first convert A3 cards to logical NPUs."
                             ),
                             "source_refs": [f"repo_semantics:{primary_model}:a3"],
                         },
@@ -412,6 +432,18 @@ def pack(
                         },
                     ]
                 )
+                if requested_card_count is not None and requested_logical_npus is not None:
+                    atoms.append(
+                        {
+                            "atom_id": f"atom-{primary_model}-a3-requested-topology",
+                            "atom_kind": "fact",
+                            "summary": (
+                                f"Requested A3 topology uses {requested_card_count} physical cards, which expands to "
+                                f"{requested_logical_npus} logical NPUs because A3 maps 1 card to 2 dies."
+                            ),
+                            "source_refs": ["hw_soc_detail:runtime"],
+                        }
+                    )
                 if substrate_rows:
                     atoms.append(
                         {
@@ -421,15 +453,17 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
-                if not requested_single_card:
-                    unknowns.append("若用户对拓扑未指定，应默认选择 TP4 / 4-NPU 最优性能基线")
+                if requested_card_count is None:
+                    unknowns.append(
+                        f"若用户对拓扑未指定，应默认选择 TP{documented_tp} / {documented_cards} cards / {documented_logical_npus} logical NPUs 最优性能基线"
+                    )
                 deep_refs.extend(
                     [
                         {
                             "stub_id": "stub-qwen3-dense-a3",
                             "source_ref": "docs/source/tutorials/models/Qwen3-Dense.md",
                             "estimated_tokens": 260,
-                            "reason": "需要查看 A3 TP4 官方部署命令和参数细节",
+                            "reason": "需要查看 A3 2-card / 4-logical-NPU TP4 官方部署命令和参数细节",
                         },
                             {
                                 "stub_id": "stub-qwen3-32b-a3-config",
@@ -439,7 +473,7 @@ def pack(
                                     else "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
                                 ),
                                 "estimated_tokens": 220,
-                                "reason": "需要查看 nightly single-node A3 baseline 配置",
+                                "reason": "需要查看 nightly A3 2-card / 4-logical-NPU baseline 配置",
                             },
                     ]
                 )

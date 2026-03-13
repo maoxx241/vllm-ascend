@@ -8,6 +8,7 @@ from .bundle import build_continuation_state
 from .contracts import copy_example, now_utc, validate_instance
 from .kb import build_local, pack, resolve
 from .paths import kb_root, repo_root
+from .topology import detect_requested_card_count
 
 
 class RawRequest(NamedTuple):
@@ -91,6 +92,11 @@ def _detect_features(text: str) -> list[str]:
     for feature, pattern in FEATURE_PATTERNS.items():
         if pattern.search(text):
             hits.append(feature)
+    requested_cards = detect_requested_card_count(text)
+    if requested_cards is not None:
+        if requested_cards == 1 and "single_card" not in hits:
+            hits.append("single_card")
+        hits.append(f"cards_{requested_cards}")
     return hits
 
 
@@ -237,6 +243,10 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
         execution_mode = "direct_atomic_workflow"
         analysis_depth = "lightweight_design_note"
         deliverable_hint = deliverable
+    normalized_features = features
+    if not normalized_features and kind == "deployment":
+        normalized_features = []
+    feature_entities = normalized_features if normalized_features or kind == "deployment" else seed["normalized_entities"]["features"]
     seed.update(
         {
             "request_id": raw_request.request_id,
@@ -254,7 +264,7 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
                 "entities": seed["normalized_entities"]["entities"],
                 "errors": raw_request.inline_errors,
                 "models": models or seed["normalized_entities"]["models"],
-                "features": features or seed["normalized_entities"]["features"],
+                "features": feature_entities,
                 "hw": hw or seed["normalized_entities"]["hw"],
                 "commits": [],
                 "prs": [],
@@ -305,6 +315,14 @@ def build_selector_seed(raw_request: RawRequest, root: Any | None = None) -> dic
             ),
         }
     )
+    hard_constraints = [
+        constraint
+        for constraint in seed["constraints"]["hard_constraints"]
+        if not constraint.startswith("目标硬件是 ")
+    ]
+    if hw:
+        hard_constraints.append(f"目标硬件是 {hw[0]}")
+    seed["constraints"]["hard_constraints"] = hard_constraints
     validate_instance(seed, "selector-seed.schema.json", root=root)
     return seed
 

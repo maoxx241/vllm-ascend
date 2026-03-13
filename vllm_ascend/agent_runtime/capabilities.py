@@ -4,6 +4,7 @@ from typing import Any
 
 from .contracts import copy_example, now_utc, validate_instance
 from .paths import repo_root
+from .topology import logical_npus_for_hw, requested_card_count_from_features, visible_devices
 
 
 def _base_card(template_name: str, selector_plan: dict[str, Any], atomic_skill: str, root: Any | None = None) -> dict[str, Any]:
@@ -38,6 +39,93 @@ def _apply_pack(card: dict[str, Any], pack_response: dict[str, Any]) -> dict[str
     return card
 
 
+def _documented_qwen3_a3_topology() -> dict[str, int]:
+    return {
+        "physical_cards": 2,
+        "logical_npus": 4,
+        "tensor_parallel": 4,
+    }
+
+
+def _render_qwen3_a3_launch_block(
+    *,
+    model_path: str,
+    model_name: str,
+    logical_npus: int,
+    is_quantized: bool,
+    conservative: bool,
+) -> str:
+    quant_line = '  --quantization ascend \\\n' if is_quantized else ""
+    env_lines = [
+        f"export ASCEND_RT_VISIBLE_DEVICES={visible_devices(logical_npus)}",
+        "export TASK_QUEUE_ENABLE=1",
+    ]
+    if not conservative and not is_quantized:
+        env_lines.append('export OMP_PROC_BIND="false"')
+    env_lines.append('export HCCL_OP_EXPANSION_MODE="AIV"')
+    if is_quantized and not conservative:
+        env_lines.append("export VLLM_ASCEND_ENABLE_FLASHCOMM1=1")
+    if not is_quantized and not conservative:
+        env_lines.append("export PAGED_ATTENTION_MASK_LEN=5500")
+
+    lines = [*env_lines, f"vllm serve {model_path} \\", f"  --served-model-name {model_name} \\"]
+    if is_quantized:
+        lines.extend(
+            [
+                "  --trust-remote-code \\",
+                "  --async-scheduling \\",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "  --no-enable-prefix-caching \\",
+            ]
+        )
+    if quant_line:
+        lines.append(quant_line.rstrip())
+    lines.extend(
+        [
+            "  --distributed-executor-backend mp \\",
+            f"  --tensor-parallel-size {logical_npus} \\",
+        ]
+    )
+    if not is_quantized:
+        lines.append("  --trust-remote-code \\")
+    if conservative:
+        lines.extend(
+            [
+                "  --enforce-eager \\",
+                "  --max-model-len 4096 \\",
+                "  --max-num-batched-tokens 256 \\",
+                "  --max-num-seqs 1 \\",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                f"  --max-model-len {'40960' if is_quantized else '36864'} \\",
+                f"  --max-num-batched-tokens {'40960' if is_quantized else '36864'} \\",
+            ]
+        )
+        if is_quantized:
+            lines.append("  --reasoning-parser qwen3 \\")
+    lines.extend(
+        [
+            "  --block-size 128 \\",
+            "  --gpu-memory-utilization 0.9 \\",
+            "  --port 8113 \\",
+        ]
+    )
+    if is_quantized:
+        lines.append(
+            "  --additional-config '{\"weight_prefetch_config\":{\"enabled\":true}}'"
+        )
+    else:
+        lines.append("  --additional-config '{\"enable_weight_nz_layout\":true}'")
+    return "```bash\n" + "\n".join(lines) + "\n```"
+
+
 def _deployment_notes(selector_plan: dict[str, Any]) -> str | None:
     selectors = selector_plan.get("selectors", {})
     models = selectors.get("models", [])
@@ -54,79 +142,54 @@ def _deployment_notes(selector_plan: dict[str, Any]) -> str | None:
     is_quantized = primary_model == "qwen3-32b-w8a8"
     model_path = "/model/Qwen3-32B-W8A8" if is_quantized else "/model/Qwen3-32B"
     model_name = "qwen3-32b-w8a8" if is_quantized else "qwen3-32b"
-    if "single_card" in features:
-        quant_line = '  --quantization ascend \\\n' if is_quantized else ""
+    documented_topology = _documented_qwen3_a3_topology()
+    requested_card_count = requested_card_count_from_features(features)
+    requested_logical_npus = logical_npus_for_hw(primary_hw, requested_card_count)
+    if requested_card_count is not None and requested_card_count != documented_topology["physical_cards"]:
+        conservative = requested_logical_npus is not None and requested_logical_npus < documented_topology["logical_npus"]
+        assert requested_logical_npus is not None
+        topology_label = "single-card" if requested_card_count == 1 else f"{requested_card_count}-card"
+        requested_card_phrase = "1 card" if requested_card_count == 1 else f"{requested_card_count} cards"
         return (
-            "unverified single-card attempt for the requested A3 topology. "
-            "The documented best-performance baseline is TP4 / 4-NPU, but the user explicitly asked for single-card, "
-            "so the script below keeps TP1 and uses conservative caps. It may still OOM or underperform.\n\n"
-            "```bash\n"
-            "export ASCEND_RT_VISIBLE_DEVICES=0\n"
-            "export TASK_QUEUE_ENABLE=1\n"
-            "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
-            f"vllm serve {model_path} \\\n"
-            f"  --served-model-name {model_name} \\\n"
-            "  --trust-remote-code \\\n"
-            f"{quant_line}"
-            "  --distributed-executor-backend mp \\\n"
-            "  --tensor-parallel-size 1 \\\n"
-            "  --enforce-eager \\\n"
-            "  --max-model-len 4096 \\\n"
-            "  --max-num-batched-tokens 256 \\\n"
-            "  --max-num-seqs 1 \\\n"
-            "  --block-size 128 \\\n"
-            "  --gpu-memory-utilization 0.9 \\\n"
-            "  --port 8113 \\\n"
-            "  --additional-config '{\"enable_weight_nz_layout\":true}'\n"
-            "```\n\n"
-            "documented best-performance baseline for comparison: TP4 / 4-NPU on A3."
+            f"unverified {topology_label} attempt for the requested A3 topology. "
+            f"On A3, 1 card = 2 logical NPUs, so {requested_card_phrase} = {requested_logical_npus} logical NPUs. "
+            "The documented best-performance baseline is TP4 / 2 cards / 4 logical NPUs. "
+            "The script below keeps the requested physical-card topology instead of silently collapsing it to the documented baseline, "
+            "so it must be treated as inferred and unvalidated.\n\n"
+            + _render_qwen3_a3_launch_block(
+                model_path=model_path,
+                model_name=model_name,
+                logical_npus=requested_logical_npus,
+                is_quantized=is_quantized,
+                conservative=conservative,
+            )
+            + "\n\n"
+            "documented best-performance baseline for comparison: TP4 / 2 cards / 4 logical NPUs on A3."
         )
 
     if is_quantized:
         return (
-            "documented best-performance baseline for Qwen3-32B-W8A8 on A3:\n\n"
-            "```bash\n"
-            "export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3\n"
-            "export TASK_QUEUE_ENABLE=1\n"
-            "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
-            "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1\n"
-            f"vllm serve {model_path} \\\n"
-            f"  --served-model-name {model_name} \\\n"
-            "  --trust-remote-code \\\n"
-            "  --async-scheduling \\\n"
-            "  --quantization ascend \\\n"
-            "  --distributed-executor-backend mp \\\n"
-            "  --tensor-parallel-size 4 \\\n"
-            "  --max-model-len 40960 \\\n"
-            "  --max-num-batched-tokens 40960 \\\n"
-            "  --block-size 128 \\\n"
-            "  --gpu-memory-utilization 0.9 \\\n"
-            "  --port 8113 \\\n"
-            "  --reasoning-parser qwen3 \\\n"
-            "  --additional-config '{\"weight_prefetch_config\":{\"enabled\":true}}'\n"
-            "```"
+            "documented best-performance baseline for Qwen3-32B-W8A8 on A3 "
+            "(TP4 / 2 cards / 4 logical NPUs):\n\n"
+            + _render_qwen3_a3_launch_block(
+                model_path=model_path,
+                model_name=model_name,
+                logical_npus=documented_topology["logical_npus"],
+                is_quantized=True,
+                conservative=False,
+            )
         )
 
     return (
-        "documented best-performance baseline for Qwen3-32B on A3:\n\n"
-        "```bash\n"
-        "export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3\n"
-        "export TASK_QUEUE_ENABLE=1\n"
-        "export OMP_PROC_BIND=\"false\"\n"
-        "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
-        "export PAGED_ATTENTION_MASK_LEN=5500\n"
-        f"vllm serve {model_path} \\\n"
-        f"  --served-model-name {model_name} \\\n"
-        "  --no-enable-prefix-caching \\\n"
-        "  --tensor-parallel-size 4 \\\n"
-        "  --port 8113 \\\n"
-        "  --max-model-len 36864 \\\n"
-        "  --max-num-batched-tokens 36864 \\\n"
-        "  --block-size 128 \\\n"
-        "  --trust-remote-code \\\n"
-        "  --gpu-memory-utilization 0.9 \\\n"
-        "  --additional-config '{\"enable_weight_nz_layout\":true}'\n"
-        "```"
+        "documented best-performance baseline for Qwen3-32B on A3 "
+        "(TP4 / 2 cards / 4 logical NPUs):\n\n"
+        + _render_qwen3_a3_launch_block(
+            model_path=model_path,
+            model_name=model_name,
+            logical_npus=documented_topology["logical_npus"],
+            is_quantized=False,
+            conservative=False,
+        )
     )
 
 
@@ -191,9 +254,10 @@ def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: d
     )
     notes = _deployment_notes(selector_plan)
     if notes:
-        if "single_card" in selector_plan.get("selectors", {}).get("features", []):
+        requested_card_count = requested_card_count_from_features(selector_plan.get("selectors", {}).get("features", []))
+        if requested_card_count is not None and requested_card_count != _documented_qwen3_a3_topology()["physical_cards"]:
             card["deliverable_fragment_summary"] = (
-                "单卡请求未命中文档化基线；已基于用户要求返回未验证的单卡推断脚本，并附带文档化 TP4 / 4-NPU 对照基线。"
+                f"{requested_card_count} 卡请求未命中文档化基线；已基于用户要求返回未验证的 A3 拓扑推断脚本，并附带文档化 TP4 / 2 cards / 4 logical NPUs 对照基线。"
             )
         card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)

@@ -15,3 +15,7 @@ If the request does not match a documented baseline, analyze the gap and return
 an inferred script that still satisfies the user's requested topology, such as
 `single-card`, but mark it as unvalidated and list the risks. If the user did
 not specify topology or priority, default to the documented best-performance baseline.
+
+On A3, 1 card = 2 logical NPUs on A3. Translate physical card counts to
+logical NPUs before proposing `ASCEND_RT_VISIBLE_DEVICES` or
+`--tensor-parallel-size`. Do not collapse `4 cards` into `TP4`.
