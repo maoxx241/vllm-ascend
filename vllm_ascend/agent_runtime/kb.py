@@ -355,6 +355,9 @@ def pack(
         selectors = request["selectors"]
         primary_model = selectors.get("models", [None])[0]
         primary_hw = selectors.get("hw", [resolve_result["runtime_tuple"].get("soc", "unknown")])[0]
+        base_model = primary_model[:-5] if primary_model and primary_model.endswith("-w8a8") else primary_model
+        quantized_variant = bool(primary_model and primary_model.endswith("-w8a8"))
+        requested_single_card = "single_card" in selectors.get("features", [])
 
         warnings = list(resolve_result["warnings"])
         unknowns: list[str] = []
@@ -364,14 +367,28 @@ def pack(
         evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
-            if primary_model in {"qwen3-32b", "qwen3-32b-w8a8"} and primary_hw == "A3":
-                is_quantized = primary_model == "qwen3-32b-w8a8"
-                model_label = "Qwen3-32B-W8A8" if is_quantized else "Qwen3-32B"
-                validation_rows = qwen_a3_validation_rows if is_quantized else qwen_a3_dense_validation_rows
-                capsule_text = (
-                    f"{model_label} 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
-                    "单卡不在当前文档化路径内，应先按 A3 TP4 基线交付部署命令与约束。"
-                )
+            if base_model == "qwen3-32b" and primary_hw == "A3":
+                model_label = "Qwen3-32B-W8A8" if quantized_variant else "Qwen3-32B"
+                validation_rows = qwen_a3_validation_rows if quantized_variant else qwen_a3_dense_validation_rows
+                if requested_single_card:
+                    capsule_text = (
+                        f"{model_label} 在 A3 上的单卡请求未命中文档化基线；"
+                        "当前文档化的最优性能版本是 TP4 / 4-NPU。"
+                        "如果必须保持单卡拓扑，只能给出未验证的推断脚本，并明确存在 OOM 或性能显著退化风险。"
+                    )
+                    warnings.append("requested single-card topology is undocumented; returning an inferred script with explicit risk")
+                    unknowns.extend(
+                        [
+                            "single-card path is unvalidated on the current repo/doc matrix",
+                            "单卡 BF16/W8A8 是否能在目标负载下装入显存仍未知",
+                            "max_model_len 和 max_num_batched_tokens 只能做保守推断",
+                        ]
+                    )
+                else:
+                    capsule_text = (
+                        f"{model_label} 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
+                        "若用户未指定拓扑，应默认返回该最优性能版本。"
+                    )
                 atoms.extend(
                     [
                         {
@@ -404,7 +421,8 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
-                unknowns.append("若必须单卡，需要额外确认非文档化降配路径是否可接受")
+                if not requested_single_card:
+                    unknowns.append("若用户对拓扑未指定，应默认选择 TP4 / 4-NPU 最优性能基线")
                 deep_refs.extend(
                     [
                         {
@@ -413,16 +431,16 @@ def pack(
                             "estimated_tokens": 260,
                             "reason": "需要查看 A3 TP4 官方部署命令和参数细节",
                         },
-                        {
-                            "stub_id": "stub-qwen3-32b-a3-config",
-                            "source_ref": (
-                                "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
-                                if is_quantized
-                                else "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
-                            ),
-                            "estimated_tokens": 220,
-                            "reason": "需要查看 nightly single-node A3 baseline 配置",
-                        },
+                            {
+                                "stub_id": "stub-qwen3-32b-a3-config",
+                                "source_ref": (
+                                    "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
+                                    if quantized_variant
+                                    else "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
+                                ),
+                                "estimated_tokens": 220,
+                                "reason": "需要查看 nightly single-node A3 baseline 配置",
+                            },
                     ]
                 )
             else:

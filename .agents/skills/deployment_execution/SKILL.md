@@ -9,6 +9,9 @@ Required order:
 - Then run `deployment-config-synthesizer`.
 - Finish with `deployment-artifact-packager`.
 
-Do not fabricate a single-card script when the capsule says the path is
-undocumented or unsupported. Return the documented TP4 / 4-NPU baseline and
-state that the single-card path is outside the documented launch matrix.
+Do not silently substitute the user's requested topology with another script.
+If the request matches a documented baseline, return that documented script.
+If the request does not match a documented baseline, analyze the gap and return
+an inferred script that still satisfies the user's requested topology, such as
+`single-card`, but mark it as unvalidated and list the risks. If the user did
+not specify topology or priority, default to the documented best-performance baseline.

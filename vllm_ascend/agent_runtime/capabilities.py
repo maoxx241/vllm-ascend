@@ -54,34 +54,78 @@ def _deployment_notes(selector_plan: dict[str, Any]) -> str | None:
     is_quantized = primary_model == "qwen3-32b-w8a8"
     model_path = "/model/Qwen3-32B-W8A8" if is_quantized else "/model/Qwen3-32B"
     model_name = "qwen3-32b-w8a8" if is_quantized else "qwen3-32b"
-    quant_line = '  --quantization ascend \\\n' if is_quantized else ""
-    prefix = (
-        "single-card is not a documented path for Qwen3-32B on A3; "
-        "the script below is the documented TP4 / 4-NPU baseline."
-        if "single_card" in features
-        else "documented TP4 / 4-NPU A3 baseline:"
-    )
+    if "single_card" in features:
+        quant_line = '  --quantization ascend \\\n' if is_quantized else ""
+        return (
+            "unverified single-card attempt for the requested A3 topology. "
+            "The documented best-performance baseline is TP4 / 4-NPU, but the user explicitly asked for single-card, "
+            "so the script below keeps TP1 and uses conservative caps. It may still OOM or underperform.\n\n"
+            "```bash\n"
+            "export ASCEND_RT_VISIBLE_DEVICES=0\n"
+            "export TASK_QUEUE_ENABLE=1\n"
+            "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
+            f"vllm serve {model_path} \\\n"
+            f"  --served-model-name {model_name} \\\n"
+            "  --trust-remote-code \\\n"
+            f"{quant_line}"
+            "  --distributed-executor-backend mp \\\n"
+            "  --tensor-parallel-size 1 \\\n"
+            "  --enforce-eager \\\n"
+            "  --max-model-len 4096 \\\n"
+            "  --max-num-batched-tokens 256 \\\n"
+            "  --max-num-seqs 1 \\\n"
+            "  --block-size 128 \\\n"
+            "  --gpu-memory-utilization 0.9 \\\n"
+            "  --port 8113 \\\n"
+            "  --additional-config '{\"enable_weight_nz_layout\":true}'\n"
+            "```\n\n"
+            "documented best-performance baseline for comparison: TP4 / 4-NPU on A3."
+        )
+
+    if is_quantized:
+        return (
+            "documented best-performance baseline for Qwen3-32B-W8A8 on A3:\n\n"
+            "```bash\n"
+            "export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3\n"
+            "export TASK_QUEUE_ENABLE=1\n"
+            "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
+            "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1\n"
+            f"vllm serve {model_path} \\\n"
+            f"  --served-model-name {model_name} \\\n"
+            "  --trust-remote-code \\\n"
+            "  --async-scheduling \\\n"
+            "  --quantization ascend \\\n"
+            "  --distributed-executor-backend mp \\\n"
+            "  --tensor-parallel-size 4 \\\n"
+            "  --max-model-len 40960 \\\n"
+            "  --max-num-batched-tokens 40960 \\\n"
+            "  --block-size 128 \\\n"
+            "  --gpu-memory-utilization 0.9 \\\n"
+            "  --port 8113 \\\n"
+            "  --reasoning-parser qwen3 \\\n"
+            "  --additional-config '{\"weight_prefetch_config\":{\"enabled\":true}}'\n"
+            "```"
+        )
+
     return (
-        f"{prefix}\n\n"
+        "documented best-performance baseline for Qwen3-32B on A3:\n\n"
         "```bash\n"
         "export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3\n"
         "export TASK_QUEUE_ENABLE=1\n"
+        "export OMP_PROC_BIND=\"false\"\n"
         "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
-        "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1\n"
+        "export PAGED_ATTENTION_MASK_LEN=5500\n"
         f"vllm serve {model_path} \\\n"
         f"  --served-model-name {model_name} \\\n"
-        "  --trust-remote-code \\\n"
-        "  --async-scheduling \\\n"
-        f"{quant_line}"
-        "  --distributed-executor-backend mp \\\n"
+        "  --no-enable-prefix-caching \\\n"
         "  --tensor-parallel-size 4 \\\n"
-        "  --max-model-len 5500 \\\n"
-        "  --max-num-batched-tokens 40960 \\\n"
-        "  --compilation-config '{\"cudagraph_mode\": \"FULL_DECODE_ONLY\"}' \\\n"
-        "  --additional-config '{\"pa_shape_list\":[48,64,72,80],\"weight_prefetch_config\":{\"enabled\":true}}' \\\n"
         "  --port 8113 \\\n"
+        "  --max-model-len 36864 \\\n"
+        "  --max-num-batched-tokens 36864 \\\n"
         "  --block-size 128 \\\n"
-        "  --gpu-memory-utilization 0.9\n"
+        "  --trust-remote-code \\\n"
+        "  --gpu-memory-utilization 0.9 \\\n"
+        "  --additional-config '{\"enable_weight_nz_layout\":true}'\n"
         "```"
     )
 
@@ -149,7 +193,7 @@ def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: d
     if notes:
         if "single_card" in selector_plan.get("selectors", {}).get("features", []):
             card["deliverable_fragment_summary"] = (
-                "单卡不在文档化路径内；已返回可执行的 TP4 / 4-NPU A3 基线脚本和最小验证步骤。"
+                "单卡请求未命中文档化基线；已基于用户要求返回未验证的单卡推断脚本，并附带文档化 TP4 / 4-NPU 对照基线。"
             )
         card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)
