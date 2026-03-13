@@ -4,7 +4,13 @@ import shutil
 
 import pytest
 
-from vllm_ascend.agent_runtime import RawRequest, pack, resolve, vllm_ascend_assistant
+from vllm_ascend.agent_runtime import (
+    RawRequest,
+    deployment_artifact_packager,
+    pack,
+    resolve,
+    vllm_ascend_assistant,
+)
 from vllm_ascend.agent_runtime.contracts import ContractError, run_contract_checks
 from vllm_ascend.agent_runtime.kb import build_local, doctor
 
@@ -133,6 +139,23 @@ def test_p6_qwen3_a3_deployment_request_routes_to_deployment() -> None:
     assert result["selector_seed"]["normalized_entities"]["hw"] == ["A3"]
 
 
+def test_p6_qwen3_dense_a3_single_card_request_stays_qwen3_32b() -> None:
+    result = vllm_ascend_assistant(
+        RawRequest(
+            request_id="req-p6-qwen-dense-deploy",
+            user_text="给我一个A3上单卡部署qwen3 32B的部署脚本",
+            attachment_refs=[],
+            inline_paths=[],
+            inline_symbols=[],
+            inline_errors=[],
+            created_at_hint="2026-03-13T14:40:02Z",
+        )
+    )
+    assert result["selector_plan"]["task_family"] == "deployment_execution"
+    assert result["selector_seed"]["normalized_entities"]["models"] == ["qwen3-32b"]
+    assert result["selector_seed"]["normalized_entities"]["hw"] == ["A3"]
+
+
 def test_p6_model_expectation_pack_uses_deepseek_a3_envelope(a3_resolve_result, agent_repo_root, tmp_path) -> None:
     emit_sqlite = tmp_path / "a3.sqlite"
     build_local(agent_repo_root, resolve_result=a3_resolve_result, emit_sqlite=emit_sqlite)
@@ -222,3 +245,91 @@ def test_p6_deployment_pack_uses_qwen3_a3_constraints(a3_resolve_result, agent_r
     assert "qwen3-32b-w8a8" in lower
     assert "a3" in lower
     assert "tp4" in lower or "4 npu" in lower or "single-card" in lower
+
+
+def test_p6_qwen3_dense_pack_rejects_single_card_and_points_to_tp4(a3_resolve_result, agent_repo_root, tmp_path) -> None:
+    emit_sqlite = tmp_path / "a3-dense.sqlite"
+    build_local(agent_repo_root, resolve_result=a3_resolve_result, emit_sqlite=emit_sqlite)
+    response = pack(
+        agent_repo_root,
+        request={
+            "schema_version": "kb-pack-request/v2",
+            "request_id": "req-p6-qwen-dense-pack",
+            "created_at": "2026-03-13T14:40:05Z",
+            "intent": "deployment_lookup",
+            "repo_root": ".",
+            "resolve_policy": "auto",
+            "logical_domains": ["deployment_config", "validation_evidence", "ascend_foundation"],
+            "physical_shard_hints": ["validation", "repo_semantics", "hw_runtime_caps", "hw_soc_detail"],
+            "selectors": {
+                "files": [],
+                "symbols": [],
+                "entities": [],
+                "errors": [],
+                "models": ["qwen3-32b"],
+                "features": ["single_card"],
+                "hw": ["A3"],
+                "commits": [],
+                "prs": [],
+                "versions": [],
+                "configs": [],
+            },
+            "must_have": ["deployment baseline", "single-card support"],
+            "nice_to_have": ["launch command"],
+            "evidence_refs": [],
+            "budget_token_cap": 1500,
+            "max_atoms": 10,
+            "max_hops": 1,
+            "include_evidence_stubs": True,
+            "stop_after_first_sufficient": True,
+            "emit_path": ".agents/kb/local/capsules/req-p6-qwen-dense-pack.json",
+        },
+        resolve_result=a3_resolve_result,
+        merged_pack=emit_sqlite,
+    )
+    card = deployment_artifact_packager(
+        {
+            "request_id": "req-p6-qwen-dense-pack",
+            "plan_id": "plan-req-p6-qwen-dense-pack",
+            "task_family": "deployment_execution",
+            "work_package_id": "wp-qwen3-dense-a3-script",
+            "selectors": {
+                "files": [],
+                "symbols": [],
+                "entities": [],
+                "errors": [],
+                "models": ["qwen3-32b"],
+                "features": ["single_card"],
+                "hw": ["A3"],
+                "commits": [],
+                "prs": [],
+                "versions": [],
+                "configs": [],
+            },
+        },
+        response,
+    )
+    lower = response["capsule_text"].lower()
+    assert "qwen3-32b" in lower
+    assert "tp4" in lower
+    assert "single-card" in lower or "单卡" in response["capsule_text"]
+    assert card["notes"] is not None
+    assert "vllm serve" in card["notes"]
+    assert "--tensor-parallel-size 4" in card["notes"]
+    assert "--quantization ascend" not in card["notes"]
+    assert "single-card" in card["notes"].lower() or "单卡" in card["notes"]
+
+
+def test_p6_skill_docs_force_runtime_first_for_deployment(agent_repo_root) -> None:
+    assistant_skill = (
+        agent_repo_root / ".agents" / "skills" / "vllm-ascend-assistant" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    deployment_skill = (
+        agent_repo_root / ".agents" / "skills" / "deployment_execution" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+    assert "runtime.py" in assistant_skill
+    assert "Do not grep raw docs first" in assistant_skill
+    assert "deployment-intake" in assistant_skill
+    assert "deployment-artifact-packager" in deployment_skill
+    assert "Do not fabricate" in deployment_skill
+    assert "single-card" in deployment_skill

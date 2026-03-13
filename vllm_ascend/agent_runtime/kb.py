@@ -336,6 +336,10 @@ def pack(
             conn,
             "SELECT qualname, file_path FROM symbol_index WHERE repo_path LIKE 'vllm/%' ORDER BY qualname",
         )
+        qwen_a3_dense_validation_rows = _query_rows(
+            conn,
+            "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:qwen3-32b:a3:tp4'",
+        )
         qwen_a3_validation_rows = _query_rows(
             conn,
             "SELECT validation_id, summary FROM validations WHERE validation_id = 'validation:baseline:qwen3-32b-w8a8:a3:tp4'",
@@ -360,28 +364,34 @@ def pack(
         evidence_refs = request["evidence_refs"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
-            if primary_model == "qwen3-32b-w8a8" and primary_hw == "A3":
+            if primary_model in {"qwen3-32b", "qwen3-32b-w8a8"} and primary_hw == "A3":
+                is_quantized = primary_model == "qwen3-32b-w8a8"
+                model_label = "Qwen3-32B-W8A8" if is_quantized else "Qwen3-32B"
+                validation_rows = qwen_a3_validation_rows if is_quantized else qwen_a3_dense_validation_rows
                 capsule_text = (
-                    "Qwen3-32B-W8A8 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
+                    f"{model_label} 在 A3 上的文档化部署基线围绕 TP4 / 4-NPU 展开；"
                     "单卡不在当前文档化路径内，应先按 A3 TP4 基线交付部署命令与约束。"
                 )
                 atoms.extend(
                     [
                         {
-                            "atom_id": "atom-qwen3-32b-w8a8-a3-deploy",
+                            "atom_id": f"atom-{primary_model}-a3-deploy",
                             "atom_kind": "fact",
-                            "summary": "Qwen3-32B-W8A8 on A3 follows a TP4 / 4-NPU deployment baseline and not a documented single-card path.",
-                            "source_refs": ["repo_semantics:qwen3-32b-w8a8:a3"],
+                            "summary": (
+                                f"{model_label} on A3 follows a TP4 / 4-NPU deployment baseline "
+                                "and not a documented single-card path."
+                            ),
+                            "source_refs": [f"repo_semantics:{primary_model}:a3"],
                         },
                         {
-                            "atom_id": "atom-qwen3-32b-w8a8-a3-validation",
+                            "atom_id": f"atom-{primary_model}-a3-validation",
                             "atom_kind": "validation",
                             "summary": (
-                                qwen_a3_validation_rows[0]["summary"]
-                                if qwen_a3_validation_rows
+                                validation_rows[0]["summary"]
+                                if validation_rows
                                 else "A3 TP4 deployment baseline is present in nightly/test assets."
                             ),
-                            "source_refs": ["validation:baseline:qwen3-32b-w8a8:a3:tp4"],
+                            "source_refs": [f"validation:baseline:{primary_model}:a3:tp4"],
                         },
                     ]
                 )
@@ -404,8 +414,12 @@ def pack(
                             "reason": "需要查看 A3 TP4 官方部署命令和参数细节",
                         },
                         {
-                            "stub_id": "stub-qwen3-32b-int8-a3",
-                            "source_ref": "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
+                            "stub_id": "stub-qwen3-32b-a3-config",
+                            "source_ref": (
+                                "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml"
+                                if is_quantized
+                                else "tests/e2e/nightly/single_node/models/configs/Qwen3-32B.yaml"
+                            ),
                             "estimated_tokens": 220,
                             "reason": "需要查看 nightly single-node A3 baseline 配置",
                         },

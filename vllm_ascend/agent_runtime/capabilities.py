@@ -38,6 +38,54 @@ def _apply_pack(card: dict[str, Any], pack_response: dict[str, Any]) -> dict[str
     return card
 
 
+def _deployment_notes(selector_plan: dict[str, Any]) -> str | None:
+    selectors = selector_plan.get("selectors", {})
+    models = selectors.get("models", [])
+    hardware = selectors.get("hw", [])
+    features = selectors.get("features", [])
+    if not models or not hardware:
+        return None
+
+    primary_model = models[0]
+    primary_hw = hardware[0]
+    if primary_hw != "A3" or primary_model not in {"qwen3-32b", "qwen3-32b-w8a8"}:
+        return None
+
+    is_quantized = primary_model == "qwen3-32b-w8a8"
+    model_path = "/model/Qwen3-32B-W8A8" if is_quantized else "/model/Qwen3-32B"
+    model_name = "qwen3-32b-w8a8" if is_quantized else "qwen3-32b"
+    quant_line = '  --quantization ascend \\\n' if is_quantized else ""
+    prefix = (
+        "single-card is not a documented path for Qwen3-32B on A3; "
+        "the script below is the documented TP4 / 4-NPU baseline."
+        if "single_card" in features
+        else "documented TP4 / 4-NPU A3 baseline:"
+    )
+    return (
+        f"{prefix}\n\n"
+        "```bash\n"
+        "export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3\n"
+        "export TASK_QUEUE_ENABLE=1\n"
+        "export HCCL_OP_EXPANSION_MODE=\"AIV\"\n"
+        "export VLLM_ASCEND_ENABLE_FLASHCOMM1=1\n"
+        f"vllm serve {model_path} \\\n"
+        f"  --served-model-name {model_name} \\\n"
+        "  --trust-remote-code \\\n"
+        "  --async-scheduling \\\n"
+        f"{quant_line}"
+        "  --distributed-executor-backend mp \\\n"
+        "  --tensor-parallel-size 4 \\\n"
+        "  --max-model-len 5500 \\\n"
+        "  --max-num-batched-tokens 40960 \\\n"
+        "  --compilation-config '{\"cudagraph_mode\": \"FULL_DECODE_ONLY\"}' \\\n"
+        "  --additional-config '{\"pa_shape_list\":[48,64,72,80],\"weight_prefetch_config\":{\"enabled\":true}}' \\\n"
+        "  --port 8113 \\\n"
+        "  --block-size 128 \\\n"
+        "  --gpu-memory-utilization 0.9\n"
+        "```"
+    )
+
+
 def feature_policy_resolver(
     selector_plan: dict[str, Any],
     pack_response: dict[str, Any],
@@ -71,6 +119,9 @@ def deployment_config_synthesizer(selector_plan: dict[str, Any], pack_response: 
             },
         }
     )
+    notes = _deployment_notes(selector_plan)
+    if notes:
+        card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
 
@@ -94,6 +145,13 @@ def deployment_artifact_packager(selector_plan: dict[str, Any], pack_response: d
             },
         }
     )
+    notes = _deployment_notes(selector_plan)
+    if notes:
+        if "single_card" in selector_plan.get("selectors", {}).get("features", []):
+            card["deliverable_fragment_summary"] = (
+                "单卡不在文档化路径内；已返回可执行的 TP4 / 4-NPU A3 基线脚本和最小验证步骤。"
+            )
+        card["notes"] = notes
     validate_instance(card, "atomic-result-card.schema.json", root=root)
     return card
 
