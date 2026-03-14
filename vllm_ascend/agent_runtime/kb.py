@@ -18,6 +18,7 @@ from .extractors import (extract_cann_op_constraints,
                          extract_vllm_release_delta, extract_vllm_semantics,
                          extract_vllm_symbols, merge_shard_rows)
 from .paths import kb_root, repo_root
+from .shadow_adapter import build_shadow_diagnostics
 from .strategy import (baselines_from_rows, build_artifact_atom,
                        build_strategy_atom, select_artifact_path,
                        select_deployment_strategy,
@@ -541,6 +542,25 @@ def pack(
         deep_refs: list[dict[str, Any]] = []
         intent = request["intent"]
         evidence_refs = request["evidence_refs"]
+        shadow_diagnostics = None
+        if strategy_selection is not None or artifact_selection is not None:
+            shadow_diagnostics = build_shadow_diagnostics(
+                root=root,
+                request_id=request["request_id"],
+                context=selector_context,
+                strategy_selection=strategy_selection,
+                artifact_selection=artifact_selection,
+            )
+
+        def append_shadow_diagnostics() -> None:
+            if shadow_diagnostics is None:
+                return
+            warnings.extend(shadow_diagnostics["warnings"])
+            unknowns.extend(shadow_diagnostics["unknowns"])
+            # Shadow diagnostics are part of the handoff acceptance surface.
+            # Keep them ahead of lower-priority atoms so budget trimming does
+            # not silently erase the shadow-only wiring signal.
+            atoms[0:0] = shadow_diagnostics["atoms"]
 
         if intent in {"intake_lookup", "deployment_lookup"}:
             if strategy_selection is not None or artifact_selection is not None:
@@ -641,6 +661,7 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
+                append_shadow_diagnostics()
                 if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
                     capsule_text = (
                         f"{model_label} 在 {primary_hw} 上收到 native FP8 直跑请求，但该路径当前不受支持；"
@@ -875,6 +896,7 @@ def pack(
                             "source_refs": [f"{substrate_rows[0]['shard_family']}:runtime"],
                         }
                     )
+                append_shadow_diagnostics()
                 if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
                     topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待收口"
                     capsule_text = (
@@ -1122,6 +1144,7 @@ def pack(
                             },
                         ]
                     )
+                append_shadow_diagnostics()
                 if selected_artifact is not None and selected_artifact.decision_kind == "unsupported_requires_choice":
                     topology_label = _strategy_topology_label(selected) if selected is not None else "当前拓扑待收口"
                     capsule_text = (
