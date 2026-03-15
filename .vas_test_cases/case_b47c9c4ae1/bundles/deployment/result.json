@@ -1,0 +1,73 @@
+{
+  "result_class": "compatible",
+  "resolved_subject": {
+    "model_name": "qwen3",
+    "model_size_b": 32,
+    "hardware": "A3",
+    "cards": 8,
+    "quantization": null,
+    "weight_path": "/weights/qwen3-32b",
+    "objective": "throughput"
+  },
+  "evidence_summary": [],
+  "assumptions": [
+    "默认按单实例处理。",
+    "A3 单机默认 8 卡 / 16 芯，不额外追问卡数。"
+  ],
+  "required_questions": [],
+  "why_not_exact": [
+    "仓中的最强直接证据更接近 TP4 单实例配方；当前 8 卡单实例方案是基于该配方叠加 DP 的派生。"
+  ],
+  "launch_candidates": [
+    {
+      "name": "primary_tp4_dp2_throughput",
+      "script_kind": "single_instance",
+      "command": "vllm serve /weights/qwen3-32b --served-model-name qwen3 --trust-remote-code --async-scheduling --distributed-executor-backend mp --tensor-parallel-size 4 --data-parallel-size 2 --max-model-len 40000 --max-num-batched-tokens 40000 --compilation-config '{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}' --additional-config '{\"weight_prefetch_config\":{\"enabled\":true}}' --gpu-memory-utilization 0.9 --block-size 128",
+      "env": {
+        "TASK_QUEUE_ENABLE": "1",
+        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+      },
+      "risk_level": "medium",
+      "rationale": [
+        "TP4 is the strongest documented core shape for Qwen3-32B throughput serving.",
+        "Single-instance 8-card serving prefers TP4 + DP2 over assuming TP8 is optimal."
+      ]
+    },
+    {
+      "name": "tp4_dp2_graph_capture",
+      "script_kind": "single_instance",
+      "command": "vllm serve /weights/qwen3-32b --served-model-name qwen3 --trust-remote-code --async-scheduling --distributed-executor-backend mp --tensor-parallel-size 4 --data-parallel-size 2 --max-model-len 40000 --max-num-batched-tokens 40000 --compilation-config '{\"cudagraph_mode\":\"FULL_DECODE_ONLY\",\"cudagraph_capture_sizes\":[1,12,16,20,24,32,48,60,64,68,72,76,80]}' --additional-config '{\"weight_prefetch_config\":{\"enabled\":true}}' --gpu-memory-utilization 0.9 --block-size 128",
+      "env": {
+        "TASK_QUEUE_ENABLE": "1",
+        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"
+      },
+      "risk_level": "medium",
+      "rationale": [
+        "Nightly configs suggest graph capture sizes for feature-stack serving on A3.",
+        "Use this only after the primary script starts cleanly."
+      ]
+    }
+  ],
+  "validation_checklist": [
+    "确认权重 dtype/quantization 与命令一致。",
+    "先做启动 smoke 和吞吐试跑。",
+    "观察 TP4 切分下的 KV / 吞吐表现，再决定是否需要更激进调参。"
+  ],
+  "report_sections": [
+    {
+      "title": "intent_analysis",
+      "content": "根据平均 3500 输入 / 1500 输出、最大上下文 40000 和高吞吐目标，优先按常规吞吐服务而不是 128K 长序列特殊路径处理。"
+    },
+    {
+      "title": "topology_reasoning",
+      "content": "采用 TP4 作为核心形状，再在单实例内叠加 DP2；不直接假设 TP8 是最优。"
+    }
+  ],
+  "derived_metrics": {
+    "avg_in": 3500,
+    "avg_out": 1500,
+    "max_context": 40000
+  }
+}

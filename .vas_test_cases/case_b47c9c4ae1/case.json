@@ -1,0 +1,11 @@
+{
+  "case_id": "case_b47c9c4ae1",
+  "goal_type": "unknown",
+  "user_request": "本地有权重，A3，请求长度大概平均在3.5k输入1.5k输出，最大上下文40k，想要高吞吐",
+  "state": "open",
+  "checkpoints": [
+    "checkpoints/ckpt_9ef13787.json",
+    "checkpoints/ckpt_53d9216e.json"
+  ],
+  "open_uncertainties": []
+}

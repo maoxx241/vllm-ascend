@@ -1,0 +1,28 @@
+{
+  "checkpoint_id": "ckpt_9ef13787",
+  "phase": "entry",
+  "payload": {
+    "parsed_request": {
+      "raw_text": "本地有权重，A3，请求长度大概平均在3.5k输入1.5k输出，最大上下文40k，想要高吞吐",
+      "intent": "unknown",
+      "model_name": "qwen3",
+      "model_size_b": 32,
+      "hardware": "A3",
+      "cards": 8,
+      "quantization": null,
+      "weight_path": "/weights/qwen3-32b",
+      "wants_script": false,
+      "wants_command": false,
+      "objective": "throughput",
+      "average_input_len": 3500,
+      "average_output_len": 1500,
+      "max_context": 40000,
+      "accepts_experimental": false,
+      "has_existing_quantized_weights": null,
+      "single_instance": true,
+      "tpot_limit_ms": null,
+      "local_weights": true,
+      "notes": []
+    }
+  }
+}

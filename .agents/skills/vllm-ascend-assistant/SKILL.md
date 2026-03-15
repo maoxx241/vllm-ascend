@@ -1,16 +1,23 @@
 # vllm-ascend-assistant
 
-The only public entry for the v3.3 runtime.
+Default public entry for agent-driven vLLM-Ascend work.
 
-Use `runtime.py` first. Do not grep raw docs first.
+Current acceptance scope in this package:
+- full deployment bootstrap and routing
+- open-world self-acquire before question-gate
+- case workspace + deployment bundle writeback
 
-Workflow:
-- Build a `RawRequest`.
-- Call `vllm_ascend_assistant` from `runtime.py`.
-- If the result is `direct_answer`, stop.
-- If the family is `deployment_execution`, continue with `deployment-intake`
-  and then the deployment atomic skills instead of answering from raw docs.
-- Stable skills should answer from runtime objects and capsule output, not by
-  reading raw sqlite or fabricating missing launch paths.
-- Hardware topology facts must come from runtime normalization and capsule
-  output, not from ad hoc rules embedded in this skill text.
+Do this first for deployment-style requests:
+1. Normalize the request.
+2. Self-acquire repo/code/doc evidence.
+3. Only ask user-only blocker questions.
+4. Route to deployment synthesis.
+5. Emit a bundle: result.json, decision_report.md, validation_checklist.md, shell scripts if applicable.
+
+Do **not**:
+- treat KB miss as negative evidence
+- auto-correct near model names without user confirmation or direct local evidence
+- fabricate hardware, card count, weight path, or topology
+- emit shell scripts for blocked results
+
+`runtime.py` is the integration surface.

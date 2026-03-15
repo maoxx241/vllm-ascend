@@ -1,0 +1,10 @@
+{
+  "case_id": "case_51c8cf02a4",
+  "result_json": "/Users/maoxx241/code/vllm_workspace/vllm-ascend/.vas_test_cases/case_51c8cf02a4/bundles/deployment/result.json",
+  "decision_report_md": "/Users/maoxx241/code/vllm_workspace/vllm-ascend/.vas_test_cases/case_51c8cf02a4/bundles/deployment/decision_report.md",
+  "validation_checklist_md": "/Users/maoxx241/code/vllm_workspace/vllm-ascend/.vas_test_cases/case_51c8cf02a4/bundles/deployment/validation_checklist.md",
+  "scripts": [
+    "/Users/maoxx241/code/vllm_workspace/vllm-ascend/.vas_test_cases/case_51c8cf02a4/bundles/deployment/scripts/01_primary_tp4_dp2_throughput.sh",
+    "/Users/maoxx241/code/vllm_workspace/vllm-ascend/.vas_test_cases/case_51c8cf02a4/bundles/deployment/scripts/02_tp4_dp2_graph_capture.sh"
+  ]
+}

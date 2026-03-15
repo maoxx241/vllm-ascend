@@ -1,0 +1,10 @@
+{
+  "case_id": "case_b47c9c4ae1",
+  "result_json": "/mnt/data/vas_r3_deployment_skill_acceptance/repo_overlay/vllm-ascend/.vas_test_cases/case_b47c9c4ae1/bundles/deployment/result.json",
+  "decision_report_md": "/mnt/data/vas_r3_deployment_skill_acceptance/repo_overlay/vllm-ascend/.vas_test_cases/case_b47c9c4ae1/bundles/deployment/decision_report.md",
+  "validation_checklist_md": "/mnt/data/vas_r3_deployment_skill_acceptance/repo_overlay/vllm-ascend/.vas_test_cases/case_b47c9c4ae1/bundles/deployment/validation_checklist.md",
+  "scripts": [
+    "/mnt/data/vas_r3_deployment_skill_acceptance/repo_overlay/vllm-ascend/.vas_test_cases/case_b47c9c4ae1/bundles/deployment/scripts/01_primary_tp4_dp2_throughput.sh",
+    "/mnt/data/vas_r3_deployment_skill_acceptance/repo_overlay/vllm-ascend/.vas_test_cases/case_b47c9c4ae1/bundles/deployment/scripts/02_tp4_dp2_graph_capture.sh"
+  ]
+}
