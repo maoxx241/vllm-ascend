@@ -532,3 +532,46 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         mock_maybe_pad_and_reduce.assert_called_once_with(hidden_states)
         self.assertTrue(torch.equal(reduced_hidden_states, hidden_states_shard))
         self.assertTrue(torch.equal(split_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
+
+    @patch("torch.ops.vllm.maybe_pad_and_reduce")
+    @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
+    def test_maybe_pad_and_reduce_draft_inputs_mtp_flashcomm_splits_token_aligned_inputs(
+        self,
+        mock_get_tp_group,
+        mock_maybe_pad_and_reduce,
+    ):
+        mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=1)
+        proposer = object.__new__(AscendEagleProposer)
+        proposer.method = "mtp"
+
+        input_ids = torch.arange(5, dtype=torch.int32)
+        inputs_embeds = torch.arange(20, dtype=torch.float32).reshape(5, 4)
+        hidden_states = torch.arange(10, dtype=torch.float32).reshape(5, 2)
+        positions = torch.arange(5, dtype=torch.int32)
+        hidden_states_shard = torch.arange(6, dtype=torch.float32).reshape(3, 2)
+        mock_maybe_pad_and_reduce.return_value = hidden_states_shard
+
+        with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
+                   new=SimpleNamespace(flash_comm_v1_enabled=True)):
+            model_input_ids, model_inputs_embeds, model_hidden_states, model_positions = (
+                AscendEagleProposer.maybe_pad_and_reduce_draft_inputs(
+                    proposer,
+                    input_ids,
+                    inputs_embeds,
+                    hidden_states,
+                    positions,
+                )
+            )
+
+        self.assertTrue(torch.equal(model_input_ids, torch.tensor([3, 4, 0], dtype=torch.int32)))
+        self.assertTrue(
+            torch.equal(
+                model_inputs_embeds,
+                torch.tensor(
+                    [[12.0, 13.0, 14.0, 15.0], [16.0, 17.0, 18.0, 19.0], [0.0, 0.0, 0.0, 0.0]],
+                    dtype=torch.float32,
+                ),
+            )
+        )
+        self.assertTrue(torch.equal(model_hidden_states, hidden_states_shard))
+        self.assertTrue(torch.equal(model_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))

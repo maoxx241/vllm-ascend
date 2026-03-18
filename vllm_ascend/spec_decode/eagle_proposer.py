@@ -725,18 +725,22 @@ class SpecDecodeBaseProposer(EagleProposer):
         model_input_ids = self.input_ids[:num_input_tokens]
         model_positions = self._get_positions(num_input_tokens)
 
+        if self.pass_hidden_states_to_model:
+            model_hidden_states = self.hidden_states[:num_input_tokens]
+            model_input_ids, inputs_embeds, model_hidden_states, model_positions = self.maybe_pad_and_reduce_draft_inputs(
+                model_input_ids,
+                inputs_embeds,
+                model_hidden_states,
+                model_positions,
+            )
+
         model_kwargs = {
             "input_ids": model_input_ids,
             "positions": model_positions,
             "inputs_embeds": inputs_embeds,
         }
-
         if self.pass_hidden_states_to_model:
-            model_hidden_states = self.hidden_states[:num_input_tokens]
-            model_hidden_states, model_positions = self.maybe_pad_and_reduce(model_hidden_states, model_positions)
             model_kwargs["hidden_states"] = model_hidden_states
-            if self.method == "mtp":
-                model_kwargs["positions"] = model_positions
 
         ret_hidden_states = self.model(**model_kwargs)
         if not self.model_returns_tuple():
@@ -867,7 +871,12 @@ class SpecDecodeBaseProposer(EagleProposer):
             model_positions = self._get_positions(input_batch_size)
             model_hidden_states = self.hidden_states[:input_batch_size]
 
-            model_hidden_states, model_positions = self.maybe_pad_and_reduce(model_hidden_states, model_positions)
+            model_input_ids, inputs_embeds, model_hidden_states, model_positions = self.maybe_pad_and_reduce_draft_inputs(
+                model_input_ids,
+                inputs_embeds,
+                model_hidden_states,
+                model_positions,
+            )
 
             forward_context.attn_metadata = (
                 multi_steps_attn_metadata[draft_step + 1] if multi_steps_attn_metadata else None
@@ -1585,6 +1594,20 @@ class SpecDecodeBaseProposer(EagleProposer):
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
         return hidden_states, positions
+
+    def maybe_pad_and_reduce_draft_inputs(
+        self,
+        input_ids: torch.Tensor,
+        inputs_embeds: torch.Tensor | None,
+        hidden_states: torch.Tensor,
+        positions: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor, torch.Tensor]:
+        hidden_states, positions = self.maybe_pad_and_reduce(hidden_states, positions)
+        if self.method == "mtp" and _EXTRA_CTX.flash_comm_v1_enabled:
+            input_ids = pad_and_split_tensor_tp(input_ids, 0)
+            if inputs_embeds is not None:
+                inputs_embeds = pad_and_split_tensor_tp(inputs_embeds, 0)
+        return input_ids, inputs_embeds, hidden_states, positions
 
     def maybe_all_gather_and_unpad(
         self,
