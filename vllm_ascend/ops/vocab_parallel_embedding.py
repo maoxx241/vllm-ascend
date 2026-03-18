@@ -19,6 +19,7 @@ import os
 import torch
 from torch import nn
 from torch.nn.parameter import Parameter
+from vllm.config.vllm import get_current_vllm_config
 from vllm.distributed import divide, tensor_model_parallel_all_reduce
 from vllm.forward_context import get_forward_context
 from vllm.distributed.parallel_state import get_tp_group
@@ -206,8 +207,14 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_EMBED") == "1":
             try:
                 forward_context = get_forward_context()
-                speculative_config = getattr(getattr(forward_context, "vllm_config", None), "speculative_config", None)
-                speculative_method = getattr(speculative_config, "method", None)
+                speculative_method = getattr(
+                    getattr(get_current_vllm_config(), "speculative_config", None),
+                    "method",
+                    None,
+                )
+                if speculative_method is None:
+                    speculative_config = getattr(getattr(forward_context, "vllm_config", None), "speculative_config", None)
+                    speculative_method = getattr(speculative_config, "method", None)
                 flash_comm_v1_enabled = getattr(forward_context, "flash_comm_v1_enabled", None)
                 is_draft_model = getattr(forward_context, "is_draft_model", None)
             except AssertionError:
@@ -247,9 +254,17 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if not getattr(forward_context, "is_draft_model", False):
             return False
 
-        speculative_config = getattr(forward_context, "vllm_config", None)
-        speculative_config = getattr(speculative_config, "speculative_config", None)
-        return getattr(speculative_config, "method", None) == "mtp"
+        speculative_method = getattr(
+            getattr(get_current_vllm_config(), "speculative_config", None),
+            "method",
+            None,
+        )
+        if speculative_method is None:
+            speculative_config = getattr(forward_context, "vllm_config", None)
+            speculative_config = getattr(speculative_config, "speculative_config", None)
+            speculative_method = getattr(speculative_config, "method", None)
+
+        return speculative_method in {"mtp", "qwen3_5_mtp"}
 
 
 class AscendParallelLMHead(ParallelLMHead):

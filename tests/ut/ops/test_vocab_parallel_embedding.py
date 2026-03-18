@@ -223,6 +223,9 @@ class TestCustomVocabParallelEmbedding(unittest.TestCase):
             "vllm_ascend.ops.vocab_parallel_embedding.get_forward_context",
             return_value=forward_context,
         ), patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.get_current_vllm_config",
+            return_value=forward_context.vllm_config,
+        ), patch(
             "vllm_ascend.ops.vocab_parallel_embedding.tensor_model_parallel_all_reduce",
             side_effect=lambda x: x,
         ) as mock_all_reduce, patch(
@@ -252,6 +255,9 @@ class TestCustomVocabParallelEmbedding(unittest.TestCase):
         with patch(
             "vllm_ascend.ops.vocab_parallel_embedding.get_forward_context",
             return_value=forward_context,
+        ), patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.get_current_vllm_config",
+            return_value=forward_context.vllm_config,
         ), patch(
             "vllm_ascend.ops.vocab_parallel_embedding.tensor_model_parallel_all_reduce",
             side_effect=AssertionError("all_reduce path should be skipped"),
