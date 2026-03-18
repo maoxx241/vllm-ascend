@@ -207,14 +207,7 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_EMBED") == "1":
             try:
                 forward_context = get_forward_context()
-                speculative_method = getattr(
-                    getattr(get_current_vllm_config(), "speculative_config", None),
-                    "method",
-                    None,
-                )
-                if speculative_method is None:
-                    speculative_config = getattr(getattr(forward_context, "vllm_config", None), "speculative_config", None)
-                    speculative_method = getattr(speculative_config, "method", None)
+                speculative_method = self._get_speculative_method(forward_context)
                 flash_comm_v1_enabled = getattr(forward_context, "flash_comm_v1_enabled", None)
                 is_draft_model = getattr(forward_context, "is_draft_model", None)
             except AssertionError:
@@ -254,17 +247,28 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if not getattr(forward_context, "is_draft_model", False):
             return False
 
+        speculative_method = AscendVocabParallelEmbedding._get_speculative_method(forward_context)
+
+        return speculative_method in {"mtp", "qwen3_5_mtp"}
+
+    @staticmethod
+    def _get_speculative_method(forward_context) -> str | None:
+        try:
+            vllm_config = get_current_vllm_config()
+        except AssertionError:
+            vllm_config = None
+
         speculative_method = getattr(
-            getattr(get_current_vllm_config(), "speculative_config", None),
+            getattr(vllm_config, "speculative_config", None),
             "method",
             None,
         )
-        if speculative_method is None:
-            speculative_config = getattr(forward_context, "vllm_config", None)
-            speculative_config = getattr(speculative_config, "speculative_config", None)
-            speculative_method = getattr(speculative_config, "method", None)
+        if speculative_method is not None:
+            return speculative_method
 
-        return speculative_method in {"mtp", "qwen3_5_mtp"}
+        speculative_config = getattr(forward_context, "vllm_config", None)
+        speculative_config = getattr(speculative_config, "speculative_config", None)
+        return getattr(speculative_config, "method", None)
 
 
 class AscendParallelLMHead(ParallelLMHead):
