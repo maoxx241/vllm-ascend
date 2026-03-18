@@ -624,6 +624,7 @@ class TestAscendForwardContextDraftFlashComm(TestBase):
         vllm_config.speculative_config = MagicMock(method="mtp")
         vllm_config.compilation_config = MagicMock()
         vllm_config.model_config = MagicMock()
+        vllm_config.parallel_config = SimpleNamespace(data_parallel_size=1, is_moe_model=False)
 
         with set_ascend_forward_context(
             attn_metadata=None,
@@ -649,6 +650,7 @@ class TestAscendForwardContextDraftFlashComm(TestBase):
         vllm_config.speculative_config = MagicMock(method="eagle")
         vllm_config.compilation_config = MagicMock()
         vllm_config.model_config = MagicMock()
+        vllm_config.parallel_config = SimpleNamespace(data_parallel_size=1, is_moe_model=False)
 
         with set_ascend_forward_context(
             attn_metadata=None,
