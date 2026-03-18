@@ -16,6 +16,7 @@
 # from collections.abc import Iterable
 # mypy: ignore-errors
 
+import os
 from itertools import islice
 
 import torch
@@ -43,6 +44,10 @@ from vllm_ascend.utils import enable_sp
 
 
 _ORIGINAL_QWEN3NEXT_MODEL_FORWARD = Qwen3NextModel.forward
+
+
+def _gdn_prefill_plan_enabled() -> bool:
+    return os.getenv("ASCEND_GDN_PRECOMPUTE", "1").lower() not in ("0", "false", "off")
 
 
 def _get_required_gdn_block_sizes(model: Qwen3NextModel) -> tuple[int, ...]:
@@ -82,6 +87,8 @@ def _prepare_gdn_prefill_index_plans(model: Qwen3NextModel) -> None:
             continue
 
         metadata.ascend_non_spec_index_plan = None
+        if not _gdn_prefill_plan_enabled():
+            continue
         if metadata.num_prefills <= 0:
             continue
 
