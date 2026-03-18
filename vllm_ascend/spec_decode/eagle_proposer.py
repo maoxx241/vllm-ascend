@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import copy
+import os
 from collections.abc import Callable
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from typing import Any
@@ -103,6 +104,17 @@ def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tenso
     shard_num_tokens = padded_num_tokens // world_size
     start = shard_num_tokens * rank
     return tensor.narrow(token_dim, start, shard_num_tokens)
+
+
+def _maybe_log_mtp_draft_shapes(stage: str, **tensors: torch.Tensor | None) -> None:
+    if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") != "1":
+        return
+
+    shape_repr = {
+        name: (tuple(tensor.shape) if tensor is not None else None)
+        for name, tensor in tensors.items()
+    }
+    logger.info("Qwen3.5 MTP draft shapes [%s]: %s", stage, shape_repr)
 
 
 class SpecDecodeBaseProposer(EagleProposer):
@@ -741,6 +753,13 @@ class SpecDecodeBaseProposer(EagleProposer):
         }
         if self.pass_hidden_states_to_model:
             model_kwargs["hidden_states"] = model_hidden_states
+        _maybe_log_mtp_draft_shapes(
+            "merged",
+            input_ids=model_input_ids,
+            inputs_embeds=inputs_embeds,
+            hidden_states=model_kwargs.get("hidden_states"),
+            positions=model_positions,
+        )
 
         ret_hidden_states = self.model(**model_kwargs)
         if not self.model_returns_tuple():
@@ -889,6 +908,13 @@ class SpecDecodeBaseProposer(EagleProposer):
             }
             if self.pass_hidden_states_to_model:
                 model_kwargs["hidden_states"] = model_hidden_states
+            _maybe_log_mtp_draft_shapes(
+                f"loop_{draft_step}",
+                input_ids=model_input_ids,
+                inputs_embeds=inputs_embeds,
+                hidden_states=model_kwargs.get("hidden_states"),
+                positions=model_positions,
+            )
 
             ret_hidden_states = self.model(**model_kwargs)
             if not self.model_returns_tuple():
