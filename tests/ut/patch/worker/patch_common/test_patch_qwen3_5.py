@@ -41,6 +41,9 @@ class DummyQwen35Model:
     def named_parameters(self):
         return self._params.items()
 
+    def named_modules(self):
+        return []
+
     def get_expert_mapping(self):
         return []
 
