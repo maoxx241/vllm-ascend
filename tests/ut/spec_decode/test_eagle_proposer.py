@@ -505,12 +505,10 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         expected = torch.tensor([0, 1, 2], dtype=torch.int32)
         self.assertTrue(torch.equal(shard, expected))
 
-    @patch("torch.ops.vllm.maybe_pad_and_reduce")
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_mtp_flashcomm_skips_positions_reduce(
         self,
         mock_get_tp_group,
-        mock_maybe_pad_and_reduce,
     ):
         mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=1)
         proposer = object.__new__(AscendEagleProposer)
@@ -518,8 +516,6 @@ class TestEagleProposerFlashCommHelpers(TestBase):
 
         hidden_states = torch.arange(10, dtype=torch.float32).reshape(5, 2)
         positions = torch.arange(5, dtype=torch.int32)
-        hidden_states_shard = torch.arange(6, dtype=torch.float32).reshape(3, 2)
-        mock_maybe_pad_and_reduce.return_value = hidden_states_shard
 
         with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
                    new=SimpleNamespace(flash_comm_v1_enabled=True)):
@@ -529,16 +525,13 @@ class TestEagleProposerFlashCommHelpers(TestBase):
                 positions,
             )
 
-        mock_maybe_pad_and_reduce.assert_called_once_with(hidden_states)
-        self.assertTrue(torch.equal(reduced_hidden_states, hidden_states_shard))
+        self.assertTrue(torch.equal(reduced_hidden_states, torch.tensor([[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]])))
         self.assertTrue(torch.equal(split_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
 
-    @patch("torch.ops.vllm.maybe_pad_and_reduce")
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_draft_inputs_mtp_flashcomm_splits_token_aligned_inputs(
         self,
         mock_get_tp_group,
-        mock_maybe_pad_and_reduce,
     ):
         mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=1)
         proposer = object.__new__(AscendEagleProposer)
@@ -548,8 +541,6 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         inputs_embeds = torch.arange(20, dtype=torch.float32).reshape(5, 4)
         hidden_states = torch.arange(10, dtype=torch.float32).reshape(5, 2)
         positions = torch.arange(5, dtype=torch.int32)
-        hidden_states_shard = torch.arange(6, dtype=torch.float32).reshape(3, 2)
-        mock_maybe_pad_and_reduce.return_value = hidden_states_shard
 
         with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
                    new=SimpleNamespace(flash_comm_v1_enabled=True)):
@@ -573,15 +564,13 @@ class TestEagleProposerFlashCommHelpers(TestBase):
                 ),
             )
         )
-        self.assertTrue(torch.equal(model_hidden_states, hidden_states_shard))
+        self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]])))
         self.assertTrue(torch.equal(model_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
 
-    @patch("torch.ops.vllm.maybe_pad_and_reduce")
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_draft_inputs_keeps_aligned_token_inputs(
         self,
         mock_get_tp_group,
-        mock_maybe_pad_and_reduce,
     ):
         mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=1)
         proposer = object.__new__(AscendEagleProposer)
@@ -591,8 +580,6 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         inputs_embeds = torch.arange(8, dtype=torch.float32).reshape(2, 4)
         hidden_states = torch.arange(8, dtype=torch.float32).reshape(4, 2)
         positions = torch.arange(4, dtype=torch.int32)
-        hidden_states_shard = torch.arange(4, dtype=torch.float32).reshape(2, 2)
-        mock_maybe_pad_and_reduce.return_value = hidden_states_shard
 
         with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
                    new=SimpleNamespace(flash_comm_v1_enabled=True)):
@@ -608,5 +595,5 @@ class TestEagleProposerFlashCommHelpers(TestBase):
 
         self.assertTrue(torch.equal(model_input_ids, input_ids))
         self.assertTrue(torch.equal(model_inputs_embeds, inputs_embeds))
-        self.assertTrue(torch.equal(model_hidden_states, hidden_states_shard))
+        self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[4.0, 5.0], [6.0, 7.0]])))
         self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))

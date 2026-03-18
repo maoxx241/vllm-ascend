@@ -1587,7 +1587,7 @@ class SpecDecodeBaseProposer(EagleProposer):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if self.method == "mtp":
             if _EXTRA_CTX.flash_comm_v1_enabled:
-                hidden_states = torch.ops.vllm.maybe_pad_and_reduce(hidden_states)
+                hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
                 token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
                 positions = pad_and_split_tensor_tp(positions, token_dim)
         else:
