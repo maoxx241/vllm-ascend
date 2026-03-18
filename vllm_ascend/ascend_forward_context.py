@@ -95,9 +95,13 @@ def set_ascend_forward_context(
             flash_comm_v1_enabled = enable_sp(vllm_config) and num_tokens is not None
             mmrs_fusion = False
         elif is_draft_model:
-            # TODO: for dense drafter, `sp` is redundant and is not compatible with `dp` and `graph`.
-            # Disable it to avoid more problems.
-            flash_comm_v1_enabled = False
+            speculative_method = getattr(vllm_config.speculative_config, "method", None)
+            if speculative_method == "mtp":
+                flash_comm_v1_enabled = enable_sp(vllm_config) and num_tokens is not None
+            else:
+                # TODO: for dense drafter, `sp` is redundant and is not compatible
+                # with `dp` and `graph`. Disable it to avoid more problems.
+                flash_comm_v1_enabled = False
         else:
             flash_comm_v1_enabled = enable_sp(vllm_config) and num_tokens is not None and num_tokens > 1000
         forward_context.mmrs_fusion = mmrs_fusion

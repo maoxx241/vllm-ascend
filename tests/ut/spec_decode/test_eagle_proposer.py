@@ -5,8 +5,10 @@ import unittest
 import numpy as np
 import torch
 from vllm.config import CacheConfig, CompilationMode, CUDAGraphMode, VllmConfig, set_current_vllm_config
+from vllm.forward_context import get_forward_context
 
 from tests.ut.base import TestBase
+from vllm_ascend.ascend_forward_context import set_ascend_forward_context
 from vllm_ascend.ascend_config import init_ascend_config
 from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer, pad_and_split_tensor_tp
 
@@ -525,7 +527,10 @@ class TestEagleProposerFlashCommHelpers(TestBase):
                 positions,
             )
 
-        self.assertTrue(torch.equal(reduced_hidden_states, torch.tensor([[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]])))
+        self.assertEqual(
+            reduced_hidden_states.tolist(),
+            [[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]],
+        )
         self.assertTrue(torch.equal(split_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
@@ -564,7 +569,10 @@ class TestEagleProposerFlashCommHelpers(TestBase):
                 ),
             )
         )
-        self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]])))
+        self.assertEqual(
+            model_hidden_states.tolist(),
+            [[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]],
+        )
         self.assertTrue(torch.equal(model_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
@@ -597,3 +605,55 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(model_inputs_embeds, inputs_embeds))
         self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[4.0, 5.0], [6.0, 7.0]])))
         self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))
+
+
+class TestAscendForwardContextDraftFlashComm(TestBase):
+    @patch("vllm_ascend.ascend_forward_context.enable_sp", return_value=True)
+    @patch("vllm_ascend.ascend_forward_context.select_moe_comm_method", return_value=None)
+    @patch("vllm_ascend.ascend_forward_context.get_dp_group")
+    @patch("vllm_ascend.ascend_forward_context.get_tensor_model_parallel_world_size", return_value=4)
+    def test_mtp_draft_context_enables_flashcomm(
+        self,
+        _mock_tp_world_size,
+        mock_get_dp_group,
+        _mock_select_moe_comm_method,
+        _mock_enable_sp,
+    ):
+        mock_get_dp_group.return_value = SimpleNamespace(world_size=1)
+        vllm_config = MagicMock(spec=VllmConfig)
+        vllm_config.speculative_config = MagicMock(method="mtp")
+        vllm_config.compilation_config = MagicMock()
+        vllm_config.model_config = MagicMock()
+
+        with set_ascend_forward_context(
+            attn_metadata=None,
+            vllm_config=vllm_config,
+            num_tokens=2048,
+            is_draft_model=True,
+        ):
+            self.assertTrue(get_forward_context().flash_comm_v1_enabled)
+
+    @patch("vllm_ascend.ascend_forward_context.enable_sp", return_value=True)
+    @patch("vllm_ascend.ascend_forward_context.select_moe_comm_method", return_value=None)
+    @patch("vllm_ascend.ascend_forward_context.get_dp_group")
+    @patch("vllm_ascend.ascend_forward_context.get_tensor_model_parallel_world_size", return_value=4)
+    def test_eagle_draft_context_keeps_flashcomm_disabled(
+        self,
+        _mock_tp_world_size,
+        mock_get_dp_group,
+        _mock_select_moe_comm_method,
+        _mock_enable_sp,
+    ):
+        mock_get_dp_group.return_value = SimpleNamespace(world_size=1)
+        vllm_config = MagicMock(spec=VllmConfig)
+        vllm_config.speculative_config = MagicMock(method="eagle")
+        vllm_config.compilation_config = MagicMock()
+        vllm_config.model_config = MagicMock()
+
+        with set_ascend_forward_context(
+            attn_metadata=None,
+            vllm_config=vllm_config,
+            num_tokens=2048,
+            is_draft_model=True,
+        ):
+            self.assertFalse(get_forward_context().flash_comm_v1_enabled)

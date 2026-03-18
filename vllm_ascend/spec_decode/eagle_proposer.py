@@ -82,8 +82,13 @@ def split_inputs_tp_to_sp(hidden_states, out):
 
     # copy only hidden_states in current rank
     hidden_states_curr_rank = hidden_states[start:end]
-    out[: hidden_states_curr_rank.shape[0]] = hidden_states_curr_rank
-    return out[:padded_num_tokens_per_rank]
+    if start != 0 and out.data_ptr() == hidden_states.data_ptr() and hidden_states_curr_rank.numel() > 0:
+        hidden_states_curr_rank = hidden_states_curr_rank.clone()
+    out_shard = out[:padded_num_tokens_per_rank]
+    if hidden_states_curr_rank.shape[0] != padded_num_tokens_per_rank:
+        out_shard.zero_()
+    out_shard[: hidden_states_curr_rank.shape[0]].copy_(hidden_states_curr_rank)
+    return out_shard
 
 
 def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tensor:
