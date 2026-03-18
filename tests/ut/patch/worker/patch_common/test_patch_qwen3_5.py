@@ -14,12 +14,14 @@
 #
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 import torch
 import torch.nn.functional as F
 import vllm.model_executor.layers.linear as linear_module
 from vllm.model_executor.layers.linear import MergedColumnParallelLinear
+from vllm.config import set_current_vllm_config
 
 from tests.ut.base import PytestBase
 from vllm_ascend.patch.worker.patch_qwen3_5 import (
@@ -55,6 +57,15 @@ def _local_shard(weight: torch.Tensor, tp_size: int, tp_rank: int) -> torch.Tens
     shard_size = weight.size(0) // tp_size
     start = tp_rank * shard_size
     return weight.narrow(0, start, shard_size)
+
+
+@pytest.fixture
+def default_vllm_config():
+    mock_config = MagicMock()
+    mock_config.compilation_config.dispatch_forward_backend = "eager"
+    mock_config.compilation_config.custom_ops = ["all"]
+    with set_current_vllm_config(mock_config):
+        yield mock_config
 
 
 class TestPatchQwen35PackedInProj(PytestBase):
@@ -117,6 +128,7 @@ class TestPatchQwen35PackedInProj(PytestBase):
         monkeypatch,
         tp_size,
         tp_rank,
+        default_vllm_config,
     ):
         hidden_size = 7
         key_dim = 24
