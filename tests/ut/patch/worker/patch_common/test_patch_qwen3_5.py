@@ -22,6 +22,7 @@ import torch.nn.functional as F
 import vllm.model_executor.layers.linear as linear_module
 from vllm.model_executor.layers.linear import MergedColumnParallelLinear
 from vllm.config import set_current_vllm_config
+from vllm_ascend.ops import linear as ascend_linear_module
 
 from tests.ut.base import PytestBase
 from vllm_ascend.patch.worker.patch_qwen3_5 import (
@@ -146,6 +147,11 @@ class TestPatchQwen35PackedInProj(PytestBase):
             linear_module,
             "get_tensor_model_parallel_rank",
             lambda: tp_rank,
+        )
+        monkeypatch.setattr(
+            ascend_linear_module,
+            "get_parallel_op",
+            lambda disable_tp, prefix, layer, direct: (None, tp_rank, tp_size),
         )
 
         packed_layer = MergedColumnParallelLinear(
