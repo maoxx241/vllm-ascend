@@ -488,7 +488,10 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         core_attn_out = self.norm(core_attn_out, z)
         core_attn_out = core_attn_out.reshape(z_shape_og)
         core_attn_out = rearrange(core_attn_out, "... h d -> ... (h d)")
-        output[:num_tokens], _ = self.out_proj(core_attn_out)
+        projected_output, _ = self.out_proj(core_attn_out)
+        if output.shape != projected_output.shape:
+            output.resize_(projected_output.shape)
+        output.copy_(projected_output)
 
     def _forward_core(
         self,
