@@ -16,7 +16,7 @@ from pathlib import Path
 
 DEFAULT_MODEL = "/home/weights/Qwen3.5-35B-A3B"
 DEFAULT_OUTPUT = Path("/tmp/qwen35_moe_gsm8k.json")
-VLLM_REPO_ROOT = Path(__file__).resolve().parents[4] / "vllm"
+VLLM_REPO_ROOT = Path(__file__).resolve().parents[5] / "vllm"
 
 
 def _get_counter_delta(before, after, name: str) -> int:
