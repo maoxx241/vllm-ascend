@@ -253,6 +253,10 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
 
     @staticmethod
     def _get_speculative_method(forward_context) -> str | None:
+        speculative_method = getattr(forward_context, "speculative_method", None)
+        if speculative_method is not None:
+            return speculative_method
+
         try:
             vllm_config = get_current_vllm_config()
         except AssertionError:

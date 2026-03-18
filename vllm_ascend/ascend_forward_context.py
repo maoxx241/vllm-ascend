@@ -128,6 +128,9 @@ def set_ascend_forward_context(
         forward_context.prefetch_mlp_down_proj = False
         forward_context.model_instance = model_instance
         forward_context.is_draft_model = is_draft_model
+        forward_context.speculative_method = (
+            getattr(vllm_config.speculative_config, "method", None) if vllm_config.speculative_config else None
+        )
 
         if num_tokens is None and attn_metadata is not None:
             num_tokens = attn_metadata.num_actual_tokens
@@ -307,6 +310,7 @@ class _ExtraForwardContextProxy:
         "num_accept_tokens",
         "in_profile_run",
         "padded_num_tokens",
+        "speculative_method",
     )
 
     def check_extra_attr(self, name: str):

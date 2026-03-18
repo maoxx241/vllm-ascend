@@ -633,6 +633,7 @@ class TestAscendForwardContextDraftFlashComm(TestBase):
             is_draft_model=True,
         ):
             self.assertTrue(get_forward_context().flash_comm_v1_enabled)
+            self.assertEqual(get_forward_context().speculative_method, "mtp")
 
     @patch("vllm_ascend.ascend_forward_context.enable_sp", return_value=True)
     @patch("vllm_ascend.ascend_forward_context.select_moe_comm_method", return_value=None)
@@ -659,3 +660,4 @@ class TestAscendForwardContextDraftFlashComm(TestBase):
             is_draft_model=True,
         ):
             self.assertFalse(get_forward_context().flash_comm_v1_enabled)
+            self.assertEqual(get_forward_context().speculative_method, "eagle")
