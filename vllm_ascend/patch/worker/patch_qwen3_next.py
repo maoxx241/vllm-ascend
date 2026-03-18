@@ -18,20 +18,25 @@
 
 import os
 from itertools import islice
+from collections import defaultdict as collections_defaultdict
 
 import torch
 import torch_npu
 from einops import rearrange
+from vllm.config import get_layers_from_vllm_config
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule
 from vllm.model_executor.layers.fla.ops.l2norm import l2norm_fwd
+from vllm.model_executor.layers.attention_layer_base import AttentionLayerBase
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
 from vllm.model_executor.models.qwen3_next import Qwen3NextGatedDeltaNet, Qwen3NextModel
 from vllm.triton_utils import triton
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
 from vllm.v1.attention.backends.utils import PAD_SLOT_ID
+from vllm.v1.kv_cache_interface import UniformTypeKVCacheSpecs
 from vllm.v1.worker.kv_connector_model_runner_mixin import KVConnectorModelRunnerMixin
+from vllm.v1.worker.utils import AttentionGroup
 
 from vllm_ascend.attention.utils import maybe_save_kv_layer_to_connector
 from vllm_ascend.ops.triton.fla.utils import (
@@ -41,6 +46,7 @@ from vllm_ascend.ops.triton.fla.utils import (
 )
 from vllm_ascend.ops.triton.fla.fused_qkvzba_split_reshape import fused_qkvzba_split_reshape_cat
 from vllm_ascend.ops.triton.fused_gdn_gating import fused_gdn_gating_patch
+from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer
 from vllm_ascend.utils import enable_sp
 
 
@@ -62,6 +68,62 @@ def _maybe_get_kv_connector_output_compat(
 
 
 KVConnectorModelRunnerMixin.maybe_get_kv_connector_output = staticmethod(_maybe_get_kv_connector_output_compat)
+
+
+def _initialize_mtp_attn_backend(self, kv_cache_config, kernel_block_sizes) -> None:
+    if getattr(self, "draft_attn_groups", None):
+        return
+
+    layers = get_layers_from_vllm_config(
+        self.vllm_config,
+        AttentionLayerBase,
+        self.attn_layer_names,
+    )
+    draft_attn_groups = []
+    for kv_cache_group_id, kv_cache_group_spec in enumerate(kv_cache_config.kv_cache_groups):
+        group_layer_names = [name for name in kv_cache_group_spec.layer_names if name in self.attn_layer_names]
+        if not group_layer_names:
+            continue
+
+        grouped_layers = collections_defaultdict(list)
+        grouped_backends = {}
+        grouped_specs = {}
+        for layer_name in group_layer_names:
+            attn_backend = layers[layer_name].get_attn_backend()
+            layer_kv_cache_spec = kv_cache_group_spec.kv_cache_spec
+            if isinstance(layer_kv_cache_spec, UniformTypeKVCacheSpecs):
+                layer_kv_cache_spec = layer_kv_cache_spec.kv_cache_specs[layer_name]
+
+            key = (attn_backend.full_cls_name(), layer_kv_cache_spec)
+            grouped_backends[key] = attn_backend
+            grouped_specs[key] = layer_kv_cache_spec
+            grouped_layers[key].append(layer_name)
+
+        for key, layer_names in grouped_layers.items():
+            attn_backend = grouped_backends[key]
+            layer_kv_cache_spec = grouped_specs[key]
+            attn_metadata_builder = attn_backend.get_builder_cls()(
+                layer_kv_cache_spec,
+                layer_names,
+                self.vllm_config,
+                self.device,
+            )
+            draft_attn_groups.append(
+                AttentionGroup(
+                    attn_backend,
+                    layer_names,
+                    layer_kv_cache_spec,
+                    kv_cache_group_id,
+                    [attn_metadata_builder],
+                )
+            )
+
+    assert draft_attn_groups, "draft attention groups must be initialized before drafter setup"
+    self.draft_attn_groups = draft_attn_groups
+    self.kernel_block_size = self.draft_attn_groups[0].kv_cache_spec.block_size
+
+
+AscendEagleProposer.initialize_attn_backend = _initialize_mtp_attn_backend
 
 
 def _gdn_prefill_plan_enabled() -> bool:
