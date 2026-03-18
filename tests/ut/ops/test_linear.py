@@ -66,6 +66,7 @@ class BaseLinearTest(unittest.TestCase):
             ),
             patch("vllm_ascend.ops.linear.enable_sp", return_value=False),
             patch("vllm_ascend.ops.linear_op.enable_dsa_cp", return_value=False),
+            patch("vllm_ascend.ops.linear_op.enable_dsa_cp_with_layer_shard", return_value=False),
             patch("vllm_ascend.ops.linear_op.enable_sp", return_value=False),
             patch("vllm_ascend.utils.mlp_tp_enable", return_value=True),
             patch("vllm_ascend.utils.oproj_tp_enable", return_value=True)
@@ -165,7 +166,7 @@ class TestAscendMergedColumnParallelLinear(BaseLinearTest):
         )
         self.assertEqual(linear.custom_op.comm_group, parallel_state._MLP_TP)
 
-    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    @patch("vllm.config.get_current_vllm_config")
     def test_marks_qwen35_vl_linear_attention_first_projection(self, mock_get_current_vllm_config):
         mock_get_current_vllm_config.return_value = _build_mock_vllm_config()
 
@@ -177,7 +178,7 @@ class TestAscendMergedColumnParallelLinear(BaseLinearTest):
 
         self.assertTrue(linear.fc1_skip_input_gather)
 
-    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    @patch("vllm.config.get_current_vllm_config")
     def test_does_not_mark_non_first_qwen35_projection(self, mock_get_current_vllm_config):
         mock_get_current_vllm_config.return_value = _build_mock_vllm_config()
 
@@ -192,7 +193,7 @@ class TestAscendMergedColumnParallelLinear(BaseLinearTest):
 
 class TestAscendQKVParallelLinear(BaseLinearTest):
 
-    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    @patch("vllm.config.get_current_vllm_config")
     def test_marks_qwen35_vl_full_attention_first_projection(self, mock_get_current_vllm_config):
         mock_get_current_vllm_config.return_value = _build_mock_vllm_config(first_layer_type="full_attention")
 
