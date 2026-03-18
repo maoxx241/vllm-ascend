@@ -1623,6 +1623,19 @@ class SpecDecodeBaseProposer(EagleProposer):
         hidden_states: torch.Tensor,
         positions: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") == "1":
+            print(
+                "Qwen3.5 maybe_pad_and_reduce before:",
+                {
+                    "method": self.method,
+                    "flash_comm_v1_enabled": getattr(_EXTRA_CTX, "flash_comm_v1_enabled", None),
+                    "tp_world_size": get_tp_group().world_size,
+                    "tp_rank": get_tp_group().rank,
+                    "hidden_states": tuple(hidden_states.shape),
+                    "positions": tuple(positions.shape),
+                },
+                flush=True,
+            )
         if self.method == "mtp":
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
@@ -1631,6 +1644,15 @@ class SpecDecodeBaseProposer(EagleProposer):
         else:
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
+        if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") == "1":
+            print(
+                "Qwen3.5 maybe_pad_and_reduce after:",
+                {
+                    "hidden_states": tuple(hidden_states.shape),
+                    "positions": tuple(positions.shape),
+                },
+                flush=True,
+            )
         return hidden_states, positions
 
     def maybe_pad_and_reduce_draft_inputs(
