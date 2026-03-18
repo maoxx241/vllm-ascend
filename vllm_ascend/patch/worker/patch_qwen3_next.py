@@ -31,6 +31,7 @@ from vllm.triton_utils import triton
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
 from vllm.v1.attention.backends.utils import PAD_SLOT_ID
+from vllm.v1.worker.kv_connector_model_runner_mixin import KVConnectorModelRunnerMixin
 
 from vllm_ascend.attention.utils import maybe_save_kv_layer_to_connector
 from vllm_ascend.ops.triton.fla.utils import (
@@ -44,6 +45,23 @@ from vllm_ascend.utils import enable_sp
 
 
 _ORIGINAL_QWEN3NEXT_MODEL_FORWARD = Qwen3NextModel.forward
+_ORIGINAL_MAYBE_GET_KV_CONNECTOR_OUTPUT = KVConnectorModelRunnerMixin.maybe_get_kv_connector_output
+
+
+def _maybe_get_kv_connector_output_compat(
+    scheduler_output,
+    clear_metadata: bool = True,
+    defer_finalize: bool | None = None,
+):
+    if defer_finalize is not None:
+        clear_metadata = not defer_finalize
+    return _ORIGINAL_MAYBE_GET_KV_CONNECTOR_OUTPUT(
+        scheduler_output,
+        clear_metadata=clear_metadata,
+    )
+
+
+KVConnectorModelRunnerMixin.maybe_get_kv_connector_output = staticmethod(_maybe_get_kv_connector_output_compat)
 
 
 def _gdn_prefill_plan_enabled() -> bool:
