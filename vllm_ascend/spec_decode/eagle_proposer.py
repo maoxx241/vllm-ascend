@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 import copy
-import os
 from collections.abc import Callable
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from typing import Any
@@ -109,24 +108,6 @@ def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tenso
     shard_num_tokens = padded_num_tokens // world_size
     start = shard_num_tokens * rank
     return tensor.narrow(token_dim, start, shard_num_tokens)
-
-
-def _maybe_log_mtp_draft_shapes(stage: str, **tensors: torch.Tensor | None) -> None:
-    if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") != "1":
-        return
-
-    shape_repr = {
-        name: (tuple(tensor.shape) if tensor is not None else None)
-        for name, tensor in tensors.items()
-    }
-    print(
-        f"Qwen3.5 MTP draft shapes [{stage}]: "
-        f"flash_comm_v1_enabled={getattr(_EXTRA_CTX, 'flash_comm_v1_enabled', None)} "
-        f"tp_world_size={get_tp_group().world_size} "
-        f"tp_rank={get_tp_group().rank} "
-        f"{shape_repr}",
-        flush=True,
-    )
 
 
 class SpecDecodeBaseProposer(EagleProposer):
@@ -773,14 +754,6 @@ class SpecDecodeBaseProposer(EagleProposer):
         }
         if self.pass_hidden_states_to_model:
             model_kwargs["hidden_states"] = model_hidden_states
-        _maybe_log_mtp_draft_shapes(
-            "merged",
-            input_ids=model_input_ids,
-            inputs_embeds=inputs_embeds,
-            hidden_states=model_kwargs.get("hidden_states"),
-            positions=model_positions,
-        )
-
         ret_hidden_states = self.model(**model_kwargs)
         if not self.model_returns_tuple():
             last_hidden_states = ret_hidden_states
@@ -928,14 +901,6 @@ class SpecDecodeBaseProposer(EagleProposer):
             }
             if self.pass_hidden_states_to_model:
                 model_kwargs["hidden_states"] = model_hidden_states
-            _maybe_log_mtp_draft_shapes(
-                f"loop_{draft_step}",
-                input_ids=model_input_ids,
-                inputs_embeds=inputs_embeds,
-                hidden_states=model_kwargs.get("hidden_states"),
-                positions=model_positions,
-            )
-
             ret_hidden_states = self.model(**model_kwargs)
             if not self.model_returns_tuple():
                 last_hidden_states = ret_hidden_states
@@ -1631,19 +1596,6 @@ class SpecDecodeBaseProposer(EagleProposer):
         hidden_states: torch.Tensor,
         positions: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") == "1":
-            print(
-                "Qwen3.5 maybe_pad_and_reduce before:",
-                {
-                    "method": self.method,
-                    "flash_comm_v1_enabled": getattr(_EXTRA_CTX, "flash_comm_v1_enabled", None),
-                    "tp_world_size": get_tp_group().world_size,
-                    "tp_rank": get_tp_group().rank,
-                    "hidden_states": tuple(hidden_states.shape),
-                    "positions": tuple(positions.shape),
-                },
-                flush=True,
-            )
         if self.method == "mtp":
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
@@ -1652,15 +1604,6 @@ class SpecDecodeBaseProposer(EagleProposer):
         else:
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
-        if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_DRAFT_SHAPES") == "1":
-            print(
-                "Qwen3.5 maybe_pad_and_reduce after:",
-                {
-                    "hidden_states": tuple(hidden_states.shape),
-                    "positions": tuple(positions.shape),
-                },
-                flush=True,
-            )
         return hidden_states, positions
 
     def maybe_pad_and_reduce_draft_inputs(
