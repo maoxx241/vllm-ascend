@@ -20,6 +20,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 import vllm.model_executor.layers.linear as linear_module
+import vllm.model_executor.parameter as parameter_module
 from vllm.model_executor.layers.linear import MergedColumnParallelLinear
 from vllm.config import set_current_vllm_config
 from vllm_ascend.ops import linear as ascend_linear_module
@@ -145,6 +146,16 @@ class TestPatchQwen35PackedInProj(PytestBase):
         )
         monkeypatch.setattr(
             linear_module,
+            "get_tensor_model_parallel_rank",
+            lambda: tp_rank,
+        )
+        monkeypatch.setattr(
+            parameter_module,
+            "get_tensor_model_parallel_world_size",
+            lambda: tp_size,
+        )
+        monkeypatch.setattr(
+            parameter_module,
             "get_tensor_model_parallel_rank",
             lambda: tp_rank,
         )
