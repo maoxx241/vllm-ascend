@@ -267,4 +267,6 @@ class TestPatchQwen35PackedInProj(PytestBase):
         )
         assert loaded_params == {
             "layers.0.linear_attn.in_proj.weight",
+            "layers.0.linear_attn.in_proj_qkvz.weight",
+            "layers.0.linear_attn.in_proj_ba.weight",
         }

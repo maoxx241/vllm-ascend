@@ -172,23 +172,24 @@ def _load_qwen35_legacy_in_proj_for_validation(
     packed_name: str,
     weight_name: str,
     loaded_weight: torch.Tensor,
-) -> None:
+) -> str | None:
     if not _should_validate_packed_in_proj():
-        return
+        return None
     if weight_name not in _QWEN35_LEGACY_IN_PROJ_MAPPING:
-        return
+        return None
 
     legacy_param_name, legacy_shard_id = _QWEN35_LEGACY_IN_PROJ_MAPPING[weight_name]
     legacy_name = packed_name.replace("in_proj", legacy_param_name)
     legacy_param = params_dict.get(legacy_name)
     if legacy_param is None:
-        return
+        return None
     legacy_weight_loader = getattr(
         legacy_param,
         "weight_loader",
         default_weight_loader,
     )
     legacy_weight_loader(legacy_param, loaded_weight, legacy_shard_id)
+    return legacy_name
 
 
 def _patched_qwen3_5_gated_delta_net_init(self, *args, **kwargs) -> None:
@@ -268,12 +269,14 @@ def _patched_qwen3_5_model_load_weights(
             param = params_dict[name_mapped]
             weight_loader = getattr(param, "weight_loader", default_weight_loader)
             weight_loader(param, loaded_weight, shard_id)
-            _load_qwen35_legacy_in_proj_for_validation(
+            legacy_name = _load_qwen35_legacy_in_proj_for_validation(
                 params_dict,
                 name_mapped,
                 weight_name,
                 loaded_weight,
             )
+            if legacy_name is not None:
+                loaded_params.add(legacy_name)
             name = name_mapped
             break
         else:
