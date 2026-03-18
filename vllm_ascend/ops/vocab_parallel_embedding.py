@@ -19,7 +19,8 @@
 import torch
 from torch import nn
 from torch.nn.parameter import Parameter
-from vllm.distributed import divide
+from vllm.distributed import divide, tensor_model_parallel_all_reduce
+from vllm.forward_context import get_forward_context
 from vllm.distributed.parallel_state import get_tp_group
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization.base_config import (
@@ -201,8 +202,27 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if self.tp_size > 1:
             output_parallel.masked_fill_(input_mask.unsqueeze(-1), 0)
         # Reduce across all the model parallel GPUs.
-        output = torch.ops.vllm.maybe_pad_and_reduce(output_parallel)
+        if self._should_preserve_mtp_draft_sequence_dim():
+            output = tensor_model_parallel_all_reduce(output_parallel)
+        else:
+            output = torch.ops.vllm.maybe_pad_and_reduce(output_parallel)
         return output
+
+    @staticmethod
+    def _should_preserve_mtp_draft_sequence_dim() -> bool:
+        try:
+            forward_context = get_forward_context()
+        except AssertionError:
+            return False
+
+        if not getattr(forward_context, "flash_comm_v1_enabled", False):
+            return False
+        if not getattr(forward_context, "is_draft_model", False):
+            return False
+
+        speculative_config = getattr(forward_context, "vllm_config", None)
+        speculative_config = getattr(speculative_config, "speculative_config", None)
+        return getattr(speculative_config, "method", None) == "mtp"
 
 
 class AscendParallelLMHead(ParallelLMHead):

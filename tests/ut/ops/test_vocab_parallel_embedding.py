@@ -16,6 +16,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
 
 import torch
 
@@ -203,6 +204,66 @@ class TestCustomVocabParallelEmbedding(unittest.TestCase):
                     # Call the forward method
                     output = layer.forward(input_)
                 self.assertEqual(output.shape, expected_shape)
+
+    def test_forward_mtp_draft_flashcomm_preserves_sequence_dim(self):
+        layer = self._create_layer()
+        layer.tp_size = 2
+        input_ = torch.tensor([15, 35, 16, 36])
+        mock_output = torch.randn(4, self.embedding_dim)
+        layer.quant_method.embedding = MagicMock(return_value=mock_output.clone())
+        forward_context = SimpleNamespace(
+            flash_comm_v1_enabled=True,
+            is_draft_model=True,
+            vllm_config=SimpleNamespace(
+                speculative_config=SimpleNamespace(method="mtp"),
+            ),
+        )
+
+        with patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.get_forward_context",
+            return_value=forward_context,
+        ), patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.tensor_model_parallel_all_reduce",
+            side_effect=lambda x: x,
+        ) as mock_all_reduce, patch(
+            "torch.ops.vllm.maybe_pad_and_reduce",
+            side_effect=AssertionError("maybe_pad_and_reduce should be skipped"),
+        ) as mock_pad_reduce:
+            output = layer.forward(input_)
+
+        mock_all_reduce.assert_called_once()
+        mock_pad_reduce.assert_not_called()
+        self.assertEqual(output.shape, (4, self.embedding_dim))
+
+    def test_forward_non_mtp_draft_flashcomm_keeps_existing_reduce_path(self):
+        layer = self._create_layer()
+        layer.tp_size = 2
+        input_ = torch.tensor([15, 35, 16, 36])
+        mock_output = torch.randn(4, self.embedding_dim)
+        layer.quant_method.embedding = MagicMock(return_value=mock_output.clone())
+        forward_context = SimpleNamespace(
+            flash_comm_v1_enabled=True,
+            is_draft_model=True,
+            vllm_config=SimpleNamespace(
+                speculative_config=SimpleNamespace(method="eagle"),
+            ),
+        )
+
+        with patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.get_forward_context",
+            return_value=forward_context,
+        ), patch(
+            "vllm_ascend.ops.vocab_parallel_embedding.tensor_model_parallel_all_reduce",
+            side_effect=AssertionError("all_reduce path should be skipped"),
+        ) as mock_all_reduce, patch(
+            "torch.ops.vllm.maybe_pad_and_reduce",
+            side_effect=lambda x: x,
+        ) as mock_pad_reduce:
+            output = layer.forward(input_)
+
+        mock_all_reduce.assert_not_called()
+        mock_pad_reduce.assert_called_once()
+        self.assertEqual(output.shape, (4, self.embedding_dim))
 
 
 class TestAscendLogitsProcessor(unittest.TestCase):
