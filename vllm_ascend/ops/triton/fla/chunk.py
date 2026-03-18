@@ -38,6 +38,7 @@ def chunk_gated_delta_rule_fwd(
     initial_state: torch.Tensor,
     output_final_state: bool,
     cu_seqlens: torch.LongTensor | None = None,
+    launch_plan=None,
 ):
     forward_context = get_forward_context()
     num_decodes = 0
@@ -47,10 +48,17 @@ def chunk_gated_delta_rule_fwd(
     if attn_metadata is not None:
         num_decodes = attn_metadata.num_decodes
     chunk_size = 64
-    g = chunk_local_cumsum(g, chunk_size=chunk_size, cu_seqlens=cu_seqlens)
+    g = chunk_local_cumsum(g, chunk_size=chunk_size, cu_seqlens=cu_seqlens, launch_plan=launch_plan)
     # obtain WY representation. u is actually the new v.
-    A = chunk_scaled_dot_kkt_fwd(k=k, beta=beta, g_cumsum=g, cu_seqlens=cu_seqlens, output_dtype=torch.float32)
-    A = solve_tril(A=A, cu_seqlens=cu_seqlens, output_dtype=k.dtype)
+    A = chunk_scaled_dot_kkt_fwd(
+        k=k,
+        beta=beta,
+        g_cumsum=g,
+        cu_seqlens=cu_seqlens,
+        output_dtype=torch.float32,
+        launch_plan=launch_plan,
+    )
+    A = solve_tril(A=A, cu_seqlens=cu_seqlens, output_dtype=k.dtype, launch_plan=launch_plan)
     w, u = recompute_w_u_fwd(
         k=k,
         v=v,
@@ -58,6 +66,7 @@ def chunk_gated_delta_rule_fwd(
         A=A,
         g_cumsum=g,
         cu_seqlens=cu_seqlens,
+        launch_plan=launch_plan,
     )
     h, v_new, final_state = chunk_gated_delta_rule_fwd_h(
         k=k,
@@ -67,6 +76,7 @@ def chunk_gated_delta_rule_fwd(
         initial_state=initial_state,
         output_final_state=output_final_state,
         cu_seqlens=cu_seqlens,
+        launch_plan=launch_plan,
     )
 
     if get_pcp_group().world_size > 1:
@@ -77,9 +87,14 @@ def chunk_gated_delta_rule_fwd(
             g=g,
             cu_seqlens=cu_seqlens,
             num_decodes=num_decodes,
+            launch_plan=launch_plan,
         )
         all_final_state = get_pcp_group().all_gather(final_state.unsqueeze(0), 0)
-        final_chunk_indices = prepare_final_chunk_indices(cu_seqlens, chunk_size)
+        final_chunk_indices = (
+            launch_plan.get_final_chunk_indices()
+            if launch_plan is not None
+            else prepare_final_chunk_indices(cu_seqlens, chunk_size)
+        )
         final_h_update = h_update[:, final_chunk_indices, :, :, :]
         all_final_h_update = get_pcp_group().all_gather(final_h_update, 0)
 
@@ -105,6 +120,7 @@ def chunk_gated_delta_rule_fwd(
             h_update=h_update,
             updated_h_state=updated_h_state,
             cu_seqlens=cu_seqlens,
+            launch_plan=launch_plan,
         )
 
     o = chunk_fwd_o(
@@ -115,6 +131,7 @@ def chunk_gated_delta_rule_fwd(
         g=g,
         scale=scale,
         cu_seqlens=cu_seqlens,
+        launch_plan=launch_plan,
     )
 
     if SUPPRESS_LEVEL < 3:
@@ -138,6 +155,7 @@ class ChunkGatedDeltaRuleFunction(torch.autograd.Function):
         output_final_state: bool,
         cu_seqlens: torch.LongTensor | None = None,
         use_qk_l2norm_in_kernel: bool = False,
+        launch_plan=None,
     ):
         if use_qk_l2norm_in_kernel:
             q = l2norm_fwd(q)
@@ -152,6 +170,7 @@ class ChunkGatedDeltaRuleFunction(torch.autograd.Function):
             initial_state=initial_state,
             output_final_state=output_final_state,
             cu_seqlens=cu_seqlens,
+            launch_plan=launch_plan,
         )
         ctx.scale = scale
         ctx.use_qk_l2norm_in_kernel = use_qk_l2norm_in_kernel
@@ -171,6 +190,7 @@ def chunk_gated_delta_rule(
     cu_seqlens: torch.LongTensor | None = None,
     head_first: bool = False,
     use_qk_l2norm_in_kernel: bool = False,
+    launch_plan=None,
 ):
     r"""
     Args:
@@ -268,7 +288,17 @@ def chunk_gated_delta_rule(
     if scale is None:
         scale = k.shape[-1] ** -0.5
     o, final_state = ChunkGatedDeltaRuleFunction.apply(
-        q, k, v, g, beta, scale, initial_state, output_final_state, cu_seqlens, use_qk_l2norm_in_kernel
+        q,
+        k,
+        v,
+        g,
+        beta,
+        scale,
+        initial_state,
+        output_final_state,
+        cu_seqlens,
+        use_qk_l2norm_in_kernel,
+        launch_plan,
     )
     if head_first:
         o = rearrange(o, "b t h ... -> b h t ...")

@@ -118,6 +118,7 @@ def chunk_fwd_o(
     scale: float | None = None,
     cu_seqlens: torch.LongTensor | None = None,
     chunk_size: int = 64,
+    launch_plan=None,
 ) -> torch.Tensor:
     B, T, Hg, K, V = *q.shape, v.shape[-1]
     H = v.shape[-2]
@@ -129,6 +130,8 @@ def chunk_fwd_o(
     o = torch.empty_like(v)
     if cu_seqlens is None:
         N, chunk_offsets = B, None
+    elif launch_plan is not None:
+        N, chunk_offsets = len(cu_seqlens) - 1, launch_plan.get_chunk_offsets()
     else:
         N, chunk_offsets = (
             len(cu_seqlens) - 1,

@@ -16,6 +16,8 @@
 # from collections.abc import Iterable
 # mypy: ignore-errors
 
+from itertools import islice
+
 import torch
 import torch_npu
 from einops import rearrange
@@ -23,16 +25,99 @@ from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule
 from vllm.model_executor.layers.fla.ops.l2norm import l2norm_fwd
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
-from vllm.model_executor.models.qwen3_next import Qwen3NextGatedDeltaNet
+from vllm.model_executor.models.qwen3_next import Qwen3NextGatedDeltaNet, Qwen3NextModel
 from vllm.triton_utils import triton
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
 from vllm.v1.attention.backends.utils import PAD_SLOT_ID
 
 from vllm_ascend.attention.utils import maybe_save_kv_layer_to_connector
+from vllm_ascend.ops.triton.fla.utils import (
+    GDN_SOLVE_TRIL_LARGE_BLOCK_T,
+    get_chunk_local_cumsum_block_size,
+    prepare_gdn_prefill_index_plan,
+)
 from vllm_ascend.ops.triton.fla.fused_qkvzba_split_reshape import fused_qkvzba_split_reshape_cat
 from vllm_ascend.ops.triton.fused_gdn_gating import fused_gdn_gating_patch
 from vllm_ascend.utils import enable_sp
+
+
+_ORIGINAL_QWEN3NEXT_MODEL_FORWARD = Qwen3NextModel.forward
+
+
+def _get_required_gdn_block_sizes(model: Qwen3NextModel) -> tuple[int, ...]:
+    cached = getattr(model, "_ascend_gdn_required_block_sizes", None)
+    if cached is not None:
+        return cached
+
+    head_counts: set[int] = set()
+    for layer in islice(model.layers, model.start_layer, model.end_layer):
+        linear_attn = getattr(layer, "linear_attn", None)
+        if linear_attn is None:
+            continue
+        head_counts.add(linear_attn.num_v_heads // linear_attn.tp_size)
+
+    cached = tuple(
+        sorted(
+            {
+                GDN_SOLVE_TRIL_LARGE_BLOCK_T,
+                *(get_chunk_local_cumsum_block_size(num_heads) for num_heads in head_counts),
+            }
+        )
+    )
+    model._ascend_gdn_required_block_sizes = cached
+    return cached
+
+
+def _prepare_gdn_prefill_index_plans(model: Qwen3NextModel) -> None:
+    forward_context = get_forward_context()
+    attn_metadata = forward_context.attn_metadata
+    if not isinstance(attn_metadata, dict):
+        return
+
+    required_block_sizes = _get_required_gdn_block_sizes(model)
+    plan_cache = {}
+    for metadata in attn_metadata.values():
+        if not isinstance(metadata, GDNAttentionMetadata):
+            continue
+
+        metadata.ascend_non_spec_index_plan = None
+        if metadata.num_prefills <= 0:
+            continue
+
+        non_spec_query_start_loc = metadata.non_spec_query_start_loc
+        if non_spec_query_start_loc is None or non_spec_query_start_loc.numel() <= 1:
+            continue
+
+        cache_key = (
+            non_spec_query_start_loc.data_ptr(),
+            non_spec_query_start_loc.numel(),
+        )
+        index_plan = plan_cache.get(cache_key)
+        if index_plan is None:
+            index_plan = prepare_gdn_prefill_index_plan(
+                non_spec_query_start_loc,
+                required_block_sizes=required_block_sizes,
+            )
+            plan_cache[cache_key] = index_plan
+        metadata.ascend_non_spec_index_plan = index_plan
+
+
+def _ascend_qwen3next_model_forward(
+    self,
+    input_ids,
+    positions,
+    intermediate_tensors=None,
+    inputs_embeds=None,
+):
+    _prepare_gdn_prefill_index_plans(self)
+    return _ORIGINAL_QWEN3NEXT_MODEL_FORWARD(
+        self,
+        input_ids,
+        positions,
+        intermediate_tensors,
+        inputs_embeds,
+    )
 
 
 class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
@@ -124,6 +209,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
         non_spec_token_indx = attn_metadata.non_spec_token_indx
         spec_state_indices_tensor = attn_metadata.spec_state_indices_tensor  # noqa: E501
         non_spec_state_indices_tensor = attn_metadata.non_spec_state_indices_tensor  # noqa: E501
+        non_spec_index_plan = getattr(attn_metadata, "ascend_non_spec_index_plan", None)
         self_kv_cache = self.kv_cache[forward_context.virtual_engine]
         conv_state = self_kv_cache[0].transpose(-1, -2)
         ssm_state = self_kv_cache[1]
@@ -251,6 +337,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 cu_seqlens=non_spec_query_start_loc,
                 head_first=False,
                 use_qk_l2norm_in_kernel=True,
+                launch_plan=non_spec_index_plan,
             )
             ssm_state[non_spec_state_indices_tensor] = (
                 last_recurrent_state.transpose(-1, -2).contiguous().to(ssm_state.dtype)
@@ -302,3 +389,4 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
 
 Qwen3NextGatedDeltaNet.forward = AscendQwen3Next_GatedDeltaNet.forward
 Qwen3NextGatedDeltaNet._forward_core = AscendQwen3Next_GatedDeltaNet._forward_core
+Qwen3NextModel.forward = _ascend_qwen3next_model_forward

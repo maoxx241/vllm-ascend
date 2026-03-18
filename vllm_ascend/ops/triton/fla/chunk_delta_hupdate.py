@@ -164,6 +164,7 @@ def chunk_gated_delta_rule_fwd_hupdate(
     chunk_size: int = 64,  # SY: remove this argument and force chunk size 64?
     cu_seqlens: torch.LongTensor | None = None,
     num_decodes: int = 0,
+    launch_plan=None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     # This kernel is slightly different from fla to support Q/K with different head numbers.
     # In fla, Q/K always have the same head number, so Hg is always equal to H.
@@ -171,21 +172,26 @@ def chunk_gated_delta_rule_fwd_hupdate(
     H = u.shape[-2]
     BT = chunk_size
 
-    chunk_indices = prepare_chunk_indices(cu_seqlens, chunk_size) if cu_seqlens is not None else None
     # N: the actual number of sequences in the batch with either equal or variable lengths
     if cu_seqlens is None:
         N, NT, chunk_offsets = B, triton.cdiv(T, BT), None
+        update_indices = None
+    elif launch_plan is not None:
+        N, NT, chunk_offsets = len(cu_seqlens) - 1, launch_plan.total_chunks, launch_plan.get_chunk_offsets()
+        update_indices = launch_plan.get_update_chunk_offsets()[:-1]
     else:
+        chunk_indices = prepare_chunk_indices(cu_seqlens, chunk_size)
         N, NT, chunk_offsets = (
             len(cu_seqlens) - 1,
             len(chunk_indices),
             prepare_chunk_offsets(cu_seqlens, BT),
         )
+        update_indices = prepare_update_chunk_offsets(cu_seqlens, BT)[:-1]
     assert K <= 256, "current kernel does not support head dimension larger than 256."
 
     h_update = k.new_empty(B, NT + N, H, K, K, dtype=torch.float32)
-    update_indices = prepare_update_chunk_offsets(cu_seqlens, BT)[:-1]
-    h_update[:, update_indices, :, :, :] = torch.eye(K, dtype=h_update.dtype, device=h_update.device)
+    if update_indices is not None:
+        h_update[:, update_indices, :, :, :] = torch.eye(K, dtype=h_update.dtype, device=h_update.device)
 
     g = g.transpose(1, 2).contiguous()
 

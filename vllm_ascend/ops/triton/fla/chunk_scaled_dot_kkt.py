@@ -87,6 +87,7 @@ def chunk_scaled_dot_kkt_fwd(
     cu_seqlens: torch.LongTensor | None = None,
     chunk_size: int = 64,
     output_dtype: torch.dtype = torch.float32,
+    launch_plan=None,
 ) -> torch.Tensor:
     r"""
     Compute beta * K * K^T.
@@ -115,14 +116,18 @@ def chunk_scaled_dot_kkt_fwd(
 
     H = beta.shape[-1]
     BT = chunk_size
-    if cu_seqlens is not None:
+    if cu_seqlens is not None and launch_plan is not None:
+        chunk_indices = launch_plan.get_chunk_indices()
+        NT = launch_plan.total_chunks
+    elif cu_seqlens is not None:
         cu_seqlens = cu_seqlens.cpu()
-        chunk_indices = prepare_chunk_indices(cu_seqlens, BT) if cu_seqlens is not None else None
+        chunk_indices = prepare_chunk_indices(cu_seqlens, BT)
         chunk_indices = chunk_indices.npu()
         cu_seqlens = cu_seqlens.npu()
+        NT = len(chunk_indices)
     else:
         chunk_indices = None
-    NT = triton.cdiv(T, BT) if cu_seqlens is None else len(chunk_indices)
+        NT = triton.cdiv(T, BT)
     A = torch.empty(B, T, H, BT, device=k.device, dtype=output_dtype)
 
     chunk_scaled_dot_kkt_fwd_kernel[(NT, 1)](
