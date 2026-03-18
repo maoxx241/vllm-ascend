@@ -122,6 +122,8 @@ def _maybe_log_mtp_draft_shapes(stage: str, **tensors: torch.Tensor | None) -> N
     print(
         f"Qwen3.5 MTP draft shapes [{stage}]: "
         f"flash_comm_v1_enabled={getattr(_EXTRA_CTX, 'flash_comm_v1_enabled', None)} "
+        f"tp_world_size={get_tp_group().world_size} "
+        f"tp_rank={get_tp_group().rank} "
         f"{shape_repr}",
         flush=True,
     )
