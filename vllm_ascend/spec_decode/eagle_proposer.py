@@ -1604,8 +1604,9 @@ class SpecDecodeBaseProposer(EagleProposer):
     ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor, torch.Tensor]:
         hidden_states, positions = self.maybe_pad_and_reduce(hidden_states, positions)
         if self.method == "mtp" and _EXTRA_CTX.flash_comm_v1_enabled:
-            input_ids = pad_and_split_tensor_tp(input_ids, 0)
-            if inputs_embeds is not None:
+            if input_ids.shape[0] != hidden_states.shape[0]:
+                input_ids = pad_and_split_tensor_tp(input_ids, 0)
+            if inputs_embeds is not None and inputs_embeds.shape[0] != hidden_states.shape[0]:
                 inputs_embeds = pad_and_split_tensor_tp(inputs_embeds, 0)
         return input_ids, inputs_embeds, hidden_states, positions
 
