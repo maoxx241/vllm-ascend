@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import torch
 from vllm.config import set_current_vllm_config
-from vllm.model_executor.layers.layernorm import RMSNorm
+from vllm.model_executor.layers.layernorm import GemmaRMSNorm, RMSNorm
 
 from vllm_ascend.utils import enable_custom_op
 from vllm_ascend.utils import is_310p as is_310p_hw
@@ -94,6 +94,23 @@ def test_RMSNorm_forward_chunks_residual(
     mock_chunk_residual.side_effect = lambda x, residual: residual + 3
 
     layer = RMSNorm(hidden_size=8, eps=1e-05)
+    out_x, out_residual = layer.forward_oot(dummy_tensor, residual)
+
+    mock_chunk_residual.assert_called_once()
+    mock_add_rms_norm_bias.assert_called_once()
+    assert torch.allclose(out_x, 2 * dummy_tensor)
+    assert torch.allclose(out_residual, 2 * (residual + 3))
+
+
+@patch("torch.ops.vllm.maybe_chunk_residual")
+@patch("torch.ops._C_ascend.npu_add_rms_norm_bias", side_effect=mock_add_rms_norm_bias)
+def test_GemmaRMSNorm_forward_chunks_residual(
+    mock_add_rms_norm_bias, mock_chunk_residual, dummy_tensor, default_vllm_config
+):
+    residual = torch.randn(4, 8, dtype=torch.float32)
+    mock_chunk_residual.side_effect = lambda x, residual: residual + 3
+
+    layer = GemmaRMSNorm(hidden_size=8, eps=1e-05)
     out_x, out_residual = layer.forward_oot(dummy_tensor, residual)
 
     mock_chunk_residual.assert_called_once()
