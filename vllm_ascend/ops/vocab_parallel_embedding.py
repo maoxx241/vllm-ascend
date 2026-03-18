@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import os
 
 import torch
 from torch import nn
@@ -202,7 +202,34 @@ class AscendVocabParallelEmbedding(VocabParallelEmbedding):
         if self.tp_size > 1:
             output_parallel.masked_fill_(input_mask.unsqueeze(-1), 0)
         # Reduce across all the model parallel GPUs.
-        if self._should_preserve_mtp_draft_sequence_dim():
+        preserve_sequence_dim = self._should_preserve_mtp_draft_sequence_dim()
+        if os.environ.get("VLLM_ASCEND_DEBUG_QWEN35_EMBED") == "1":
+            try:
+                forward_context = get_forward_context()
+                speculative_config = getattr(getattr(forward_context, "vllm_config", None), "speculative_config", None)
+                speculative_method = getattr(speculative_config, "method", None)
+                flash_comm_v1_enabled = getattr(forward_context, "flash_comm_v1_enabled", None)
+                is_draft_model = getattr(forward_context, "is_draft_model", None)
+            except AssertionError:
+                speculative_method = None
+                flash_comm_v1_enabled = None
+                is_draft_model = None
+            print(
+                "Qwen3.5 embed forward:",
+                {
+                    "class": type(self).__name__,
+                    "input_shape": tuple(input_.shape),
+                    "output_parallel_shape": tuple(output_parallel.shape),
+                    "tp_size": self.tp_size,
+                    "forward_type": self.forward_type,
+                    "flash_comm_v1_enabled": flash_comm_v1_enabled,
+                    "is_draft_model": is_draft_model,
+                    "speculative_method": speculative_method,
+                    "preserve_sequence_dim": preserve_sequence_dim,
+                },
+                flush=True,
+            )
+        if preserve_sequence_dim:
             output = tensor_model_parallel_all_reduce(output_parallel)
         else:
             output = torch.ops.vllm.maybe_pad_and_reduce(output_parallel)
