@@ -66,6 +66,7 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         non_spec_token_indx = attn_metadata.non_spec_token_indx
         spec_state_indices_tensor = attn_metadata.spec_state_indices_tensor  # noqa: E501
         non_spec_state_indices_tensor = attn_metadata.non_spec_state_indices_tensor  # noqa: E501
+        non_spec_index_plan = getattr(attn_metadata, "ascend_non_spec_index_plan", None)
         self_kv_cache = self.kv_cache[forward_context.virtual_engine]
         conv_state = self_kv_cache[0].transpose(-1, -2)
         ssm_state = self_kv_cache[1]
@@ -192,6 +193,7 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
                     cu_seqlens=non_spec_query_start_loc,
                     head_first=False,
                     use_qk_l2norm_in_kernel=True,
+                    launch_plan=non_spec_index_plan,
                 )
                 # Init cache
                 ssm_state[non_spec_state_indices_tensor] = last_recurrent_state.to(ssm_state.dtype)

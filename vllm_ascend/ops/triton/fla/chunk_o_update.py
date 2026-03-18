@@ -85,6 +85,7 @@ def chunk_fwd_o_update(
     updated_h_state: torch.Tensor,
     cu_seqlens: torch.LongTensor | None = None,
     chunk_size: int = 64,
+    launch_plan=None,
 ) -> torch.Tensor:
     B, T, Hg, K, V = *q.shape, v.shape[-1]
     H = v.shape[-2]
@@ -95,7 +96,7 @@ def chunk_fwd_o_update(
     else:
         N, chunk_offsets = (
             len(cu_seqlens) - 1,
-            prepare_chunk_offsets(cu_seqlens, BT),
+            launch_plan.get_chunk_offsets() if launch_plan is not None else prepare_chunk_offsets(cu_seqlens, BT),
         )
 
     def grid(meta):

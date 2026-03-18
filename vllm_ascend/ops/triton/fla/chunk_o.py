@@ -118,6 +118,7 @@ def chunk_fwd_o(
     scale: float | None = None,
     cu_seqlens: torch.LongTensor | None = None,
     chunk_size: int = 64,
+    launch_plan=None,
 ) -> torch.Tensor:
     B, T, Hg, K, V = *q.shape, v.shape[-1]
     H = v.shape[-2]
@@ -132,7 +133,7 @@ def chunk_fwd_o(
     else:
         N, chunk_offsets = (
             len(cu_seqlens) - 1,
-            prepare_chunk_offsets(cu_seqlens, BT),
+            launch_plan.get_chunk_offsets() if launch_plan is not None else prepare_chunk_offsets(cu_seqlens, BT),
         )
 
     def grid(meta):

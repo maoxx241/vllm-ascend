@@ -83,6 +83,7 @@ def chunk_local_cumsum_scalar(
     cu_seqlens: torch.Tensor | None = None,
     head_first: bool = False,
     output_dtype: torch.Tensor | None = torch.float,
+    launch_plan=None,
 ):
     if head_first:
         B, H, T = g.shape
@@ -90,8 +91,20 @@ def chunk_local_cumsum_scalar(
         B, T, H = g.shape
     assert chunk_size == 2 ** (chunk_size.bit_length() - 1), "chunk_size must be a power of 2"
     OPTIM_BLOCK_SIZE = triton.next_power_of_2((2**18) // (H * chunk_size))
-    block_indices = prepare_chunk_indices(cu_seqlens, chunk_size=OPTIM_BLOCK_SIZE) if cu_seqlens is not None else None
-    num_blocks = len(block_indices) if cu_seqlens is not None else triton.cdiv(T, OPTIM_BLOCK_SIZE)
+    block_indices = (
+        launch_plan.get_block_indices(OPTIM_BLOCK_SIZE)
+        if launch_plan is not None and cu_seqlens is not None
+        else prepare_chunk_indices(cu_seqlens, chunk_size=OPTIM_BLOCK_SIZE)
+        if cu_seqlens is not None
+        else None
+    )
+    num_blocks = (
+        launch_plan.get_num_blocks(OPTIM_BLOCK_SIZE)
+        if launch_plan is not None and cu_seqlens is not None
+        else len(block_indices)
+        if cu_seqlens is not None
+        else triton.cdiv(T, OPTIM_BLOCK_SIZE)
+    )
     g_org, g = g, torch.empty_like(g, dtype=output_dtype or g.dtype)
     grid = (num_blocks, B)
     chunk_local_cumsum_scalar_kernel[grid](
@@ -134,6 +147,7 @@ def chunk_local_cumsum(
             cu_seqlens=cu_seqlens,
             head_first=head_first,
             output_dtype=output_dtype,
+            launch_plan=kwargs.get("launch_plan"),
         )
     else:
         raise ValueError(
