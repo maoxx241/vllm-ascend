@@ -361,7 +361,7 @@ class AscendColumnParallelLinear(ColumnParallelLinear):
         )
 
         self.gather_output = gather_output
-        self.fc1_skip_input_gather = is_qwen35_vl_first_lm_projection(prefix, get_current_vllm_config())
+        self.fc1_skip_input_gather = is_qwen35_vl_first_lm_projection(prefix)
 
         if output_sizes is None:
             output_sizes = [output_size]

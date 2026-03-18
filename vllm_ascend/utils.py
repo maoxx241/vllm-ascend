@@ -869,7 +869,10 @@ def is_qwen35_vl_first_lm_projection(prefix: str, vllm_config: VllmConfig | None
     if vllm_config is None:
         from vllm.config import get_current_vllm_config
 
-        vllm_config = get_current_vllm_config()
+        try:
+            vllm_config = get_current_vllm_config()
+        except AssertionError:
+            return False
 
     if not vllm_config or not vllm_config.model_config or not is_vl_model(vllm_config):
         return False
