@@ -465,7 +465,8 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
             self.tp_size,
             self.head_v_dim,
         )
-        _validate_qwen35_packed_in_proj(self, hidden_states, mixed_qkv, z, b, a)
+        if _should_validate_packed_in_proj():
+            _validate_qwen35_packed_in_proj(self, hidden_states, mixed_qkv, z, b, a)
 
         core_attn_out = torch.zeros(
             (num_tokens, self.num_v_heads // self.tp_size, self.head_v_dim),
