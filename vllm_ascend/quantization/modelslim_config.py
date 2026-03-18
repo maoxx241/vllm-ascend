@@ -119,14 +119,12 @@ packed_modules_model_mapping: dict[str, dict[str, list[str]]] = {
     "qwen3_5": {
         "qkv_proj": ["q_proj", "k_proj", "v_proj"],
         "gate_up_proj": ["gate_proj", "up_proj"],
-        "in_proj_qkvz": ["in_proj_qkv", "in_proj_z"],
-        "in_proj_ba": ["in_proj_b", "in_proj_a"],
+        "in_proj": ["in_proj_qkv", "in_proj_z", "in_proj_b", "in_proj_a"],
     },
     "qwen3_5_moe": {
         "qkv_proj": ["q_proj", "k_proj", "v_proj"],
         "gate_up_proj": ["gate_proj", "up_proj"],
-        "in_proj_qkvz": ["in_proj_qkv", "in_proj_z"],
-        "in_proj_ba": ["in_proj_b", "in_proj_a"],
+        "in_proj": ["in_proj_qkv", "in_proj_z", "in_proj_b", "in_proj_a"],
         "experts": ["experts.0.gate_proj", "experts.0.up_proj", "experts.0.down_proj"],
     },
     "deepseek_v2": {
