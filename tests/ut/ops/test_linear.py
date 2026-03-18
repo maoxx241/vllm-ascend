@@ -64,6 +64,8 @@ class BaseLinearTest(unittest.TestCase):
                 "vllm.distributed.parallel_state.get_tp_group",
                 return_value=self.mock_group,
             ),
+            patch("vllm_ascend.ops.linear_op.enable_dsa_cp", return_value=False),
+            patch("vllm_ascend.ops.linear_op.enable_sp", return_value=False),
             patch("vllm_ascend.utils.mlp_tp_enable", return_value=True),
             patch("vllm_ascend.utils.oproj_tp_enable", return_value=True)
         ]
