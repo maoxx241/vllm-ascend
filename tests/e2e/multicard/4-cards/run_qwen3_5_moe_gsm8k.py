@@ -59,8 +59,8 @@ def main() -> None:
         os.environ["VLLM_ASCEND_ENABLE_FLASHCOMM1"] = "1"
 
     import torch_npu  # noqa: F401
+    from tests.evals.gsm8k.gsm8k_eval import evaluate_gsm8k_offline
     from vllm import LLM
-    from vllm.tests.evals.gsm8k.gsm8k_eval import evaluate_gsm8k_offline
 
     llm = None
     result = {
