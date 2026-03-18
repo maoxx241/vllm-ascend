@@ -10,11 +10,13 @@
 import argparse
 import json
 import os
+import sys
 import time
 from pathlib import Path
 
 DEFAULT_MODEL = "/home/weights/Qwen3.5-35B-A3B"
 DEFAULT_OUTPUT = Path("/tmp/qwen35_moe_gsm8k.json")
+VLLM_REPO_ROOT = Path(__file__).resolve().parents[4] / "vllm"
 
 
 def _get_counter_delta(before, after, name: str) -> int:
@@ -57,6 +59,7 @@ def main() -> None:
     os.environ.setdefault("HCCL_BUFFSIZE", "1024")
     if args.flashcomm:
         os.environ["VLLM_ASCEND_ENABLE_FLASHCOMM1"] = "1"
+    sys.path.insert(0, str(VLLM_REPO_ROOT))
 
     import torch_npu  # noqa: F401
     from tests.evals.gsm8k.gsm8k_eval import evaluate_gsm8k_offline
