@@ -328,8 +328,16 @@ class SpecDecodeBaseProposer(EagleProposer):
                     )
             else:
                 # MTP model
-                share_embeddings = True
-                logger.info("Detected MTP model. Sharing target model embedding weights with the draft model.")
+                target_tp = self.vllm_config.parallel_config.tensor_parallel_size
+                draft_tp = self.speculative_config.draft_tensor_parallel_size
+                if enable_sp(self.vllm_config) and target_tp != draft_tp:
+                    logger.info(
+                        "Detected MTP model with FLASHCOMM1 and draft TP != target TP. "
+                        "Keeping draft model embedding weights to avoid double sequence sharding."
+                    )
+                else:
+                    share_embeddings = True
+                    logger.info("Detected MTP model. Sharing target model embedding weights with the draft model.")
 
             if share_embeddings:
                 if hasattr(self.model.model, "embed_tokens"):
