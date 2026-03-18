@@ -23,6 +23,7 @@ import atexit
 import functools
 import math
 import os
+import re
 from contextlib import nullcontext
 from enum import Enum
 from functools import lru_cache
@@ -842,16 +843,55 @@ def _is_contain_expert(config: Any):
 
 
 def is_vl_model(vllm_config: VllmConfig):
-    """Checks if the model is a VL model by config"""
-    global _IS_VL_MODEL
-    if _IS_VL_MODEL is None and vllm_config and vllm_config.model_config:
-        hf_config = vllm_config.model_config.hf_config.to_dict()
-        if "thinker_config" in hf_config:
-            # Qwen-Omni-thinker models
-            _IS_VL_MODEL = True
-        else:
-            _IS_VL_MODEL = "vision_config" in hf_config
-    return _IS_VL_MODEL
+    """Checks if the model is a VL model by config.
+
+    Uses the same criterion as vllm itself: a model is multimodal when its
+    top-level hf_config differs from its hf_text_config. Legacy key checks are
+    kept as fallback for configs that collapse both views to the same object.
+    """
+    if not vllm_config or not vllm_config.model_config:
+        return False
+
+    model_config = vllm_config.model_config
+    if model_config.hf_config is not model_config.hf_text_config:
+        return True
+
+    hf_config = model_config.hf_config.to_dict()
+    return "thinker_config" in hf_config or "vision_config" in hf_config
+
+
+def parse_layer_idx(prefix: str) -> int | None:
+    match = re.search(r"layers\.(\d+)", prefix)
+    return int(match.group(1)) if match else None
+
+
+def is_qwen35_vl_first_lm_projection(prefix: str, vllm_config: VllmConfig | None = None) -> bool:
+    if vllm_config is None:
+        from vllm.config import get_current_vllm_config
+
+        vllm_config = get_current_vllm_config()
+
+    if not vllm_config or not vllm_config.model_config or not is_vl_model(vllm_config):
+        return False
+
+    hf_text_config = vllm_config.model_config.hf_text_config
+    if "qwen3_5" not in getattr(hf_text_config, "model_type", ""):
+        return False
+
+    if parse_layer_idx(prefix) != 0:
+        return False
+
+    layer_types = getattr(hf_text_config, "layer_types", None)
+    if not layer_types:
+        return False
+
+    first_layer_type = layer_types[0]
+    if first_layer_type == "linear_attention":
+        return prefix.endswith("layers.0.linear_attn.in_proj")
+    if first_layer_type == "full_attention":
+        return prefix.endswith("layers.0.self_attn.qkv_proj")
+
+    return False
 
 
 def has_rope(vllm_config: VllmConfig):

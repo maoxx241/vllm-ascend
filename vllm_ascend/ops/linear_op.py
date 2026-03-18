@@ -127,10 +127,12 @@ class CustomColumnParallelOp(CustomLinearOp):
     def __init__(self, layer):
         super().__init__(layer)
         self.gather_output = None
+        self.skip_input_gather = False
 
     def update_attrs(self):
         super().update_attrs()
         self.gather_output = self.layer.gather_output
+        self.skip_input_gather = getattr(self.layer, "fc1_skip_input_gather", False)
 
 
 class CustomRowParallelOp(CustomLinearOp):
@@ -441,7 +443,8 @@ class SequenceColumnParallelOp(CustomColumnParallelOp):
         # Matrix multiply.
         assert self.quant_method is not None
 
-        input_ = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(input_, True)
+        if not self.skip_input_gather:
+            input_ = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(input_, True)
         output_parallel = self.quant_method.apply(self.layer, input_, bias)
 
         if self.gather_output:

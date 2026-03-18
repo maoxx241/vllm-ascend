@@ -83,3 +83,20 @@ def test_RMSNorm_forward_310p(mock_add_rmsnorm, mock_rmsnorm, residual, dummy_te
         expected_out_x = dummy_tensor + 1
         mock_rmsnorm.assert_called_once()
         assert torch.allclose(out_x, expected_out_x)
+
+
+@patch("torch.ops.vllm.maybe_chunk_residual")
+@patch("torch.ops._C_ascend.npu_add_rms_norm_bias", side_effect=mock_add_rms_norm_bias)
+def test_RMSNorm_forward_chunks_residual(
+    mock_add_rms_norm_bias, mock_chunk_residual, dummy_tensor, default_vllm_config
+):
+    residual = torch.randn(4, 8, dtype=torch.float32)
+    mock_chunk_residual.side_effect = lambda x, residual: residual + 3
+
+    layer = RMSNorm(hidden_size=8, eps=1e-05)
+    out_x, out_residual = layer.forward_oot(dummy_tensor, residual)
+
+    mock_chunk_residual.assert_called_once()
+    mock_add_rms_norm_bias.assert_called_once()
+    assert torch.allclose(out_x, 2 * dummy_tensor)
+    assert torch.allclose(out_residual, 2 * (residual + 3))

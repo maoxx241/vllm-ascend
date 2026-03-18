@@ -431,8 +431,8 @@ class AscendQwen3_5Model(Qwen3_5Model):
     ) -> torch.Tensor:
         forward_context = get_forward_context()
         forward_context.qwen35_gdn_prefill_precomputed = {}
-        if _has_qwen35_prefill_metadata(self):
-            _prepare_qwen35_prefill_precomputed(self)
+        # if _has_qwen35_prefill_metadata(self):
+        #     _prepare_qwen35_prefill_precomputed(self)
         return _ORIGINAL_QWEN3_5_MODEL_FORWARD(
             self,
             input_ids,

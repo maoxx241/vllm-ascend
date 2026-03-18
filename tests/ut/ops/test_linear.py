@@ -1,5 +1,6 @@
 import os
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 from unittest.mock import MagicMock, patch
 
@@ -10,9 +11,30 @@ from tests.ut.base import TestBase
 from vllm_ascend import ascend_config
 from vllm_ascend.distributed import parallel_state
 from vllm_ascend.ops.linear import (AscendMergedColumnParallelLinear,
+                                    AscendQKVParallelLinear,
                                     AscendReplicatedLinear,
                                     AscendRowParallelLinear,
                                     AscendUnquantizedLinearMethod)
+from vllm_ascend.ops.linear_op import SequenceColumnParallelOp
+
+
+def _build_mock_vllm_config(first_layer_type="linear_attention", is_vl=True):
+    hf_text_config = SimpleNamespace(
+        model_type="qwen3_5_text",
+        layer_types=[first_layer_type],
+    )
+    hf_config = SimpleNamespace(
+        to_dict=lambda: {"vision_config": {}} if is_vl else {},
+    )
+    if not is_vl:
+        hf_config = hf_text_config
+
+    return SimpleNamespace(
+        model_config=SimpleNamespace(
+            hf_config=hf_config,
+            hf_text_config=hf_text_config,
+        )
+    )
 
 
 class BaseLinearTest(unittest.TestCase):
@@ -139,6 +161,85 @@ class TestAscendMergedColumnParallelLinear(BaseLinearTest):
             prefix="gate_up_proj",
         )
         self.assertEqual(linear.custom_op.comm_group, parallel_state._MLP_TP)
+
+    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    def test_marks_qwen35_vl_linear_attention_first_projection(self, mock_get_current_vllm_config):
+        mock_get_current_vllm_config.return_value = _build_mock_vllm_config()
+
+        linear = AscendMergedColumnParallelLinear(
+            input_size=16,
+            output_sizes=[8, 8],
+            prefix="model.language_model.model.layers.0.linear_attn.in_proj",
+        )
+
+        self.assertTrue(linear.fc1_skip_input_gather)
+
+    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    def test_does_not_mark_non_first_qwen35_projection(self, mock_get_current_vllm_config):
+        mock_get_current_vllm_config.return_value = _build_mock_vllm_config()
+
+        linear = AscendMergedColumnParallelLinear(
+            input_size=16,
+            output_sizes=[8, 8],
+            prefix="model.language_model.model.layers.1.linear_attn.in_proj",
+        )
+
+        self.assertFalse(linear.fc1_skip_input_gather)
+
+
+class TestAscendQKVParallelLinear(BaseLinearTest):
+
+    @patch("vllm_ascend.ops.linear.get_current_vllm_config")
+    def test_marks_qwen35_vl_full_attention_first_projection(self, mock_get_current_vllm_config):
+        mock_get_current_vllm_config.return_value = _build_mock_vllm_config(first_layer_type="full_attention")
+
+        linear = AscendQKVParallelLinear(
+            hidden_size=16,
+            head_size=4,
+            total_num_heads=4,
+            total_num_kv_heads=4,
+            prefix="model.language_model.model.layers.0.self_attn.qkv_proj",
+        )
+
+        self.assertTrue(linear.fc1_skip_input_gather)
+
+
+class TestSequenceColumnParallelOp(unittest.TestCase):
+
+    def _build_layer(self, skip_input_gather):
+        return SimpleNamespace(
+            bias=None,
+            skip_bias_add=False,
+            return_bias=False,
+            gather_output=False,
+            prefix="model.language_model.model.layers.0.linear_attn.in_proj",
+            fc1_skip_input_gather=skip_input_gather,
+            quant_method=SimpleNamespace(apply=lambda layer, input_, bias: input_ + 1),
+        )
+
+    @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
+    def test_skips_gather_for_marked_first_projection(self, mock_all_gather):
+        mock_all_gather.side_effect = lambda tensor, _: tensor
+        layer = self._build_layer(skip_input_gather=True)
+        op = SequenceColumnParallelOp(layer)
+        op.update_attrs()
+
+        output, _ = op.apply_impl(torch.randn(4, 8))
+
+        mock_all_gather.assert_not_called()
+        self.assertEqual(output.shape, (4, 8))
+
+    @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
+    def test_gathers_for_unmarked_projection(self, mock_all_gather):
+        mock_all_gather.side_effect = lambda tensor, _: tensor
+        layer = self._build_layer(skip_input_gather=False)
+        op = SequenceColumnParallelOp(layer)
+        op.update_attrs()
+
+        output, _ = op.apply_impl(torch.randn(4, 8))
+
+        mock_all_gather.assert_called_once()
+        self.assertEqual(output.shape, (4, 8))
 
 
 class TestAscendReplicatedLinear(BaseLinearTest):

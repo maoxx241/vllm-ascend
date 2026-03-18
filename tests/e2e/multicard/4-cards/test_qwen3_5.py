@@ -16,7 +16,14 @@
 # This file is a part of the vllm-ascend project.
 # Adapted from vllm/tests/basic_correctness/test_basic_correctness.py
 #
-from tests.e2e.conftest import VllmRunner
+import os
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+from PIL import Image
+
+from tests.e2e.conftest import VllmRunner, qwen_prompt
 
 
 def test_qwen3_5_27b_distributed_mp_tp4():
@@ -34,6 +41,23 @@ def test_qwen3_5_27b_distributed_mp_tp4():
         del vllm_model
 
 
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_27b_distributed_mp_flash_comm_tp4():
+    example_prompts = [
+        "Hello, my name is",
+    ] * 4
+    max_tokens = 5
+    model_name = os.environ.get("VLLM_QWEN35_TEXT_MODEL", "Qwen/Qwen3.5-27B")
+    with VllmRunner(model_name,
+                    tensor_parallel_size=4,
+                    max_model_len=4096,
+                    gpu_memory_utilization=0.90,
+                    distributed_executor_backend="mp",
+                    enforce_eager=True) as vllm_model:
+        vllm_model.generate_greedy(example_prompts, max_tokens)
+        del vllm_model
+
+
 def test_qwen3_5_35b_distributed_mp_tp4():
     example_prompts = [
         "Hello, my name is",
@@ -47,6 +71,40 @@ def test_qwen3_5_35b_distributed_mp_tp4():
                     distributed_executor_backend="mp") as vllm_model:
         vllm_model.generate_greedy(example_prompts, max_tokens)
         del vllm_model
+
+
+def _get_qwen35_vl_test_image():
+    image_path = Path(__file__).resolve().parents[2] / "310p" / "data" / "qwen.png"
+    return Image.open(image_path).convert("RGB")
+
+
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_local_vl_distributed_mp_flash_comm_tp2():
+    model_name = os.environ.get("VLLM_QWEN35_VL_MODEL", "/home/weights/Qwen3.5-0.8B")
+    if os.path.isabs(model_name) and not os.path.exists(model_name):
+        pytest.skip(f"Local Qwen3.5 VL model path does not exist: {model_name}")
+
+    image = _get_qwen35_vl_test_image()
+    prompts = [
+        "Briefly introduce yourself.",
+        qwen_prompt(["Describe this image in detail."])[0],
+    ]
+    images = [None, image]
+
+    with VllmRunner(model_name,
+                    tensor_parallel_size=2,
+                    max_model_len=512,
+                    max_num_seqs=2,
+                    gpu_memory_utilization=0.6,
+                    distributed_executor_backend="mp",
+                    enforce_eager=True,
+                    dtype="bfloat16",
+                    limit_mm_per_prompt={"image": 1}) as vllm_model:
+        outputs = vllm_model.generate_greedy(prompts, max_tokens=32, images=images)
+
+    assert len(outputs) == len(prompts)
+    for _, output_str in outputs:
+        assert output_str
 
 
 def test_qwen3_5_35b_distributed_mp_tp4_full_decode_only_mtp3():
