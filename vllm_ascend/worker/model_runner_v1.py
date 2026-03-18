@@ -1996,6 +1996,26 @@ class NPUModelRunner(GPUModelRunner):
             cudagraph_stats,
         )
 
+    def _build_gdn_common_attn_metadata(
+        self,
+        common_attn_metadata: AscendCommonAttentionMetadata,
+        num_reqs: int,
+    ) -> AscendCommonAttentionMetadata:
+        gdn_common_attn_metadata = copy(common_attn_metadata)
+        gdn_common_attn_metadata.query_start_loc_cpu = self.gdn_query_start_loc.cpu[: num_reqs + 1]
+        gdn_common_attn_metadata.query_start_loc = self.gdn_query_start_loc.gpu[: num_reqs + 1]
+        gdn_common_attn_metadata.seq_lens_cpu = self.seq_lens.cpu[:num_reqs]
+        gdn_common_attn_metadata.seq_lens = self.seq_lens.gpu[:num_reqs]
+        gdn_common_attn_metadata.num_computed_tokens_cpu = self.input_batch.num_computed_tokens_cpu_tensor[:num_reqs]
+        gdn_common_attn_metadata.num_reqs = num_reqs
+        if gdn_common_attn_metadata.block_table_tensor is not None:
+            gdn_common_attn_metadata.block_table_tensor = gdn_common_attn_metadata.block_table_tensor[:num_reqs]
+        if gdn_common_attn_metadata.encoder_seq_lens is not None:
+            gdn_common_attn_metadata.encoder_seq_lens = gdn_common_attn_metadata.encoder_seq_lens[:num_reqs]
+        if gdn_common_attn_metadata.encoder_seq_lens_cpu is not None:
+            gdn_common_attn_metadata.encoder_seq_lens_cpu = gdn_common_attn_metadata.encoder_seq_lens_cpu[:num_reqs]
+        return gdn_common_attn_metadata
+
     def _build_attention_metadata(
         self,
         num_tokens: int,
@@ -2136,21 +2156,23 @@ class NPUModelRunner(GPUModelRunner):
                 cascade_attn_prefix_lens[kv_cache_gid][attn_gid] if cascade_attn_prefix_lens else 0
             )
 
+            metadata_for_builder = common_attn_metadata
             extra_attn_metadata_args = {}
             if use_spec_decode and isinstance(builder, GDNAttentionMetadataBuilder):
                 assert ubid is None, "UBatching not supported with GDN yet"
                 patch_torch_npu_argsort()
+                metadata_for_builder = self._build_gdn_common_attn_metadata(common_attn_metadata, num_reqs)
                 extra_attn_metadata_args = dict(
-                    num_accepted_tokens=self.num_accepted_tokens.gpu[:num_reqs_padded],
-                    num_decode_draft_tokens_cpu=self.num_decode_draft_tokens.cpu[:num_reqs_padded],
+                    num_accepted_tokens=self.num_accepted_tokens.gpu[:num_reqs],
+                    num_decode_draft_tokens_cpu=self.num_decode_draft_tokens.cpu[:num_reqs],
                 )
 
             if for_cudagraph_capture:
-                attn_metadata_i = builder.build_for_cudagraph_capture(common_attn_metadata)
+                attn_metadata_i = builder.build_for_cudagraph_capture(metadata_for_builder)
             else:
                 attn_metadata_i = builder.build(
                     common_prefix_len=cascade_attn_prefix_len,
-                    common_attn_metadata=common_attn_metadata,
+                    common_attn_metadata=metadata_for_builder,
                     **extra_attn_metadata_args,
                 )
 
@@ -2177,23 +2199,17 @@ class NPUModelRunner(GPUModelRunner):
                 num_reqs_padded,
             )
 
-            # Now, query_start_loc is padded.
-            # But gdn needs an unpadded one.
-            # gdn_query_start_loc is an unpadded version of query_start_loc.
-            # TODO delete it if fia's check is removed.
-            if self._has_gdn:
-                attn_group = self.attn_groups[kv_cache_gid][0]
-                builder = attn_group.get_metadata_builder(0)
-                if use_spec_decode and isinstance(builder, GDNAttentionMetadataBuilder):
-                    cm.query_start_loc_cpu = self.gdn_query_start_loc.cpu[: num_reqs_padded + 1]
-                    cm.query_start_loc = self.gdn_query_start_loc.gpu[: num_reqs_padded + 1]
-
             if kv_cache_gid > 0:
                 cm.block_table_tensor, cm.slot_mapping = _get_block_table_and_slot_mapping(kv_cache_gid)
             if self.speculative_config and spec_decode_common_attn_metadata is None:
                 if isinstance(self.drafter, AscendEagleProposer | AscendDraftModelProposer):
                     if self.drafter.attn_layer_names[0] in kv_cache_group.layer_names:
-                        spec_decode_common_attn_metadata = cm
+                        attn_group = self.attn_groups[kv_cache_gid][0]
+                        builder = attn_group.get_metadata_builder(0)
+                        if use_spec_decode and isinstance(builder, GDNAttentionMetadataBuilder):
+                            spec_decode_common_attn_metadata = self._build_gdn_common_attn_metadata(cm, num_reqs)
+                        else:
+                            spec_decode_common_attn_metadata = cm
                 else:
                     spec_decode_common_attn_metadata = cm
 

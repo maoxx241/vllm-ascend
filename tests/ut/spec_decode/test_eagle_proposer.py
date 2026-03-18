@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 import unittest
 
@@ -7,7 +8,7 @@ from vllm.config import CacheConfig, CompilationMode, CUDAGraphMode, VllmConfig,
 
 from tests.ut.base import TestBase
 from vllm_ascend.ascend_config import init_ascend_config
-from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer
+from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer, pad_and_split_tensor_tp
 
 
 class TestEagleProposerInitialization(TestBase):
@@ -485,3 +486,49 @@ class TestEagleProposerHelperMethods(TestBase):
         ):
             return_attn, indices = self.proposer.prepare_inputs(mock_attn, num_rejected)
             self.assertEqual(indices.tolist(), [1, 2, 4])
+
+
+class TestEagleProposerFlashCommHelpers(TestBase):
+    @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
+    def test_pad_and_split_tensor_tp_stays_device_local(self, mock_get_tp_group):
+        mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=0)
+        tensor = torch.arange(5, dtype=torch.int32)
+
+        with (
+            patch.object(torch.Tensor, "cpu", side_effect=AssertionError("cpu() should not be called")),
+            patch.object(torch.Tensor, "numpy", side_effect=AssertionError("numpy() should not be called")),
+            patch.object(torch.Tensor, "item", side_effect=AssertionError("item() should not be called")),
+            patch.object(torch.Tensor, "tolist", side_effect=AssertionError("tolist() should not be called")),
+        ):
+            shard = pad_and_split_tensor_tp(tensor, 0)
+
+        expected = torch.tensor([0, 1, 2], dtype=torch.int32)
+        self.assertTrue(torch.equal(shard, expected))
+
+    @patch("torch.ops.vllm.maybe_pad_and_reduce")
+    @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
+    def test_maybe_pad_and_reduce_mtp_flashcomm_skips_positions_reduce(
+        self,
+        mock_get_tp_group,
+        mock_maybe_pad_and_reduce,
+    ):
+        mock_get_tp_group.return_value = SimpleNamespace(world_size=2, rank=1)
+        proposer = object.__new__(AscendEagleProposer)
+        proposer.method = "mtp"
+
+        hidden_states = torch.arange(10, dtype=torch.float32).reshape(5, 2)
+        positions = torch.arange(5, dtype=torch.int32)
+        hidden_states_shard = torch.arange(6, dtype=torch.float32).reshape(3, 2)
+        mock_maybe_pad_and_reduce.return_value = hidden_states_shard
+
+        with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
+                   new=SimpleNamespace(flash_comm_v1_enabled=True)):
+            reduced_hidden_states, split_positions = AscendEagleProposer.maybe_pad_and_reduce(
+                proposer,
+                hidden_states,
+                positions,
+            )
+
+        mock_maybe_pad_and_reduce.assert_called_once_with(hidden_states)
+        self.assertTrue(torch.equal(reduced_hidden_states, hidden_states_shard))
+        self.assertTrue(torch.equal(split_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))

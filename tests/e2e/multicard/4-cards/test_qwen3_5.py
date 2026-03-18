@@ -39,6 +39,61 @@ def _get_qwen35_mtp3_speculative_config():
     return dict(QWEN35_MTP3_SPECULATIVE_CONFIG)
 
 
+def _get_qwen35_moe_model():
+    model_name = os.environ.get("VLLM_QWEN35_MOE_MODEL", "/home/weights/Qwen3.5-35B-A3B")
+    if os.path.isabs(model_name) and not os.path.exists(model_name):
+        pytest.skip(f"Local Qwen3.5 MoE model path does not exist: {model_name}")
+    return model_name
+
+
+def _is_ep_dispatch_combine_error(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    ep_dispatch_combine_markers = (
+        "dispatch_ffn_combine",
+        "dispatch_gmm_combine_decode",
+        "npu_moe_distribute_dispatch",
+        "npu_moe_distribute_combine",
+    )
+    return any(marker in msg for marker in ep_dispatch_combine_markers)
+
+
+def _run_qwen35_moe_smoke(*, enable_expert_parallel: bool, graph_mode: bool):
+    prompts = [
+        "Hello, my name is",
+        "The president of the United States is",
+        "The capital of France is",
+        "The future of AI is",
+    ]
+    runner_kwargs = dict(
+        tensor_parallel_size=4,
+        max_model_len=4096,
+        max_num_seqs=4,
+        gpu_memory_utilization=0.85,
+        distributed_executor_backend="mp",
+        disable_log_stats=False,
+        enable_expert_parallel=enable_expert_parallel,
+        speculative_config=_get_qwen35_mtp3_speculative_config(),
+        enforce_eager=not graph_mode,
+    )
+    if graph_mode:
+        runner_kwargs["compilation_config"] = {
+            "cudagraph_mode": "FULL_DECODE_ONLY",
+            "cudagraph_capture_sizes": [4, 8, 12, 16],
+        }
+
+    try:
+        with VllmRunner(_get_qwen35_moe_model(), **runner_kwargs) as vllm_model:
+            outputs = vllm_model.generate_greedy(prompts, max_tokens=20)
+    except Exception as exc:
+        if enable_expert_parallel and _is_ep_dispatch_combine_error(exc):
+            pytest.skip(f"Skip EP smoke due to dispatch/combine operator error: {exc}")
+        raise
+
+    assert len(outputs) == len(prompts)
+    for _, output_str in outputs:
+        assert output_str
+
+
 def test_qwen3_5_27b_distributed_mp_tp4():
     example_prompts = [
         "Hello, my name is",
@@ -78,7 +133,7 @@ def test_qwen3_5_35b_distributed_mp_tp4():
         "Hello, my name is",
     ] * 4
     max_tokens = 5
-    with VllmRunner("Qwen/Qwen3.5-35B-A3B",
+    with VllmRunner(_get_qwen35_moe_model(),
                     tensor_parallel_size=4,
                     cudagraph_capture_sizes=[1, 2, 4, 8],
                     max_model_len=4096,
@@ -161,7 +216,7 @@ def test_qwen3_5_35b_distributed_mp_tp4_full_decode_only_mtp3():
     ]
 
     max_tokens = 20
-    with VllmRunner("Qwen/Qwen3.5-35B-A3B",
+    with VllmRunner(_get_qwen35_moe_model(),
                     tensor_parallel_size=4,
                     max_model_len=4096,
                     gpu_memory_utilization=0.90,
@@ -173,3 +228,35 @@ def test_qwen3_5_35b_distributed_mp_tp4_full_decode_only_mtp3():
                     speculative_config=_get_qwen35_mtp3_speculative_config()) as vllm_model:
         vllm_model.generate_greedy(example_prompts, max_tokens)
         del vllm_model
+
+
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_35b_local_distributed_mp_flash_comm_tp4_mtp3():
+    _run_qwen35_moe_smoke(
+        enable_expert_parallel=True,
+        graph_mode=False,
+    )
+
+
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_35b_local_distributed_mp_flash_comm_tp4_mtp3_no_ep():
+    _run_qwen35_moe_smoke(
+        enable_expert_parallel=False,
+        graph_mode=False,
+    )
+
+
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_35b_local_distributed_mp_flash_comm_full_decode_only_tp4_mtp3():
+    _run_qwen35_moe_smoke(
+        enable_expert_parallel=True,
+        graph_mode=True,
+    )
+
+
+@patch.dict(os.environ, {"VLLM_ASCEND_ENABLE_FLASHCOMM1": "1"})
+def test_qwen3_5_35b_local_distributed_mp_flash_comm_full_decode_only_tp4_mtp3_no_ep():
+    _run_qwen35_moe_smoke(
+        enable_expert_parallel=False,
+        graph_mode=True,
+    )

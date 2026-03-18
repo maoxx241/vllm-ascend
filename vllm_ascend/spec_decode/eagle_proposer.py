@@ -85,6 +85,26 @@ def split_inputs_tp_to_sp(hidden_states, out):
     return out[:padded_num_tokens_per_rank]
 
 
+def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tensor:
+    group = get_tp_group()
+    world_size = group.world_size
+    rank = group.rank
+
+    num_tokens = tensor.shape[token_dim]
+    padded_num_tokens = ((num_tokens + world_size - 1) // world_size) * world_size
+    pad_size = padded_num_tokens - num_tokens
+
+    if pad_size > 0:
+        pad_shape = list(tensor.shape)
+        pad_shape[token_dim] = pad_size
+        pad = torch.zeros(pad_shape, dtype=tensor.dtype, device=tensor.device)
+        tensor = torch.cat((tensor, pad), dim=token_dim)
+
+    shard_num_tokens = padded_num_tokens // world_size
+    start = shard_num_tokens * rank
+    return tensor.narrow(token_dim, start, shard_num_tokens)
+
+
 class SpecDecodeBaseProposer(EagleProposer):
     _runnable: ACLGraphWrapper | Callable
 
@@ -1559,9 +1579,8 @@ class SpecDecodeBaseProposer(EagleProposer):
         if self.method == "mtp":
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = torch.ops.vllm.maybe_pad_and_reduce(hidden_states)
-                positions = positions.unsqueeze(-1)
-                positions = torch.ops.vllm.maybe_pad_and_reduce(positions)
-                positions = positions.squeeze(-1)
+                token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
+                positions = pad_and_split_tensor_tp(positions, token_dim)
         else:
             if _EXTRA_CTX.flash_comm_v1_enabled:
                 hidden_states = split_inputs_tp_to_sp(hidden_states, hidden_states)
