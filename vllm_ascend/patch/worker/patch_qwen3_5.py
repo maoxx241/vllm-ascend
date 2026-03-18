@@ -455,8 +455,8 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
                 output,
             )
 
-        num_tokens = hidden_states.size(0)
         projected_states, _ = self.in_proj(hidden_states)
+        num_tokens = projected_states.size(0)
         mixed_qkv, z, b, a = split_qwen35_packed_in_proj_output(
             projected_states,
             self.key_dim,
