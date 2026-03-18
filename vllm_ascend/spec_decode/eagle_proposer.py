@@ -119,11 +119,11 @@ def _maybe_log_mtp_draft_shapes(stage: str, **tensors: torch.Tensor | None) -> N
         name: (tuple(tensor.shape) if tensor is not None else None)
         for name, tensor in tensors.items()
     }
-    logger.info(
-        "Qwen3.5 MTP draft shapes [%s]: flash_comm_v1_enabled=%s %s",
-        stage,
-        getattr(_EXTRA_CTX, "flash_comm_v1_enabled", None),
-        shape_repr,
+    print(
+        f"Qwen3.5 MTP draft shapes [{stage}]: "
+        f"flash_comm_v1_enabled={getattr(_EXTRA_CTX, 'flash_comm_v1_enabled', None)} "
+        f"{shape_repr}",
+        flush=True,
     )
 
 
