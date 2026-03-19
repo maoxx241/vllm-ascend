@@ -55,6 +55,7 @@ from vllm_ascend.utils import enable_sp, lmhead_tp_enable, shared_expert_dp_enab
 _PREPARE_INPUTS_BLOCK_SIZE = 4
 _DEBUG_DUMP_DIR = os.environ.get("QWEN35_REPO_DUMP_DIR")
 _DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_REPO_DUMP_LIMIT", "16"))
+_DEBUG_TENSOR_HEAD = int(os.environ.get("QWEN35_REPO_DUMP_TENSOR_HEAD", "16"))
 _DEBUG_COUNTERS = {
     "split_inputs_tp_to_sp": 0,
     "pad_and_split_tensor_tp": 0,
@@ -108,6 +109,25 @@ def _debug_dump_info(kind: str, idx: int, name: str, payload: dict[str, Any]) ->
     }
     with open(path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.json", "w", encoding="utf-8") as f:
         json.dump(record, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+
+def _debug_head_tensor(
+    tensor: torch.Tensor | None,
+    *,
+    token_dim: int = 0,
+) -> torch.Tensor | None:
+    if tensor is None:
+        return None
+    if tensor.dim() == 0 or _DEBUG_TENSOR_HEAD <= 0:
+        return tensor
+    token_dim = token_dim % tensor.dim()
+    token_count = tensor.shape[token_dim]
+    head_count = min(token_count, _DEBUG_TENSOR_HEAD)
+    if head_count == token_count:
+        return tensor
+    slices = [slice(None)] * tensor.dim()
+    slices[token_dim] = slice(0, head_count)
+    return tensor[tuple(slices)].contiguous()
 
 
 # TODO: Remove it when the bug of fx-graph is solved
@@ -1017,6 +1037,13 @@ class SpecDecodeBaseProposer(EagleProposer):
                 token_indices_to_sample,
                 phase="initial",
             )
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "sample_hidden_states",
+                sample_hidden_states,
+                phase="initial",
+            )
         logits = self.model.compute_logits(sample_hidden_states)
 
         if lmhead_tp_enable() and num_indices < logits.shape[0] and not is_dummy:
@@ -1024,6 +1051,14 @@ class SpecDecodeBaseProposer(EagleProposer):
             token_indices_to_sample = token_indices_to_sample[:num_indices]
 
         draft_token_ids = logits.argmax(dim=-1)
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "draft_token_ids",
+                draft_token_ids,
+                phase="initial",
+            )
 
         # Early exit if there is only one draft token to be generated.
         if self.num_speculative_tokens == 1 or self.parallel_drafting:
@@ -1248,6 +1283,14 @@ class SpecDecodeBaseProposer(EagleProposer):
                     phase="loop",
                     draft_step=draft_step + 1,
                 )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "sample_hidden_states",
+                    sample_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
             logits = self.model.compute_logits(sample_hidden_states)
 
             if lmhead_tp_enable() and num_indices < logits.shape[0] and not is_dummy:
@@ -1257,6 +1300,15 @@ class SpecDecodeBaseProposer(EagleProposer):
             # TODO(wenlong): get more than one token for tree attention
             hidden_states = hidden_states[:batch_size]
             draft_token_ids = logits.argmax(dim=-1)
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "draft_token_ids",
+                    draft_token_ids,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
             draft_token_ids_tensor[draft_step + 1] = draft_token_ids
 
         # [batch_size, num_speculative_tokens]
@@ -1283,6 +1335,57 @@ class SpecDecodeBaseProposer(EagleProposer):
             # Inserting the next token ids at the last slot in each request.
             if token_indices_to_sample is None:
                 token_indices_to_sample = cad.query_start_loc[1:] - 1
+            if self.method == "mtp":
+                info_idx = _DEBUG_COUNTERS["mtp_model_info"]
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "token_indices_to_sample_in",
+                    token_indices_to_sample,
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "target_token_ids_head",
+                    _debug_head_tensor(target_token_ids),
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "next_token_ids",
+                    next_token_ids,
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "target_positions_head",
+                    _debug_head_tensor(target_positions, token_dim=1 if target_positions.dim() > 1 else 0),
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "target_hidden_states_head",
+                    _debug_head_tensor(target_hidden_states),
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "query_start_loc",
+                    cad.query_start_loc[: cad.num_reqs + 1],
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "query_start_loc_cpu",
+                    cad.query_start_loc_cpu[: cad.num_reqs + 1],
+                )
+                if self.runner is not None and getattr(self.runner, "logits_indices", None) is not None:
+                    _debug_dump_tensor(
+                        "mtp_first_pass",
+                        info_idx,
+                        "runner_logits_indices",
+                        _debug_head_tensor(self.runner.logits_indices),
+                    )
 
             num_tokens = target_token_ids.shape[0]
             # Shift the input ids by one token.
@@ -1360,6 +1463,45 @@ class SpecDecodeBaseProposer(EagleProposer):
 
             self._set_positions(num_tokens, target_positions)
             self.hidden_states[:num_tokens] = target_hidden_states
+            if self.method == "mtp":
+                info_idx = _DEBUG_COUNTERS["mtp_model_info"]
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "token_indices_to_sample_out",
+                    token_indices_to_sample,
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "input_ids_buffer_head",
+                    _debug_head_tensor(self.input_ids[:num_tokens]),
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "positions_buffer_head",
+                    _debug_head_tensor(
+                        self._get_positions(num_tokens),
+                        token_dim=1 if target_positions.dim() > 1 else 0,
+                    ),
+                )
+                _debug_dump_tensor(
+                    "mtp_first_pass",
+                    info_idx,
+                    "hidden_states_buffer_head",
+                    _debug_head_tensor(self.hidden_states[:num_tokens]),
+                )
+                _debug_dump_info(
+                    "mtp_first_pass",
+                    info_idx,
+                    "meta",
+                    {
+                        "num_tokens": int(num_tokens),
+                        "num_decode_reqs": int(num_decode_reqs),
+                        "num_prefill_reqs": int(num_prefill_reqs),
+                    },
+                )
 
             return num_tokens, token_indices_to_sample, cad, (query_lens_d, ori_token_indices_to_sample)
         else:
@@ -1666,6 +1808,25 @@ class SpecDecodeBaseProposer(EagleProposer):
             selected_tokens,
             self.backup_next_token_ids.gpu[:batch_size],
         )
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "valid_sampled_tokens_count",
+                valid_sampled_tokens_count,
+            )
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "last_valid_indices",
+                last_valid_indices,
+            )
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "next_token_ids",
+                next_token_ids,
+            )
         if self.method == "mtp":
             _debug_dump_tensor(
                 "prepare_next_token_ids_padded",
