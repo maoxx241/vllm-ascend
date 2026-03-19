@@ -89,7 +89,13 @@ _QWEN35_STACKED_PARAMS_MAPPING = [
 ]
 
 
+def _should_write_alias_debug() -> bool:
+    return bool(_QWEN35_ALIAS_DEBUG_JSONL) and not _is_compiling_debug()
+
+
 def _tensor_debug_ptr(tensor: torch.Tensor | None) -> dict[str, int | list[int] | str] | None:
+    if not _should_write_alias_debug():
+        return None
     if tensor is None:
         return None
     return {
@@ -98,6 +104,17 @@ def _tensor_debug_ptr(tensor: torch.Tensor | None) -> dict[str, int | list[int] 
         "shape": list(tensor.shape),
         "dtype": str(tensor.dtype),
     }
+
+
+def _same_storage_debug(
+    lhs: torch.Tensor | None,
+    rhs: torch.Tensor | None,
+) -> bool | None:
+    if not _should_write_alias_debug():
+        return None
+    if lhs is None or rhs is None:
+        return None
+    return lhs.untyped_storage().data_ptr() == rhs.untyped_storage().data_ptr()
 
 
 def _is_compiling_debug() -> bool:
@@ -116,7 +133,7 @@ def _is_compiling_debug() -> bool:
 
 
 def _write_alias_debug(stage: str, **fields) -> None:
-    if not _QWEN35_ALIAS_DEBUG_JSONL or _is_compiling_debug():
+    if not _should_write_alias_debug():
         return
     record = {"stage": stage, "pid": os.getpid(), **fields}
     with open(_QWEN35_ALIAS_DEBUG_JSONL, "a", encoding="utf-8") as f:
@@ -847,10 +864,9 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
             layer_type=self.layer_type,
             hidden=_tensor_debug_ptr(hidden_states),
             residual=_tensor_debug_ptr(residual),
-            hidden_residual_same_storage=(
-                hidden_states is not None
-                and residual is not None
-                and hidden_states.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            hidden_residual_same_storage=_same_storage_debug(
+                hidden_states,
+                residual,
             ),
         )
         _dump_decoder_tensors(
@@ -882,15 +898,13 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
             residual=_tensor_debug_ptr(residual),
             attn_output=_tensor_debug_ptr(attn_output),
             self_attention_output=_tensor_debug_ptr(self_attention_output),
-            hidden_residual_same_storage=(
-                hidden_states is not None
-                and residual is not None
-                and hidden_states.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            hidden_residual_same_storage=_same_storage_debug(
+                hidden_states,
+                residual,
             ),
-            output_residual_same_storage=(
-                self_attention_output is not None
-                and residual is not None
-                and self_attention_output.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            output_residual_same_storage=_same_storage_debug(
+                self_attention_output,
+                residual,
             ),
         )
         _dump_decoder_tensors(
