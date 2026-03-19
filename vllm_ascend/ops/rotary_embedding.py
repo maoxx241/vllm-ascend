@@ -243,7 +243,13 @@ class AscendRotaryEmbedding(RotaryEmbedding):
         is_draft_model = _EXTRA_CTX.is_draft_model
         flash_comm_v1_enabled = _EXTRA_CTX.flash_comm_v1_enabled
         if is_draft_model and self.use_mtp and flash_comm_v1_enabled:
-            positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(positions.contiguous(), True)
+            token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
+            positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
+                positions.contiguous(),
+                True,
+                False,
+                token_dim,
+            )
         return torch.ops.vllm.npu_rotary_embedding(
             positions, query, key, self.cos_sin_cache, self.head_size, self.rotary_dim, is_neox_style
         )

@@ -607,7 +607,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))
 
     @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
-    def test_maybe_all_gather_and_unpad_mtp_gathers_positions(
+    def test_maybe_all_gather_and_unpad_mtp_gathers_1d_positions(
         self,
         mock_all_gather,
     ):
@@ -633,6 +633,50 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertEqual(mock_all_gather.call_count, 2)
         self.assertTrue(torch.equal(gathered_last_hidden_states, last_hidden_states + 100))
         self.assertTrue(torch.equal(kept_positions, positions + 100))
+        self.assertTrue(torch.equal(gathered_hidden_states, gathered_last_hidden_states))
+
+    @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
+    def test_maybe_all_gather_and_unpad_mtp_gathers_2d_positions_on_token_dim(
+        self,
+        mock_all_gather,
+    ):
+        proposer = object.__new__(AscendEagleProposer)
+        proposer.method = "mtp"
+        proposer.enable_shared_expert_dp = True
+
+        last_hidden_states = torch.arange(6, dtype=torch.float32).reshape(3, 2)
+        hidden_states = torch.arange(6, dtype=torch.float32).reshape(3, 2) + 10
+        positions = torch.arange(12, dtype=torch.int32).reshape(3, 4)
+
+        def _gather_by_token_dim(tensor, _label, is_ep_comm=False, token_dim=0):
+            self.assertFalse(is_ep_comm)
+            return torch.cat((tensor, tensor + 100), dim=token_dim)
+
+        mock_all_gather.side_effect = _gather_by_token_dim
+
+        gathered_last_hidden_states, kept_positions, gathered_hidden_states = (
+            AscendEagleProposer.maybe_all_gather_and_unpad(
+                proposer,
+                last_hidden_states,
+                positions,
+                hidden_states,
+            )
+        )
+
+        self.assertEqual(mock_all_gather.call_count, 2)
+        self.assertEqual(mock_all_gather.call_args_list[1].args[3], 1)
+        self.assertTrue(
+            torch.equal(
+                gathered_last_hidden_states,
+                torch.cat((last_hidden_states, last_hidden_states + 100), dim=0),
+            )
+        )
+        self.assertTrue(
+            torch.equal(
+                kept_positions,
+                torch.cat((positions, positions + 100), dim=1),
+            )
+        )
         self.assertTrue(torch.equal(gathered_hidden_states, gathered_last_hidden_states))
 
 

@@ -1632,7 +1632,14 @@ class SpecDecodeBaseProposer(EagleProposer):
                 last_hidden_states = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
                     last_hidden_states.contiguous(), True
                 )
-                positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(positions.contiguous(), True)
+                if positions.dim() == 1:
+                    positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
+                        positions.contiguous(), True
+                    )
+                else:
+                    positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
+                        positions.contiguous(), True, False, positions.dim() - 1
+                    )
                 if hidden_states is not None:
                     hidden_states = last_hidden_states
         else:
