@@ -22,7 +22,7 @@ from itertools import islice
 
 import torch
 from einops import rearrange
-from vllm.distributed import get_pcp_group
+from vllm.distributed import get_pcp_group, get_pp_group
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import (
     chunk_gated_delta_rule,
@@ -39,6 +39,8 @@ from vllm.model_executor.models.qwen3_5 import (
     logger,
     maybe_remap_kv_scale_name,
 )
+from vllm.model_executor.models.qwen3_5_mtp import Qwen3_5MultiTokenPredictor
+from vllm.sequence import IntermediateTensors
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
 from vllm.v1.attention.backends.utils import PAD_SLOT_ID
@@ -69,6 +71,7 @@ _QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
     "0",
 ) == "1"
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
+_ORIGINAL_QWEN3_5_MTP_FORWARD = Qwen3_5MultiTokenPredictor.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_FORWARD = Qwen3_5GatedDeltaNet.forward
@@ -561,6 +564,58 @@ class AscendQwen3_5Model(Qwen3_5Model):
         )
 
 
+class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        positions: torch.Tensor,
+        hidden_states: torch.Tensor,
+        intermediate_tensors=None,
+        inputs_embeds: torch.Tensor | None = None,
+        spec_step_idx: int = 0,
+    ) -> torch.Tensor:
+        if get_pp_group().is_first_rank:
+            if inputs_embeds is None:
+                inputs_embeds = self.embed_input_ids(input_ids)
+            assert hidden_states.shape[-1] == inputs_embeds.shape[-1]
+            inputs_embeds = self.pre_fc_norm_embedding(inputs_embeds)
+            hidden_states = self.pre_fc_norm_hidden(hidden_states)
+            hidden_states = torch.cat([inputs_embeds, hidden_states], dim=-1)
+            hidden_states = self.fc(hidden_states)
+            residual = None
+        else:
+            assert intermediate_tensors is not None
+            hidden_states = intermediate_tensors["hidden_states"]
+            residual = intermediate_tensors["residual"]
+
+        current_step_idx = spec_step_idx % self.num_mtp_layers
+        hidden_states, residual = self.layers[current_step_idx](
+            positions=positions,
+            hidden_states=hidden_states,
+            residual=residual,
+        )
+        _dump_decoder_tensors(
+            "mtp_before_final_norm",
+            "mtp",
+            hidden_states=hidden_states,
+            residual=residual,
+        )
+
+        if not get_pp_group().is_last_rank:
+            return IntermediateTensors(
+                {"hidden_states": hidden_states, "residual": residual}
+            )
+
+        hidden_states, residual_out = self.norm(hidden_states, residual)
+        _dump_decoder_tensors(
+            "mtp_after_final_norm",
+            "mtp",
+            hidden_states=hidden_states,
+            residual=residual_out,
+        )
+        return hidden_states
+
+
 class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
     def forward(
         self,
@@ -981,4 +1036,5 @@ Qwen3_5GatedDeltaNet.__init__ = _patched_qwen3_5_gated_delta_net_init
 Qwen3_5GatedDeltaNet.forward = AscendQwen3_5GatedDeltaNet.forward
 Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
 Qwen3_5Model.forward = AscendQwen3_5Model.forward
+Qwen3_5MultiTokenPredictor.forward = AscendQwen3_5MultiTokenPredictor.forward
 Qwen3_5Model.load_weights = _patched_qwen3_5_model_load_weights
