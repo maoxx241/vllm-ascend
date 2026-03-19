@@ -18,12 +18,14 @@
 #
 
 import math
+import os
 import sys
 from collections import defaultdict
 from contextlib import contextmanager, nullcontext
 from copy import copy, deepcopy
 from dataclasses import dataclass
 from multiprocessing import Manager
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, NamedTuple, TypeAlias
 
 import numpy as np
@@ -159,6 +161,32 @@ PerLayerAttnMetadata: TypeAlias = list[AttnMetadataDict] | AttnMetadataDict
 
 
 SEQ_LEN_WITH_MAX_PA_WORKSPACE = 6144
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_REPO_DUMP_DIR")
+_DEBUG_COUNTERS: defaultdict[str, int] = defaultdict(int)
+
+
+def _debug_dump_runner_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None:
+        return
+    try:
+        tp_rank = get_tp_group().rank
+    except Exception:
+        tp_rank = -1
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "tp_rank": tp_rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
+    )
 
 
 @dataclass
@@ -1525,6 +1553,29 @@ class NPUModelRunner(GPUModelRunner):
 
         def propose_draft_token_ids(sampled_token_ids):
             assert spec_decode_common_attn_metadata is not None
+            debug_idx = _DEBUG_COUNTERS["spec_decode_common_attn_metadata_pre_propose"]
+            _DEBUG_COUNTERS["spec_decode_common_attn_metadata_pre_propose"] += 1
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_pre_propose",
+                debug_idx,
+                "query_start_loc",
+                spec_decode_common_attn_metadata.query_start_loc,
+                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+            )
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_pre_propose",
+                debug_idx,
+                "query_start_loc_cpu",
+                spec_decode_common_attn_metadata.query_start_loc_cpu,
+                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+            )
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_pre_propose",
+                debug_idx,
+                "runner_query_start_loc_cpu",
+                self.query_start_loc.cpu[: self.input_batch.num_reqs + 2],
+                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+            )
             self._draft_token_ids = self.propose_draft_token_ids(
                 sampled_token_ids,
                 self.input_batch.sampling_metadata,
@@ -2242,6 +2293,39 @@ class NPUModelRunner(GPUModelRunner):
             # the attention metadata in directly), and therefore does not want to use
             # padded attention metadata.
             spec_decode_common_attn_metadata = spec_decode_common_attn_metadata.unpadded(num_tokens, num_reqs)
+        if spec_decode_common_attn_metadata is not None:
+            debug_idx = _DEBUG_COUNTERS["spec_decode_common_attn_metadata_built"]
+            _DEBUG_COUNTERS["spec_decode_common_attn_metadata_built"] += 1
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_built",
+                debug_idx,
+                "query_start_loc",
+                spec_decode_common_attn_metadata.query_start_loc,
+                num_tokens=num_tokens,
+                num_tokens_padded=num_tokens_padded,
+                num_reqs=num_reqs,
+                num_reqs_padded=num_reqs_padded,
+            )
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_built",
+                debug_idx,
+                "query_start_loc_cpu",
+                spec_decode_common_attn_metadata.query_start_loc_cpu,
+                num_tokens=num_tokens,
+                num_tokens_padded=num_tokens_padded,
+                num_reqs=num_reqs,
+                num_reqs_padded=num_reqs_padded,
+            )
+            _debug_dump_runner_tensor(
+                "spec_decode_common_attn_metadata_built",
+                debug_idx,
+                "runner_query_start_loc_cpu",
+                self.query_start_loc.cpu[: num_reqs_padded + 2],
+                num_tokens=num_tokens,
+                num_tokens_padded=num_tokens_padded,
+                num_reqs=num_reqs,
+                num_reqs_padded=num_reqs_padded,
+            )
         return attn_metadata, spec_decode_common_attn_metadata
 
     def _should_build_dummy_attn_metadata(
