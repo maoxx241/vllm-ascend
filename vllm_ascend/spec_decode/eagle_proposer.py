@@ -57,6 +57,8 @@ _DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_REPO_DUMP_LIMIT", "16"))
 _DEBUG_COUNTERS = {
     "split_inputs_tp_to_sp": 0,
     "pad_and_split_tensor_tp": 0,
+    "prepare_next_token_ids_padded": 0,
+    "prepare_inputs_padded": 0,
 }
 
 
@@ -1532,6 +1534,27 @@ class SpecDecodeBaseProposer(EagleProposer):
         should not introduce any blocking CPU-GPU synchronization.
         """
         # TODO(Ben): Combine this into a custom fused kernel
+        debug_idx = _DEBUG_COUNTERS["prepare_next_token_ids_padded"]
+        _DEBUG_COUNTERS["prepare_next_token_ids_padded"] += 1
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "sampled_token_ids",
+                sampled_token_ids,
+            )
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "query_start_loc",
+                common_attn_metadata.query_start_loc[: common_attn_metadata.num_reqs + 1],
+            )
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "query_start_loc_cpu",
+                common_attn_metadata.query_start_loc_cpu[: common_attn_metadata.num_reqs + 1],
+            )
 
         # Precompute get_token_id for when there is no valid next token
         num_reqs = gpu_input_batch.num_reqs
@@ -1570,6 +1593,19 @@ class SpecDecodeBaseProposer(EagleProposer):
             selected_tokens,
             self.backup_next_token_ids.gpu[:batch_size],
         )
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "valid_sampled_tokens_count",
+                valid_sampled_tokens_count,
+            )
+            _debug_dump_tensor(
+                "prepare_next_token_ids_padded",
+                debug_idx,
+                "next_token_ids",
+                next_token_ids,
+            )
 
         return next_token_ids, valid_sampled_tokens_count
 
@@ -1694,6 +1730,33 @@ class SpecDecodeBaseProposer(EagleProposer):
         used as padding and filtered out later by `token_indices_to_sample`.
         No blocking CPU operations should be introduced in this function.
         """
+        debug_idx = _DEBUG_COUNTERS["prepare_inputs_padded"]
+        _DEBUG_COUNTERS["prepare_inputs_padded"] += 1
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "valid_sampled_tokens_count",
+                valid_sampled_tokens_count,
+            )
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "cu_num_draft_tokens",
+                spec_decode_metadata.cu_num_draft_tokens,
+            )
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "query_start_loc",
+                common_attn_metadata.query_start_loc[: common_attn_metadata.num_reqs + 1],
+            )
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "query_start_loc_cpu",
+                common_attn_metadata.query_start_loc_cpu[: common_attn_metadata.num_reqs + 1],
+            )
         if HAS_TRITON:
             num_reqs = common_attn_metadata.num_reqs
             device = valid_sampled_tokens_count.device
@@ -1731,6 +1794,19 @@ class SpecDecodeBaseProposer(EagleProposer):
             token_indices_to_sample = common_attn_metadata.query_start_loc[1:] - 1 - num_rejected_tokens_gpu
 
         query_start_loc_cpu = common_attn_metadata.query_start_loc_cpu
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "num_rejected_tokens_gpu",
+                num_rejected_tokens_gpu,
+            )
+            _debug_dump_tensor(
+                "prepare_inputs_padded",
+                debug_idx,
+                "token_indices_to_sample",
+                token_indices_to_sample,
+            )
 
         new_query_len_per_req = query_start_loc_cpu[1:] - query_start_loc_cpu[:-1]
 
