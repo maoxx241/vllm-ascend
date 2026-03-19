@@ -815,12 +815,42 @@ class SpecDecodeBaseProposer(EagleProposer):
 
         if self.pass_hidden_states_to_model:
             model_hidden_states = self.hidden_states[:num_input_tokens]
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    0,
+                    "model_hidden_states_pre_reduce",
+                    model_hidden_states,
+                    phase="initial",
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    0,
+                    "model_positions_pre_reduce",
+                    model_positions,
+                    phase="initial",
+                )
             model_input_ids, inputs_embeds, model_hidden_states, model_positions = self.maybe_pad_and_reduce_draft_inputs(
                 model_input_ids,
                 inputs_embeds,
                 model_hidden_states,
                 model_positions,
             )
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    0,
+                    "model_hidden_states_post_reduce",
+                    model_hidden_states,
+                    phase="initial",
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    0,
+                    "model_positions_post_reduce",
+                    model_positions,
+                    phase="initial",
+                )
 
         model_kwargs = {
             "input_ids": model_input_ids,
@@ -836,9 +866,53 @@ class SpecDecodeBaseProposer(EagleProposer):
         else:
             last_hidden_states, hidden_states = ret_hidden_states
 
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "last_hidden_states_pre_allgather",
+                last_hidden_states,
+                phase="initial",
+            )
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "hidden_states_pre_allgather",
+                hidden_states,
+                phase="initial",
+            )
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "positions_pre_allgather",
+                model_positions,
+                phase="initial",
+            )
         last_hidden_states, model_positions, hidden_states = self.maybe_all_gather_and_unpad(
             last_hidden_states, model_positions, hidden_states
         )
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "last_hidden_states_post_allgather",
+                last_hidden_states,
+                phase="initial",
+            )
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "hidden_states_post_allgather",
+                hidden_states,
+                phase="initial",
+            )
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "positions_post_allgather",
+                model_positions,
+                phase="initial",
+            )
 
         num_indices = token_indices_to_sample.shape[0]
         if self.pcp_size > 1:
@@ -957,6 +1031,23 @@ class SpecDecodeBaseProposer(EagleProposer):
             model_input_ids = self.input_ids[:input_batch_size]
             model_positions = self._get_positions(input_batch_size)
             model_hidden_states = self.hidden_states[:input_batch_size]
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "model_hidden_states_pre_reduce",
+                    model_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "model_positions_pre_reduce",
+                    model_positions,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
 
             model_input_ids, inputs_embeds, model_hidden_states, model_positions = self.maybe_pad_and_reduce_draft_inputs(
                 model_input_ids,
@@ -964,6 +1055,23 @@ class SpecDecodeBaseProposer(EagleProposer):
                 model_hidden_states,
                 model_positions,
             )
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "model_hidden_states_post_reduce",
+                    model_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "model_positions_post_reduce",
+                    model_positions,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
 
             forward_context.attn_metadata = (
                 multi_steps_attn_metadata[draft_step + 1] if multi_steps_attn_metadata else None
@@ -983,9 +1091,59 @@ class SpecDecodeBaseProposer(EagleProposer):
             else:
                 last_hidden_states, hidden_states = ret_hidden_states
 
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "last_hidden_states_pre_allgather",
+                    last_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "hidden_states_pre_allgather",
+                    hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "positions_pre_allgather",
+                    model_positions,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
             last_hidden_states, model_positions, hidden_states = self.maybe_all_gather_and_unpad(
                 last_hidden_states, model_positions, hidden_states
             )
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "last_hidden_states_post_allgather",
+                    last_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "hidden_states_post_allgather",
+                    hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "positions_post_allgather",
+                    model_positions,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
 
             num_indices = token_indices_to_sample.shape[0]
             if lmhead_tp_enable() and not is_dummy:
