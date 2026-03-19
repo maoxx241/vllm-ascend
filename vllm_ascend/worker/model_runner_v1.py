@@ -163,6 +163,7 @@ PerLayerAttnMetadata: TypeAlias = list[AttnMetadataDict] | AttnMetadataDict
 SEQ_LEN_WITH_MAX_PA_WORKSPACE = 6144
 _DEBUG_DUMP_DIR = os.environ.get("QWEN35_REPO_DUMP_DIR")
 _DEBUG_COUNTERS: defaultdict[str, int] = defaultdict(int)
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_REPO_DUMP_LIMIT", "0") or "0")
 
 
 def _debug_dump_runner_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
@@ -187,6 +188,12 @@ def _debug_dump_runner_tensor(kind: str, idx: int, name: str, tensor: torch.Tens
         },
         path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
     )
+
+
+def _debug_should_dump(kind: str) -> tuple[bool, int]:
+    idx = _DEBUG_COUNTERS[kind]
+    _DEBUG_COUNTERS[kind] += 1
+    return _DEBUG_DUMP_LIMIT <= 0 or idx < _DEBUG_DUMP_LIMIT, idx
 
 
 @dataclass
@@ -1451,6 +1458,66 @@ class NPUModelRunner(GPUModelRunner):
                     return output
 
                 sample_hidden_states = hidden_states[logits_indices]
+                do_dump, debug_idx = _debug_should_dump("spec_decode_hidden_state_handoff")
+                if do_dump:
+                    _debug_dump_runner_tensor(
+                        "spec_decode_hidden_state_handoff",
+                        debug_idx,
+                        "hidden_states",
+                        hidden_states,
+                        total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                        num_tokens_padded=num_tokens_padded,
+                        has_spec_decode=spec_decode_metadata is not None,
+                    )
+                    _debug_dump_runner_tensor(
+                        "spec_decode_hidden_state_handoff",
+                        debug_idx,
+                        "logits_indices",
+                        logits_indices,
+                        total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                        num_tokens_padded=num_tokens_padded,
+                    )
+                    _debug_dump_runner_tensor(
+                        "spec_decode_hidden_state_handoff",
+                        debug_idx,
+                        "sample_hidden_states",
+                        sample_hidden_states,
+                        total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                        num_tokens_padded=num_tokens_padded,
+                    )
+                    if spec_decode_metadata is not None:
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "spec_logits_indices",
+                            spec_decode_metadata.logits_indices,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "target_logits_indices",
+                            spec_decode_metadata.target_logits_indices,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "bonus_logits_indices",
+                            spec_decode_metadata.bonus_logits_indices,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "draft_token_ids",
+                            spec_decode_metadata.draft_token_ids,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
                 logits = self.model.compute_logits(sample_hidden_states)
             else:
                 # Rare case.
@@ -1462,6 +1529,66 @@ class NPUModelRunner(GPUModelRunner):
                     logits = None
                 else:
                     sample_hidden_states = hidden_states[logits_indices]
+                    do_dump, debug_idx = _debug_should_dump("spec_decode_hidden_state_handoff")
+                    if do_dump:
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "hidden_states",
+                            hidden_states,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                            has_spec_decode=spec_decode_metadata is not None,
+                        )
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "logits_indices",
+                            logits_indices,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
+                        _debug_dump_runner_tensor(
+                            "spec_decode_hidden_state_handoff",
+                            debug_idx,
+                            "sample_hidden_states",
+                            sample_hidden_states,
+                            total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                            num_tokens_padded=num_tokens_padded,
+                        )
+                        if spec_decode_metadata is not None:
+                            _debug_dump_runner_tensor(
+                                "spec_decode_hidden_state_handoff",
+                                debug_idx,
+                                "spec_logits_indices",
+                                spec_decode_metadata.logits_indices,
+                                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                                num_tokens_padded=num_tokens_padded,
+                            )
+                            _debug_dump_runner_tensor(
+                                "spec_decode_hidden_state_handoff",
+                                debug_idx,
+                                "target_logits_indices",
+                                spec_decode_metadata.target_logits_indices,
+                                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                                num_tokens_padded=num_tokens_padded,
+                            )
+                            _debug_dump_runner_tensor(
+                                "spec_decode_hidden_state_handoff",
+                                debug_idx,
+                                "bonus_logits_indices",
+                                spec_decode_metadata.bonus_logits_indices,
+                                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                                num_tokens_padded=num_tokens_padded,
+                            )
+                            _debug_dump_runner_tensor(
+                                "spec_decode_hidden_state_handoff",
+                                debug_idx,
+                                "draft_token_ids",
+                                spec_decode_metadata.draft_token_ids,
+                                total_num_scheduled_tokens=scheduler_output.total_num_scheduled_tokens,
+                                num_tokens_padded=num_tokens_padded,
+                            )
                     logits = self.model.compute_logits(sample_hidden_states)
 
                 model_output_broadcast_data: dict[str, Any] = {}
@@ -1867,6 +1994,25 @@ class NPUModelRunner(GPUModelRunner):
             inputs_embeds=inputs_embeds,
             **model_kwargs,
         )
+        do_dump, debug_idx = _debug_should_dump("model_forward_handoff")
+        if do_dump and not isinstance(hidden_states, IntermediateTensors):
+            tensor_to_dump = hidden_states[0] if isinstance(hidden_states, tuple) else hidden_states
+            _debug_dump_runner_tensor(
+                "model_forward_handoff",
+                debug_idx,
+                "hidden_states_before_last_allgather",
+                tensor_to_dump,
+                num_tokens_padded=num_tokens_padded,
+                flash_comm_enabled=get_forward_context().flash_comm_v1_enabled if get_forward_context() else False,
+                pad_size=get_forward_context().pad_size if get_forward_context() else None,
+            )
+            _debug_dump_runner_tensor(
+                "model_forward_handoff",
+                debug_idx,
+                "positions",
+                positions,
+                num_tokens_padded=num_tokens_padded,
+            )
         forward_context = get_forward_context()
         assert forward_context is not None
         if (
@@ -1886,6 +2032,17 @@ class NPUModelRunner(GPUModelRunner):
             )
         if get_forward_context().flash_comm_v1_enabled and not isinstance(hidden_states, IntermediateTensors):
             hidden_states = self._all_gather_hidden_states_and_aux(hidden_states)
+            if do_dump:
+                tensor_to_dump = hidden_states[0] if isinstance(hidden_states, tuple) else hidden_states
+                _debug_dump_runner_tensor(
+                    "model_forward_handoff",
+                    debug_idx,
+                    "hidden_states_after_last_allgather",
+                    tensor_to_dump,
+                    num_tokens_padded=num_tokens_padded,
+                    flash_comm_enabled=True,
+                    pad_size=forward_context.pad_size,
+                )
         return hidden_states
 
     def _pad_for_sequence_parallelism(self, num_scheduled_tokens: int) -> int:
