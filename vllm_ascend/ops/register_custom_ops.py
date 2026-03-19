@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import torch
 import torch.nn.functional as F
 import torch_npu
@@ -20,12 +23,48 @@ from vllm_ascend.ops.weight_prefetch import maybe_npu_prefetch
 from vllm_ascend.utils import npu_stream_switch, prefetch_stream
 
 
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_REPO_DUMP_DIR")
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_REPO_DUMP_LIMIT", "16"))
+_DEBUG_COUNTERS = {
+    "maybe_chunk_residual": 0,
+    "maybe_pad_and_reduce": 0,
+    "maybe_all_gather_and_maybe_unpad": 0,
+}
+
+
+def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT:
+        return
+    try:
+        tp_rank = get_tensor_model_parallel_rank()
+    except Exception:
+        tp_rank = -1
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "tp_rank": tp_rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
+    )
+
+
 def _maybe_chunk_residual_impl(x: torch.Tensor, residual: torch.Tensor) -> torch.Tensor:
+    debug_idx = _DEBUG_COUNTERS["maybe_chunk_residual"]
+    _DEBUG_COUNTERS["maybe_chunk_residual"] += 1
     try:
         get_forward_context()
     except AssertionError:
         return residual
 
+    residual_in = residual
     if x.size(0) != residual.size(0):
         pad_size = _EXTRA_CTX.pad_size
         if pad_size > 0:
@@ -33,6 +72,30 @@ def _maybe_chunk_residual_impl(x: torch.Tensor, residual: torch.Tensor) -> torch
         tp_size = get_tensor_model_parallel_world_size()
         tp_rank = get_tensor_model_parallel_rank()
         residual = torch.chunk(residual, tp_size, dim=0)[tp_rank]
+        _debug_dump_tensor(
+            "maybe_chunk_residual",
+            debug_idx,
+            "x",
+            x,
+            pad_size=pad_size,
+            chunked=True,
+        )
+        _debug_dump_tensor(
+            "maybe_chunk_residual",
+            debug_idx,
+            "residual_in",
+            residual_in,
+            pad_size=pad_size,
+            chunked=True,
+        )
+        _debug_dump_tensor(
+            "maybe_chunk_residual",
+            debug_idx,
+            "residual_out",
+            residual,
+            pad_size=pad_size,
+            chunked=True,
+        )
 
     return residual
 
@@ -43,11 +106,14 @@ def _maybe_all_gather_and_maybe_unpad_impl(
     is_ep_comm: bool = False,
     token_dim: int = 0,
 ) -> torch.Tensor:
+    debug_idx = _DEBUG_COUNTERS["maybe_all_gather_and_maybe_unpad"]
+    _DEBUG_COUNTERS["maybe_all_gather_and_maybe_unpad"] += 1
     try:
         forward_context = get_forward_context()
     except AssertionError:
         return x
 
+    x_in = x
     flash_comm_v1_enabled = _EXTRA_CTX.flash_comm_v1_enabled
     if flash_comm_v1_enabled and label:
         dp_metadata = forward_context.dp_metadata
@@ -69,11 +135,31 @@ def _maybe_all_gather_and_maybe_unpad_impl(
                 result[offset : offset + num_tokens_dp] = x[idx, :num_tokens_dp]
                 offset += num_tokens_dp
             x = result
+        _debug_dump_tensor(
+            "maybe_all_gather_and_maybe_unpad",
+            debug_idx,
+            "x_in",
+            x_in,
+            is_ep_comm=is_ep_comm,
+            token_dim=token_dim,
+            label=label,
+        )
+        _debug_dump_tensor(
+            "maybe_all_gather_and_maybe_unpad",
+            debug_idx,
+            "x_out",
+            x,
+            is_ep_comm=is_ep_comm,
+            token_dim=token_dim,
+            label=label,
+        )
 
     return x
 
 
 def _maybe_pad_and_reduce_impl(x: torch.Tensor, is_ep_comm: bool = False) -> torch.Tensor:
+    debug_idx = _DEBUG_COUNTERS["maybe_pad_and_reduce"]
+    _DEBUG_COUNTERS["maybe_pad_and_reduce"] += 1
     try:
         forward_context = get_forward_context()
     except AssertionError:
@@ -82,12 +168,30 @@ def _maybe_pad_and_reduce_impl(x: torch.Tensor, is_ep_comm: bool = False) -> tor
     if not getattr(forward_context, "flash_comm_v1_enabled", False):
         return tensor_model_parallel_all_reduce(x)
 
+    x_in = x
     dp_metadata = forward_context.dp_metadata
     if dp_metadata is None or not is_ep_comm:
         pad_size = _EXTRA_CTX.pad_size
         if pad_size > 0:
             x = F.pad(x, (0, 0, 0, pad_size))
-        return tensor_model_parallel_reduce_scatter(x, 0)
+        out = tensor_model_parallel_reduce_scatter(x, 0)
+        _debug_dump_tensor(
+            "maybe_pad_and_reduce",
+            debug_idx,
+            "x_in",
+            x_in,
+            is_ep_comm=is_ep_comm,
+            pad_size=pad_size,
+        )
+        _debug_dump_tensor(
+            "maybe_pad_and_reduce",
+            debug_idx,
+            "x_out",
+            out,
+            is_ep_comm=is_ep_comm,
+            pad_size=pad_size,
+        )
+        return out
     else:
         # padding
         dp_size = get_dp_group().world_size
@@ -99,7 +203,24 @@ def _maybe_pad_and_reduce_impl(x: torch.Tensor, is_ep_comm: bool = False) -> tor
             padded_x[idx, :num_tokens_dp] = x[offset : offset + num_tokens_dp]
             offset += num_tokens_dp
 
-        return get_ep_group().reduce_scatter(padded_x.view(-1, *x.shape[1:]), 0)
+        out = get_ep_group().reduce_scatter(padded_x.view(-1, *x.shape[1:]), 0)
+        _debug_dump_tensor(
+            "maybe_pad_and_reduce",
+            debug_idx,
+            "x_in",
+            x_in,
+            is_ep_comm=is_ep_comm,
+            pad_size=_EXTRA_CTX.padded_length - x_in.shape[0],
+        )
+        _debug_dump_tensor(
+            "maybe_pad_and_reduce",
+            debug_idx,
+            "x_out",
+            out,
+            is_ep_comm=is_ep_comm,
+            pad_size=_EXTRA_CTX.padded_length - x_in.shape[0],
+        )
+        return out
 
 
 def _maybe_all_gather_and_maybe_unpad_fake(

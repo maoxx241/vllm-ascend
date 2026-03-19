@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 import copy
+import os
 from collections.abc import Callable
 from contextlib import AbstractContextManager, contextmanager, nullcontext
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -50,6 +52,36 @@ from vllm_ascend.utils import enable_sp, lmhead_tp_enable, shared_expert_dp_enab
 
 # Currently we will fix block size to a small one since `num_reqs` can't be too large
 _PREPARE_INPUTS_BLOCK_SIZE = 4
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_REPO_DUMP_DIR")
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_REPO_DUMP_LIMIT", "16"))
+_DEBUG_COUNTERS = {
+    "split_inputs_tp_to_sp": 0,
+    "pad_and_split_tensor_tp": 0,
+}
+
+
+def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT:
+        return
+    try:
+        tp_rank = get_tp_group().rank
+    except Exception:
+        tp_rank = -1
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "tp_rank": tp_rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
+    )
 
 
 # TODO: Remove it when the bug of fx-graph is solved
@@ -66,6 +98,8 @@ def _maybe_eager_context(vllm_config):
 
 # split hidden states along dimension of sequence
 def split_inputs_tp_to_sp(hidden_states, out):
+    debug_idx = _DEBUG_COUNTERS["split_inputs_tp_to_sp"]
+    _DEBUG_COUNTERS["split_inputs_tp_to_sp"] += 1
     # tp and sp share the same group
     group = get_tp_group()
 
@@ -87,10 +121,30 @@ def split_inputs_tp_to_sp(hidden_states, out):
     if hidden_states_curr_rank.shape[0] != padded_num_tokens_per_rank:
         out_shard.zero_()
     out_shard[: hidden_states_curr_rank.shape[0]].copy_(hidden_states_curr_rank)
+    _debug_dump_tensor(
+        "split_inputs_tp_to_sp",
+        debug_idx,
+        "hidden_states_in",
+        hidden_states,
+        start=start,
+        end=end,
+        padded_num_tokens_per_rank=padded_num_tokens_per_rank,
+    )
+    _debug_dump_tensor(
+        "split_inputs_tp_to_sp",
+        debug_idx,
+        "out_shard",
+        out_shard,
+        start=start,
+        end=end,
+        padded_num_tokens_per_rank=padded_num_tokens_per_rank,
+    )
     return out_shard
 
 
 def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tensor:
+    debug_idx = _DEBUG_COUNTERS["pad_and_split_tensor_tp"]
+    _DEBUG_COUNTERS["pad_and_split_tensor_tp"] += 1
     group = get_tp_group()
     world_size = group.world_size
     rank = group.rank
@@ -107,7 +161,28 @@ def pad_and_split_tensor_tp(tensor: torch.Tensor, token_dim: int) -> torch.Tenso
 
     shard_num_tokens = padded_num_tokens // world_size
     start = shard_num_tokens * rank
-    return tensor.narrow(token_dim, start, shard_num_tokens)
+    out = tensor.narrow(token_dim, start, shard_num_tokens)
+    _debug_dump_tensor(
+        "pad_and_split_tensor_tp",
+        debug_idx,
+        "tensor_in",
+        tensor,
+        token_dim=token_dim,
+        pad_size=pad_size,
+        start=start,
+        shard_num_tokens=shard_num_tokens,
+    )
+    _debug_dump_tensor(
+        "pad_and_split_tensor_tp",
+        debug_idx,
+        "tensor_out",
+        out,
+        token_dim=token_dim,
+        pad_size=pad_size,
+        start=start,
+        shard_num_tokens=shard_num_tokens,
+    )
+    return out
 
 
 class SpecDecodeBaseProposer(EagleProposer):
