@@ -48,6 +48,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--num-shots", type=int, default=5)
     parser.add_argument("--max-tokens", type=int, default=256)
     parser.add_argument("--temperature", type=float, default=0.0)
+    parser.add_argument("--gpu-memory-utilization", type=float, default=0.85)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--enable-expert-parallel", action="store_true", default=True)
     parser.add_argument("--disable-expert-parallel", action="store_false", dest="enable_expert_parallel")
@@ -88,6 +89,7 @@ def main() -> None:
             "max_tokens": args.max_tokens,
             "temperature": args.temperature,
             "enforce_eager": args.enforce_eager,
+            "gpu_memory_utilization": args.gpu_memory_utilization,
         }
     }
 
@@ -111,7 +113,7 @@ def main() -> None:
             enforce_eager=args.enforce_eager,
             max_model_len=4096,
             max_num_seqs=4,
-            gpu_memory_utilization=0.85,
+            gpu_memory_utilization=args.gpu_memory_utilization,
             disable_log_stats=False,
             compilation_config=compilation_config,
             speculative_config={
