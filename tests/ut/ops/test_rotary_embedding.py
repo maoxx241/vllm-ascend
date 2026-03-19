@@ -82,7 +82,7 @@ def test_mrotary_forward_triton_uses_gathered_positions(monkeypatch):
         "_maybe_all_gather_mtp_positions",
         fake_maybe_gather,
     )
-    monkeypatch.setattr(rope_mod, "triton_mrope", fake_triton_mrope)
+    monkeypatch.setattr(rope_mod, "triton_mrope", fake_triton_mrope, raising=False)
 
     q_out, k_out = rope.forward_triton(positions, query, key)
 
