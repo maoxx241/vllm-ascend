@@ -74,6 +74,10 @@ _QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
     "QWEN35_DECODER_DUMP_DRAFT_ONLY",
     "0",
 ) == "1"
+_QWEN35_DECODER_DUMP_TARGET_ONLY = os.environ.get(
+    "QWEN35_DECODER_DUMP_TARGET_ONLY",
+    "0",
+) == "1"
 _QWEN35_DECODER_DUMP_NON_PROFILE_ONLY = os.environ.get(
     "QWEN35_DECODER_DUMP_NON_PROFILE_ONLY",
     "0",
@@ -216,6 +220,9 @@ def _should_dump_decoder_invocation(
         if not getattr(forward_context, "is_draft_model", False):
             return False
         if getattr(forward_context, "in_profile_run", False):
+            return False
+    elif _QWEN35_DECODER_DUMP_TARGET_ONLY:
+        if forward_context is not None and getattr(forward_context, "is_draft_model", False):
             return False
     elif _QWEN35_DECODER_DUMP_NON_PROFILE_ONLY:
         if forward_context is not None and getattr(forward_context, "in_profile_run", False):
@@ -711,13 +718,76 @@ class AscendQwen3_5Model(Qwen3_5Model):
         forward_context.qwen35_gdn_prefill_precomputed = {}
         # if _has_qwen35_prefill_metadata(self):
         #     _prepare_qwen35_prefill_precomputed(self)
-        return _ORIGINAL_QWEN3_5_MODEL_FORWARD(
-            self,
-            input_ids,
-            positions,
-            intermediate_tensors,
-            inputs_embeds,
-        )
+        if get_pp_group().is_first_rank:
+            if inputs_embeds is not None:
+                hidden_states = inputs_embeds
+            else:
+                hidden_states = self.embed_input_ids(input_ids)
+            residual = None
+        else:
+            assert intermediate_tensors is not None
+            hidden_states = intermediate_tensors["hidden_states"]
+            residual = intermediate_tensors["residual"]
+
+        for layer in islice(self.layers, self.start_layer, self.end_layer):
+            if _should_dump_decoder_invocation(
+                layer.layer_type,
+                positions=positions,
+                hidden_states=hidden_states,
+                layer_idx=layer.layer_idx,
+            ):
+                _dump_qwen35_runtime_tensors(
+                    f"target_layer{layer.layer_idx}_before",
+                    positions=positions,
+                    hidden_states=hidden_states,
+                    residual=residual,
+                )
+            hidden_states, residual = layer(
+                positions=positions,
+                hidden_states=hidden_states,
+                residual=residual,
+            )
+            if _should_dump_decoder_invocation(
+                layer.layer_type,
+                positions=positions,
+                hidden_states=hidden_states,
+                layer_idx=layer.layer_idx,
+            ):
+                _dump_qwen35_runtime_tensors(
+                    f"target_layer{layer.layer_idx}_after",
+                    positions=positions,
+                    hidden_states=hidden_states,
+                    residual=residual,
+                )
+
+        if not get_pp_group().is_last_rank:
+            return IntermediateTensors(
+                {"hidden_states": hidden_states, "residual": residual}
+            )
+
+        if _should_dump_decoder_invocation(
+            "full_attention",
+            positions=positions,
+            hidden_states=hidden_states,
+        ):
+            _dump_qwen35_runtime_tensors(
+                "target_pre_norm",
+                positions=positions,
+                hidden_states=hidden_states,
+                residual=residual,
+            )
+        hidden_states, _ = self.norm(hidden_states, residual)
+        if _should_dump_decoder_invocation(
+            "full_attention",
+            positions=positions,
+            hidden_states=hidden_states,
+        ):
+            _dump_qwen35_runtime_tensors(
+                "target_post_norm",
+                positions=positions,
+                hidden_states=hidden_states,
+            )
+        return hidden_states
 
 
 class AscendQwen3_5MTP(Qwen3_5MTP):
