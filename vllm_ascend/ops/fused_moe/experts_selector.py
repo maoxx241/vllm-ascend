@@ -25,6 +25,7 @@ from vllm_ascend.utils import get_weight_prefetch_method
 
 _DEBUG_DUMP_DIR = os.environ.get("QWEN35_MOE_DUMP_DIR")
 _DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_MOE_DUMP_LIMIT", "16"))
+_DEBUG_LAYER_FILTER = os.environ.get("QWEN35_MOE_DUMP_LAYER_FILTER")
 _DEBUG_COUNTERS = {
     "select_experts": 0,
 }
@@ -56,6 +57,9 @@ def _get_debug_rank() -> int:
 
 def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
     if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT or _is_compiling_debug():
+        return
+    layer_name = str(meta.get("layer_name", ""))
+    if _DEBUG_LAYER_FILTER and _DEBUG_LAYER_FILTER not in layer_name:
         return
     path = Path(_DEBUG_DUMP_DIR)
     path.mkdir(parents=True, exist_ok=True)
@@ -89,6 +93,7 @@ def select_experts(
     e_score_correction_bias: torch.Tensor | None = None,
     indices_type: torch.dtype | None = None,
     global_num_experts: int = -1,
+    layer_name: str = "",
 ):
     """
     Fused experts with select experts.
@@ -124,6 +129,7 @@ def select_experts(
         topk_group=topk_group,
         num_expert_group=num_expert_group,
         scoring_func=scoring_func,
+        layer_name=layer_name,
     )
     _debug_dump_tensor(
         "select_experts",
@@ -136,6 +142,7 @@ def select_experts(
         topk_group=topk_group,
         num_expert_group=num_expert_group,
         scoring_func=scoring_func,
+        layer_name=layer_name,
     )
 
     # prefetch w1_w3_proj.weight preprocess
@@ -179,8 +186,8 @@ def select_experts(
             e_score_correction_bias=e_score_correction_bias,
             global_num_experts=global_num_experts,
         )
-    _debug_dump_tensor("select_experts", debug_idx, "topk_weights_out", topk_weights)
-    _debug_dump_tensor("select_experts", debug_idx, "topk_ids_out", topk_ids)
+    _debug_dump_tensor("select_experts", debug_idx, "topk_weights_out", topk_weights, layer_name=layer_name)
+    _debug_dump_tensor("select_experts", debug_idx, "topk_ids_out", topk_ids, layer_name=layer_name)
     return topk_weights, topk_ids
 
 
