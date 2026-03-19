@@ -573,7 +573,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
             model_hidden_states.tolist(),
             [[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]],
         )
-        self.assertTrue(torch.equal(model_positions, positions))
+        self.assertTrue(torch.equal(model_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_draft_inputs_keeps_aligned_token_inputs(
@@ -604,10 +604,10 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(model_input_ids, input_ids))
         self.assertTrue(torch.equal(model_inputs_embeds, inputs_embeds))
         self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[4.0, 5.0], [6.0, 7.0]])))
-        self.assertTrue(torch.equal(model_positions, positions))
+        self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))
 
     @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
-    def test_maybe_all_gather_and_unpad_mtp_keeps_positions_local(
+    def test_maybe_all_gather_and_unpad_mtp_gathers_positions(
         self,
         mock_all_gather,
     ):
@@ -630,9 +630,9 @@ class TestEagleProposerFlashCommHelpers(TestBase):
             )
         )
 
-        mock_all_gather.assert_called_once()
+        self.assertEqual(mock_all_gather.call_count, 2)
         self.assertTrue(torch.equal(gathered_last_hidden_states, last_hidden_states + 100))
-        self.assertTrue(torch.equal(kept_positions, positions))
+        self.assertTrue(torch.equal(kept_positions, positions + 100))
         self.assertTrue(torch.equal(gathered_hidden_states, gathered_last_hidden_states))
 
 
