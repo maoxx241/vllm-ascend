@@ -606,6 +606,35 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[4.0, 5.0], [6.0, 7.0]])))
         self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))
 
+    @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
+    def test_maybe_all_gather_and_unpad_mtp_keeps_positions_local(
+        self,
+        mock_all_gather,
+    ):
+        proposer = object.__new__(AscendEagleProposer)
+        proposer.method = "mtp"
+        proposer.enable_shared_expert_dp = True
+
+        last_hidden_states = torch.arange(6, dtype=torch.float32).reshape(3, 2)
+        hidden_states = torch.arange(6, dtype=torch.float32).reshape(3, 2) + 10
+        positions = torch.arange(3, dtype=torch.int32)
+
+        mock_all_gather.side_effect = lambda tensor, _: tensor + 100
+
+        gathered_last_hidden_states, kept_positions, gathered_hidden_states = (
+            AscendEagleProposer.maybe_all_gather_and_unpad(
+                proposer,
+                last_hidden_states,
+                positions,
+                hidden_states,
+            )
+        )
+
+        mock_all_gather.assert_called_once()
+        self.assertTrue(torch.equal(gathered_last_hidden_states, last_hidden_states + 100))
+        self.assertTrue(torch.equal(kept_positions, positions))
+        self.assertTrue(torch.equal(gathered_hidden_states, gathered_last_hidden_states))
+
 
 class TestAscendForwardContextDraftFlashComm(TestBase):
     @patch("vllm_ascend.ascend_forward_context.enable_sp", return_value=True)

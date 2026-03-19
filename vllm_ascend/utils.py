@@ -865,7 +865,7 @@ def parse_layer_idx(prefix: str) -> int | None:
     return int(match.group(1)) if match else None
 
 
-def is_qwen35_vl_first_lm_projection(prefix: str, vllm_config: VllmConfig | None = None) -> bool:
+def is_qwen35_first_full_input_lm_projection(prefix: str, vllm_config: VllmConfig | None = None) -> bool:
     if vllm_config is None:
         from vllm.config import get_current_vllm_config
 
@@ -874,11 +874,19 @@ def is_qwen35_vl_first_lm_projection(prefix: str, vllm_config: VllmConfig | None
         except AssertionError:
             return False
 
-    if not vllm_config or not vllm_config.model_config or not is_vl_model(vllm_config):
+    if not vllm_config or not vllm_config.model_config:
         return False
 
     hf_text_config = vllm_config.model_config.hf_text_config
     if "qwen3_5" not in getattr(hf_text_config, "model_type", ""):
+        return False
+
+    speculative_config = getattr(vllm_config, "speculative_config", None)
+    speculative_method = getattr(speculative_config, "method", None)
+    if speculative_method in {"mtp", "qwen3_5_mtp"} and prefix.endswith("mtp.layers.0.self_attn.qkv_proj"):
+        return True
+
+    if not is_vl_model(vllm_config):
         return False
 
     if parse_layer_idx(prefix) != 0:

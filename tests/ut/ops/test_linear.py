@@ -18,7 +18,7 @@ from vllm_ascend.ops.linear import (AscendMergedColumnParallelLinear,
 from vllm_ascend.ops.linear_op import SequenceColumnParallelOp
 
 
-def _build_mock_vllm_config(first_layer_type="linear_attention", is_vl=True):
+def _build_mock_vllm_config(first_layer_type="linear_attention", is_vl=True, speculative_method=None):
     hf_text_config = SimpleNamespace(
         model_type="qwen3_5_text",
         layer_types=[first_layer_type],
@@ -33,7 +33,8 @@ def _build_mock_vllm_config(first_layer_type="linear_attention", is_vl=True):
         model_config=SimpleNamespace(
             hf_config=hf_config,
             hf_text_config=hf_text_config,
-        )
+        ),
+        speculative_config=SimpleNamespace(method=speculative_method),
     )
 
 
@@ -206,6 +207,42 @@ class TestAscendQKVParallelLinear(BaseLinearTest):
         )
 
         self.assertTrue(linear.fc1_skip_input_gather)
+
+    @patch("vllm.config.get_current_vllm_config")
+    def test_marks_qwen35_mtp_first_projection(self, mock_get_current_vllm_config):
+        mock_get_current_vllm_config.return_value = _build_mock_vllm_config(
+            first_layer_type="full_attention",
+            is_vl=False,
+            speculative_method="mtp",
+        )
+
+        linear = AscendQKVParallelLinear(
+            hidden_size=16,
+            head_size=4,
+            total_num_heads=4,
+            total_num_kv_heads=4,
+            prefix="mtp.layers.0.self_attn.qkv_proj",
+        )
+
+        self.assertTrue(linear.fc1_skip_input_gather)
+
+    @patch("vllm.config.get_current_vllm_config")
+    def test_does_not_mark_non_first_qwen35_mtp_projection(self, mock_get_current_vllm_config):
+        mock_get_current_vllm_config.return_value = _build_mock_vllm_config(
+            first_layer_type="full_attention",
+            is_vl=False,
+            speculative_method="mtp",
+        )
+
+        linear = AscendQKVParallelLinear(
+            hidden_size=16,
+            head_size=4,
+            total_num_heads=4,
+            total_num_kv_heads=4,
+            prefix="mtp.layers.1.self_attn.qkv_proj",
+        )
+
+        self.assertFalse(linear.fc1_skip_input_gather)
 
 
 class TestSequenceColumnParallelOp(unittest.TestCase):

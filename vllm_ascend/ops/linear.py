@@ -40,7 +40,7 @@ from vllm.model_executor.layers.quantization.base_config import QuantizationConf
 from vllm.model_executor.utils import set_weight_attrs
 
 from vllm_ascend.ops.linear_op import get_parallel_op, get_replicated_op
-from vllm_ascend.utils import enable_sp, is_qwen35_vl_first_lm_projection, maybe_trans_nz
+from vllm_ascend.utils import enable_sp, is_qwen35_first_full_input_lm_projection, maybe_trans_nz
 
 
 class AscendUnquantizedLinearMethod(UnquantizedLinearMethod):
@@ -361,7 +361,7 @@ class AscendColumnParallelLinear(ColumnParallelLinear):
         )
 
         self.gather_output = gather_output
-        self.fc1_skip_input_gather = is_qwen35_vl_first_lm_projection(prefix)
+        self.fc1_skip_input_gather = is_qwen35_first_full_input_lm_projection(prefix)
 
         if output_sizes is None:
             output_sizes = [output_size]
