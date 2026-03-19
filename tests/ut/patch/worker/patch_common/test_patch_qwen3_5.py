@@ -26,7 +26,9 @@ from vllm.config import set_current_vllm_config
 from vllm_ascend.ops import linear as ascend_linear_module
 
 from tests.ut.base import PytestBase
+import vllm_ascend.patch.worker.patch_qwen3_5 as patch_qwen3_5_module
 from vllm_ascend.patch.worker.patch_qwen3_5 import (
+    AscendQwen3_5DecoderLayer,
     _patched_qwen3_5_model_load_weights,
     qwen35_packed_in_proj_output_sizes,
     split_qwen35_packed_in_proj_output,
@@ -270,3 +272,75 @@ class TestPatchQwen35PackedInProj(PytestBase):
             "layers.0.linear_attn.in_proj_qkvz.weight",
             "layers.0.linear_attn.in_proj_ba.weight",
         }
+
+
+class _PassthroughLayerNorm:
+    def __call__(self, hidden_states, residual=None):
+        if residual is None:
+            return hidden_states
+        return hidden_states, residual
+
+
+class _FakeSelfAttention:
+    def __init__(self, tp_size: int, skip_input_gather: bool):
+        self.qkv_proj = SimpleNamespace(fc1_skip_input_gather=skip_input_gather)
+        self.o_proj = SimpleNamespace(tp_size=tp_size)
+        self.output_shapes: list[tuple[int, ...]] = []
+
+    def __call__(self, *, hidden_states, output, positions):
+        del hidden_states, positions
+        self.output_shapes.append(tuple(output.shape))
+        output.fill_(1)
+        return None
+
+
+class TestQwen35DecoderLayerFlashCommBuffer(PytestBase):
+    def _build_layer(self, *, tp_size: int, skip_input_gather: bool):
+        return SimpleNamespace(
+            layer_type="full_attention",
+            input_layernorm=_PassthroughLayerNorm(),
+            post_attention_layernorm=_PassthroughLayerNorm(),
+            self_attn=_FakeSelfAttention(tp_size, skip_input_gather),
+            layer_scale=False,
+            mlp=lambda hidden_states: hidden_states,
+        )
+
+    def test_allocates_sharded_attention_output_for_qwen35_full_input_fc1_path(
+        self,
+        monkeypatch,
+    ):
+        monkeypatch.setattr(patch_qwen3_5_module, "enable_sp", lambda: True)
+        layer = self._build_layer(tp_size=4, skip_input_gather=True)
+        hidden_states = torch.randn(5, 8)
+        positions = torch.arange(hidden_states.shape[0], dtype=torch.int64)
+
+        output, residual = AscendQwen3_5DecoderLayer.forward(
+            layer,
+            hidden_states=hidden_states,
+            residual=None,
+            positions=positions,
+        )
+
+        assert layer.self_attn.output_shapes == [(2, 8)]
+        assert output.shape == (2, 8)
+        assert residual.shape == hidden_states.shape
+
+    def test_keeps_full_attention_output_shape_for_non_fc1_first_projection(
+        self,
+        monkeypatch,
+    ):
+        monkeypatch.setattr(patch_qwen3_5_module, "enable_sp", lambda: True)
+        layer = self._build_layer(tp_size=4, skip_input_gather=False)
+        hidden_states = torch.randn(5, 8)
+        positions = torch.arange(hidden_states.shape[0], dtype=torch.int64)
+
+        output, residual = AscendQwen3_5DecoderLayer.forward(
+            layer,
+            hidden_states=hidden_states,
+            residual=None,
+            positions=positions,
+        )
+
+        assert layer.self_attn.output_shapes == [(5, 8)]
+        assert output.shape == (5, 8)
+        assert residual.shape == hidden_states.shape
