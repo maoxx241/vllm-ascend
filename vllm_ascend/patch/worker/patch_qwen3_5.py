@@ -64,6 +64,10 @@ _QWEN35_DECODER_DUMP_LAYER_TYPE = os.environ.get(
     "QWEN35_DECODER_DUMP_LAYER_TYPE",
     "full_attention",
 )
+_QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
+    "QWEN35_DECODER_DUMP_DRAFT_ONLY",
+    "0",
+) == "1"
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
@@ -154,6 +158,14 @@ def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor |
         return
     if _QWEN35_DECODER_DUMP_LAYER_TYPE and layer_type != _QWEN35_DECODER_DUMP_LAYER_TYPE:
         return
+    if _QWEN35_DECODER_DUMP_DRAFT_ONLY:
+        forward_context = get_forward_context()
+        if forward_context is None:
+            return
+        if not getattr(forward_context, "is_draft_model", False):
+            return
+        if getattr(forward_context, "in_profile_run", False):
+            return
 
     idx = _QWEN35_DECODER_DUMP_COUNTERS.get(stage, 0)
     _QWEN35_DECODER_DUMP_COUNTERS[stage] = idx + 1
