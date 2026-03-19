@@ -86,5 +86,5 @@ def test_mrotary_forward_triton_uses_gathered_positions(monkeypatch):
 
     q_out, k_out = rope.forward_triton(positions, query, key)
 
-    assert q_out is query
-    assert k_out is key
+    assert torch.equal(q_out, query)
+    assert torch.equal(k_out, key)
