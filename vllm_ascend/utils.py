@@ -885,11 +885,6 @@ def is_qwen35_first_full_input_lm_projection(prefix: str, vllm_config: VllmConfi
     if "qwen3_5" not in getattr(hf_text_config, "model_type", ""):
         return False
 
-    speculative_config = getattr(vllm_config, "speculative_config", None)
-    speculative_method = getattr(speculative_config, "method", None)
-    if speculative_method in {"mtp", "qwen3_5_mtp"} and prefix.endswith("mtp.layers.0.self_attn.qkv_proj"):
-        return True
-
     if not is_vl_model(vllm_config):
         return False
 

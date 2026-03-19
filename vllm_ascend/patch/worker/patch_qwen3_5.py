@@ -382,30 +382,6 @@ def _has_qwen35_prefill_metadata(model: Qwen3_5Model) -> bool:
     return False
 
 
-def _make_qwen35_self_attention_output_buffer(
-    layer: Qwen3_5DecoderLayer,
-    hidden_states: torch.Tensor,
-) -> torch.Tensor:
-    if not enable_sp() or layer.layer_type != "full_attention":
-        return torch.empty_like(hidden_states)
-
-    qkv_proj = getattr(layer.self_attn, "qkv_proj", None)
-    if not getattr(qkv_proj, "fc1_skip_input_gather", False):
-        return torch.empty_like(hidden_states)
-
-    tp_size = getattr(getattr(layer.self_attn, "o_proj", None), "tp_size", 1)
-    if tp_size <= 1:
-        return torch.empty_like(hidden_states)
-
-    output_shape = list(hidden_states.shape)
-    output_shape[0] = (hidden_states.shape[0] + tp_size - 1) // tp_size
-    return torch.empty(
-        output_shape,
-        dtype=hidden_states.dtype,
-        device=hidden_states.device,
-    )
-
-
 @torch.compiler.disable
 def _prepare_qwen35_prefill_precomputed(model: Qwen3_5Model) -> None:
     forward_context = get_forward_context()
@@ -772,10 +748,7 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         else:
             hidden_states, residual = self.input_layernorm(hidden_states, residual)
 
-        self_attention_output = _make_qwen35_self_attention_output_buffer(
-            self,
-            hidden_states,
-        )
+        self_attention_output = torch.empty_like(hidden_states)
         if self.layer_type == "linear_attention":
             attn_output = self.linear_attn(
                 hidden_states=hidden_states,
