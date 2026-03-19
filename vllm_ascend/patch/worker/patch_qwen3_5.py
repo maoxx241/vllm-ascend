@@ -702,11 +702,32 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
             residual = intermediate_tensors["residual"]
 
         current_step_idx = spec_step_idx % self.num_mtp_layers
+        debug_step_idx = positions.new_tensor([current_step_idx])
+        if is_single_token_call:
+            _dump_decoder_tensors(
+                "mtp_single_token_before_layer",
+                "mtp",
+                input_ids=input_ids,
+                positions=positions,
+                hidden_states=hidden_states,
+                residual=residual,
+                step_idx=debug_step_idx,
+            )
         hidden_states, residual = self.layers[current_step_idx](
             positions=positions,
             hidden_states=hidden_states,
             residual=residual,
         )
+        if is_single_token_call:
+            _dump_decoder_tensors(
+                "mtp_single_token_after_layer",
+                "mtp",
+                input_ids=input_ids,
+                positions=positions,
+                hidden_states=hidden_states,
+                residual=residual,
+                step_idx=debug_step_idx,
+            )
         _dump_decoder_tensors(
             "mtp_before_final_norm",
             "mtp",
@@ -1050,6 +1071,9 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         positions: torch.Tensor = None,
         **kwargs: object,
     ):
+        debug_layer_idx = None
+        if _QWEN35_DECODER_DUMP_DIR and positions is not None:
+            debug_layer_idx = positions.new_tensor([self.layer_idx])
         _write_alias_debug(
             "decoder_enter",
             layer_type=self.layer_type,
@@ -1074,6 +1098,8 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         _dump_decoder_tensors(
             "after_input_layernorm",
             self.layer_type,
+            positions=positions,
+            layer_idx=debug_layer_idx,
             hidden_states=hidden_states,
             residual=residual,
         )
@@ -1112,6 +1138,8 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         _dump_decoder_tensors(
             "after_attention",
             self.layer_type,
+            positions=positions,
+            layer_idx=debug_layer_idx,
             hidden_states=hidden_states,
             residual=residual,
             self_attention_output=self_attention_output,
@@ -1130,6 +1158,8 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         _dump_decoder_tensors(
             "before_post_attention_layernorm",
             self.layer_type,
+            positions=positions,
+            layer_idx=debug_layer_idx,
             hidden_states=hidden_states,
             residual=residual,
         )
@@ -1137,6 +1167,8 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         _dump_decoder_tensors(
             "after_post_attention_layernorm",
             self.layer_type,
+            positions=positions,
+            layer_idx=debug_layer_idx,
             hidden_states=hidden_states,
             residual=residual,
         )
@@ -1144,6 +1176,8 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         _dump_decoder_tensors(
             "after_mlp",
             self.layer_type,
+            positions=positions,
+            layer_idx=debug_layer_idx,
             hidden_states=hidden_states,
             residual=residual,
         )
