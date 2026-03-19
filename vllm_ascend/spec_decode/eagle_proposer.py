@@ -77,10 +77,11 @@ def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | No
             "idx": idx,
             "name": name,
             "tp_rank": tp_rank,
+            "pid": os.getpid(),
             "shape": list(tensor.shape),
             "dtype": str(tensor.dtype),
             "meta": meta,
-            "tensor": tensor.detach().cpu(),
+            "tensor": tensor.detach().clone().cpu(),
         },
         path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
     )

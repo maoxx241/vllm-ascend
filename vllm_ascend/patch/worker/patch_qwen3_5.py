@@ -195,7 +195,7 @@ def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor |
                 "pid": os.getpid(),
                 "shape": list(tensor.shape),
                 "dtype": str(tensor.dtype),
-                "tensor": tensor.detach().cpu(),
+                "tensor": tensor.detach().clone().cpu(),
             },
             os.path.join(
                 _QWEN35_DECODER_DUMP_DIR,
@@ -236,7 +236,7 @@ def _dump_qwen35_runtime_tensors(stage: str, **tensors: torch.Tensor | None) -> 
                 "pid": os.getpid(),
                 "shape": list(tensor.shape),
                 "dtype": str(tensor.dtype),
-                "tensor": tensor.detach().cpu(),
+                "tensor": tensor.detach().clone().cpu(),
             },
             os.path.join(
                 _QWEN35_DECODER_DUMP_DIR,
