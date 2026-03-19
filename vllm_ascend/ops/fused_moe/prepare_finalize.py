@@ -14,7 +14,9 @@
 # limitations under the License.
 # This file is a part of the vllm-ascend project.
 
+import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import torch
 import torch.distributed as dist
@@ -33,6 +35,52 @@ from vllm_ascend.ascend_forward_context import _EXTRA_CTX
 from vllm_ascend.distributed.utils import fc3_all_gather_and_maybe_unpad_impl
 from vllm_ascend.quantization.methods.base import QuantType
 from vllm_ascend.utils import enable_sp, npu_stream_switch, prefill_context_parallel_enable
+
+
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_MOE_DUMP_DIR")
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_MOE_DUMP_LIMIT", "16"))
+_DEBUG_COUNTERS = {
+    "moe_prepare_ep": 0,
+}
+
+
+def _is_compiling_debug() -> bool:
+    try:
+        if torch.compiler.is_compiling():
+            return True
+    except Exception:
+        pass
+    dynamo = getattr(torch, "_dynamo", None)
+    if dynamo is not None:
+        try:
+            return bool(dynamo.is_compiling())
+        except Exception:
+            pass
+    return False
+
+
+def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT or _is_compiling_debug():
+        return
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    try:
+        rank = get_tensor_model_parallel_rank()
+    except Exception:
+        rank = -1
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "rank": rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{rank}_{name}.pt",
+    )
 
 
 class PrepareAndFinalize(ABC):
@@ -319,6 +367,10 @@ class PrepareAndFinalizeWithAllGather(PrepareAndFinalize):
     def _prepare_with_ep_group(
         self, hidden_states: torch.Tensor, router_logits: torch.Tensor, quant_type=QuantType.NONE
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
+        debug_idx = _DEBUG_COUNTERS["moe_prepare_ep"]
+        _DEBUG_COUNTERS["moe_prepare_ep"] += 1
+        _debug_dump_tensor("moe_prepare_ep", debug_idx, "hidden_states_in", hidden_states, quant_type=str(quant_type))
+        _debug_dump_tensor("moe_prepare_ep", debug_idx, "router_logits_in", router_logits, quant_type=str(quant_type))
         pertoken_scale = None
         if quant_type == QuantType.W8A8:
             hidden_states, pertoken_scale = torch_npu.npu_dynamic_quant(hidden_states)
@@ -342,7 +394,10 @@ class PrepareAndFinalizeWithAllGather(PrepareAndFinalize):
         if self.multistream_overlap_gate:
             torch.npu.current_stream().wait_stream(PrepareAndFinalize.quant_stream)
 
+        _debug_dump_tensor("moe_prepare_ep", debug_idx, "hidden_states_out", hidden_states, quant_type=str(quant_type))
+        _debug_dump_tensor("moe_prepare_ep", debug_idx, "router_logits_out", router_logits, quant_type=str(quant_type))
         if pertoken_scale is not None:
+            _debug_dump_tensor("moe_prepare_ep", debug_idx, "pertoken_scale_out", pertoken_scale, quant_type=str(quant_type))
             return (hidden_states, pertoken_scale), router_logits, None, None
 
         return hidden_states, router_logits, None, None

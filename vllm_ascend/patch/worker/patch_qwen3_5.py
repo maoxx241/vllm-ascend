@@ -925,6 +925,12 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
             residual=residual,
         )
         hidden_states = self.mlp(hidden_states)
+        _dump_decoder_tensors(
+            "after_mlp",
+            self.layer_type,
+            hidden_states=hidden_states,
+            residual=residual,
+        )
 
         if self.layer_scale:
             if len(hidden_states.shape) == 2:

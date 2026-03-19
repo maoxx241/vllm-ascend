@@ -14,11 +14,65 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 from collections.abc import Callable
+from pathlib import Path
 
 import torch
 
 from vllm_ascend.utils import get_weight_prefetch_method
+
+
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_MOE_DUMP_DIR")
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_MOE_DUMP_LIMIT", "16"))
+_DEBUG_COUNTERS = {
+    "select_experts": 0,
+}
+
+
+def _is_compiling_debug() -> bool:
+    try:
+        if torch.compiler.is_compiling():
+            return True
+    except Exception:
+        pass
+    dynamo = getattr(torch, "_dynamo", None)
+    if dynamo is not None:
+        try:
+            return bool(dynamo.is_compiling())
+        except Exception:
+            pass
+    return False
+
+
+def _get_debug_rank() -> int:
+    try:
+        if torch.distributed.is_initialized():
+            return torch.distributed.get_rank()
+    except Exception:
+        pass
+    return -1
+
+
+def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT or _is_compiling_debug():
+        return
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    rank = _get_debug_rank()
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "rank": rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{rank}_{name}.pt",
+    )
 
 
 def select_experts(
@@ -57,6 +111,33 @@ def select_experts(
         topk_weights: router weights of shape (num_tokens, top_k).
         topk_ids: selected expert IDs of shape (num_tokens, top_k).
     """
+    debug_idx = _DEBUG_COUNTERS["select_experts"]
+    _DEBUG_COUNTERS["select_experts"] += 1
+    _debug_dump_tensor(
+        "select_experts",
+        debug_idx,
+        "hidden_states_in",
+        hidden_states,
+        top_k=top_k,
+        use_grouped_topk=use_grouped_topk,
+        renormalize=renormalize,
+        topk_group=topk_group,
+        num_expert_group=num_expert_group,
+        scoring_func=scoring_func,
+    )
+    _debug_dump_tensor(
+        "select_experts",
+        debug_idx,
+        "router_logits_in",
+        router_logits,
+        top_k=top_k,
+        use_grouped_topk=use_grouped_topk,
+        renormalize=renormalize,
+        topk_group=topk_group,
+        num_expert_group=num_expert_group,
+        scoring_func=scoring_func,
+    )
+
     # prefetch w1_w3_proj.weight preprocess
     weight_prefetch_method = get_weight_prefetch_method()
     weight_prefetch_method.maybe_prefetch_moe_weight_preprocess(hidden_states, "gate_up")
@@ -98,6 +179,8 @@ def select_experts(
             e_score_correction_bias=e_score_correction_bias,
             global_num_experts=global_num_experts,
         )
+    _debug_dump_tensor("select_experts", debug_idx, "topk_weights_out", topk_weights)
+    _debug_dump_tensor("select_experts", debug_idx, "topk_ids_out", topk_ids)
     return topk_weights, topk_ids
 
 
