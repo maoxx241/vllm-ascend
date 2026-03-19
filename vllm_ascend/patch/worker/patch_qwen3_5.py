@@ -15,6 +15,7 @@
 # limitations under the License.
 # mypy: ignore-errors
 
+import json
 import os
 from collections.abc import Iterable
 from itertools import islice
@@ -55,6 +56,7 @@ from vllm_ascend.utils import enable_sp
 
 
 _VALIDATE_PACKED_IN_PROJ_ENV = "VLLM_ASCEND_VALIDATE_QWEN35_PACKED_INPROJ"
+_QWEN35_ALIAS_DEBUG_JSONL = os.environ.get("QWEN35_ALIAS_DEBUG_JSONL")
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
@@ -77,6 +79,25 @@ _QWEN35_STACKED_PARAMS_MAPPING = [
     ("in_proj", "in_proj_b", 4),
     ("in_proj", "in_proj_a", 5),
 ]
+
+
+def _tensor_debug_ptr(tensor: torch.Tensor | None) -> dict[str, int | list[int] | str] | None:
+    if tensor is None:
+        return None
+    return {
+        "data_ptr": int(tensor.data_ptr()),
+        "storage_ptr": int(tensor.untyped_storage().data_ptr()),
+        "shape": list(tensor.shape),
+        "dtype": str(tensor.dtype),
+    }
+
+
+def _write_alias_debug(stage: str, **fields) -> None:
+    if not _QWEN35_ALIAS_DEBUG_JSONL:
+        return
+    record = {"stage": stage, "pid": os.getpid(), **fields}
+    with open(_QWEN35_ALIAS_DEBUG_JSONL, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 _QWEN35_LEGACY_IN_PROJ_MAPPING = {
     "in_proj_qkv": ("in_proj_qkvz", (0, 1, 2)),
@@ -742,11 +763,28 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         positions: torch.Tensor = None,
         **kwargs: object,
     ):
+        _write_alias_debug(
+            "decoder_enter",
+            layer_type=self.layer_type,
+            hidden=_tensor_debug_ptr(hidden_states),
+            residual=_tensor_debug_ptr(residual),
+        )
         if residual is None:
             residual = hidden_states
             hidden_states = self.input_layernorm(hidden_states)
         else:
             hidden_states, residual = self.input_layernorm(hidden_states, residual)
+        _write_alias_debug(
+            "after_input_layernorm",
+            layer_type=self.layer_type,
+            hidden=_tensor_debug_ptr(hidden_states),
+            residual=_tensor_debug_ptr(residual),
+            hidden_residual_same_storage=(
+                hidden_states is not None
+                and residual is not None
+                and hidden_states.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            ),
+        )
 
         self_attention_output = torch.empty_like(hidden_states)
         if self.layer_type == "linear_attention":
@@ -763,6 +801,24 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
         else:
             raise ValueError("Invalid layer_type")
         hidden_states = self_attention_output if attn_output is None else attn_output
+        _write_alias_debug(
+            "after_attention",
+            layer_type=self.layer_type,
+            hidden=_tensor_debug_ptr(hidden_states),
+            residual=_tensor_debug_ptr(residual),
+            attn_output=_tensor_debug_ptr(attn_output),
+            self_attention_output=_tensor_debug_ptr(self_attention_output),
+            hidden_residual_same_storage=(
+                hidden_states is not None
+                and residual is not None
+                and hidden_states.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            ),
+            output_residual_same_storage=(
+                self_attention_output is not None
+                and residual is not None
+                and self_attention_output.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
+            ),
+        )
 
         if self.layer_scale:
             if len(hidden_states.shape) == 2:
