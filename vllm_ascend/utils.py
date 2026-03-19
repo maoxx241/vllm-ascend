@@ -856,7 +856,11 @@ def is_vl_model(vllm_config: VllmConfig):
     if model_config.hf_config is not model_config.hf_text_config:
         return True
 
-    hf_config = model_config.hf_config.to_dict()
+    hf_config_obj = model_config.hf_config
+    if hasattr(hf_config_obj, "to_dict"):
+        hf_config = hf_config_obj.to_dict()
+    else:
+        hf_config = vars(hf_config_obj)
     return "thinker_config" in hf_config or "vision_config" in hf_config
 
 
