@@ -73,6 +73,10 @@ _QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
     "QWEN35_DECODER_DUMP_DRAFT_ONLY",
     "0",
 ) == "1"
+_QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY = os.environ.get(
+    "QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY",
+    "0",
+) == "1"
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
 _ORIGINAL_QWEN3_5_OUTER_MTP_FORWARD = Qwen3_5MTP.forward
 _ORIGINAL_QWEN3_5_MTP_FORWARD = Qwen3_5MultiTokenPredictor.forward
@@ -183,6 +187,13 @@ def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor |
 
     os.makedirs(_QWEN35_DECODER_DUMP_DIR, exist_ok=True)
     rank = _get_debug_rank()
+    if _QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY:
+        torch_npu = getattr(torch, "npu", None)
+        if torch_npu is not None:
+            try:
+                torch_npu.synchronize()
+            except Exception:
+                pass
     for name, tensor in tensors.items():
         if tensor is None:
             continue
@@ -225,6 +236,13 @@ def _dump_qwen35_runtime_tensors(stage: str, **tensors: torch.Tensor | None) -> 
 
     os.makedirs(_QWEN35_DECODER_DUMP_DIR, exist_ok=True)
     rank = _get_debug_rank()
+    if _QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY:
+        torch_npu = getattr(torch, "npu", None)
+        if torch_npu is not None:
+            try:
+                torch_npu.synchronize()
+            except Exception:
+                pass
     for name, tensor in tensors.items():
         if tensor is None:
             continue
@@ -668,6 +686,7 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
         inputs_embeds: torch.Tensor | None = None,
         spec_step_idx: int = 0,
     ) -> torch.Tensor:
+        is_single_token_call = hidden_states.shape[0] == 1
         if get_pp_group().is_first_rank:
             if inputs_embeds is None:
                 inputs_embeds = self.embed_input_ids(input_ids)
@@ -691,13 +710,17 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
         _dump_decoder_tensors(
             "mtp_before_final_norm",
             "mtp",
+            input_ids=input_ids,
+            positions=positions,
             hidden_states=hidden_states,
             residual=residual,
         )
-        if hidden_states.shape[0] == 1:
+        if is_single_token_call:
             _dump_decoder_tensors(
                 "mtp_single_token_before_final_norm",
                 "mtp",
+                input_ids=input_ids,
+                positions=positions,
                 hidden_states=hidden_states,
                 residual=residual,
             )
@@ -711,13 +734,17 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
         _dump_decoder_tensors(
             "mtp_after_final_norm",
             "mtp",
+            input_ids=input_ids,
+            positions=positions,
             hidden_states=hidden_states,
             residual=residual_out,
         )
-        if hidden_states.shape[0] == 1:
+        if is_single_token_call:
             _dump_decoder_tensors(
                 "mtp_single_token_after_final_norm",
                 "mtp",
+                input_ids=input_ids,
+                positions=positions,
                 hidden_states=hidden_states,
                 residual=residual_out,
             )
