@@ -43,6 +43,7 @@ from vllm.model_executor.models.qwen3_5_mtp import (
     Qwen3_5MTP,
     Qwen3_5MultiTokenPredictor,
 )
+from vllm.model_executor.models.qwen3_next import Qwen3NextAttention
 from vllm.sequence import IntermediateTensors
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
@@ -80,6 +81,7 @@ _QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY = os.environ.get(
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
 _ORIGINAL_QWEN3_5_OUTER_MTP_FORWARD = Qwen3_5MTP.forward
 _ORIGINAL_QWEN3_5_MTP_FORWARD = Qwen3_5MultiTokenPredictor.forward
+_ORIGINAL_QWEN3_NEXT_ATTENTION_FORWARD = Qwen3NextAttention.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_FORWARD = Qwen3_5GatedDeltaNet.forward
@@ -261,6 +263,23 @@ def _dump_qwen35_runtime_tensors(stage: str, **tensors: torch.Tensor | None) -> 
                 f"{stage}_idx{idx}_rank{rank}_{name}.pt",
             ),
         )
+
+
+def _should_dump_qwen35_single_token_attention(hidden_states: torch.Tensor) -> bool:
+    if not _QWEN35_DECODER_DUMP_DIR or _is_compiling_debug():
+        return False
+    if hidden_states.shape[0] != 1:
+        return False
+    if _QWEN35_DECODER_DUMP_DRAFT_ONLY:
+        forward_context = get_forward_context()
+        if forward_context is None:
+            return False
+        if not getattr(forward_context, "is_draft_model", False):
+            return False
+        if getattr(forward_context, "in_profile_run", False):
+            return False
+    return True
+
 
 _QWEN35_LEGACY_IN_PROJ_MAPPING = {
     "in_proj_qkv": ("in_proj_qkvz", (0, 1, 2)),
@@ -1063,6 +1082,96 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         maybe_save_kv_layer_to_connector("", [])
 
 
+class AscendQwen3NextAttention(Qwen3NextAttention):
+    def forward(
+        self,
+        positions: torch.Tensor,
+        output: torch.Tensor,
+        hidden_states: torch.Tensor,
+    ):
+        if not _should_dump_qwen35_single_token_attention(hidden_states):
+            return _ORIGINAL_QWEN3_NEXT_ATTENTION_FORWARD(
+                self,
+                positions,
+                output,
+                hidden_states,
+            )
+
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_input",
+            positions=positions,
+            hidden_states=hidden_states,
+        )
+        qkv, _ = self.qkv_proj(hidden_states)
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_qkv",
+            positions=positions,
+            qkv=qkv,
+        )
+
+        gate = None
+        if self.attn_output_gate:
+            q_gate, k, v = qkv.split(
+                [self.q_size * 2, self.kv_size, self.kv_size], dim=-1
+            )
+            orig_shape = q_gate.shape[:-1]
+            q_gate = q_gate.view(*orig_shape, self.num_heads, -1)
+            q, gate = torch.chunk(q_gate, 2, dim=-1)
+            q = q.reshape(*orig_shape, -1)
+            gate = gate.reshape(*orig_shape, -1)
+        else:
+            q, k, v = qkv.split([self.q_size, self.kv_size, self.kv_size], dim=-1)
+
+        q = self.q_norm(q.view(-1, self.num_heads, self.head_dim)).view(
+            -1, self.num_heads * self.head_dim
+        )
+        k = self.k_norm(k.view(-1, self.num_kv_heads, self.head_dim)).view(
+            -1, self.num_kv_heads * self.head_dim
+        )
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_qk_norm",
+            positions=positions,
+            q=q,
+            k=k,
+            v=v,
+            gate=gate,
+        )
+
+        q, k = self.rotary_emb(positions, q, k)
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_rotary",
+            positions=positions,
+            q=q,
+            k=k,
+            v=v,
+        )
+
+        attn_output = self.attn(q, k, v)
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_core",
+            positions=positions,
+            attn_output=attn_output,
+        )
+
+        if self.attn_output_gate:
+            gate = torch.sigmoid(gate)
+            attn_output = attn_output * gate
+            _dump_qwen35_runtime_tensors(
+                "mtp_full_attn_gate",
+                positions=positions,
+                gate=gate,
+                attn_output=attn_output,
+            )
+
+        projected_output, _ = self.o_proj(attn_output)
+        output[:] = projected_output
+        _dump_qwen35_runtime_tensors(
+            "mtp_full_attn_o_proj",
+            positions=positions,
+            hidden_states=projected_output,
+        )
+
+
 class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
     def forward(
         self,
@@ -1200,6 +1309,7 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
 
 
 Qwen3_5ForCausalLMBase.packed_modules_mapping = _QWEN35_PACKED_MODULES_MAPPING
+Qwen3NextAttention.forward = AscendQwen3NextAttention.forward
 Qwen3_5DecoderLayer.forward = AscendQwen3_5DecoderLayer.forward
 Qwen3_5GatedDeltaNet.__init__ = _patched_qwen3_5_gated_delta_net_init
 Qwen3_5GatedDeltaNet.forward = AscendQwen3_5GatedDeltaNet.forward
