@@ -625,6 +625,13 @@ class AscendQwen3_5MTP(Qwen3_5MTP):
             positions=positions,
             hidden_states=hidden_states,
         )
+        if hidden_states.shape[0] == 1:
+            _dump_qwen35_runtime_tensors(
+                "mtp_wrapper_single_token_input",
+                input_ids=input_ids,
+                positions=positions,
+                hidden_states=hidden_states,
+            )
         hidden_states = self.model(
             input_ids,
             positions,
@@ -643,6 +650,11 @@ class AscendQwen3_5MTP(Qwen3_5MTP):
                 "mtp_wrapper_return",
                 hidden_states=hidden_states,
             )
+            if hidden_states.shape[0] == 1:
+                _dump_qwen35_runtime_tensors(
+                    "mtp_wrapper_single_token_return",
+                    hidden_states=hidden_states,
+                )
         return hidden_states
 
 
