@@ -47,6 +47,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--num-questions", type=int, default=100)
     parser.add_argument("--num-shots", type=int, default=5)
     parser.add_argument("--max-tokens", type=int, default=256)
+    parser.add_argument("--max-model-len", type=int, default=4096)
+    parser.add_argument("--max-num-seqs", type=int, default=4)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.85)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUTPUT)
@@ -87,6 +89,8 @@ def main() -> None:
             "num_questions": args.num_questions,
             "num_shots": args.num_shots,
             "max_tokens": args.max_tokens,
+            "max_model_len": args.max_model_len,
+            "max_num_seqs": args.max_num_seqs,
             "temperature": args.temperature,
             "enforce_eager": args.enforce_eager,
             "gpu_memory_utilization": args.gpu_memory_utilization,
@@ -111,8 +115,8 @@ def main() -> None:
             enable_expert_parallel=args.enable_expert_parallel,
             async_scheduling=True,
             enforce_eager=args.enforce_eager,
-            max_model_len=4096,
-            max_num_seqs=4,
+            max_model_len=args.max_model_len,
+            max_num_seqs=args.max_num_seqs,
             gpu_memory_utilization=args.gpu_memory_utilization,
             disable_log_stats=False,
             compilation_config=compilation_config,

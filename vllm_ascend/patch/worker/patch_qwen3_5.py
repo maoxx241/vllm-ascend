@@ -74,6 +74,22 @@ _QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
     "QWEN35_DECODER_DUMP_DRAFT_ONLY",
     "0",
 ) == "1"
+_QWEN35_DECODER_DUMP_NON_PROFILE_ONLY = os.environ.get(
+    "QWEN35_DECODER_DUMP_NON_PROFILE_ONLY",
+    "0",
+) == "1"
+_QWEN35_DECODER_DUMP_TARGET_POSITIONS_LEN = int(
+    os.environ.get("QWEN35_DECODER_DUMP_TARGET_POSITIONS_LEN", "0"),
+)
+_QWEN35_DECODER_DUMP_TARGET_TOKEN_COUNT = int(
+    os.environ.get("QWEN35_DECODER_DUMP_TARGET_TOKEN_COUNT", "0"),
+)
+_QWEN35_DECODER_DUMP_TARGET_LAYER_IDX = int(
+    os.environ.get("QWEN35_DECODER_DUMP_TARGET_LAYER_IDX", "-1"),
+)
+_QWEN35_DECODER_DUMP_ONLY_RANK = int(
+    os.environ.get("QWEN35_DECODER_DUMP_ONLY_RANK", "-1"),
+)
 _QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY = os.environ.get(
     "QWEN35_DECODER_DUMP_SYNC_BEFORE_COPY",
     "0",
@@ -166,19 +182,77 @@ def _get_debug_rank() -> int:
     return -1
 
 
-def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor | None) -> None:
+def _get_scalar_int_debug(value: object) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, int):
+        return value
+    if torch.is_tensor(value):
+        if value.numel() != 1:
+            return None
+        try:
+            return int(value.detach().cpu().reshape(()).item())
+        except Exception:
+            return None
+    return None
+
+
+def _should_dump_decoder_invocation(
+    layer_type: str,
+    *,
+    positions: torch.Tensor | None = None,
+    hidden_states: torch.Tensor | None = None,
+    layer_idx: object = None,
+) -> bool:
     if not _QWEN35_DECODER_DUMP_DIR or _is_compiling_debug():
-        return
+        return False
     if _QWEN35_DECODER_DUMP_LAYER_TYPE and layer_type != _QWEN35_DECODER_DUMP_LAYER_TYPE:
-        return
+        return False
+
+    forward_context = get_forward_context()
     if _QWEN35_DECODER_DUMP_DRAFT_ONLY:
-        forward_context = get_forward_context()
         if forward_context is None:
-            return
+            return False
         if not getattr(forward_context, "is_draft_model", False):
-            return
+            return False
         if getattr(forward_context, "in_profile_run", False):
-            return
+            return False
+    elif _QWEN35_DECODER_DUMP_NON_PROFILE_ONLY:
+        if forward_context is not None and getattr(forward_context, "in_profile_run", False):
+            return False
+
+    rank = _get_debug_rank()
+    if _QWEN35_DECODER_DUMP_ONLY_RANK >= 0 and rank != _QWEN35_DECODER_DUMP_ONLY_RANK:
+        return False
+
+    if _QWEN35_DECODER_DUMP_TARGET_LAYER_IDX >= 0:
+        actual_layer_idx = _get_scalar_int_debug(layer_idx)
+        if actual_layer_idx != _QWEN35_DECODER_DUMP_TARGET_LAYER_IDX:
+            return False
+
+    if _QWEN35_DECODER_DUMP_TARGET_POSITIONS_LEN > 0:
+        if positions is None or positions.ndim == 0:
+            return False
+        if positions.shape[-1] != _QWEN35_DECODER_DUMP_TARGET_POSITIONS_LEN:
+            return False
+
+    if _QWEN35_DECODER_DUMP_TARGET_TOKEN_COUNT > 0:
+        if hidden_states is None or hidden_states.ndim == 0:
+            return False
+        if hidden_states.shape[0] != _QWEN35_DECODER_DUMP_TARGET_TOKEN_COUNT:
+            return False
+
+    return True
+
+
+def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor | None) -> None:
+    if not _should_dump_decoder_invocation(
+        layer_type,
+        positions=tensors.get("positions"),
+        hidden_states=tensors.get("hidden_states"),
+        layer_idx=tensors.get("layer_idx"),
+    ):
+        return
 
     idx = _QWEN35_DECODER_DUMP_COUNTERS.get(stage, 0)
     _QWEN35_DECODER_DUMP_COUNTERS[stage] = idx + 1
