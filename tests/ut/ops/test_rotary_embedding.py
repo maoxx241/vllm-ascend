@@ -1,4 +1,5 @@
 import torch
+from vllm.config import VllmConfig, set_current_vllm_config
 
 from vllm_ascend.ops import rotary_embedding as rope_mod
 from vllm_ascend.ops.rotary_embedding import AscendMRotaryEmbedding
@@ -16,12 +17,18 @@ def test_maybe_all_gather_mtp_positions_uses_token_dim_for_mrope(monkeypatch):
         called["token_dim"] = token_dim
         return expected
 
-    monkeypatch.setattr(rope_mod._EXTRA_CTX, "is_draft_model", True, raising=False)
+    ctx = type(
+        "DummyForwardCtx",
+        (),
+        {
+            "is_draft_model": True,
+            "flash_comm_v1_enabled": True,
+        },
+    )()
     monkeypatch.setattr(
-        rope_mod._EXTRA_CTX,
-        "flash_comm_v1_enabled",
-        True,
-        raising=False,
+        type(rope_mod._EXTRA_CTX),
+        "_ctx",
+        staticmethod(lambda: ctx),
     )
     monkeypatch.setattr(
         torch.ops.vllm,
@@ -45,16 +52,17 @@ def test_mrotary_forward_triton_uses_gathered_positions(monkeypatch):
     gathered_positions = torch.zeros((3, 4), dtype=torch.long)
     query = torch.randn(4, 16, dtype=torch.float32)
     key = torch.randn(4, 8, dtype=torch.float32)
-    rope = AscendMRotaryEmbedding(
-        head_size=8,
-        rotary_dim=6,
-        max_position_embeddings=16,
-        base=10000.0,
-        is_neox_style=True,
-        dtype=torch.float32,
-        mrope_section=[1, 1, 1],
-        mrope_interleaved=True,
-    )
+    with set_current_vllm_config(VllmConfig()):
+        rope = AscendMRotaryEmbedding(
+            head_size=8,
+            rotary_dim=6,
+            max_position_embeddings=16,
+            base=10000.0,
+            is_neox_style=True,
+            dtype=torch.float32,
+            mrope_section=[1, 1, 1],
+            mrope_interleaved=True,
+        )
 
     def fake_maybe_gather(x, use_mtp):
         assert use_mtp is True
