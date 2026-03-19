@@ -39,6 +39,8 @@ def _is_ep_dispatch_combine_error(exc: Exception) -> bool:
 
 
 def _parse_args() -> argparse.Namespace:
+    from vllm.config import CUDAGraphMode
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default=os.environ.get("VLLM_QWEN35_MOE_MODEL", DEFAULT_MODEL))
     parser.add_argument("--tensor-parallel-size", type=int, default=4)
@@ -50,6 +52,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--enable-expert-parallel", action="store_true", default=True)
     parser.add_argument("--disable-expert-parallel", action="store_false", dest="enable_expert_parallel")
     parser.add_argument("--flashcomm", action="store_true")
+    parser.add_argument("--enforce-eager", action="store_true")
+    parser.add_argument(
+        "--cudagraph-mode",
+        choices=[mode.name for mode in CUDAGraphMode],
+        default="FULL_DECODE_ONLY",
+    )
     return parser.parse_args()
 
 
@@ -71,7 +79,7 @@ def main() -> None:
             "model": args.model,
             "tensor_parallel_size": args.tensor_parallel_size,
             "async_scheduling": True,
-            "cudagraph_mode": "FULL_DECODE_ONLY",
+            "cudagraph_mode": args.cudagraph_mode,
             "num_speculative_tokens": 3,
             "enable_expert_parallel": args.enable_expert_parallel,
             "flashcomm": args.flashcomm,
@@ -79,8 +87,16 @@ def main() -> None:
             "num_shots": args.num_shots,
             "max_tokens": args.max_tokens,
             "temperature": args.temperature,
+            "enforce_eager": args.enforce_eager,
         }
     }
+
+    compilation_config = None
+    if not args.enforce_eager and args.cudagraph_mode != "NONE":
+        compilation_config = {
+            "cudagraph_mode": args.cudagraph_mode,
+            "cudagraph_capture_sizes": [4, 8, 12, 16],
+        }
 
     try:
         llm = LLM(
@@ -92,15 +108,12 @@ def main() -> None:
             distributed_executor_backend="mp",
             enable_expert_parallel=args.enable_expert_parallel,
             async_scheduling=True,
-            enforce_eager=False,
+            enforce_eager=args.enforce_eager,
             max_model_len=4096,
             max_num_seqs=4,
             gpu_memory_utilization=0.85,
             disable_log_stats=False,
-            compilation_config={
-                "cudagraph_mode": "FULL_DECODE_ONLY",
-                "cudagraph_capture_sizes": [4, 8, 12, 16],
-            },
+            compilation_config=compilation_config,
             speculative_config={
                 "method": "qwen3_5_mtp",
                 "num_speculative_tokens": 3,
