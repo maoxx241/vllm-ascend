@@ -256,8 +256,8 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
             mc2_mask=kwargs.get("mc2_mask"),
         )
         if zero_expert_num > 0 and zero_expert_type is not None:
-            final_hidden_states += zero_expert_result
-        _debug_dump_tensor("moe_apply", debug_idx, "routed_out", final_hidden_states, **debug_meta)
+            final_hidden_states.routed_out += zero_expert_result
+        _debug_dump_tensor("moe_apply", debug_idx, "routed_out", final_hidden_states.routed_out, **debug_meta)
         return final_hidden_states
 
 
