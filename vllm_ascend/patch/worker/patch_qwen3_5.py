@@ -39,7 +39,10 @@ from vllm.model_executor.models.qwen3_5 import (
     logger,
     maybe_remap_kv_scale_name,
 )
-from vllm.model_executor.models.qwen3_5_mtp import Qwen3_5MultiTokenPredictor
+from vllm.model_executor.models.qwen3_5_mtp import (
+    Qwen3_5MTP,
+    Qwen3_5MultiTokenPredictor,
+)
 from vllm.sequence import IntermediateTensors
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
@@ -71,6 +74,7 @@ _QWEN35_DECODER_DUMP_DRAFT_ONLY = os.environ.get(
     "0",
 ) == "1"
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
+_ORIGINAL_QWEN3_5_OUTER_MTP_FORWARD = Qwen3_5MTP.forward
 _ORIGINAL_QWEN3_5_MTP_FORWARD = Qwen3_5MultiTokenPredictor.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
@@ -186,6 +190,47 @@ def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor |
             {
                 "stage": stage,
                 "layer_type": layer_type,
+                "idx": idx,
+                "rank": rank,
+                "pid": os.getpid(),
+                "shape": list(tensor.shape),
+                "dtype": str(tensor.dtype),
+                "tensor": tensor.detach().cpu(),
+            },
+            os.path.join(
+                _QWEN35_DECODER_DUMP_DIR,
+                f"{stage}_idx{idx}_rank{rank}_{name}.pt",
+            ),
+        )
+
+
+def _dump_qwen35_runtime_tensors(stage: str, **tensors: torch.Tensor | None) -> None:
+    if not _QWEN35_DECODER_DUMP_DIR or _is_compiling_debug():
+        return
+    if _QWEN35_DECODER_DUMP_DRAFT_ONLY:
+        forward_context = get_forward_context()
+        if forward_context is None:
+            return
+        if not getattr(forward_context, "is_draft_model", False):
+            return
+        if getattr(forward_context, "in_profile_run", False):
+            return
+
+    idx = _QWEN35_DECODER_DUMP_COUNTERS.get(stage, 0)
+    _QWEN35_DECODER_DUMP_COUNTERS[stage] = idx + 1
+    if idx < _QWEN35_DECODER_DUMP_SKIP:
+        return
+    if idx >= _QWEN35_DECODER_DUMP_SKIP + _QWEN35_DECODER_DUMP_LIMIT:
+        return
+
+    os.makedirs(_QWEN35_DECODER_DUMP_DIR, exist_ok=True)
+    rank = _get_debug_rank()
+    for name, tensor in tensors.items():
+        if tensor is None:
+            continue
+        torch.save(
+            {
+                "stage": stage,
                 "idx": idx,
                 "rank": rank,
                 "pid": os.getpid(),
@@ -562,6 +607,37 @@ class AscendQwen3_5Model(Qwen3_5Model):
             intermediate_tensors,
             inputs_embeds,
         )
+
+
+class AscendQwen3_5MTP(Qwen3_5MTP):
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        positions: torch.Tensor,
+        hidden_states: torch.Tensor,
+        intermediate_tensors: IntermediateTensors | None = None,
+        inputs_embeds: torch.Tensor | None = None,
+        **kwargs: object,
+    ):
+        hidden_states = self.model(
+            input_ids,
+            positions,
+            hidden_states,
+            intermediate_tensors,
+            inputs_embeds,
+        )
+        if isinstance(hidden_states, IntermediateTensors):
+            _dump_qwen35_runtime_tensors(
+                "mtp_wrapper_return",
+                hidden_states=hidden_states.get("hidden_states"),
+                residual=hidden_states.get("residual"),
+            )
+        else:
+            _dump_qwen35_runtime_tensors(
+                "mtp_wrapper_return",
+                hidden_states=hidden_states,
+            )
+        return hidden_states
 
 
 class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
@@ -1036,5 +1112,6 @@ Qwen3_5GatedDeltaNet.__init__ = _patched_qwen3_5_gated_delta_net_init
 Qwen3_5GatedDeltaNet.forward = AscendQwen3_5GatedDeltaNet.forward
 Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
 Qwen3_5Model.forward = AscendQwen3_5Model.forward
+Qwen3_5MTP.forward = AscendQwen3_5MTP.forward
 Qwen3_5MultiTokenPredictor.forward = AscendQwen3_5MultiTokenPredictor.forward
 Qwen3_5Model.load_weights = _patched_qwen3_5_model_load_weights

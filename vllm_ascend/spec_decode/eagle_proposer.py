@@ -862,6 +862,14 @@ class SpecDecodeBaseProposer(EagleProposer):
         if self.pass_hidden_states_to_model:
             model_kwargs["hidden_states"] = model_hidden_states
         ret_hidden_states = self.model(**model_kwargs)
+        if self.method == "mtp" and not self.model_returns_tuple():
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "ret_hidden_states_raw",
+                ret_hidden_states,
+                phase="initial",
+            )
         if not self.model_returns_tuple():
             last_hidden_states = ret_hidden_states
             hidden_states = last_hidden_states
@@ -1095,6 +1103,15 @@ class SpecDecodeBaseProposer(EagleProposer):
             if self.pass_hidden_states_to_model:
                 model_kwargs["hidden_states"] = model_hidden_states
             ret_hidden_states = self.model(**model_kwargs)
+            if self.method == "mtp" and not self.model_returns_tuple():
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "ret_hidden_states_raw",
+                    ret_hidden_states,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
             if not self.model_returns_tuple():
                 last_hidden_states = ret_hidden_states
                 hidden_states = last_hidden_states
