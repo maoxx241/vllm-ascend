@@ -57,10 +57,17 @@ from vllm_ascend.utils import enable_sp
 
 _VALIDATE_PACKED_IN_PROJ_ENV = "VLLM_ASCEND_VALIDATE_QWEN35_PACKED_INPROJ"
 _QWEN35_ALIAS_DEBUG_JSONL = os.environ.get("QWEN35_ALIAS_DEBUG_JSONL")
+_QWEN35_DECODER_DUMP_DIR = os.environ.get("QWEN35_DECODER_DUMP_DIR")
+_QWEN35_DECODER_DUMP_LIMIT = int(os.environ.get("QWEN35_DECODER_DUMP_LIMIT", "4"))
+_QWEN35_DECODER_DUMP_LAYER_TYPE = os.environ.get(
+    "QWEN35_DECODER_DUMP_LAYER_TYPE",
+    "full_attention",
+)
 _ORIGINAL_QWEN3_5_MODEL_FORWARD = Qwen3_5Model.forward
 _ORIGINAL_QWEN3_5_MODEL_LOAD_WEIGHTS = Qwen3_5Model.load_weights
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_INIT = Qwen3_5GatedDeltaNet.__init__
 _ORIGINAL_QWEN3_5_GATED_DELTA_NET_FORWARD = Qwen3_5GatedDeltaNet.forward
+_QWEN35_DECODER_DUMP_COUNTERS: dict[str, int] = {}
 
 _QWEN35_PACKED_MODULES_MAPPING = {
     "qkv_proj": ["q_proj", "k_proj", "v_proj"],
@@ -92,12 +99,70 @@ def _tensor_debug_ptr(tensor: torch.Tensor | None) -> dict[str, int | list[int] 
     }
 
 
+def _is_compiling_debug() -> bool:
+    try:
+        if torch.compiler.is_compiling():
+            return True
+    except Exception:
+        pass
+    dynamo = getattr(torch, "_dynamo", None)
+    if dynamo is not None:
+        try:
+            return bool(dynamo.is_compiling())
+        except Exception:
+            pass
+    return False
+
+
 def _write_alias_debug(stage: str, **fields) -> None:
-    if not _QWEN35_ALIAS_DEBUG_JSONL:
+    if not _QWEN35_ALIAS_DEBUG_JSONL or _is_compiling_debug():
         return
     record = {"stage": stage, "pid": os.getpid(), **fields}
     with open(_QWEN35_ALIAS_DEBUG_JSONL, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def _get_debug_rank() -> int:
+    try:
+        if torch.distributed.is_initialized():
+            return torch.distributed.get_rank()
+    except Exception:
+        pass
+    return -1
+
+
+def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor | None) -> None:
+    if not _QWEN35_DECODER_DUMP_DIR or _is_compiling_debug():
+        return
+    if _QWEN35_DECODER_DUMP_LAYER_TYPE and layer_type != _QWEN35_DECODER_DUMP_LAYER_TYPE:
+        return
+
+    idx = _QWEN35_DECODER_DUMP_COUNTERS.get(stage, 0)
+    if idx >= _QWEN35_DECODER_DUMP_LIMIT:
+        return
+    _QWEN35_DECODER_DUMP_COUNTERS[stage] = idx + 1
+
+    os.makedirs(_QWEN35_DECODER_DUMP_DIR, exist_ok=True)
+    rank = _get_debug_rank()
+    for name, tensor in tensors.items():
+        if tensor is None:
+            continue
+        torch.save(
+            {
+                "stage": stage,
+                "layer_type": layer_type,
+                "idx": idx,
+                "rank": rank,
+                "pid": os.getpid(),
+                "shape": list(tensor.shape),
+                "dtype": str(tensor.dtype),
+                "tensor": tensor.detach().cpu(),
+            },
+            os.path.join(
+                _QWEN35_DECODER_DUMP_DIR,
+                f"{stage}_idx{idx}_rank{rank}_{name}.pt",
+            ),
+        )
 
 _QWEN35_LEGACY_IN_PROJ_MAPPING = {
     "in_proj_qkv": ("in_proj_qkvz", (0, 1, 2)),
@@ -785,6 +850,12 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
                 and hidden_states.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
             ),
         )
+        _dump_decoder_tensors(
+            "after_input_layernorm",
+            self.layer_type,
+            hidden_states=hidden_states,
+            residual=residual,
+        )
 
         self_attention_output = torch.empty_like(hidden_states)
         if self.layer_type == "linear_attention":
@@ -819,6 +890,13 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
                 and self_attention_output.untyped_storage().data_ptr() == residual.untyped_storage().data_ptr()
             ),
         )
+        _dump_decoder_tensors(
+            "after_attention",
+            self.layer_type,
+            hidden_states=hidden_states,
+            residual=residual,
+            self_attention_output=self_attention_output,
+        )
 
         if self.layer_scale:
             if len(hidden_states.shape) == 2:
@@ -830,7 +908,19 @@ class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
                     self.attn_layer_scale.to(hidden_states.dtype) + 1
                 )
 
+        _dump_decoder_tensors(
+            "before_post_attention_layernorm",
+            self.layer_type,
+            hidden_states=hidden_states,
+            residual=residual,
+        )
         hidden_states, residual = self.post_attention_layernorm(hidden_states, residual)
+        _dump_decoder_tensors(
+            "after_post_attention_layernorm",
+            self.layer_type,
+            hidden_states=hidden_states,
+            residual=residual,
+        )
         hidden_states = self.mlp(hidden_states)
 
         if self.layer_scale:
