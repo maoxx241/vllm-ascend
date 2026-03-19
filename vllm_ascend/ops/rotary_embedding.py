@@ -57,6 +57,43 @@ _cos: torch.Tensor = None
 _sin: torch.Tensor = None
 _cos_slice: torch.Tensor = None
 _sin_slice: torch.Tensor = None
+_ROTARY_DEBUG_DIR = os.environ.get("QWEN35_DECODER_DUMP_DIR") or os.environ.get("QWEN35_REPO_DUMP_DIR")
+_ROTARY_DEBUG_SKIP = int(os.environ.get("QWEN35_ROTARY_DUMP_SKIP", "0"))
+_ROTARY_DEBUG_LIMIT = int(os.environ.get("QWEN35_ROTARY_DUMP_LIMIT", "0"))
+_ROTARY_DEBUG_COUNTERS: dict[str, int] = {}
+
+
+def _dump_rotary_debug(stage: str, **tensors: torch.Tensor | None) -> None:
+    if not _ROTARY_DEBUG_DIR or _ROTARY_DEBUG_LIMIT <= 0:
+        return
+    idx = _ROTARY_DEBUG_COUNTERS.get(stage, 0)
+    _ROTARY_DEBUG_COUNTERS[stage] = idx + 1
+    if idx < _ROTARY_DEBUG_SKIP:
+        return
+    if idx >= _ROTARY_DEBUG_SKIP + _ROTARY_DEBUG_LIMIT:
+        return
+    try:
+        rank = torch.distributed.get_rank() if torch.distributed.is_initialized() else -1
+    except Exception:
+        rank = -1
+    os.makedirs(_ROTARY_DEBUG_DIR, exist_ok=True)
+    for name, tensor in tensors.items():
+        if tensor is None:
+            continue
+        torch.save(
+            {
+                "stage": stage,
+                "idx": idx,
+                "rank": rank,
+                "shape": list(tensor.shape),
+                "dtype": str(tensor.dtype),
+                "tensor": tensor.detach().clone().cpu(),
+            },
+            os.path.join(
+                _ROTARY_DEBUG_DIR,
+                f"{stage}_idx{idx}_rank{rank}_{name}.pt",
+            ),
+        )
 
 
 def set_cos_and_sin(vllm_config, max_num_reqs, decode_token_per_req, dtype, device):
@@ -242,6 +279,16 @@ class AscendRotaryEmbedding(RotaryEmbedding):
             is_neox_style = is_neox_style_override
         is_draft_model = _EXTRA_CTX.is_draft_model
         flash_comm_v1_enabled = _EXTRA_CTX.flash_comm_v1_enabled
+        rotary_debug_enabled = bool(_ROTARY_DEBUG_DIR) and _ROTARY_DEBUG_LIMIT > 0
+        debug_positions_before = None
+        debug_positions_after = None
+        debug_query_before = None
+        debug_key_before = None
+        debug_cache_rows = None
+        if rotary_debug_enabled:
+            debug_positions_before = positions.detach().clone()
+            debug_query_before = query.detach().clone()
+            debug_key_before = key.detach().clone()
         if is_draft_model and self.use_mtp and flash_comm_v1_enabled:
             token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
             positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
@@ -250,9 +297,29 @@ class AscendRotaryEmbedding(RotaryEmbedding):
                 False,
                 token_dim,
             )
-        return torch.ops.vllm.npu_rotary_embedding(
+        if rotary_debug_enabled:
+            debug_positions_after = positions.detach().clone()
+            flat_positions = debug_positions_after.reshape(-1)
+            if flat_positions.numel() > 0:
+                debug_cache_rows = self.cos_sin_cache.index_select(
+                    0,
+                    flat_positions.to(device=self.cos_sin_cache.device, dtype=torch.long)[:32],
+                ).detach().clone()
+        query_out, key_out = torch.ops.vllm.npu_rotary_embedding(
             positions, query, key, self.cos_sin_cache, self.head_size, self.rotary_dim, is_neox_style
         )
+        if rotary_debug_enabled:
+            _dump_rotary_debug(
+                "mtp_rotary_internal",
+                positions_before=debug_positions_before,
+                positions_after=debug_positions_after,
+                query_before=debug_query_before,
+                key_before=debug_key_before,
+                cache_rows=debug_cache_rows,
+                query_after=query_out,
+                key_after=key_out,
+            )
+        return query_out, key_out
 
 
 class AscendYaRNRotaryEmbedding(YaRNScalingRotaryEmbedding):
