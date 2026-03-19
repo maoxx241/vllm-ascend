@@ -14,9 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import os
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import wraps
+from pathlib import Path
 
 import torch
 import torch.nn.functional as F
@@ -50,6 +52,52 @@ from vllm_ascend.utils import (
     shared_expert_dp_enabled,
     shared_experts_calculation_stream,
 )
+
+
+_DEBUG_DUMP_DIR = os.environ.get("QWEN35_MOE_DUMP_DIR")
+_DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_MOE_DUMP_LIMIT", "16"))
+_DEBUG_COUNTERS = {
+    "moe_apply": 0,
+}
+
+
+def _is_compiling_debug() -> bool:
+    try:
+        if torch.compiler.is_compiling():
+            return True
+    except Exception:
+        pass
+    dynamo = getattr(torch, "_dynamo", None)
+    if dynamo is not None:
+        try:
+            return bool(dynamo.is_compiling())
+        except Exception:
+            pass
+    return False
+
+
+def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
+    if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT or _is_compiling_debug():
+        return
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    try:
+        rank = torch.distributed.get_rank() if torch.distributed.is_initialized() else -1
+    except Exception:
+        rank = -1
+    torch.save(
+        {
+            "kind": kind,
+            "idx": idx,
+            "name": name,
+            "rank": rank,
+            "shape": list(tensor.shape),
+            "dtype": str(tensor.dtype),
+            "meta": meta,
+            "tensor": tensor.detach().cpu(),
+        },
+        path / f"{kind}_idx{idx}_rank{rank}_{name}.pt",
+    )
 
 
 @dataclass
@@ -115,6 +163,16 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
         log2phy: torch.Tensor = None,
         **kwargs,
     ) -> torch.Tensor:
+        debug_idx = _DEBUG_COUNTERS["moe_apply"]
+        _DEBUG_COUNTERS["moe_apply"] += 1
+        debug_meta = {
+            "layer_name": getattr(layer, "layer_name", ""),
+            "top_k": top_k,
+            "scoring_func": scoring_func,
+            "renormalize": renormalize,
+        }
+        _debug_dump_tensor("moe_apply", debug_idx, "hidden_states_in", x, **debug_meta)
+        _debug_dump_tensor("moe_apply", debug_idx, "router_logits_in", router_logits, **debug_meta)
         zero_expert_num = getattr(layer, "zero_expert_num", 0)
         zero_expert_type = getattr(layer, "zero_expert_type", None)
         topk_weights, topk_ids = select_experts(
@@ -149,6 +207,8 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
             )
 
         topk_weights = topk_weights.to(x.dtype)
+        _debug_dump_tensor("moe_apply", debug_idx, "topk_weights", topk_weights, **debug_meta)
+        _debug_dump_tensor("moe_apply", debug_idx, "topk_ids", topk_ids, **debug_meta)
         # this is a naive implementation for experts load balance so as
         # to avoid accumulating too much tokens on a single rank.
         # currently it is only activated when doing profile runs.
@@ -197,6 +257,7 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
         )
         if zero_expert_num > 0 and zero_expert_type is not None:
             final_hidden_states += zero_expert_result
+        _debug_dump_tensor("moe_apply", debug_idx, "routed_out", final_hidden_states, **debug_meta)
         return final_hidden_states
 
 
