@@ -694,6 +694,13 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
             hidden_states=hidden_states,
             residual=residual,
         )
+        if hidden_states.shape[0] == 1:
+            _dump_decoder_tensors(
+                "mtp_single_token_before_final_norm",
+                "mtp",
+                hidden_states=hidden_states,
+                residual=residual,
+            )
 
         if not get_pp_group().is_last_rank:
             return IntermediateTensors(
@@ -707,6 +714,13 @@ class AscendQwen3_5MultiTokenPredictor(Qwen3_5MultiTokenPredictor):
             hidden_states=hidden_states,
             residual=residual_out,
         )
+        if hidden_states.shape[0] == 1:
+            _dump_decoder_tensors(
+                "mtp_single_token_after_final_norm",
+                "mtp",
+                hidden_states=hidden_states,
+                residual=residual_out,
+            )
         return hidden_states
 
 
