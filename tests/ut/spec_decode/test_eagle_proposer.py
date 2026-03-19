@@ -508,7 +508,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(shard, expected))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
-    def test_maybe_pad_and_reduce_mtp_flashcomm_skips_positions_reduce(
+    def test_maybe_pad_and_reduce_mtp_flashcomm_keeps_positions_full(
         self,
         mock_get_tp_group,
     ):
@@ -521,7 +521,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
 
         with patch("vllm_ascend.spec_decode.eagle_proposer._EXTRA_CTX",
                    new=SimpleNamespace(flash_comm_v1_enabled=True)):
-            reduced_hidden_states, split_positions = AscendEagleProposer.maybe_pad_and_reduce(
+            reduced_hidden_states, kept_positions = AscendEagleProposer.maybe_pad_and_reduce(
                 proposer,
                 hidden_states,
                 positions,
@@ -531,7 +531,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
             reduced_hidden_states.tolist(),
             [[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]],
         )
-        self.assertTrue(torch.equal(split_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
+        self.assertTrue(torch.equal(kept_positions, positions))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_draft_inputs_mtp_flashcomm_splits_token_aligned_inputs(
@@ -573,7 +573,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
             model_hidden_states.tolist(),
             [[6.0, 7.0], [8.0, 9.0], [0.0, 0.0]],
         )
-        self.assertTrue(torch.equal(model_positions, torch.tensor([3, 4, 0], dtype=torch.int32)))
+        self.assertTrue(torch.equal(model_positions, positions))
 
     @patch("vllm_ascend.spec_decode.eagle_proposer.get_tp_group")
     def test_maybe_pad_and_reduce_draft_inputs_keeps_aligned_token_inputs(
@@ -604,7 +604,7 @@ class TestEagleProposerFlashCommHelpers(TestBase):
         self.assertTrue(torch.equal(model_input_ids, input_ids))
         self.assertTrue(torch.equal(model_inputs_embeds, inputs_embeds))
         self.assertTrue(torch.equal(model_hidden_states, torch.tensor([[4.0, 5.0], [6.0, 7.0]])))
-        self.assertTrue(torch.equal(model_positions, torch.tensor([2, 3], dtype=torch.int32)))
+        self.assertTrue(torch.equal(model_positions, positions))
 
     @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
     def test_maybe_all_gather_and_unpad_mtp_keeps_positions_local(
