@@ -943,6 +943,14 @@ class SpecDecodeBaseProposer(EagleProposer):
             )
 
         sample_hidden_states = last_hidden_states[token_indices_to_sample]
+        if self.method == "mtp":
+            _debug_dump_tensor(
+                "mtp_step_state",
+                0,
+                "token_indices_to_sample",
+                token_indices_to_sample,
+                phase="initial",
+            )
         logits = self.model.compute_logits(sample_hidden_states)
 
         if lmhead_tp_enable() and num_indices < logits.shape[0] and not is_dummy:
@@ -1156,6 +1164,15 @@ class SpecDecodeBaseProposer(EagleProposer):
                 )
 
             sample_hidden_states = last_hidden_states[token_indices_to_sample]
+            if self.method == "mtp":
+                _debug_dump_tensor(
+                    "mtp_step_state",
+                    draft_step + 1,
+                    "token_indices_to_sample",
+                    token_indices_to_sample,
+                    phase="loop",
+                    draft_step=draft_step + 1,
+                )
             logits = self.model.compute_logits(sample_hidden_states)
 
             if lmhead_tp_enable() and num_indices < logits.shape[0] and not is_dummy:
