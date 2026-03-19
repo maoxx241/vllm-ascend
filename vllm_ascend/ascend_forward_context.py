@@ -45,6 +45,7 @@ def set_ascend_forward_context(
     skip_compiled: bool = False,
     max_tokens_across_pcp: int = 0,
     draft_attn_metadatas=None,
+    is_multimodal_model=False
 ):
     """A context manager that stores the current forward context,
     can be attention metadata, etc.
@@ -124,6 +125,7 @@ def set_ascend_forward_context(
         forward_context.prefetch_mlp_down_proj = False
         forward_context.model_instance = model_instance
         forward_context.is_draft_model = is_draft_model
+        forward_context.is_multimodal_model = is_multimodal_model
 
         if num_tokens is None and attn_metadata is not None:
             num_tokens = attn_metadata.num_actual_tokens

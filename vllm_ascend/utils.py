@@ -23,6 +23,7 @@ import atexit
 import functools
 import math
 import os
+import re
 from contextlib import nullcontext
 from enum import Enum
 from functools import lru_cache
@@ -1244,3 +1245,8 @@ def trans_nd_to_nz(cache_tensor: torch.Tensor):
     cache_tensor = cache_tensor.reshape(nz_shape[:-4] + [m1, m0, n1, n0])
     cache_tensor = cache_tensor.permute(*array_trans)
     return cache_tensor
+
+def parse_layer_idx(prefix: str) -> int | None:
+    """Extract the layer index from a module prefix string like 'model.layers.0.self_attn'."""
+    match = re.search(r"layers\.(\d+)", prefix)
+    return int(match.group(1)) if match else None

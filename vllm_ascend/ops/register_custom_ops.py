@@ -37,10 +37,15 @@ def _maybe_chunk_residual_impl(x: torch.Tensor, residual: torch.Tensor) -> torch
     return residual
 
 
-def _maybe_all_gather_and_maybe_unpad_impl(x: torch.Tensor, label: bool, is_ep_comm: bool = False) -> torch.Tensor:
+def _maybe_all_gather_and_maybe_unpad_impl(
+    x: torch.Tensor, label: bool, is_ep_comm: bool = False, is_first_allgather: bool = False
+) -> torch.Tensor:
     try:
         forward_context = get_forward_context()
     except AssertionError:
+        return x
+
+    if forward_context.is_multimodal_model and is_first_allgather:
         return x
 
     flash_comm_v1_enabled = _EXTRA_CTX.flash_comm_v1_enabled
@@ -74,7 +79,9 @@ def _maybe_pad_and_reduce_impl(x: torch.Tensor, is_ep_comm: bool = False) -> tor
     except AssertionError:
         return tensor_model_parallel_all_reduce(x)
 
-    if not getattr(forward_context, "flash_comm_v1_enabled", False):
+    if not getattr(forward_context, "flash_comm_v1_enabled", False) or getattr(
+        forward_context, 'is_multimodal_model', False
+    ):
         return tensor_model_parallel_all_reduce(x)
 
     dp_metadata = forward_context.dp_metadata
@@ -97,7 +104,12 @@ def _maybe_pad_and_reduce_impl(x: torch.Tensor, is_ep_comm: bool = False) -> tor
         return get_ep_group().reduce_scatter(padded_x.view(-1, *x.shape[1:]), 0)
 
 
-def _maybe_all_gather_and_maybe_unpad_fake(x: torch.Tensor, label: bool, is_ep_comm: bool = False) -> torch.Tensor:
+def _maybe_all_gather_and_maybe_unpad_fake(
+    x: torch.Tensor, label: bool, is_ep_comm: bool = False, is_first_allgather: bool = False
+) -> torch.Tensor:
+    forward_context = get_forward_context()
+    if forward_context.is_multimodal_model and is_first_allgather:
+        return x
     if _EXTRA_CTX.flash_comm_v1_enabled and label:
         return torch.empty(
             (x.shape[0] * get_tensor_model_parallel_world_size(), *x.shape[1:]), device=x.device, dtype=x.dtype

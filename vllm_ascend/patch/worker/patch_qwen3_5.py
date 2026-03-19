@@ -22,6 +22,7 @@ from itertools import islice
 import torch
 from einops import rearrange
 from vllm.distributed import get_pcp_group
+from vllm.distributed import get_tensor_model_parallel_world_size
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import (
     chunk_gated_delta_rule,
@@ -29,6 +30,7 @@ from vllm.model_executor.layers.fla.ops import (
 )
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
 from vllm.model_executor.models.qwen3_5 import (
+    Qwen3_5DecoderLayer,
     Qwen3_5ForCausalLMBase,
     Qwen3_5GatedDeltaNet,
     Qwen3_5Model,
@@ -467,13 +469,11 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         )
         if _should_validate_packed_in_proj() and self.tp_size == 1:
             _validate_qwen35_packed_in_proj(self, hidden_states, mixed_qkv, z, b, a)
-
         core_attn_out = torch.zeros(
             (num_tokens, self.num_v_heads // self.tp_size, self.head_v_dim),
             dtype=hidden_states.dtype,
             device=hidden_states.device,
         )
-
         torch.ops.vllm.gdn_attention_core(
             mixed_qkv,
             b,
@@ -481,14 +481,16 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
             core_attn_out,
             self.prefix,
         )
-
         z_shape_og = z.shape
         core_attn_out = core_attn_out.reshape(-1, core_attn_out.shape[-1])
         z = z.reshape(-1, z.shape[-1])
         core_attn_out = self.norm(core_attn_out, z)
         core_attn_out = core_attn_out.reshape(z_shape_og)
         core_attn_out = rearrange(core_attn_out, "... h d -> ... (h d)")
-        output[:num_tokens], _ = self.out_proj(core_attn_out)
+        o_out, _ = self.out_proj(core_attn_out)
+        actual_num_tokens = o_out.shape[0]
+        output[:actual_num_tokens] = o_out
+        output = output[:actual_num_tokens]
 
     def _forward_core(
         self,
@@ -735,3 +737,62 @@ Qwen3_5GatedDeltaNet.forward = AscendQwen3_5GatedDeltaNet.forward
 Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
 Qwen3_5Model.forward = AscendQwen3_5Model.forward
 Qwen3_5Model.load_weights = _patched_qwen3_5_model_load_weights
+class AscendQwen3_5DecoderLayer(Qwen3_5DecoderLayer):
+    def forward(
+        self,
+        hidden_states: torch.Tensor,
+        residual: torch.Tensor | None,
+        positions: torch.Tensor = None,
+        **kwargs: object,
+    ):
+        if residual is None:
+            residual = hidden_states
+            hidden_states = self.input_layernorm(hidden_states)
+        else:
+            hidden_states, residual = self.input_layernorm(hidden_states, residual)
+
+        self_attention_output = torch.empty_like(hidden_states)
+        if self.layer_idx == 0 and enable_sp():
+            tp_size = get_tensor_model_parallel_world_size()
+            self_attention_output = self_attention_output[: (hidden_states.shape[0] + tp_size - 1) // tp_size]
+
+        if self.layer_type == "linear_attention":
+            self.linear_attn(
+                hidden_states=hidden_states,
+                output=self_attention_output,
+            )
+        elif self.layer_type == "full_attention":
+            self.self_attn(
+                hidden_states=hidden_states,
+                output=self_attention_output,
+                positions=positions,
+            )
+        else:
+            raise ValueError("Invalid layer_type")
+        hidden_states = self_attention_output
+
+        if self.layer_scale:
+            if len(hidden_states.shape) == 2:
+                hidden_states = hidden_states * (self.attn_layer_scale.to(hidden_states.dtype)[0] + 1)
+            else:
+                hidden_states = hidden_states * (self.attn_layer_scale.to(hidden_states.dtype) + 1)
+
+        # Fully Connected
+        hidden_states, residual = self.post_attention_layernorm(hidden_states, residual)
+        hidden_states = self.mlp(hidden_states)
+
+        if self.layer_scale:
+            if len(hidden_states.shape) == 2:
+                hidden_states = hidden_states * (self.ffn_layer_scale.to(hidden_states.dtype)[0] + 1)
+            else:
+                assert len(hidden_states.shape) == len(self.ffn_layer_scale.shape), (
+                    f"shape must be the same {len(hidden_states.shape)}, {len(self.ffn_layer_scale.shape)}"
+                )
+                hidden_states = hidden_states * (self.ffn_layer_scale.to(hidden_states.dtype) + 1)
+
+        return hidden_states, residual
+
+
+Qwen3_5GatedDeltaNet.forward = AscendQwen3_5GatedDeltaNet.forward
+Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
+Qwen3_5DecoderLayer.forward = AscendQwen3_5DecoderLayer.forward
