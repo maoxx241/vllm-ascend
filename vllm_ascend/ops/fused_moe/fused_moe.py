@@ -56,6 +56,7 @@ from vllm_ascend.utils import (
 
 _DEBUG_DUMP_DIR = os.environ.get("QWEN35_MOE_DUMP_DIR")
 _DEBUG_DUMP_LIMIT = int(os.environ.get("QWEN35_MOE_DUMP_LIMIT", "16"))
+_DEBUG_LAYER_FILTER = os.environ.get("QWEN35_MOE_DUMP_LAYER_FILTER")
 _DEBUG_COUNTERS = {
     "moe_apply": 0,
 }
@@ -78,6 +79,9 @@ def _is_compiling_debug() -> bool:
 
 def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | None, **meta) -> None:
     if not _DEBUG_DUMP_DIR or tensor is None or idx >= _DEBUG_DUMP_LIMIT or _is_compiling_debug():
+        return
+    layer_name = str(meta.get("layer_name", ""))
+    if _DEBUG_LAYER_FILTER and _DEBUG_LAYER_FILTER not in layer_name:
         return
     path = Path(_DEBUG_DUMP_DIR)
     path.mkdir(parents=True, exist_ok=True)
