@@ -63,6 +63,18 @@ _ROTARY_DEBUG_LIMIT = int(os.environ.get("QWEN35_ROTARY_DUMP_LIMIT", "0"))
 _ROTARY_DEBUG_COUNTERS: dict[str, int] = {}
 
 
+def _maybe_all_gather_mtp_positions(positions: torch.Tensor, use_mtp: bool) -> torch.Tensor:
+    if not (_EXTRA_CTX.is_draft_model and use_mtp and _EXTRA_CTX.flash_comm_v1_enabled):
+        return positions
+    token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
+    return torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
+        positions.contiguous(),
+        True,
+        False,
+        token_dim,
+    )
+
+
 def _dump_rotary_debug(stage: str, **tensors: torch.Tensor | None) -> None:
     if not _ROTARY_DEBUG_DIR or _ROTARY_DEBUG_LIMIT <= 0:
         return
@@ -277,8 +289,6 @@ class AscendRotaryEmbedding(RotaryEmbedding):
         is_neox_style = self.is_neox_style
         if is_neox_style_override is not None:
             is_neox_style = is_neox_style_override
-        is_draft_model = _EXTRA_CTX.is_draft_model
-        flash_comm_v1_enabled = _EXTRA_CTX.flash_comm_v1_enabled
         rotary_debug_enabled = bool(_ROTARY_DEBUG_DIR) and _ROTARY_DEBUG_LIMIT > 0
         debug_positions_before = None
         debug_positions_after = None
@@ -289,14 +299,7 @@ class AscendRotaryEmbedding(RotaryEmbedding):
             debug_positions_before = positions.detach().clone()
             debug_query_before = query.detach().clone()
             debug_key_before = key.detach().clone()
-        if is_draft_model and self.use_mtp and flash_comm_v1_enabled:
-            token_dim = 0 if positions.dim() == 1 else positions.dim() - 1
-            positions = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
-                positions.contiguous(),
-                True,
-                False,
-                token_dim,
-            )
+        positions = _maybe_all_gather_mtp_positions(positions, self.use_mtp)
         if rotary_debug_enabled:
             debug_positions_after = positions.detach().clone()
             flat_positions = debug_positions_after.reshape(-1)
@@ -541,6 +544,11 @@ class AscendMRotaryEmbedding(MRotaryEmbedding):
     # Empirical safety threshold for large Triton grids on Ascend NPU
     _ASCEND_TRITON_GRID_LIMIT = 65535
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        vllm_config = get_current_vllm_config()
+        self.use_mtp = bool(vllm_config.speculative_config and vllm_config.speculative_config.method == "mtp")
+
     def forward_triton(
         self,
         positions: torch.Tensor,
@@ -548,6 +556,7 @@ class AscendMRotaryEmbedding(MRotaryEmbedding):
         key: torch.Tensor | None = None,
         offsets: torch.Tensor | None = None,
     ):
+        positions = _maybe_all_gather_mtp_positions(positions, self.use_mtp)
         assert positions.ndim == 2
         assert key is not None
 
@@ -592,6 +601,7 @@ class AscendMRotaryEmbedding(MRotaryEmbedding):
             # todo: need cann update in 8.5.0
             return self.forward_triton(positions, query, key)
 
+        positions = _maybe_all_gather_mtp_positions(positions, self.use_mtp)
         if self.mrope_section != [16, 24, 24] or get_ascend_device_type() == AscendDeviceType.A5:
             return super().forward_oot(positions, query, key)
 
