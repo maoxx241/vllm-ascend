@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 import copy
+import json
 import os
 from collections.abc import Callable
 from contextlib import AbstractContextManager, contextmanager, nullcontext
@@ -59,6 +60,7 @@ _DEBUG_COUNTERS = {
     "pad_and_split_tensor_tp": 0,
     "prepare_next_token_ids_padded": 0,
     "prepare_inputs_padded": 0,
+    "mtp_model_info": 0,
 }
 
 
@@ -85,6 +87,27 @@ def _debug_dump_tensor(kind: str, idx: int, name: str, tensor: torch.Tensor | No
         },
         path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.pt",
     )
+
+
+def _debug_dump_info(kind: str, idx: int, name: str, payload: dict[str, Any]) -> None:
+    if not _DEBUG_DUMP_DIR or idx >= _DEBUG_DUMP_LIMIT:
+        return
+    try:
+        tp_rank = get_tp_group().rank
+    except Exception:
+        tp_rank = -1
+    path = Path(_DEBUG_DUMP_DIR)
+    path.mkdir(parents=True, exist_ok=True)
+    record = {
+        "kind": kind,
+        "idx": idx,
+        "name": name,
+        "tp_rank": tp_rank,
+        "pid": os.getpid(),
+        "payload": payload,
+    }
+    with open(path / f"{kind}_idx{idx}_rank{tp_rank}_{name}.json", "w", encoding="utf-8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2, sort_keys=True)
 
 
 # TODO: Remove it when the bug of fx-graph is solved
@@ -862,6 +885,38 @@ class SpecDecodeBaseProposer(EagleProposer):
         }
         if self.pass_hidden_states_to_model:
             model_kwargs["hidden_states"] = model_hidden_states
+        if self.method == "mtp":
+            info_idx = _DEBUG_COUNTERS["mtp_model_info"]
+            _DEBUG_COUNTERS["mtp_model_info"] += 1
+            _debug_dump_info(
+                "mtp_model_info",
+                info_idx,
+                "self_model",
+                {
+                    "model_type": type(self.model).__name__,
+                    "model_module": type(self.model).__module__,
+                    "forward_qualname": type(self.model).forward.__qualname__,
+                    "inner_model_type": (
+                        type(getattr(self.model, "model", None)).__name__
+                        if hasattr(self.model, "model")
+                        else None
+                    ),
+                    "inner_model_module": (
+                        type(getattr(self.model, "model", None)).__module__
+                        if hasattr(self.model, "model")
+                        else None
+                    ),
+                    "inner_forward_qualname": (
+                        type(getattr(self.model, "model")).forward.__qualname__
+                        if hasattr(self.model, "model")
+                        else None
+                    ),
+                    "model_kwargs_shapes": {
+                        key: (list(value.shape) if isinstance(value, torch.Tensor) else None)
+                        for key, value in model_kwargs.items()
+                    },
+                },
+            )
         ret_hidden_states = self.model(**model_kwargs)
         if self.method == "mtp" and not self.model_returns_tuple():
             _debug_dump_tensor(

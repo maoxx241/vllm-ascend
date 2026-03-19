@@ -619,6 +619,12 @@ class AscendQwen3_5MTP(Qwen3_5MTP):
         inputs_embeds: torch.Tensor | None = None,
         **kwargs: object,
     ):
+        _dump_qwen35_runtime_tensors(
+            "mtp_wrapper_input",
+            input_ids=input_ids,
+            positions=positions,
+            hidden_states=hidden_states,
+        )
         hidden_states = self.model(
             input_ids,
             positions,
