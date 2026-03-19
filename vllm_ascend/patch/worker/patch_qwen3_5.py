@@ -59,6 +59,7 @@ _VALIDATE_PACKED_IN_PROJ_ENV = "VLLM_ASCEND_VALIDATE_QWEN35_PACKED_INPROJ"
 _QWEN35_ALIAS_DEBUG_JSONL = os.environ.get("QWEN35_ALIAS_DEBUG_JSONL")
 _QWEN35_DECODER_DUMP_DIR = os.environ.get("QWEN35_DECODER_DUMP_DIR")
 _QWEN35_DECODER_DUMP_LIMIT = int(os.environ.get("QWEN35_DECODER_DUMP_LIMIT", "4"))
+_QWEN35_DECODER_DUMP_SKIP = int(os.environ.get("QWEN35_DECODER_DUMP_SKIP", "0"))
 _QWEN35_DECODER_DUMP_LAYER_TYPE = os.environ.get(
     "QWEN35_DECODER_DUMP_LAYER_TYPE",
     "full_attention",
@@ -138,9 +139,11 @@ def _dump_decoder_tensors(stage: str, layer_type: str, **tensors: torch.Tensor |
         return
 
     idx = _QWEN35_DECODER_DUMP_COUNTERS.get(stage, 0)
-    if idx >= _QWEN35_DECODER_DUMP_LIMIT:
-        return
     _QWEN35_DECODER_DUMP_COUNTERS[stage] = idx + 1
+    if idx < _QWEN35_DECODER_DUMP_SKIP:
+        return
+    if idx >= _QWEN35_DECODER_DUMP_SKIP + _QWEN35_DECODER_DUMP_LIMIT:
+        return
 
     os.makedirs(_QWEN35_DECODER_DUMP_DIR, exist_ok=True)
     rank = _get_debug_rank()
