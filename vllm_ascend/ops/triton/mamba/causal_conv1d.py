@@ -536,7 +536,7 @@ def causal_conv1d_update_npu(
     - `[num_tokens, dim]` - continuous batching, where num_tokens is
         the total tokens of all sequences in that batch
 
-    conv_state: (..., dim, state_len), where state_len >= width - 1
+    conv_state: (..., state_len, dim), where state_len >= width - 1
     weight: (dim, width)
     bias: (dim,)
     conv_state_indices: (batch,), dtype int32
@@ -566,8 +566,31 @@ def causal_conv1d_update_npu(
             indices 0 and 3
     out: (batch, dim) or (batch, dim, seqlen) or (num_tokens, dim), same shape as `x`
     """
+    expected_dim = weight.size(0)
+    expected_state_len = weight.size(1) - 1
+    if conv_state.dim() != 3:
+        raise ValueError(
+            f"conv_state must be 3D with layout (..., state_len, dim), got shape {tuple(conv_state.shape)}"
+        )
+    if conv_state.size(-1) != expected_dim:
+        if conv_state.size(-2) == expected_dim:
+            raise ValueError(
+                "conv_state must use raw layout (..., state_len, dim); got transposed "
+                "(..., dim, state_len). Remove transpose(-1, -2) before causal_conv1d_update."
+            )
+        raise ValueError(
+            f"conv_state last dim must match weight dim {expected_dim}, got shape {tuple(conv_state.shape)}"
+        )
+    if conv_state.size(-2) < expected_state_len:
+        raise ValueError(
+            f"conv_state state_len must be >= {expected_state_len}, got {conv_state.size(-2)}"
+        )
+    if not conv_state.is_contiguous():
+        raise ValueError(
+            "conv_state must be contiguous in raw layout (..., state_len, dim) for the NPU tiled kernel."
+        )
+
     weight = weight.transpose(0, 1).contiguous()
-    conv_state = conv_state.transpose(1, 2).contiguous()
     if validate_data:
         assert pad_slot_id is not None
         assert x.stride(1) == 1
