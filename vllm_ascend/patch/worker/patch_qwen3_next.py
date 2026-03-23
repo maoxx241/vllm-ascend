@@ -35,6 +35,32 @@ from vllm_ascend.ops.triton.fused_gdn_gating import fused_gdn_gating_patch
 from vllm_ascend.utils import enable_sp
 
 
+def _get_conv1d_weights(module: Qwen3NextGatedDeltaNet) -> tuple[torch.Tensor, bool]:
+    conv_weight = module.conv1d.weight
+    conv_dim = module.conv1d.bias.numel() if module.conv1d.bias is not None else max(
+        conv_weight.size(0), conv_weight.size(2)
+    )
+    weight_is_packed = getattr(module, "_ascend_conv1d_weight_is_packed", None)
+    if weight_is_packed is None:
+        if conv_weight.size(0) == conv_dim:
+            weight_is_packed = False
+        elif conv_weight.size(2) == conv_dim:
+            weight_is_packed = True
+        else:
+            raise RuntimeError(
+                f"Unexpected conv1d weight layout: shape={tuple(conv_weight.shape)}, expected conv dim {conv_dim}"
+            )
+    if weight_is_packed and conv_weight.size(2) != conv_dim:
+        raise RuntimeError(
+            f"conv1d weight is marked packed but shape={tuple(conv_weight.shape)} does not match packed layout"
+        )
+    if not weight_is_packed and conv_weight.size(0) != conv_dim:
+        raise RuntimeError(
+            f"conv1d weight is marked unpacked but shape={tuple(conv_weight.shape)} does not match unpacked layout"
+        )
+    return conv_weight.view(conv_weight.size(0), conv_weight.size(2)), weight_is_packed
+
+
 class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
     def forward(
         self,
@@ -136,7 +162,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
             a = a[:num_actual_tokens]
 
         # 1. Convolution sequence transformation
-        conv_weights = self.conv1d.weight.view(self.conv1d.weight.size(0), self.conv1d.weight.size(2))
+        conv_weights, weight_is_packed = _get_conv1d_weights(self)
         if spec_sequence_masks is not None:
             if attn_metadata.num_prefills == 0 and attn_metadata.num_decodes == 0:
                 mixed_qkv_spec = mixed_qkv
@@ -160,13 +186,14 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 num_accepted_tokens=num_accepted_tokens,
                 query_start_loc=spec_query_start_loc,
                 max_query_len=spec_state_indices_tensor.size(-1),
+                weight_is_packed=weight_is_packed,
                 validate_data=False,
             )
 
         # 1.2: Process the remaining part
         if attn_metadata.num_prefills > 0:
             if mixed_qkv_non_spec is not None:
-                conv_weights_T = conv_weights.transpose(0, 1)
+                conv_weights_T = conv_weights if weight_is_packed else conv_weights.transpose(0, 1)
                 mixed_qkv_non_spec = torch.ops._C_ascend.causal_conv1d_fn(
                     mixed_qkv_non_spec,
                     conv_weights_T,
@@ -186,6 +213,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 self.conv1d.bias,
                 self.activation,
                 conv_state_indices=non_spec_state_indices_tensor[: attn_metadata.num_actual_tokens],
+                weight_is_packed=weight_is_packed,
                 validate_data=True,
             )
         else:
