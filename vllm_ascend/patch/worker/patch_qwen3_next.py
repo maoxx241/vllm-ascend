@@ -23,7 +23,7 @@ from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule
 from vllm.model_executor.layers.fla.ops.l2norm import l2norm_fwd
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
-from vllm.model_executor.models.qwen3_next import Qwen3NextGatedDeltaNet
+from vllm.model_executor.models.qwen3_next import Qwen3NextForCausalLM, Qwen3NextGatedDeltaNet
 from vllm.triton_utils import triton
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
@@ -35,33 +35,46 @@ from vllm_ascend.ops.triton.fused_gdn_gating import fused_gdn_gating_patch
 from vllm_ascend.utils import enable_sp
 
 
-def _get_conv1d_weights(module: Qwen3NextGatedDeltaNet) -> tuple[torch.Tensor, bool]:
+def _process_conv1d_weight_after_loading(module: Qwen3NextGatedDeltaNet) -> None:
     conv_weight = module.conv1d.weight
-    conv_dim = module.conv1d.bias.numel() if module.conv1d.bias is not None else max(
-        conv_weight.size(0), conv_weight.size(2)
-    )
-    weight_is_packed = getattr(module, "_ascend_conv1d_weight_is_packed", None)
-    if weight_is_packed is None:
-        if conv_weight.size(0) == conv_dim:
-            weight_is_packed = False
-        elif conv_weight.size(2) == conv_dim:
-            weight_is_packed = True
-        else:
-            raise RuntimeError(
-                f"Unexpected conv1d weight layout: shape={tuple(conv_weight.shape)}, expected conv dim {conv_dim}"
-            )
-    if weight_is_packed and conv_weight.size(2) != conv_dim:
+    conv_dim = module.conv_dim
+    if conv_weight.dim() != 3 or conv_weight.size(1) != 1:
         raise RuntimeError(
-            f"conv1d weight is marked packed but shape={tuple(conv_weight.shape)} does not match packed layout"
+            f"Unexpected conv1d weight shape {tuple(conv_weight.shape)}; expected 3D (dim_or_width, 1, width_or_dim)"
         )
-    if not weight_is_packed and conv_weight.size(0) != conv_dim:
+    if conv_weight.size(2) == conv_dim:
+        module.conv1d.weight.data = conv_weight.contiguous()
+        module._ascend_conv1d_weight_is_packed = True
+        return
+    if conv_weight.size(0) != conv_dim:
         raise RuntimeError(
-            f"conv1d weight is marked unpacked but shape={tuple(conv_weight.shape)} does not match unpacked layout"
+            f"Unexpected conv1d weight layout: shape={tuple(conv_weight.shape)}, expected conv dim {conv_dim}"
         )
-    return conv_weight.view(conv_weight.size(0), conv_weight.size(2)), weight_is_packed
+    module.conv1d.weight.data = conv_weight.squeeze(1).transpose(0, 1).contiguous().unsqueeze(1)
+    module._ascend_conv1d_weight_is_packed = True
+
+
+def _get_packed_conv1d_weights(module: Qwen3NextGatedDeltaNet) -> torch.Tensor:
+    conv_weight = module.conv1d.weight
+    if not getattr(module, "_ascend_conv1d_weight_is_packed", False):
+        raise RuntimeError("conv1d weight must be packed during load_weights before forward")
+    if conv_weight.dim() != 3 or conv_weight.size(1) != 1 or conv_weight.size(2) != module.conv_dim:
+        raise RuntimeError(
+            f"Packed conv1d weight has invalid shape {tuple(conv_weight.shape)} for conv dim {module.conv_dim}"
+        )
+    return conv_weight.view(conv_weight.size(0), conv_weight.size(2))
+
+
+def _process_qwen3_next_gdn_weights_after_loading(model: torch.nn.Module) -> None:
+    for _, module in model.named_modules():
+        if isinstance(module, Qwen3NextGatedDeltaNet):
+            module.process_weights_after_loading()
 
 
 class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
+    def process_weights_after_loading(self) -> None:
+        _process_conv1d_weight_after_loading(self)
+
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -162,7 +175,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
             a = a[:num_actual_tokens]
 
         # 1. Convolution sequence transformation
-        conv_weights, weight_is_packed = _get_conv1d_weights(self)
+        conv_weights = _get_packed_conv1d_weights(self)
         if spec_sequence_masks is not None:
             if attn_metadata.num_prefills == 0 and attn_metadata.num_decodes == 0:
                 mixed_qkv_spec = mixed_qkv
@@ -186,17 +199,16 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 num_accepted_tokens=num_accepted_tokens,
                 query_start_loc=spec_query_start_loc,
                 max_query_len=spec_state_indices_tensor.size(-1),
-                weight_is_packed=weight_is_packed,
+                weight_is_packed=True,
                 validate_data=False,
             )
 
         # 1.2: Process the remaining part
         if attn_metadata.num_prefills > 0:
             if mixed_qkv_non_spec is not None:
-                conv_weights_T = conv_weights if weight_is_packed else conv_weights.transpose(0, 1)
                 mixed_qkv_non_spec = torch.ops._C_ascend.causal_conv1d_fn(
                     mixed_qkv_non_spec,
-                    conv_weights_T,
+                    conv_weights,
                     self.conv1d.bias,
                     activation=self.activation,
                     conv_state=self_kv_cache[0],
@@ -213,7 +225,7 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 self.conv1d.bias,
                 self.activation,
                 conv_state_indices=non_spec_state_indices_tensor[: attn_metadata.num_actual_tokens],
-                weight_is_packed=weight_is_packed,
+                weight_is_packed=True,
                 validate_data=True,
             )
         else:
@@ -334,5 +346,16 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 core_attn_out[:num_actual_tokens] = core_attn_out_non_spec.squeeze(0)[:num_actual_tokens]
 
 
+_original_qwen3_next_load_weights = Qwen3NextForCausalLM.load_weights
+
+
+def _patched_qwen3_next_load_weights(self, weights):
+    loaded_params = _original_qwen3_next_load_weights(self, weights)
+    _process_qwen3_next_gdn_weights_after_loading(self)
+    return loaded_params
+
+
+Qwen3NextForCausalLM.load_weights = _patched_qwen3_next_load_weights
+Qwen3NextGatedDeltaNet.process_weights_after_loading = AscendQwen3Next_GatedDeltaNet.process_weights_after_loading
 Qwen3NextGatedDeltaNet.forward = AscendQwen3Next_GatedDeltaNet.forward
 Qwen3NextGatedDeltaNet._forward_core = AscendQwen3Next_GatedDeltaNet._forward_core
