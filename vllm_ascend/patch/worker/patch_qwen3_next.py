@@ -18,6 +18,8 @@
 
 import torch
 import torch_npu
+import vllm.model_executor.model_loader.base_loader as model_loader_base
+import vllm.model_executor.model_loader.utils as model_loader_utils
 from einops import rearrange
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule
@@ -65,10 +67,13 @@ def _get_packed_conv1d_weights(module: Qwen3NextGatedDeltaNet) -> torch.Tensor:
     return conv_weight.view(conv_weight.size(0), conv_weight.size(2))
 
 
-def _process_qwen3_next_gdn_weights_after_loading(model: torch.nn.Module) -> None:
+def _process_qwen3_next_gdn_weights_after_loading(
+    model: torch.nn.Module, target_device: torch.device
+) -> None:
     for _, module in model.named_modules():
         if isinstance(module, Qwen3NextGatedDeltaNet):
-            module.process_weights_after_loading()
+            with model_loader_utils.device_loading_context(module, target_device):
+                module.process_weights_after_loading()
 
 
 class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
@@ -346,16 +351,16 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
                 core_attn_out[:num_actual_tokens] = core_attn_out_non_spec.squeeze(0)[:num_actual_tokens]
 
 
-_original_qwen3_next_load_weights = Qwen3NextForCausalLM.load_weights
+_original_qwen3_next_process_weights_after_loading = model_loader_utils.process_weights_after_loading
 
 
-def _patched_qwen3_next_load_weights(self, weights):
-    loaded_params = _original_qwen3_next_load_weights(self, weights)
-    _process_qwen3_next_gdn_weights_after_loading(self)
-    return loaded_params
+def _patched_qwen3_next_process_weights_after_loading(model, model_config, target_device):
+    _original_qwen3_next_process_weights_after_loading(model, model_config, target_device)
+    _process_qwen3_next_gdn_weights_after_loading(model, target_device)
 
 
-Qwen3NextForCausalLM.load_weights = _patched_qwen3_next_load_weights
+model_loader_utils.process_weights_after_loading = _patched_qwen3_next_process_weights_after_loading
+model_loader_base.process_weights_after_loading = _patched_qwen3_next_process_weights_after_loading
 Qwen3NextGatedDeltaNet.process_weights_after_loading = AscendQwen3Next_GatedDeltaNet.process_weights_after_loading
 Qwen3NextGatedDeltaNet.forward = AscendQwen3Next_GatedDeltaNet.forward
 Qwen3NextGatedDeltaNet._forward_core = AscendQwen3Next_GatedDeltaNet._forward_core

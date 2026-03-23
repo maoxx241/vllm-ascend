@@ -18,6 +18,8 @@
 
 
 import torch
+import vllm.model_executor.model_loader.base_loader as model_loader_base
+import vllm.model_executor.model_loader.utils as model_loader_utils
 from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule, fused_recurrent_gated_delta_rule
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
@@ -67,10 +69,13 @@ def _get_packed_conv1d_weights(module: Qwen3_5GatedDeltaNet) -> torch.Tensor:
     return conv_weight.view(conv_weight.size(0), conv_weight.size(2))
 
 
-def _process_qwen3_5_gdn_weights_after_loading(model: torch.nn.Module) -> None:
+def _process_qwen3_5_gdn_weights_after_loading(
+    model: torch.nn.Module, target_device: torch.device
+) -> None:
     for _, module in model.named_modules():
         if isinstance(module, Qwen3_5GatedDeltaNet):
-            module.process_weights_after_loading()
+            with model_loader_utils.device_loading_context(module, target_device):
+                module.process_weights_after_loading()
 
 
 class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
@@ -305,41 +310,15 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         maybe_save_kv_layer_to_connector("", [])
 
 
-_original_qwen3_5_text_load_weights = Qwen3_5ForCausalLM.load_weights
+_original_qwen3_5_process_weights_after_loading = model_loader_utils.process_weights_after_loading
 
 
-def _patched_qwen3_5_text_load_weights(self, weights):
-    loaded_params = _original_qwen3_5_text_load_weights(self, weights)
-    if not getattr(self, "_ascend_skip_post_load_gdn_processing", False):
-        _process_qwen3_5_gdn_weights_after_loading(self)
-    return loaded_params
+def _patched_qwen3_5_process_weights_after_loading(model, model_config, target_device):
+    _original_qwen3_5_process_weights_after_loading(model, model_config, target_device)
+    _process_qwen3_5_gdn_weights_after_loading(model, target_device)
 
 
-_original_qwen3_5_moe_load_weights = Qwen3_5MoeForCausalLM.load_weights
-
-
-def _patched_qwen3_5_moe_load_weights(self, weights):
-    loaded_params = _original_qwen3_5_moe_load_weights(self, weights)
-    if not getattr(self, "_ascend_skip_post_load_gdn_processing", False):
-        _process_qwen3_5_gdn_weights_after_loading(self)
-    return loaded_params
-
-
-_original_qwen3_5_conditional_load_weights = Qwen3_5ForConditionalGeneration.load_weights
-
-
-def _patched_qwen3_5_conditional_load_weights(self, weights):
-    self.language_model._ascend_skip_post_load_gdn_processing = True
-    try:
-        loaded_params = _original_qwen3_5_conditional_load_weights(self, weights)
-    finally:
-        self.language_model._ascend_skip_post_load_gdn_processing = False
-    _process_qwen3_5_gdn_weights_after_loading(self)
-    return loaded_params
-
-
-Qwen3_5ForCausalLM.load_weights = _patched_qwen3_5_text_load_weights
-Qwen3_5MoeForCausalLM.load_weights = _patched_qwen3_5_moe_load_weights
-Qwen3_5ForConditionalGeneration.load_weights = _patched_qwen3_5_conditional_load_weights
+model_loader_utils.process_weights_after_loading = _patched_qwen3_5_process_weights_after_loading
+model_loader_base.process_weights_after_loading = _patched_qwen3_5_process_weights_after_loading
 Qwen3_5GatedDeltaNet.process_weights_after_loading = AscendQwen3_5GatedDeltaNet.process_weights_after_loading
 Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
