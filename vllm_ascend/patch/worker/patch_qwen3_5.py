@@ -310,7 +310,8 @@ _original_qwen3_5_text_load_weights = Qwen3_5ForCausalLM.load_weights
 
 def _patched_qwen3_5_text_load_weights(self, weights):
     loaded_params = _original_qwen3_5_text_load_weights(self, weights)
-    _process_qwen3_5_gdn_weights_after_loading(self)
+    if not getattr(self, "_ascend_skip_post_load_gdn_processing", False):
+        _process_qwen3_5_gdn_weights_after_loading(self)
     return loaded_params
 
 
@@ -319,7 +320,8 @@ _original_qwen3_5_moe_load_weights = Qwen3_5MoeForCausalLM.load_weights
 
 def _patched_qwen3_5_moe_load_weights(self, weights):
     loaded_params = _original_qwen3_5_moe_load_weights(self, weights)
-    _process_qwen3_5_gdn_weights_after_loading(self)
+    if not getattr(self, "_ascend_skip_post_load_gdn_processing", False):
+        _process_qwen3_5_gdn_weights_after_loading(self)
     return loaded_params
 
 
@@ -327,7 +329,11 @@ _original_qwen3_5_conditional_load_weights = Qwen3_5ForConditionalGeneration.loa
 
 
 def _patched_qwen3_5_conditional_load_weights(self, weights):
-    loaded_params = _original_qwen3_5_conditional_load_weights(self, weights)
+    self.language_model._ascend_skip_post_load_gdn_processing = True
+    try:
+        loaded_params = _original_qwen3_5_conditional_load_weights(self, weights)
+    finally:
+        self.language_model._ascend_skip_post_load_gdn_processing = False
     _process_qwen3_5_gdn_weights_after_loading(self)
     return loaded_params
 
