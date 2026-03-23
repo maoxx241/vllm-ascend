@@ -38,18 +38,18 @@ from vllm_ascend.utils import enable_sp
 
 def _process_conv1d_weight_after_loading(module: Qwen3_5GatedDeltaNet) -> None:
     conv_weight = module.conv1d.weight
-    conv_dim = module.conv_dim
+    conv_width = module.conv_kernel_size
     if conv_weight.dim() != 3 or conv_weight.size(1) != 1:
         raise RuntimeError(
             f"Unexpected conv1d weight shape {tuple(conv_weight.shape)}; expected 3D (dim_or_width, 1, width_or_dim)"
         )
-    if conv_weight.size(2) == conv_dim:
+    if conv_weight.size(0) == conv_width:
         module.conv1d.weight.data = conv_weight.contiguous()
         module._ascend_conv1d_weight_is_packed = True
         return
-    if conv_weight.size(0) != conv_dim:
+    if conv_weight.size(2) != conv_width:
         raise RuntimeError(
-            f"Unexpected conv1d weight layout: shape={tuple(conv_weight.shape)}, expected conv dim {conv_dim}"
+            f"Unexpected conv1d weight layout: shape={tuple(conv_weight.shape)}, expected conv width {conv_width}"
         )
     module.conv1d.weight.data = conv_weight.squeeze(1).transpose(0, 1).contiguous().unsqueeze(1)
     module._ascend_conv1d_weight_is_packed = True
@@ -59,9 +59,9 @@ def _get_packed_conv1d_weights(module: Qwen3_5GatedDeltaNet) -> torch.Tensor:
     conv_weight = module.conv1d.weight
     if not getattr(module, "_ascend_conv1d_weight_is_packed", False):
         raise RuntimeError("conv1d weight must be packed during load_weights before forward")
-    if conv_weight.dim() != 3 or conv_weight.size(1) != 1 or conv_weight.size(2) != module.conv_dim:
+    if conv_weight.dim() != 3 or conv_weight.size(1) != 1 or conv_weight.size(0) != module.conv_kernel_size:
         raise RuntimeError(
-            f"Packed conv1d weight has invalid shape {tuple(conv_weight.shape)} for conv dim {module.conv_dim}"
+            f"Packed conv1d weight has invalid shape {tuple(conv_weight.shape)} for conv width {module.conv_kernel_size}"
         )
     return conv_weight.view(conv_weight.size(0), conv_weight.size(2))
 
