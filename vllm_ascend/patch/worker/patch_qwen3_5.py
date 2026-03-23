@@ -22,9 +22,10 @@ from vllm.forward_context import get_forward_context
 from vllm.model_executor.layers.fla.ops import chunk_gated_delta_rule, fused_recurrent_gated_delta_rule
 from vllm.model_executor.layers.mamba.ops.causal_conv1d import causal_conv1d_update
 from vllm.model_executor.models.qwen3_5 import (
-    Qwen3_5ForCausalLMBase,
+    Qwen3_5ForCausalLM,
     Qwen3_5ForConditionalGeneration,
     Qwen3_5GatedDeltaNet,
+    Qwen3_5MoeForCausalLM,
 )
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadata
@@ -304,11 +305,20 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
         maybe_save_kv_layer_to_connector("", [])
 
 
-_original_qwen3_5_base_load_weights = Qwen3_5ForCausalLMBase.load_weights
+_original_qwen3_5_text_load_weights = Qwen3_5ForCausalLM.load_weights
 
 
-def _patched_qwen3_5_base_load_weights(self, weights):
-    loaded_params = _original_qwen3_5_base_load_weights(self, weights)
+def _patched_qwen3_5_text_load_weights(self, weights):
+    loaded_params = _original_qwen3_5_text_load_weights(self, weights)
+    _process_qwen3_5_gdn_weights_after_loading(self)
+    return loaded_params
+
+
+_original_qwen3_5_moe_load_weights = Qwen3_5MoeForCausalLM.load_weights
+
+
+def _patched_qwen3_5_moe_load_weights(self, weights):
+    loaded_params = _original_qwen3_5_moe_load_weights(self, weights)
     _process_qwen3_5_gdn_weights_after_loading(self)
     return loaded_params
 
@@ -322,7 +332,8 @@ def _patched_qwen3_5_conditional_load_weights(self, weights):
     return loaded_params
 
 
-Qwen3_5ForCausalLMBase.load_weights = _patched_qwen3_5_base_load_weights
+Qwen3_5ForCausalLM.load_weights = _patched_qwen3_5_text_load_weights
+Qwen3_5MoeForCausalLM.load_weights = _patched_qwen3_5_moe_load_weights
 Qwen3_5ForConditionalGeneration.load_weights = _patched_qwen3_5_conditional_load_weights
 Qwen3_5GatedDeltaNet.process_weights_after_loading = AscendQwen3_5GatedDeltaNet.process_weights_after_loading
 Qwen3_5GatedDeltaNet._forward_core = AscendQwen3_5GatedDeltaNet._forward_core
