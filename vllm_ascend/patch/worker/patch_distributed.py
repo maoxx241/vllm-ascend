@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import contextlib
 
 import torch
 import vllm
@@ -24,6 +24,53 @@ from vllm.distributed.parallel_state import GroupCoordinator, _get_unique_name, 
 
 from vllm_ascend.distributed.device_communicators.npu_communicator import NPUCommunicator
 from vllm_ascend.utils import create_hccl_pg_options
+
+
+def _dump_group_comm_domain(group_name: str, device_group) -> None:
+    backend = "unknown"
+    rank = None
+    world_size = None
+    comm_name = None
+    is_hccl = False
+
+    with contextlib.suppress(Exception):
+        backend = str(torch.distributed.get_backend(device_group))
+    with contextlib.suppress(Exception):
+        rank = torch.distributed.get_rank(device_group)
+    with contextlib.suppress(Exception):
+        world_size = torch.distributed.get_world_size(device_group)
+    with contextlib.suppress(Exception):
+        from torch_npu._C._distributed_c10d import ProcessGroupHCCL
+
+        is_hccl = isinstance(device_group, ProcessGroupHCCL)
+        if is_hccl:
+            backend_obj = None
+            with contextlib.suppress(Exception):
+                backend_obj = device_group._get_backend(torch.device("npu"))
+            if backend_obj is None:
+                with contextlib.suppress(Exception):
+                    backend_obj = getattr(device_group, "_backend", None)
+            if backend_obj is not None:
+                with contextlib.suppress(Exception):
+                    comm_name = str(backend_obj.get_hccl_comm_name(0))
+
+    print(
+        f"COMM_DOMAIN_HCCL: name={group_name}"
+        f" backend={backend}"
+        f" rank={rank}"
+        f" world_size={world_size}"
+        f" is_hccl={is_hccl}"
+        f" type={device_group.__class__.__name__}"
+        f" get_hccl_comm_name={comm_name}",
+        flush=True,
+    )
+    print(
+        f"COMM_DOMAIN_NPU: name={group_name}"
+        f" backend={backend}"
+        f" rank={rank}"
+        f" world_size={world_size}",
+        flush=True,
+    )
 
 
 class GroupCoordinatorPatch(GroupCoordinator):
@@ -93,6 +140,7 @@ class GroupCoordinatorPatch(GroupCoordinator):
 
         self.use_custom_op_call = True
         self.use_cpu_custom_send_recv = False
+        _dump_group_comm_domain(group_name, self.device_group)
 
     def all_to_all(
         self,
