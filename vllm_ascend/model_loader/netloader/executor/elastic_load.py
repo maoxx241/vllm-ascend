@@ -66,6 +66,15 @@ class P2PLoad:
                 world_size=2,
                 group_name="netloader",
             )
+            try:
+                logger.info(
+                    "receiver_pg backend=%s rank=%s world_size=%s",
+                    torch.distributed.get_backend(receiver_pg),
+                    torch.distributed.get_rank(receiver_pg),
+                    torch.distributed.get_world_size(receiver_pg),
+                )
+            except Exception as e:
+                logger.warning("receiver_pg status unavailable: %s", e)
             logger.info(
                 f"Finish init_process_group, name: {self.world_name}, addr: {self.source_ip}:{self.source_port}"
             )
@@ -131,6 +140,15 @@ class P2PSend:
                 world_size=2,
                 group_name="netloader",
             )
+            try:
+                logger.info(
+                    "sender_pg backend=%s rank=%s world_size=%s",
+                    torch.distributed.get_backend(sender_pg),
+                    torch.distributed.get_rank(sender_pg),
+                    torch.distributed.get_world_size(sender_pg),
+                )
+            except Exception as e:
+                logger.warning("sender_pg status unavailable: %s", e)
             logger.info(f"Finish init_process_group, name: {self.comm_name}, addr: {self.listen_ip}:{self.listen_port}")
             logger.info(f"Start send, name: {self.comm_name}, addr: {self.listen_ip}:{self.listen_port}")
             logger.info(f"Model device: {model_device}")

@@ -134,6 +134,20 @@ def stateless_init_process_group(
     backend_type = ProcessGroup.BackendType.CUSTOM
     # Register backend
     pg._register_backend(torch.device("npu"), backend_type, backend_class)
+    logger.info_once(
+        "stateless_init_process_group: backend=%s host=%s:%s world_size=%d rank=%d group_name=%s",
+        backend,
+        host,
+        port,
+        world_size,
+        rank,
+        group_name,
+    )
+    logger.debug(
+        "ProcessGroupHCCL created: type=%s options=%s",
+        type(backend_class).__name__,
+        type(pg_options).__name__,
+    )
 
     # Set group_desc and pg_tag
     group_desc = "undefined"

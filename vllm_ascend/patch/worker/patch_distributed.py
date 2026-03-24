@@ -18,6 +18,7 @@
 
 import torch
 import vllm
+from vllm.logger import logger
 from torch.distributed import Backend
 from vllm.distributed.parallel_state import GroupCoordinator, _get_unique_name, _register_group
 
@@ -47,6 +48,12 @@ class GroupCoordinatorPatch(GroupCoordinator):
         hccl_pg_options = create_hccl_pg_options(group_name)
 
         for ranks in group_ranks:
+            logger.info_once(
+                "GroupCoordinatorPatch init_device_group: group_name=%s backend=%s ranks=%s",
+                group_name,
+                torch_distributed_backend,
+                ranks,
+            )
             device_group = torch.distributed.new_group(
                 ranks, backend=torch_distributed_backend, pg_options=hccl_pg_options
             )

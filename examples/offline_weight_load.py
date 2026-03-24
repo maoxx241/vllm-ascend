@@ -70,6 +70,7 @@ from vllm.distributed.parallel_state import (  # noqa E402
     destroy_model_parallel,
     get_tp_group,
 )
+from vllm.logger import logger
 from vllm.model_executor.model_loader.utils import process_weights_after_loading
 from vllm.utils.mem_constants import GiB_bytes
 from vllm.utils.network_utils import get_open_port
@@ -177,10 +178,23 @@ def main(
     os.environ["LOCAL_RANK"] = str(local_rank)
     os.environ["WORLD_SIZE"] = str(world_size)
     if not torch.distributed.is_initialized():
+        logger.info(
+            "init_process_group called: backend=%s world_size=%d rank=%d local_rank=%d",
+            "cpu:gloo,npu:hccl",
+            world_size,
+            rank,
+            local_rank,
+        )
         torch.distributed.init_process_group(
             backend="cpu:gloo,npu:hccl",
             world_size=world_size,
             rank=rank,
+        )
+        logger.info(
+            "init_process_group done: backend=%s rank=%d world_size=%d",
+            "cpu:gloo,npu:hccl",
+            rank,
+            world_size,
         )
     prompts = [
         "Hello, my name is",
