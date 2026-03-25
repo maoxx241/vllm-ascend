@@ -18,7 +18,6 @@ import contextlib
 
 import torch
 import vllm
-from vllm.logger import logger
 from torch.distributed import Backend
 from vllm.distributed.parallel_state import GroupCoordinator, _get_unique_name, _register_group
 
@@ -26,49 +25,77 @@ from vllm_ascend.distributed.device_communicators.npu_communicator import NPUCom
 from vllm_ascend.utils import create_hccl_pg_options
 
 
-def _dump_group_comm_domain(group_name: str, device_group) -> None:
-    backend = "unknown"
-    rank = None
-    world_size = None
-    comm_name = None
-    is_hccl = False
+def _describe_hccl_pg_options(hccl_pg_options) -> dict[str, object]:
+    snapshot: dict[str, object] = {
+        "type": hccl_pg_options.__class__.__name__,
+    }
+    with contextlib.suppress(Exception):
+        snapshot["hccl_config"] = hccl_pg_options.hccl_config
+    return snapshot
 
+
+def _get_npu_backend(device_group):
+    backend = None
+    with contextlib.suppress(Exception):
+        backend = device_group._get_backend(torch.device("npu"))
+    if backend is None:
+        with contextlib.suppress(Exception):
+            backend = getattr(device_group, "_backend", None)
+    return backend
+
+
+def _get_hccl_comm_name(device_group, global_rank: int) -> str | None:
+    backend = _get_npu_backend(device_group)
+    if backend is None:
+        return None
+    getter = getattr(backend, "get_hccl_comm_name", None)
+    if getter is None:
+        return None
+    with contextlib.suppress(TypeError):
+        return str(getter(global_rank, True))
+    with contextlib.suppress(TypeError):
+        return str(getter(global_rank))
+    with contextlib.suppress(Exception):
+        return str(getter())
+    return None
+
+
+def _log_group_details(
+    group_name: str,
+    unique_name: str,
+    ranks: list[int],
+    global_rank: int,
+    device_group,
+    hccl_pg_options,
+) -> None:
+    backend = "unknown"
     with contextlib.suppress(Exception):
         backend = str(torch.distributed.get_backend(device_group))
+    rank_in_group = None
+    world_size = None
     with contextlib.suppress(Exception):
-        rank = torch.distributed.get_rank(device_group)
+        rank_in_group = torch.distributed.get_rank(device_group)
     with contextlib.suppress(Exception):
         world_size = torch.distributed.get_world_size(device_group)
-    with contextlib.suppress(Exception):
-        from torch_npu._C._distributed_c10d import ProcessGroupHCCL
-
-        is_hccl = isinstance(device_group, ProcessGroupHCCL)
-        if is_hccl:
-            backend_obj = None
-            with contextlib.suppress(Exception):
-                backend_obj = device_group._get_backend(torch.device("npu"))
-            if backend_obj is None:
-                with contextlib.suppress(Exception):
-                    backend_obj = getattr(device_group, "_backend", None)
-            if backend_obj is not None:
-                with contextlib.suppress(Exception):
-                    comm_name = str(backend_obj.get_hccl_comm_name(0))
-
+    hccl_pg_options_snapshot = _describe_hccl_pg_options(hccl_pg_options)
+    comm_name = _get_hccl_comm_name(device_group, global_rank)
     print(
-        f"COMM_DOMAIN_HCCL: name={group_name}"
-        f" backend={backend}"
-        f" rank={rank}"
-        f" world_size={world_size}"
-        f" is_hccl={is_hccl}"
-        f" type={device_group.__class__.__name__}"
-        f" get_hccl_comm_name={comm_name}",
+        f"HCCL_PG_OPTIONS: group_name={group_name}"
+        f" unique_name={unique_name}"
+        f" global_rank={global_rank}"
+        f" ranks={ranks}"
+        f" hccl_pg_options={hccl_pg_options_snapshot}",
         flush=True,
     )
     print(
-        f"COMM_DOMAIN_NPU: name={group_name}"
+        f"HCCL_COMM_NAME: group_name={group_name}"
+        f" unique_name={unique_name}"
         f" backend={backend}"
-        f" rank={rank}"
-        f" world_size={world_size}",
+        f" global_rank={global_rank}"
+        f" rank_in_group={rank_in_group}"
+        f" world_size={world_size}"
+        f" type={device_group.__class__.__name__}"
+        f" get_hccl_comm_name={comm_name}",
         flush=True,
     )
 
@@ -95,12 +122,6 @@ class GroupCoordinatorPatch(GroupCoordinator):
         hccl_pg_options = create_hccl_pg_options(group_name)
 
         for ranks in group_ranks:
-            logger.info_once(
-                "GroupCoordinatorPatch init_device_group: group_name=%s backend=%s ranks=%s",
-                group_name,
-                torch_distributed_backend,
-                ranks,
-            )
             device_group = torch.distributed.new_group(
                 ranks, backend=torch_distributed_backend, pg_options=hccl_pg_options
             )
@@ -140,7 +161,14 @@ class GroupCoordinatorPatch(GroupCoordinator):
 
         self.use_custom_op_call = True
         self.use_cpu_custom_send_recv = False
-        _dump_group_comm_domain(group_name, self.device_group)
+        _log_group_details(
+            group_name=group_name,
+            unique_name=self.unique_name,
+            ranks=self.ranks,
+            global_rank=self.rank,
+            device_group=self.device_group,
+            hccl_pg_options=hccl_pg_options,
+        )
 
     def all_to_all(
         self,

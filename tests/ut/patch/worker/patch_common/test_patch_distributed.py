@@ -19,6 +19,7 @@ import torch
 from vllm.distributed.parallel_state import GroupCoordinator
 
 from tests.ut.base import TestBase
+import vllm_ascend.patch.worker.patch_distributed as patch_distributed
 from vllm_ascend.patch.worker.patch_distributed import GroupCoordinatorPatch
 
 
@@ -117,3 +118,24 @@ class TestPatchDistributed(TestBase):
 
         mock_communicator.all_to_all.assert_called_once_with(
             input_tensor, scatter_dim, gather_dim, None, None)
+
+    def test_get_hccl_comm_name_uses_backend_rank_and_init_comm(self):
+        device_group = MagicMock()
+        backend = MagicMock()
+        backend.get_hccl_comm_name.return_value = "comm_name"
+        device_group._get_backend.return_value = backend
+
+        result = patch_distributed._get_hccl_comm_name(device_group, global_rank=7)
+
+        self.assertEqual(result, "comm_name")
+        device_group._get_backend.assert_called_once_with(torch.device("npu"))
+        backend.get_hccl_comm_name.assert_called_once_with(7, True)
+
+    def test_describe_hccl_pg_options_includes_hccl_config(self):
+        options = MagicMock()
+        options.hccl_config = {"hccl_buffer_size": 64}
+
+        result = patch_distributed._describe_hccl_pg_options(options)
+
+        self.assertEqual(result["hccl_config"], {"hccl_buffer_size": 64})
+        self.assertEqual(result["type"], options.__class__.__name__)

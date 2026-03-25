@@ -1,5 +1,4 @@
 import torch
-import contextlib
 from vllm.config import ParallelConfig, get_current_vllm_config
 from vllm.distributed.parallel_state import GroupCoordinator, get_tp_group, get_world_group, init_model_parallel_group
 
@@ -26,86 +25,6 @@ _SHARD_WEIGHT: GroupCoordinator | None = None
 _P_TP: GroupCoordinator | None = None
 
 _DYNAMIC_EPLB: GroupCoordinator | None = None
-
-
-def _resolve_hccl_comm_name(group_coordinator) -> str | None:
-    if group_coordinator is None:
-        return None
-    try:
-        process_group = group_coordinator.device_group
-    except Exception:
-        return None
-    try:
-        from torch_npu._C._distributed_c10d import ProcessGroupHCCL
-
-        if not isinstance(process_group, ProcessGroupHCCL):
-            return None
-    except Exception:
-        return None
-    try:
-        backend = process_group._get_backend(torch.device("npu"))
-    except Exception:
-        backend = getattr(process_group, "_backend", None)
-    if backend is None:
-        return None
-    with contextlib.suppress(Exception):
-        getter = backend.get_hccl_comm_name
-        return str(getter(0))
-    return None
-
-
-def _dump_init_ascend_groups() -> None:
-    if not torch.distributed.is_initialized():
-        return
-    group_map = {
-        "mc2": _MC2,
-        "p_tp": _P_TP,
-        "dynamic_eplb": _DYNAMIC_EPLB,
-        "fc3_quant_x": _FC3_QUANT_X,
-        "otp": _OTP,
-        "lmhead_tp": _LMTP,
-        "embed_tp": _EMBED_TP,
-        "mlp_tp": _MLP_TP,
-        "flashcomm2_otp": _FLASHCOMM2_OTP,
-        "flashcomm2_odp": _FLASHCOMM2_ODP,
-        "shard_weight": _SHARD_WEIGHT,
-    }
-    for name, group in group_map.items():
-        if group is None:
-            continue
-        pg = None
-        backend = "unknown"
-        with contextlib.suppress(Exception):
-            pg = group.device_group
-        if pg is None:
-            print(f"COMM_DOMAIN_HCCL: name={name} class=GroupCoordinator device_group=None", flush=True)
-            continue
-        with contextlib.suppress(Exception):
-            backend = torch.distributed.get_backend(pg)
-        rank = None
-        ws = None
-        with contextlib.suppress(Exception):
-            rank = torch.distributed.get_rank(pg)
-        with contextlib.suppress(Exception):
-            ws = torch.distributed.get_world_size(pg)
-        comm_name = _resolve_hccl_comm_name(group)
-        print(
-            f"COMM_DOMAIN_HCCL: name={name}"
-            f" backend={backend}"
-            f" rank={rank}"
-            f" world_size={ws}"
-            f" is_hccl={backend == 'hccl'}"
-            f" type=ProcessGroupHCCL"
-            f" get_hccl_comm_name={comm_name}",
-            flush=True,
-        )
-        print(
-            f"COMM_DOMAIN_NPU: name={name}"
-            f" backend={backend}"
-            f" rank={rank}"
-            f" world_size={ws}",
-            flush=True,
-        )
 
 
 def init_ascend_model_parallel(
@@ -305,8 +224,6 @@ def init_ascend_model_parallel(
             # For standard tp, use global tp group_ranks
             tp_group_ranks = all_ranks.view(-1, global_tp_size)
             _SHARD_WEIGHT = create_shard_weight_group(tp_group_ranks)
-
-    _dump_init_ascend_groups()
 
 
 def model_parallel_initialized():
