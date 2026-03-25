@@ -141,6 +141,34 @@ def test_make_hccl_pg_key_fails_closed_on_mismatched_global_ranks_in_group():
     assert key is None
 
 
+def test_make_hccl_pg_key_ignores_runtime_populated_group_identity_fields():
+    key_a = make_hccl_pg_key(
+        [0, 1],
+        "hccl",
+        RealisticFakeHcclOptions(
+            global_ranks_in_group=[0, 1],
+            group_id="hccl_pg_1",
+            group_name="tp_auto",
+            hccl_config={"hccl_buffer_size": 200},
+        ),
+        reuse_domain="shared",
+    )
+    key_b = make_hccl_pg_key(
+        [0, 1],
+        "hccl",
+        RealisticFakeHcclOptions(
+            global_ranks_in_group=[0, 1],
+            group_id="hccl_pg_2",
+            group_name="world_auto",
+            hccl_config={"hccl_buffer_size": 200},
+        ),
+        reuse_domain="shared",
+    )
+
+    assert key_a is not None
+    assert key_a == key_b
+
+
 def test_make_hccl_pg_key_fails_closed_for_unknown_mapping_fields():
     assert (
         make_hccl_pg_key(

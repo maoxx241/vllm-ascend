@@ -13,7 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 _AUDITED_PG_OPTION_FIELDS = ("hccl_config",)
-_REDUNDANT_PG_OPTION_FIELDS = ("global_ranks_in_group",)
+# These fields are populated by torch_npu/new_group at runtime and are either
+# already represented elsewhere in the reuse key or intentionally excluded.
+_REDUNDANT_PG_OPTION_FIELDS = (
+    "global_ranks_in_group",
+    "group_id",
+    "group_name",
+)
 _KNOWN_PG_OPTION_DEFAULTS = {
     "backend": "hccl",
     "global_ranks_in_group": (),
