@@ -130,11 +130,11 @@ class GroupCoordinatorPatch(GroupCoordinator):
         self.use_custom_op_call = True
         self.use_cpu_custom_send_recv = False
 
-        hccl_pg_options = create_hccl_pg_options(group_name)
         reuse_domain = _resolve_reuse_domain(group_name)
 
         try:
             for ranks in group_ranks:
+                hccl_pg_options = create_hccl_pg_options(group_name)
                 device_group, hccl_key = _acquire_hccl_group(
                     ranks=ranks,
                     backend=self.backend,

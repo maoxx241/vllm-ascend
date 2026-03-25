@@ -376,6 +376,16 @@ def test_unknown_groups_share_by_default_when_ranks_and_options_match(module_env
     assert first.device_group is second.device_group
 
 
+def test_hccl_pg_options_are_recreated_for_each_group_ranks_entry(module_env):
+    _make_group(
+        module_env,
+        group_ranks=[[0], [1]],
+        group_name="tp",
+    )
+
+    assert module_env.utils_module.create_hccl_pg_options.call_count == 2
+
+
 def test_destroy_releases_all_acquired_keys_in_reverse_order(module_env):
     group = _make_group(
         module_env,
