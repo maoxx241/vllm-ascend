@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 _AUDITED_PG_OPTION_FIELDS = ("hccl_config",)
+_REDUNDANT_PG_OPTION_FIELDS = ("global_ranks_in_group",)
 _KNOWN_PG_OPTION_DEFAULTS = {
     "backend": "hccl",
     "global_ranks_in_group": (),
@@ -59,6 +60,8 @@ def make_hccl_pg_key(
 
     normalized_options = _normalize_hccl_pg_options(pg_options)
     if normalized_options is None:
+        return None
+    if not _global_ranks_match_requested_ranks(ranks, pg_options):
         return None
 
     return HcclPgKey(
@@ -173,6 +176,8 @@ def _has_unknown_non_default_fields(pg_options: object) -> bool:
     for name in field_names:
         if name in _AUDITED_PG_OPTION_FIELDS:
             continue
+        if name in _REDUNDANT_PG_OPTION_FIELDS:
+            continue
         try:
             if options_dict is not None:
                 value = options_dict[name]
@@ -189,6 +194,33 @@ def _has_unknown_non_default_fields(pg_options: object) -> bool:
             name,
         )
         return True
+    return False
+
+
+def _global_ranks_match_requested_ranks(
+    ranks: list[int] | tuple[int, ...],
+    pg_options: object,
+) -> bool:
+    if isinstance(pg_options, Mapping):
+        value = pg_options.get("global_ranks_in_group", ())
+    else:
+        value = getattr(pg_options, "global_ranks_in_group", ())
+    if value is None:
+        return True
+
+    value_tuple = tuple(value)
+    if not value_tuple:
+        return True
+    ranks_tuple = tuple(ranks)
+    if value_tuple == ranks_tuple:
+        return True
+
+    logger.warning(
+        "Disabling HCCL process-group reuse because pg_options.global_ranks_in_group=%s "
+        "does not match requested ranks=%s",
+        value_tuple,
+        ranks_tuple,
+    )
     return False
 
 

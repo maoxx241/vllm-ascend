@@ -113,6 +113,34 @@ def test_make_hccl_pg_key_accepts_realistic_options_object_defaults():
     assert key_a != key_b
 
 
+def test_make_hccl_pg_key_accepts_matching_global_ranks_in_group():
+    key = make_hccl_pg_key(
+        [0, 1],
+        "hccl",
+        RealisticFakeHcclOptions(
+            global_ranks_in_group=[0, 1],
+            hccl_config={"hccl_buffer_size": 200},
+        ),
+        reuse_domain="shared",
+    )
+
+    assert key is not None
+
+
+def test_make_hccl_pg_key_fails_closed_on_mismatched_global_ranks_in_group():
+    key = make_hccl_pg_key(
+        [0, 1],
+        "hccl",
+        RealisticFakeHcclOptions(
+            global_ranks_in_group=[1, 2],
+            hccl_config={"hccl_buffer_size": 200},
+        ),
+        reuse_domain="shared",
+    )
+
+    assert key is None
+
+
 def test_make_hccl_pg_key_fails_closed_for_unknown_mapping_fields():
     assert (
         make_hccl_pg_key(
