@@ -31,7 +31,6 @@ from vllm_ascend.patch.worker._hccl_pg_registry import HcclPgRegistry, make_hccl
 from vllm_ascend.utils import create_hccl_pg_options
 
 
-_SHARED_HCCL_REUSE_GROUPS = {"tp", "ep", "world"}
 _HCCL_PG_REGISTRY = HcclPgRegistry()
 logger = logging.getLogger(__name__)
 
@@ -42,9 +41,9 @@ def _normalize_backend(backend: str | Backend) -> str:
 
 def _resolve_reuse_domain(group_name: str) -> str:
     group_base_name = group_name.split(":")[0]
-    if group_base_name in _SHARED_HCCL_REUSE_GROUPS:
-        return "shared"
-    return group_base_name
+    if "eplb" in group_base_name or group_base_name == "mc2":
+        return group_base_name
+    return "shared"
 
 
 def _create_device_group(

@@ -322,7 +322,7 @@ def test_same_hccl_group_reuses_with_realistic_options_object(module_env):
     assert first.device_group is second.device_group
 
 
-def test_eplb_forces_separate_reuse_domain(module_env):
+def test_eplb_stays_isolated_from_ep_even_when_pg_options_match(module_env):
     first = _make_group(module_env, group_name="ep")
     second = _make_group(module_env, group_name="eplb")
 
@@ -332,15 +332,48 @@ def test_eplb_forces_separate_reuse_domain(module_env):
     assert first.device_group is not second.device_group
 
 
-def test_unknown_groups_are_isolated_by_default(module_env):
+def test_mc2_stays_isolated_from_ep_even_when_pg_options_match(module_env):
+    first = _make_group(module_env, group_name="ep")
+    second = _make_group(module_env, group_name="mc2")
+
+    hccl_calls = _calls_with_backend(module_env, "hccl")
+
+    assert len(hccl_calls) == 2
+    assert first.device_group is not second.device_group
+
+
+def test_dynamic_eplb_stays_separate_from_ep_when_pg_options_differ(module_env):
+    default_hccl_pg_options = (
+        module_env.utils_module.create_hccl_pg_options.return_value
+    )
+
+    def fake_create_hccl_pg_options(group_name: str):
+        if group_name == "dynamic_eplb":
+            return {"hccl_config": {"hccl_buffer_size": 512}}
+        return default_hccl_pg_options
+
+    module_env.utils_module.create_hccl_pg_options.side_effect = (
+        fake_create_hccl_pg_options
+    )
+
+    first = _make_group(module_env, group_name="ep")
+    second = _make_group(module_env, group_name="dynamic_eplb")
+
+    hccl_calls = _calls_with_backend(module_env, "hccl")
+
+    assert len(hccl_calls) == 2
+    assert first.device_group is not second.device_group
+
+
+def test_unknown_groups_share_by_default_when_ranks_and_options_match(module_env):
     first = _make_group(module_env, group_name="fc3_quant_x")
     second = _make_group(module_env, group_name="fc3_quant_y")
 
     hccl_calls = _calls_with_backend(module_env, "hccl")
 
-    assert module_env.module._resolve_reuse_domain("fc3_quant_x:0") == "fc3_quant_x"
-    assert len(hccl_calls) == 2
-    assert first.device_group is not second.device_group
+    assert module_env.module._resolve_reuse_domain("fc3_quant_x:0") == "shared"
+    assert len(hccl_calls) == 1
+    assert first.device_group is second.device_group
 
 
 def test_destroy_releases_all_acquired_keys_in_reverse_order(module_env):
