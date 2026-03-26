@@ -40,6 +40,20 @@ class GDNChunkedPrefillMetadata:
 
 
 @dataclass
+class GDNCausalConv1dHostMetadata:
+    query_start_loc_cpu: torch.Tensor
+    cache_indices_cpu: torch.Tensor
+    has_initial_state_cpu: torch.Tensor
+    _buffer_slot: object | None = None
+
+
+@dataclass
+class GDNPrefillFallbackMeta:
+    causal_conv1d: GDNCausalConv1dHostMetadata | None
+    chunk: GDNChunkedPrefillMetadata | None
+
+
+@dataclass
 class _GDNChunkedPrefillBufferSlot:
     chunk_indices_chunk64: CpuGpuBuffer
     chunk_offsets_chunk64: CpuGpuBuffer
@@ -47,6 +61,11 @@ class _GDNChunkedPrefillBufferSlot:
     final_chunk_indices_chunk64: CpuGpuBuffer
     chunk_indices_large_block: CpuGpuBuffer
     block_indices_cumsum: CpuGpuBuffer
+
+
+@dataclass
+class _GDNCausalConv1dHostBufferSlot:
+    cache_indices_cpu: torch.Tensor
 
 
 def _next_power_of_2(value: int) -> int:
@@ -177,6 +196,28 @@ def _ensure_chunk_meta_state(builder, device: torch.device) -> None:
         ]
 
 
+def _build_spec_sequence_masks_cpu(builder, num_decode_draft_tokens_cpu: torch.Tensor | None) -> torch.Tensor | None:
+    if (
+        not getattr(builder, "use_spec_decode", False)
+        or num_decode_draft_tokens_cpu is None
+        or num_decode_draft_tokens_cpu[num_decode_draft_tokens_cpu >= 0].sum().item() == 0
+    ):
+        return None
+    spec_sequence_masks_cpu = num_decode_draft_tokens_cpu >= 0
+    if spec_sequence_masks_cpu.sum().item() == 0:
+        return None
+    return spec_sequence_masks_cpu
+
+
+def _get_common_metadata_tensor_cpu(common_attn_metadata, field_names: tuple[str, ...]) -> torch.Tensor | None:
+    metadata_dict = vars(common_attn_metadata)
+    for field_name in field_names:
+        value = metadata_dict.get(field_name)
+        if value is not None:
+            return value
+    return None
+
+
 def _build_non_spec_query_start_loc_cpu(
     builder,
     attn_metadata,
@@ -187,15 +228,8 @@ def _build_non_spec_query_start_loc_cpu(
         return None
 
     query_start_loc_cpu = common_attn_metadata.query_start_loc_cpu
-    if (
-        not getattr(builder, "use_spec_decode", False)
-        or num_decode_draft_tokens_cpu is None
-        or num_decode_draft_tokens_cpu[num_decode_draft_tokens_cpu >= 0].sum().item() == 0
-    ):
-        return query_start_loc_cpu
-
-    spec_sequence_masks_cpu = num_decode_draft_tokens_cpu >= 0
-    if spec_sequence_masks_cpu.sum().item() == 0:
+    spec_sequence_masks_cpu = _build_spec_sequence_masks_cpu(builder, num_decode_draft_tokens_cpu)
+    if spec_sequence_masks_cpu is None:
         return query_start_loc_cpu
 
     query_lens_cpu = query_start_loc_cpu[1:] - query_start_loc_cpu[:-1]
@@ -210,6 +244,103 @@ def _build_non_spec_query_start_loc_cpu(
         out=non_spec_query_start_loc_cpu[1:],
     )
     return non_spec_query_start_loc_cpu
+
+
+def _allocate_causal_conv1d_host_slot(
+    builder,
+    device: torch.device,
+) -> _GDNCausalConv1dHostBufferSlot:
+    max_num_seqs = builder.vllm_config.scheduler_config.max_num_seqs
+    return _GDNCausalConv1dHostBufferSlot(
+        cache_indices_cpu=torch.empty(
+            max_num_seqs,
+            dtype=torch.int32,
+            device="cpu",
+            pin_memory=device.type != "cpu",
+        )
+    )
+
+
+def _ensure_causal_conv1d_host_meta_state(builder, device: torch.device) -> None:
+    if getattr(builder, "_ascend_gdn_causal_conv1d_host_meta_initialized", False):
+        return
+    builder._ascend_gdn_causal_conv1d_host_meta_initialized = True
+    builder._ascend_gdn_causal_conv1d_host_pool_idx = -1
+    builder._ascend_gdn_causal_conv1d_host_pool = []
+    if device.type != "cpu":
+        builder._ascend_gdn_causal_conv1d_host_pool = [
+            _allocate_causal_conv1d_host_slot(builder, device),
+            _allocate_causal_conv1d_host_slot(builder, device),
+        ]
+
+
+def _copy_non_spec_state_indices_to_cpu(
+    builder,
+    non_spec_state_indices_tensor: torch.Tensor,
+) -> tuple[torch.Tensor, _GDNCausalConv1dHostBufferSlot | None]:
+    if non_spec_state_indices_tensor.device.type == "cpu":
+        return non_spec_state_indices_tensor, None
+
+    pool = builder._ascend_gdn_causal_conv1d_host_pool
+    builder._ascend_gdn_causal_conv1d_host_pool_idx = (
+        builder._ascend_gdn_causal_conv1d_host_pool_idx + 1
+    ) % len(pool)
+    slot = pool[builder._ascend_gdn_causal_conv1d_host_pool_idx]
+    num_indices = non_spec_state_indices_tensor.numel()
+    cache_indices_cpu = slot.cache_indices_cpu[:num_indices]
+    cache_indices_cpu.copy_(
+        non_spec_state_indices_tensor.reshape(-1),
+        non_blocking=True,
+    )
+    return cache_indices_cpu, slot
+
+
+def _build_non_spec_causal_conv1d_host_meta(
+    builder,
+    attn_metadata,
+    common_attn_metadata,
+    num_decode_draft_tokens_cpu: torch.Tensor | None,
+    non_spec_query_start_loc_cpu: torch.Tensor,
+) -> GDNCausalConv1dHostMetadata | None:
+    if attn_metadata.num_prefills <= 0 or attn_metadata.non_spec_state_indices_tensor is None:
+        return None
+
+    spec_sequence_masks_cpu = _build_spec_sequence_masks_cpu(
+        builder,
+        num_decode_draft_tokens_cpu,
+    )
+    num_computed_tokens_cpu = _get_common_metadata_tensor_cpu(
+        common_attn_metadata,
+        ("num_computed_tokens_cpu", "_num_computed_tokens_cpu"),
+    )
+    if num_computed_tokens_cpu is None:
+        seq_lens_cpu = _get_common_metadata_tensor_cpu(
+            common_attn_metadata,
+            ("seq_lens_cpu", "_seq_lens_cpu"),
+        )
+        if seq_lens_cpu is None:
+            seq_lens_cpu = common_attn_metadata.seq_lens.to("cpu")
+        query_lens_cpu = (
+            common_attn_metadata.query_start_loc_cpu[1:]
+            - common_attn_metadata.query_start_loc_cpu[:-1]
+        )
+        num_computed_tokens_cpu = seq_lens_cpu - query_lens_cpu
+
+    has_initial_state_cpu = num_computed_tokens_cpu > 0
+    if spec_sequence_masks_cpu is not None:
+        has_initial_state_cpu = has_initial_state_cpu[~spec_sequence_masks_cpu]
+
+    cache_indices_cpu, slot = _copy_non_spec_state_indices_to_cpu(
+        builder,
+        attn_metadata.non_spec_state_indices_tensor,
+    )
+
+    return GDNCausalConv1dHostMetadata(
+        query_start_loc_cpu=non_spec_query_start_loc_cpu,
+        cache_indices_cpu=cache_indices_cpu,
+        has_initial_state_cpu=has_initial_state_cpu,
+        _buffer_slot=slot,
+    )
 
 
 def _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu: torch.Tensor) -> GDNChunkedPrefillMetadata:
@@ -297,11 +428,15 @@ def _patched_build(
         num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
         fast_build=fast_build,
     )
-    attn_metadata.non_spec_chunked_prefill_meta = None
+    attn_metadata.non_spec_prefill_fallback_meta = None
     if attn_metadata.num_prefills <= 0:
         return attn_metadata
 
     _ensure_chunk_meta_state(self, common_attn_metadata.query_start_loc.device)
+    _ensure_causal_conv1d_host_meta_state(
+        self,
+        common_attn_metadata.query_start_loc.device,
+    )
     non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(
         self,
         attn_metadata,
@@ -309,13 +444,25 @@ def _patched_build(
         num_decode_draft_tokens_cpu,
     )
     assert non_spec_query_start_loc_cpu is not None
-    attn_metadata.non_spec_chunked_prefill_meta = _build_non_spec_chunked_prefill_meta(
-        self, non_spec_query_start_loc_cpu
+    attn_metadata.non_spec_prefill_fallback_meta = GDNPrefillFallbackMeta(
+        causal_conv1d=_build_non_spec_causal_conv1d_host_meta(
+            self,
+            attn_metadata,
+            common_attn_metadata,
+            num_decode_draft_tokens_cpu,
+            non_spec_query_start_loc_cpu,
+        ),
+        chunk=_build_non_spec_chunked_prefill_meta(
+            self,
+            non_spec_query_start_loc_cpu,
+        ),
     )
     return attn_metadata
 
 
 if not _IS_PATCHED:
     gdn_attn.GDNChunkedPrefillMetadata = GDNChunkedPrefillMetadata
+    gdn_attn.GDNCausalConv1dHostMetadata = GDNCausalConv1dHostMetadata
+    gdn_attn.GDNPrefillFallbackMeta = GDNPrefillFallbackMeta
     gdn_attn.GDNAttentionMetadataBuilder.build = _patched_build
     _IS_PATCHED = True

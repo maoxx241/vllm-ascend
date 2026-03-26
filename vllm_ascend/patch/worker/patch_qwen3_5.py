@@ -43,6 +43,35 @@ def to_int64_tuple(t):
     return tuple(t.tolist())
 
 
+def get_non_spec_causal_conv1d_host_args(
+    attn_metadata,
+    non_spec_query_start_loc: torch.Tensor,
+    non_spec_state_indices_tensor: torch.Tensor,
+    has_initial_state: torch.Tensor,
+) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:
+    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
+    if fallback_meta is not None and fallback_meta.causal_conv1d is not None:
+        causal_conv1d_meta = fallback_meta.causal_conv1d
+        return (
+            to_int64_tuple(causal_conv1d_meta.query_start_loc_cpu),
+            to_int64_tuple(causal_conv1d_meta.cache_indices_cpu),
+            to_int64_tuple(causal_conv1d_meta.has_initial_state_cpu),
+        )
+
+    prebuilt_meta = getattr(attn_metadata, "non_spec_causal_conv1d_meta", None)
+    if prebuilt_meta is not None:
+        return (
+            prebuilt_meta.query_start_loc_opt,
+            prebuilt_meta.cache_indices_opt,
+            prebuilt_meta.initial_state_mode_opt,
+        )
+    return (
+        to_int64_tuple(non_spec_query_start_loc),
+        to_int64_tuple(non_spec_state_indices_tensor),
+        to_int64_tuple(has_initial_state),
+    )
+
+
 class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
     def forward(
         self,
@@ -179,14 +208,24 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
             if mixed_qkv_non_spec is not None:
                 conv_weights_T = conv_weights.transpose(0, 1)
                 activation_num = 1 if self.activation else 0
+                (
+                    query_start_loc_opt,
+                    cache_indices_opt,
+                    initial_state_mode_opt,
+                ) = get_non_spec_causal_conv1d_host_args(
+                    attn_metadata,
+                    non_spec_query_start_loc,
+                    non_spec_state_indices_tensor,
+                    has_initial_state,
+                )
                 mixed_qkv_non_spec = torch.ops._C_ascend.npu_causal_conv1d_custom(
                     mixed_qkv_non_spec,
                     conv_weights_T,
                     conv_state=self_kv_cache[0],
                     bias_opt=self.conv1d.bias,
-                    query_start_loc_opt=to_int64_tuple(non_spec_query_start_loc),
-                    cache_indices_opt=to_int64_tuple(non_spec_state_indices_tensor),
-                    initial_state_mode_opt=to_int64_tuple(has_initial_state),
+                    query_start_loc_opt=query_start_loc_opt,
+                    cache_indices_opt=cache_indices_opt,
+                    initial_state_mode_opt=initial_state_mode_opt,
                     num_accepted_tokens_opt=[],
                     activation_mode=activation_num,
                     pad_slot_id=PAD_SLOT_ID,
@@ -250,10 +289,15 @@ class AscendQwen3_5GatedDeltaNet(Qwen3_5GatedDeltaNet):
             if attn_metadata.num_prefills > 0:
                 initial_state = ssm_state[non_spec_state_indices_tensor].contiguous()
                 initial_state[~has_initial_state, ...] = 0
-                non_spec_chunked_prefill_meta = getattr(
+                fallback_meta = getattr(
                     attn_metadata,
-                    "non_spec_chunked_prefill_meta",
+                    "non_spec_prefill_fallback_meta",
                     None,
+                )
+                non_spec_chunked_prefill_meta = (
+                    fallback_meta.chunk
+                    if fallback_meta is not None
+                    else getattr(attn_metadata, "non_spec_chunked_prefill_meta", None)
                 )
                 (
                     core_attn_out_non_spec,

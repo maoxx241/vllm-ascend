@@ -32,7 +32,9 @@ from vllm.v1.attention.backends.utils import PAD_SLOT_ID
 from vllm_ascend.attention.utils import maybe_save_kv_layer_to_connector
 from vllm_ascend.ops.triton.fla.fused_qkvzba_split_reshape import fused_qkvzba_split_reshape_cat
 from vllm_ascend.ops.triton.fused_gdn_gating import fused_gdn_gating_patch
-from vllm_ascend.patch.worker.patch_qwen3_5 import to_int64_tuple
+from vllm_ascend.patch.worker.patch_qwen3_5 import (
+    get_non_spec_causal_conv1d_host_args,
+)
 from vllm_ascend.utils import enable_sp, vllm_version_is
 
 
@@ -169,14 +171,24 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
             if mixed_qkv_non_spec is not None:
                 conv_weights_T = conv_weights.transpose(0, 1)
                 activation_num = 1 if self.activation else 0
+                (
+                    query_start_loc_opt,
+                    cache_indices_opt,
+                    initial_state_mode_opt,
+                ) = get_non_spec_causal_conv1d_host_args(
+                    attn_metadata,
+                    non_spec_query_start_loc,
+                    non_spec_state_indices_tensor,
+                    has_initial_state,
+                )
                 mixed_qkv_non_spec = torch.ops._C_ascend.npu_causal_conv1d_custom(
                     mixed_qkv_non_spec,
                     conv_weights_T,
                     conv_state=self_kv_cache[0],
                     bias_opt=self.conv1d.bias,
-                    query_start_loc_opt=to_int64_tuple(non_spec_query_start_loc),
-                    cache_indices_opt=to_int64_tuple(non_spec_state_indices_tensor),
-                    initial_state_mode_opt=to_int64_tuple(has_initial_state),
+                    query_start_loc_opt=query_start_loc_opt,
+                    cache_indices_opt=cache_indices_opt,
+                    initial_state_mode_opt=initial_state_mode_opt,
                     num_accepted_tokens_opt=[],
                     activation_mode=activation_num,
                     pad_slot_id=PAD_SLOT_ID,
@@ -241,10 +253,15 @@ class AscendQwen3Next_GatedDeltaNet(Qwen3NextGatedDeltaNet):
             initial_state = ssm_state[non_spec_state_indices_tensor].transpose(-1, -2).contiguous()
 
             initial_state[~has_initial_state, ...] = 0
-            non_spec_chunked_prefill_meta = getattr(
+            fallback_meta = getattr(
                 attn_metadata,
-                "non_spec_chunked_prefill_meta",
+                "non_spec_prefill_fallback_meta",
                 None,
+            )
+            non_spec_chunked_prefill_meta = (
+                fallback_meta.chunk
+                if fallback_meta is not None
+                else getattr(attn_metadata, "non_spec_chunked_prefill_meta", None)
             )
             (
                 core_attn_out_non_spec,
