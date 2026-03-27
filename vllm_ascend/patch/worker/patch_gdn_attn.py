@@ -67,6 +67,7 @@ class _GDNChunkedPrefillBufferSlot:
 @dataclass
 class _GDNCausalConv1dHostBufferSlot:
     cache_indices_cpu: torch.Tensor
+    has_initial_state_cpu: torch.Tensor
 
 
 def _next_power_of_2(value: int) -> int:
@@ -258,7 +259,13 @@ def _allocate_causal_conv1d_host_slot(
             dtype=torch.int32,
             device="cpu",
             pin_memory=device.type != "cpu",
-        )
+        ),
+        has_initial_state_cpu=torch.empty(
+            max_num_seqs,
+            dtype=torch.bool,
+            device="cpu",
+            pin_memory=device.type != "cpu",
+        ),
     )
 
 
@@ -275,41 +282,35 @@ def _ensure_causal_conv1d_host_meta_state(builder, device: torch.device) -> None
         ]
 
 
-def _copy_non_spec_state_indices_to_cpu(
-    builder,
-    non_spec_state_indices_tensor: torch.Tensor,
-) -> tuple[torch.Tensor, _GDNCausalConv1dHostBufferSlot | None]:
-    if non_spec_state_indices_tensor.device.type == "cpu":
-        return non_spec_state_indices_tensor, None
-
+def _acquire_causal_conv1d_host_slot(builder) -> _GDNCausalConv1dHostBufferSlot:
     pool = builder._ascend_gdn_causal_conv1d_host_pool
     builder._ascend_gdn_causal_conv1d_host_pool_idx = (
         builder._ascend_gdn_causal_conv1d_host_pool_idx + 1
     ) % len(pool)
-    slot = pool[builder._ascend_gdn_causal_conv1d_host_pool_idx]
+    return pool[builder._ascend_gdn_causal_conv1d_host_pool_idx]
+
+
+def _copy_non_spec_state_indices_to_cpu(
+    non_spec_state_indices_tensor: torch.Tensor,
+    slot: _GDNCausalConv1dHostBufferSlot | None,
+) -> torch.Tensor:
+    if non_spec_state_indices_tensor.device.type == "cpu":
+        return non_spec_state_indices_tensor
+
+    assert slot is not None
     num_indices = non_spec_state_indices_tensor.numel()
     cache_indices_cpu = slot.cache_indices_cpu[:num_indices]
     cache_indices_cpu.copy_(
         non_spec_state_indices_tensor.reshape(-1),
         non_blocking=True,
     )
-    return cache_indices_cpu, slot
+    return cache_indices_cpu
 
 
-def _build_non_spec_causal_conv1d_host_meta(
-    builder,
-    attn_metadata,
+def _fallback_non_spec_has_initial_state_cpu(
     common_attn_metadata,
-    num_decode_draft_tokens_cpu: torch.Tensor | None,
-    non_spec_query_start_loc_cpu: torch.Tensor,
-) -> GDNCausalConv1dHostMetadata | None:
-    if attn_metadata.num_prefills <= 0 or attn_metadata.non_spec_state_indices_tensor is None:
-        return None
-
-    spec_sequence_masks_cpu = _build_spec_sequence_masks_cpu(
-        builder,
-        num_decode_draft_tokens_cpu,
-    )
+    spec_sequence_masks_cpu: torch.Tensor | None,
+) -> torch.Tensor:
     num_computed_tokens_cpu = _get_common_metadata_tensor_cpu(
         common_attn_metadata,
         ("num_computed_tokens_cpu", "_num_computed_tokens_cpu"),
@@ -330,11 +331,61 @@ def _build_non_spec_causal_conv1d_host_meta(
     has_initial_state_cpu = num_computed_tokens_cpu > 0
     if spec_sequence_masks_cpu is not None:
         has_initial_state_cpu = has_initial_state_cpu[~spec_sequence_masks_cpu]
+    return has_initial_state_cpu
 
-    cache_indices_cpu, slot = _copy_non_spec_state_indices_to_cpu(
-        builder,
+
+def _copy_has_initial_state_to_cpu(
+    has_initial_state: torch.Tensor,
+    slot: _GDNCausalConv1dHostBufferSlot | None,
+) -> torch.Tensor:
+    if has_initial_state.device.type == "cpu":
+        return has_initial_state
+
+    assert slot is not None
+    num_states = has_initial_state.numel()
+    has_initial_state_cpu = slot.has_initial_state_cpu[:num_states]
+    has_initial_state_cpu.copy_(has_initial_state.reshape(-1), non_blocking=True)
+    return has_initial_state_cpu
+
+
+def _build_non_spec_causal_conv1d_host_meta(
+    builder,
+    attn_metadata,
+    common_attn_metadata,
+    num_decode_draft_tokens_cpu: torch.Tensor | None,
+    non_spec_query_start_loc_cpu: torch.Tensor,
+) -> GDNCausalConv1dHostMetadata | None:
+    if attn_metadata.num_prefills <= 0 or attn_metadata.non_spec_state_indices_tensor is None:
+        return None
+
+    slot = None
+    if (
+        attn_metadata.non_spec_state_indices_tensor.device.type != "cpu"
+        or (
+            attn_metadata.has_initial_state is not None
+            and attn_metadata.has_initial_state.device.type != "cpu"
+        )
+    ):
+        slot = _acquire_causal_conv1d_host_slot(builder)
+
+    cache_indices_cpu = _copy_non_spec_state_indices_to_cpu(
         attn_metadata.non_spec_state_indices_tensor,
+        slot,
     )
+    if attn_metadata.has_initial_state is not None:
+        has_initial_state_cpu = _copy_has_initial_state_to_cpu(
+            attn_metadata.has_initial_state,
+            slot,
+        )
+    else:
+        spec_sequence_masks_cpu = _build_spec_sequence_masks_cpu(
+            builder,
+            num_decode_draft_tokens_cpu,
+        )
+        has_initial_state_cpu = _fallback_non_spec_has_initial_state_cpu(
+            common_attn_metadata,
+            spec_sequence_masks_cpu,
+        )
 
     return GDNCausalConv1dHostMetadata(
         query_start_loc_cpu=non_spec_query_start_loc_cpu,
@@ -373,7 +424,11 @@ def _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu: torch.Tens
     )
 
 
-def _build_non_spec_chunked_prefill_meta(builder, cu_seqlens_cpu: torch.Tensor) -> GDNChunkedPrefillMetadata:
+def _build_non_spec_chunked_prefill_meta(
+    builder,
+    cu_seqlens_cpu: torch.Tensor,
+    cu_seqlens: torch.Tensor,
+) -> GDNChunkedPrefillMetadata:
     device = builder._ascend_gdn_chunk_meta_device
     if device.type == "cpu":
         return _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu)
@@ -397,7 +452,6 @@ def _build_non_spec_chunked_prefill_meta(builder, cu_seqlens_cpu: torch.Tensor) 
     chunk_indices_large_block = slot.chunk_indices_large_block.gpu[:num_chunk_indices_large]
     block_indices_cumsum = slot.block_indices_cumsum.gpu[:num_block_indices_cumsum]
 
-    cu_seqlens = cu_seqlens_cpu.to(slot.chunk_offsets_chunk64.gpu.device, non_blocking=True)
     build_chunk_meta_device(
         cu_seqlens=cu_seqlens,
         chunk_size=builder._ascend_gdn_chunk_size,
@@ -470,6 +524,7 @@ def _patched_build(
         chunk=_build_non_spec_chunked_prefill_meta(
             self,
             non_spec_query_start_loc_cpu,
+            attn_metadata.non_spec_query_start_loc,
         ),
     )
     return attn_metadata

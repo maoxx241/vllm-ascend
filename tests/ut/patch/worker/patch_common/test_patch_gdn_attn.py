@@ -394,7 +394,11 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
         raising=False,
     )
 
-    patch_gdn_attn._build_non_spec_chunked_prefill_meta(builder, cu_seqlens_cpu)
+    patch_gdn_attn._build_non_spec_chunked_prefill_meta(
+        builder,
+        cu_seqlens_cpu,
+        cu_seqlens_cpu,
+    )
 
     expected_chunk_sizes = {
         64,
@@ -528,6 +532,105 @@ def test_builder_prebuilds_non_spec_causal_conv1d_host_metadata(
         prebuilt_meta.has_initial_state_cpu,
         expected_has_initial_state_cpu,
     )
+
+
+def test_build_non_spec_causal_conv1d_host_meta_avoids_seq_lens_cpu_fallback():
+    class GuardSeqLens:
+        def to(self, *args, **kwargs):
+            raise AssertionError("seq_lens.to('cpu') should not be reached")
+
+    builder = SimpleNamespace(use_spec_decode=False)
+    attn_metadata = SimpleNamespace(
+        num_prefills=2,
+        non_spec_state_indices_tensor=torch.tensor([3, 9], dtype=torch.int32),
+        has_initial_state=torch.tensor([True, False]),
+    )
+    common_attn_metadata = SimpleNamespace(
+        query_start_loc_cpu=torch.tensor([0, 4, 12], dtype=torch.int32),
+        seq_lens=GuardSeqLens(),
+    )
+
+    host_meta = patch_gdn_attn._build_non_spec_causal_conv1d_host_meta(
+        builder,
+        attn_metadata,
+        common_attn_metadata,
+        num_decode_draft_tokens_cpu=None,
+        non_spec_query_start_loc_cpu=torch.tensor([0, 4, 12], dtype=torch.int32),
+    )
+
+    assert host_meta is not None
+    assert torch.equal(
+        host_meta.has_initial_state_cpu,
+        torch.tensor([True, False]),
+    )
+
+
+def test_builder_passes_device_non_spec_query_start_loc_to_chunk_meta(monkeypatch):
+    device = torch.device("cpu")
+    common_attn_metadata = create_common_attn_metadata(
+        batch_spec=BatchSpec(
+            seq_lens=[8, 4, 0, 12],
+            query_lens=[4, 4, 0, 8],
+            name="mixed_spec_non_spec_with_padding",
+        ),
+        block_size=16,
+        device=device,
+    )
+    builder = _make_builder(
+        device=device,
+        num_heads=32,
+        num_speculative_tokens=3,
+    )
+    captured: dict[str, object] = {}
+    num_accepted_tokens = torch.ones(4, dtype=torch.int32, device=device)
+    num_decode_draft_tokens_cpu = torch.tensor([-1, 3, -1, -1], dtype=torch.int32)
+
+    def fake_build_non_spec_chunked_prefill_meta(
+        builder_arg,
+        cu_seqlens_cpu,
+        cu_seqlens,
+    ):
+        captured["builder"] = builder_arg
+        captured["cu_seqlens_cpu"] = cu_seqlens_cpu
+        captured["cu_seqlens"] = cu_seqlens
+        return SimpleNamespace(marker="chunk")
+
+    monkeypatch.setattr(
+        patch_gdn_attn,
+        "_build_non_spec_chunked_prefill_meta",
+        fake_build_non_spec_chunked_prefill_meta,
+    )
+    monkeypatch.setattr(
+        patch_gdn_attn,
+        "_build_non_spec_causal_conv1d_host_meta",
+        lambda *args, **kwargs: None,
+    )
+
+    attn_metadata = builder.build(
+        0,
+        common_attn_metadata,
+        num_accepted_tokens=num_accepted_tokens,
+        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
+    )
+
+    assert captured["builder"] is builder
+    expected_non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(
+        BatchSpec(
+            seq_lens=[8, 4, 0, 12],
+            query_lens=[4, 4, 0, 8],
+            name="mixed_spec_non_spec_with_padding",
+        ),
+        num_decode_draft_tokens_cpu >= 0,
+    )
+    assert torch.equal(
+        captured["cu_seqlens_cpu"],
+        expected_non_spec_query_start_loc_cpu,
+    )
+    assert captured["cu_seqlens"] is attn_metadata.non_spec_query_start_loc
+    assert captured["cu_seqlens"] is not common_attn_metadata.query_start_loc_cpu
+    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
+    assert fallback_meta is not None
+    assert getattr(fallback_meta.chunk, "marker", None) == "chunk"
 
 
 def test_get_non_spec_causal_conv1d_host_args_prefers_prefill_fallback_meta():
