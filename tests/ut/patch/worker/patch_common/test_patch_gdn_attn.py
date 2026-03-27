@@ -425,7 +425,7 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     assert chunk64_kwargs["out_update_chunk_offsets"].shape == legacy_update_chunk_offsets_64.shape
     assert chunk64_kwargs["out_update_chunk_offsets"].dtype == legacy_update_chunk_offsets_64.dtype
     assert chunk64_kwargs["out_final_chunk_indices"].shape == legacy_final_chunk_indices_64.shape
-    assert chunk64_kwargs["out_final_chunk_indices"].dtype == legacy_final_chunk_indices_64.dtype
+    assert chunk64_kwargs["out_final_chunk_indices"].dtype == slot.final_chunk_indices_chunk64.gpu.dtype
 
     large_block_kwargs = helper_calls[patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE]
     assert large_block_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_large_block.shape
