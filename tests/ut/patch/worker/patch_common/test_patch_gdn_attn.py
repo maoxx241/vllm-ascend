@@ -339,7 +339,7 @@ def test_builder_prebuilds_non_spec_chunk_metadata_exactly(
     )
 
 
-def test_builder_delegates_non_spec_chunk_metadata_to_device_helper(monkeypatch):
+def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     device = torch.device("cpu")
     batch_spec = BatchSpec(
         seq_lens=[8, 12],
