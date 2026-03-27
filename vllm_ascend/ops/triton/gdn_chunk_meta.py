@@ -4,6 +4,13 @@ import torch
 from vllm.triton_utils import tl, triton
 
 
+def _cdiv(x: int, y: int) -> int:
+    triton_cdiv = getattr(triton, "cdiv", None)
+    if triton_cdiv is not None:
+        return triton_cdiv(x, y)
+    return (x + y - 1) // y
+
+
 @triton.jit
 def _build_chunk_counts_kernel(
     cu_seqlens_ptr,
@@ -24,51 +31,6 @@ def _build_chunk_counts_kernel(
 
     tl.store(chunk_counts_ptr + offsets, chunk_counts, mask=mask)
     tl.store(update_chunk_counts_ptr + offsets, chunk_counts + 1, mask=mask)
-
-
-@triton.jit
-def _build_chunk_indices_kernel(
-    chunk_offsets_ptr,
-    out_chunk_indices_ptr,
-    total_chunks,
-    num_seqs,
-    SEARCH_ITERS: tl.constexpr,
-    BLOCK_SIZE: tl.constexpr,
-):
-    pid = tl.program_id(0)
-    rows = pid * BLOCK_SIZE + tl.arange(0, BLOCK_SIZE)
-    mask = rows < total_chunks
-
-    left = tl.zeros([BLOCK_SIZE], dtype=tl.int32)
-    right = tl.full([BLOCK_SIZE], num_seqs, dtype=tl.int32)
-    seq_indices = tl.zeros([BLOCK_SIZE], dtype=tl.int32)
-
-    for _ in range(SEARCH_ITERS):
-        mid = (left + right) // 2
-        chunk_start = tl.load(chunk_offsets_ptr + mid, mask=mask, other=0).to(tl.int32)
-        chunk_end = tl.load(chunk_offsets_ptr + mid + 1, mask=mask, other=0).to(tl.int32)
-
-        go_left = rows < chunk_start
-        go_right = rows >= chunk_end
-        found = ~(go_left | go_right)
-
-        right = tl.where(go_left, mid, right)
-        left = tl.where(go_right, mid + 1, left)
-        seq_indices = tl.where(found, mid, seq_indices)
-
-    seq_chunk_start = tl.load(chunk_offsets_ptr + seq_indices, mask=mask, other=0).to(tl.int32)
-    flat_offsets = rows * 2
-
-    tl.store(
-        out_chunk_indices_ptr + flat_offsets,
-        seq_indices.to(out_chunk_indices_ptr.dtype.element_ty),
-        mask=mask,
-    )
-    tl.store(
-        out_chunk_indices_ptr + flat_offsets + 1,
-        (rows - seq_chunk_start).to(out_chunk_indices_ptr.dtype.element_ty),
-        mask=mask,
-    )
 
 
 def _validate_optional_output(
@@ -166,16 +128,27 @@ def build_chunk_meta_device(
     chunk_counts = torch.empty(num_seqs, dtype=cu_seqlens.dtype, device=cu_seqlens.device)
     update_chunk_counts = torch.empty_like(chunk_counts)
 
-    block_size = 256
-    grid = (triton.cdiv(num_seqs, block_size),)
-    _build_chunk_counts_kernel[grid](
-        cu_seqlens_ptr=cu_seqlens,
-        chunk_counts_ptr=chunk_counts,
-        update_chunk_counts_ptr=update_chunk_counts,
-        num_seqs=num_seqs,
-        chunk_size=chunk_size,
-        BLOCK_SIZE=block_size,
-    )
+    if hasattr(_build_chunk_counts_kernel, "__getitem__"):
+        block_size = 256
+        grid = (_cdiv(num_seqs, block_size),)
+        _build_chunk_counts_kernel[grid](
+            cu_seqlens_ptr=cu_seqlens,
+            chunk_counts_ptr=chunk_counts,
+            update_chunk_counts_ptr=update_chunk_counts,
+            num_seqs=num_seqs,
+            chunk_size=chunk_size,
+            BLOCK_SIZE=block_size,
+        )
+    else:
+        seq_lens = cu_seqlens[1:] - cu_seqlens[:-1]
+        torch.div(
+            seq_lens + chunk_size - 1,
+            chunk_size,
+            rounding_mode="floor",
+            out=chunk_counts,
+        )
+        update_chunk_counts.copy_(chunk_counts)
+        update_chunk_counts.add_(1)
 
     chunk_offsets = out_chunk_offsets
     if chunk_offsets is None and out_chunk_indices is not None:
@@ -205,13 +178,22 @@ def build_chunk_meta_device(
         if total_chunks == 0:
             return
 
-        search_iters = max(1, (num_seqs - 1).bit_length())
-        grid = (triton.cdiv(total_chunks, block_size),)
-        _build_chunk_indices_kernel[grid](
-            chunk_offsets_ptr=chunk_offsets,
-            out_chunk_indices_ptr=out_chunk_indices,
-            total_chunks=total_chunks,
-            num_seqs=num_seqs,
-            SEARCH_ITERS=search_iters,
-            BLOCK_SIZE=block_size,
+        repeat_counts = chunk_counts.to(torch.int64)
+        seq_indices = torch.repeat_interleave(
+            torch.arange(num_seqs, device=cu_seqlens.device, dtype=out_chunk_indices.dtype),
+            repeat_counts,
         )
+        if seq_indices.shape[0] != total_chunks:
+            raise ValueError(
+                "out_chunk_indices has incompatible first dimension for the provided cu_seqlens"
+            )
+        chunk_starts = torch.repeat_interleave(
+            chunk_offsets[:-1].to(dtype=out_chunk_indices.dtype),
+            repeat_counts,
+        )
+        local_indices = (
+            torch.arange(total_chunks, device=cu_seqlens.device, dtype=out_chunk_indices.dtype)
+            - chunk_starts
+        )
+        out_chunk_indices[:, 0].copy_(seq_indices)
+        out_chunk_indices[:, 1].copy_(local_indices)
