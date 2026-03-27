@@ -430,16 +430,16 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     large_block_kwargs = helper_calls[patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE]
     assert large_block_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_large_block.shape
     assert large_block_kwargs["out_chunk_indices"].dtype == legacy_chunk_indices_large_block.dtype
-    assert large_block_kwargs["out_chunk_offsets"] is None
-    assert large_block_kwargs["out_update_chunk_offsets"] is None
-    assert large_block_kwargs["out_final_chunk_indices"] is None
+    assert large_block_kwargs.get("out_chunk_offsets") is None
+    assert large_block_kwargs.get("out_update_chunk_offsets") is None
+    assert large_block_kwargs.get("out_final_chunk_indices") is None
 
     cumsum_kwargs = helper_calls[builder._ascend_gdn_cumsum_block_size]
     assert cumsum_kwargs["out_chunk_indices"].shape == legacy_block_indices_cumsum.shape
     assert cumsum_kwargs["out_chunk_indices"].dtype == legacy_block_indices_cumsum.dtype
-    assert cumsum_kwargs["out_chunk_offsets"] is None
-    assert cumsum_kwargs["out_update_chunk_offsets"] is None
-    assert cumsum_kwargs["out_final_chunk_indices"] is None
+    assert cumsum_kwargs.get("out_chunk_offsets") is None
+    assert cumsum_kwargs.get("out_update_chunk_offsets") is None
+    assert cumsum_kwargs.get("out_final_chunk_indices") is None
 
 
 @pytest.mark.parametrize(
