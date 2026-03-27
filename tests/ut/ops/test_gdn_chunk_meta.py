@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import json
+import os
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
 import pytest
 import torch
 
@@ -76,6 +83,58 @@ def _patch_missing_cdiv(monkeypatch: pytest.MonkeyPatch, module) -> None:
         lambda x, y: (x + y - 1) // y,
         raising=False,
     )
+
+
+def _run_build_chunk_meta_device_subprocess(
+    *,
+    chunk_size: int,
+    fail_cumsum: bool = False,
+    fail_repeat_interleave: bool = False,
+) -> dict[str, list]:
+    repo_root = Path(__file__).resolve().parents[3]
+    script = f"""
+import json
+import torch
+from vllm_ascend.ops.triton.gdn_chunk_meta import build_chunk_meta_device
+
+if {fail_cumsum!r}:
+    torch.cumsum = lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("torch.cumsum should not be used"))
+if {fail_repeat_interleave!r}:
+    torch.repeat_interleave = lambda *args, **kwargs: (_ for _ in ()).throw(
+        RuntimeError("torch.repeat_interleave should not be used")
+    )
+
+cu = torch.tensor([0, 4, 12], dtype=torch.int32, device="npu")
+out_idx = torch.empty((2, 2), dtype=torch.int32, device="npu")
+out_off = torch.empty((3,), dtype=torch.int32, device="npu")
+out_upd = torch.empty((3,), dtype=torch.int32, device="npu")
+out_final = torch.empty((2,), dtype=torch.int64, device="npu")
+build_chunk_meta_device(cu, {chunk_size}, out_idx, out_off, out_upd, out_final)
+print(json.dumps({{
+    "chunk_indices": out_idx.cpu().tolist(),
+    "chunk_offsets": out_off.cpu().tolist(),
+    "update_chunk_offsets": out_upd.cpu().tolist(),
+    "final_chunk_indices": out_final.cpu().tolist(),
+}}))
+"""
+
+    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as handle:
+        handle.write(script)
+        script_path = handle.name
+
+    try:
+        result = subprocess.run(
+            [sys.executable, script_path],
+            cwd=repo_root,
+            env=os.environ.copy(),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    finally:
+        os.unlink(script_path)
+
+    return json.loads(result.stdout.strip().splitlines()[-1])
 
 
 def _prepare_chunk_indices(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
@@ -296,8 +355,6 @@ def test_chunk_gated_delta_rule_fwd_threads_prebuilt_chunk_offsets(
 
 @pytest.mark.skipif(not torch.npu.is_available(), reason="NPU required")
 def test_build_chunk_meta_device_matches_cpu_reference_helpers():
-    from vllm_ascend.ops.triton.gdn_chunk_meta import build_chunk_meta_device
-
     device = torch.device("npu")
     num_heads = 32
     cu_seqlens = torch.tensor([0, 4, 12], dtype=torch.int32, device=device)
@@ -326,50 +383,39 @@ def test_build_chunk_meta_device_matches_cpu_reference_helpers():
         cumsum_chunk_size,
     )
 
-    out_chunk_indices = torch.empty_like(expected_chunk_indices_64, device=device)
-    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
-    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
-    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
+    outputs = _run_build_chunk_meta_device_subprocess(chunk_size=64)
+    assert outputs["chunk_indices"] == expected_chunk_indices_64.tolist()
+    assert outputs["chunk_offsets"] == expected_chunk_offsets_64.tolist()
+    assert outputs["update_chunk_offsets"] == expected_update_chunk_offsets_64.tolist()
+    assert outputs["final_chunk_indices"] == expected_final_chunk_indices_64.tolist()
 
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
+    outputs = _run_build_chunk_meta_device_subprocess(
+        chunk_size=patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE
+    )
+    assert outputs["chunk_indices"] == expected_chunk_indices_large_block.tolist()
+
+    outputs = _run_build_chunk_meta_device_subprocess(chunk_size=cumsum_chunk_size)
+    assert outputs["chunk_indices"] == expected_block_indices_cumsum.tolist()
+
+
+@pytest.mark.skipif(not torch.npu.is_available(), reason="NPU required")
+def test_build_chunk_meta_device_does_not_use_device_torch_expansion():
+    device = torch.device("npu")
+    cu_seqlens = torch.tensor([0, 4, 12], dtype=torch.int32, device=device)
+    cu_seqlens_cpu = cu_seqlens.cpu()
+
+    expected_chunk_indices = _prepare_chunk_indices(cu_seqlens_cpu, 64)
+    expected_chunk_offsets = _prepare_chunk_offsets(cu_seqlens_cpu, 64)
+    expected_update_chunk_offsets = _prepare_update_chunk_offsets(cu_seqlens_cpu, 64)
+    expected_final_chunk_indices = _prepare_final_chunk_indices(cu_seqlens_cpu, 64)
+
+    outputs = _run_build_chunk_meta_device_subprocess(
         chunk_size=64,
-        out_chunk_indices=out_chunk_indices,
-        out_chunk_offsets=out_chunk_offsets,
-        out_update_chunk_offsets=out_update_chunk_offsets,
-        out_final_chunk_indices=out_final_chunk_indices,
+        fail_cumsum=True,
+        fail_repeat_interleave=True,
     )
-    assert torch.equal(out_chunk_indices.cpu(), expected_chunk_indices_64)
-    assert torch.equal(out_chunk_offsets.cpu(), expected_chunk_offsets_64)
-    assert torch.equal(out_update_chunk_offsets.cpu(), expected_update_chunk_offsets_64)
-    assert torch.equal(out_final_chunk_indices.cpu(), expected_final_chunk_indices_64)
 
-    out_chunk_indices = torch.empty_like(expected_chunk_indices_large_block, device=device)
-    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
-    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
-    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
-
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
-        chunk_size=patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
-        out_chunk_indices=out_chunk_indices,
-        out_chunk_offsets=out_chunk_offsets,
-        out_update_chunk_offsets=out_update_chunk_offsets,
-        out_final_chunk_indices=out_final_chunk_indices,
-    )
-    assert torch.equal(out_chunk_indices.cpu(), expected_chunk_indices_large_block)
-
-    out_chunk_indices = torch.empty_like(expected_block_indices_cumsum, device=device)
-    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
-    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
-    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
-
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
-        chunk_size=cumsum_chunk_size,
-        out_chunk_indices=out_chunk_indices,
-        out_chunk_offsets=out_chunk_offsets,
-        out_update_chunk_offsets=out_update_chunk_offsets,
-        out_final_chunk_indices=out_final_chunk_indices,
-    )
-    assert torch.equal(out_chunk_indices.cpu(), expected_block_indices_cumsum)
+    assert outputs["chunk_indices"] == expected_chunk_indices.tolist()
+    assert outputs["chunk_offsets"] == expected_chunk_offsets.tolist()
+    assert outputs["update_chunk_offsets"] == expected_update_chunk_offsets.tolist()
+    assert outputs["final_chunk_indices"] == expected_final_chunk_indices.tolist()
