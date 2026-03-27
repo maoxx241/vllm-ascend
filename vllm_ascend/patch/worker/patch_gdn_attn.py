@@ -83,15 +83,17 @@ def _prepare_chunk_counts_cpu(cu_seqlens_cpu: torch.Tensor, chunk_size: int) -> 
 
 def _fill_chunk_indices_cpu(out: torch.Tensor, chunk_counts: torch.Tensor) -> int:
     cursor = 0
-    for seq_idx, num_chunks in enumerate(chunk_counts.tolist()):
+    compact_seq_idx = 0
+    for num_chunks in chunk_counts.tolist():
         if num_chunks <= 0:
             continue
-        out[cursor : cursor + num_chunks, 0].fill_(seq_idx)
+        out[cursor : cursor + num_chunks, 0].fill_(compact_seq_idx)
         out[cursor : cursor + num_chunks, 1] = torch.arange(
             num_chunks,
             dtype=out.dtype,
         )
         cursor += num_chunks
+        compact_seq_idx += 1
     return cursor
 
 
@@ -141,21 +143,21 @@ def _allocate_chunked_prefill_slot(builder, device: torch.device):
         ),
         chunk_offsets_chunk64=CpuGpuBuffer(
             max_num_seqs + 1,
-            dtype=torch.int32,
+            dtype=torch.int64,
             device=device,
             pin_memory=True,
             with_numpy=False,
         ),
         update_chunk_offsets_chunk64=CpuGpuBuffer(
             max_num_seqs + 1,
-            dtype=torch.int32,
+            dtype=torch.int64,
             device=device,
             pin_memory=True,
             with_numpy=False,
         ),
         final_chunk_indices_chunk64=CpuGpuBuffer(
             max_num_seqs,
-            dtype=torch.int32,
+            dtype=torch.int64,
             device=device,
             pin_memory=True,
             with_numpy=False,
@@ -401,9 +403,9 @@ def _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu: torch.Tens
     chunk_counts_cumsum = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_cumsum_block_size)
     num_seqs = chunk_counts_chunk64.numel()
     chunk_indices_chunk64 = torch.empty((int(chunk_counts_chunk64.sum().item()), 2), dtype=torch.int32)
-    chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int32)
-    update_chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int32)
-    final_chunk_indices_chunk64 = torch.empty((num_seqs,), dtype=torch.int32)
+    chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int64)
+    update_chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int64)
+    final_chunk_indices_chunk64 = torch.empty((num_seqs,), dtype=torch.int64)
     chunk_indices_large_block = torch.empty((int(chunk_counts_large.sum().item()), 2), dtype=torch.int32)
     block_indices_cumsum = torch.empty((int(chunk_counts_cumsum.sum().item()), 2), dtype=torch.int32)
 

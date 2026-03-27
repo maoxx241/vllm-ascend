@@ -236,7 +236,8 @@ def build_chunk_meta_device(
         if total_chunks == 0:
             return
         rows = torch.arange(total_chunks, device=cu_seqlens.device, dtype=chunk_offsets.dtype)
-        seq_indices = torch.bucketize(rows, chunk_offsets[1:], right=True)
-        chunk_starts = chunk_offsets.index_select(0, seq_indices)
+        compact_chunk_offsets = torch.unique_consecutive(chunk_offsets)
+        seq_indices = torch.bucketize(rows, compact_chunk_offsets[1:], right=True)
+        chunk_starts = compact_chunk_offsets.index_select(0, seq_indices)
         out_chunk_indices[:, 0].copy_(seq_indices.to(dtype=out_chunk_indices.dtype))
         out_chunk_indices[:, 1].copy_((rows - chunk_starts).to(dtype=out_chunk_indices.dtype))

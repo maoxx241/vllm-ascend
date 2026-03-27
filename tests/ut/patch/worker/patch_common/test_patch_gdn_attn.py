@@ -14,6 +14,12 @@ from vllm.config.compilation import CUDAGraphMode
 from vllm.v1.attention.backend import CommonAttentionMetadata
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadataBuilder
 from vllm.v1.kv_cache_interface import MambaSpec
+from vllm_ascend.ops.triton.fla.utils import (
+    prepare_chunk_indices as runtime_prepare_chunk_indices,
+    prepare_chunk_offsets as runtime_prepare_chunk_offsets,
+    prepare_final_chunk_indices as runtime_prepare_final_chunk_indices,
+    prepare_update_chunk_offsets as runtime_prepare_update_chunk_offsets,
+)
 
 
 @dataclass
@@ -136,53 +142,23 @@ def _next_power_of_2(value: int) -> int:
 
 
 def _prepare_chunk_indices(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
-    lens = (cu_seqlens[1:] - cu_seqlens[:-1]).tolist()
-    pairs: list[list[int]] = []
-    for seq_idx, seq_len in enumerate(lens):
-        num_chunks = (seq_len + chunk_size - 1) // chunk_size
-        for chunk_idx in range(num_chunks):
-            pairs.append([seq_idx, chunk_idx])
-    if not pairs:
-        return torch.empty((0, 2), dtype=cu_seqlens.dtype, device=cu_seqlens.device)
-    return torch.tensor(pairs, dtype=cu_seqlens.dtype, device=cu_seqlens.device)
+    return runtime_prepare_chunk_indices(cu_seqlens, chunk_size)
 
 
 def _prepare_chunk_offsets(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
-    lens = cu_seqlens[1:] - cu_seqlens[:-1]
-    num_chunks = torch.div(
-        lens + chunk_size - 1,
-        chunk_size,
-        rounding_mode="floor",
-    )
-    offsets = torch.zeros(len(num_chunks) + 1, dtype=cu_seqlens.dtype)
-    torch.cumsum(num_chunks, dim=0, out=offsets[1:])
-    return offsets.to(cu_seqlens.device)
+    return runtime_prepare_chunk_offsets(cu_seqlens, chunk_size)
 
 
 def _prepare_update_chunk_offsets(
     cu_seqlens: torch.Tensor, chunk_size: int
 ) -> torch.Tensor:
-    lens = cu_seqlens[1:] - cu_seqlens[:-1]
-    num_chunks = torch.div(
-        lens + chunk_size - 1,
-        chunk_size,
-        rounding_mode="floor",
-    ) + 1
-    offsets = torch.zeros(len(num_chunks) + 1, dtype=cu_seqlens.dtype)
-    torch.cumsum(num_chunks, dim=0, out=offsets[1:])
-    return offsets.to(cu_seqlens.device)
+    return runtime_prepare_update_chunk_offsets(cu_seqlens, chunk_size)
 
 
 def _prepare_final_chunk_indices(
     cu_seqlens: torch.Tensor, chunk_size: int
 ) -> torch.Tensor:
-    lens = cu_seqlens[1:] - cu_seqlens[:-1]
-    num_chunks = torch.div(
-        lens + chunk_size - 1,
-        chunk_size,
-        rounding_mode="floor",
-    ) + 1
-    return (torch.cumsum(num_chunks, dim=0) - 1).to(cu_seqlens.device)
+    return runtime_prepare_final_chunk_indices(cu_seqlens, chunk_size)
 
 
 def _build_non_spec_query_start_loc_cpu(
@@ -444,6 +420,47 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     assert cumsum_kwargs.get("out_chunk_offsets") is None
     assert cumsum_kwargs.get("out_update_chunk_offsets") is None
     assert cumsum_kwargs.get("out_final_chunk_indices") is None
+
+
+def test_builder_prebuilt_chunk_indices_match_runtime_prepare_helpers():
+    device = torch.device("cpu")
+    batch_spec = BatchSpec(
+        seq_lens=[8, 4, 0, 12],
+        query_lens=[4, 4, 0, 8],
+        name="mixed_spec_non_spec_with_padding",
+    )
+    common_attn_metadata = create_common_attn_metadata(
+        batch_spec=batch_spec,
+        block_size=16,
+        device=device,
+    )
+    builder = _make_builder(
+        device=device,
+        num_heads=32,
+        num_speculative_tokens=3,
+    )
+    num_accepted_tokens = torch.ones(batch_spec.batch_size, dtype=torch.int32, device=device)
+    num_decode_draft_tokens_cpu = torch.tensor([-1, 3, -1, -1], dtype=torch.int32)
+
+    attn_metadata = builder.build(
+        0,
+        common_attn_metadata,
+        num_accepted_tokens=num_accepted_tokens,
+        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
+    )
+
+    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
+    assert fallback_meta is not None
+    assert fallback_meta.chunk is not None
+
+    runtime_chunk_indices = runtime_prepare_chunk_indices(
+        attn_metadata.non_spec_query_start_loc,
+        64,
+    )
+    assert torch.equal(
+        fallback_meta.chunk.chunk_indices_chunk64,
+        runtime_chunk_indices,
+    )
 
 
 @pytest.mark.parametrize(
