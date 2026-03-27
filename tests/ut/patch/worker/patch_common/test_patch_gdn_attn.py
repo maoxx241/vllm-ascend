@@ -341,7 +341,6 @@ def test_builder_prebuilds_non_spec_chunk_metadata_exactly(
 
 def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     device = torch.device("cpu")
-    npu_device = torch.device("npu")
     batch_spec = BatchSpec(
         seq_lens=[8, 12],
         query_lens=[4, 8],
@@ -353,7 +352,7 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
         num_heads=32,
         num_speculative_tokens=0,
     )
-    builder._ascend_gdn_chunk_meta_device = npu_device
+    builder._ascend_gdn_chunk_meta_device = SimpleNamespace(type="npu")
     builder._ascend_gdn_chunk_size = patch_gdn_attn._GDN_CHUNK_SIZE
     builder._ascend_gdn_large_block_size = patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE
     builder._ascend_gdn_cumsum_block_size = _next_power_of_2(
@@ -364,7 +363,7 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     class DummyChunkBuffer:
         def __init__(self, shape):
             self.cpu = torch.zeros(shape, dtype=torch.int32)
-            self.gpu = torch.zeros(shape, dtype=torch.int32, device=npu_device)
+            self.gpu = torch.zeros(shape, dtype=torch.int32)
             self.copy_calls = 0
 
         def copy_to_gpu(self, num_items: int):
@@ -384,7 +383,7 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     called_chunk_sizes: list[int] = []
 
     def fake_build_chunk_meta_device(**kwargs):
-        assert torch.equal(kwargs["cu_seqlens"], cu_seqlens_cpu)
+        assert torch.equal(kwargs["cu_seqlens"].cpu(), cu_seqlens_cpu)
         assert kwargs["chunk_size"] in {
             64,
             patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
