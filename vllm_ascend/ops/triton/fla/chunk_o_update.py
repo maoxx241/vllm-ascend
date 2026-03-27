@@ -84,8 +84,8 @@ def chunk_fwd_o_update(
     h_update: torch.Tensor,
     updated_h_state: torch.Tensor,
     cu_seqlens: torch.LongTensor | None = None,
-    chunk_offsets: torch.Tensor | None = None,
     chunk_size: int = 64,
+    chunk_offsets: torch.Tensor | None = None,
 ) -> torch.Tensor:
     B, T, Hg, K, V = *q.shape, v.shape[-1]
     H = v.shape[-2]
