@@ -67,6 +67,17 @@ def _next_power_of_2(value: int) -> int:
     return 1 << (value - 1).bit_length()
 
 
+def _patch_missing_cdiv(monkeypatch: pytest.MonkeyPatch, module) -> None:
+    if hasattr(module.triton, "cdiv"):
+        return
+    monkeypatch.setattr(
+        module.triton,
+        "cdiv",
+        lambda x, y: (x + y - 1) // y,
+        raising=False,
+    )
+
+
 def _prepare_chunk_indices(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
     lens = (cu_seqlens[1:] - cu_seqlens[:-1]).tolist()
     pairs: list[list[int]] = []
@@ -122,6 +133,7 @@ def test_chunk_fwd_o_uses_prebuilt_chunk_offsets(monkeypatch: pytest.MonkeyPatch
     sentinel = torch.tensor([0, 2, 5], dtype=torch.int32)
     cu_seqlens = torch.tensor([0, 4, 7], dtype=torch.int32)
 
+    _patch_missing_cdiv(monkeypatch, chunk_o)
     monkeypatch.setattr(chunk_o, "chunk_fwd_kernel_o", fake_kernel)
     monkeypatch.setattr(
         chunk_o,
@@ -154,6 +166,7 @@ def test_chunk_fwd_o_update_uses_prebuilt_chunk_offsets(monkeypatch: pytest.Monk
     sentinel = torch.tensor([0, 2, 5], dtype=torch.int32)
     cu_seqlens = torch.tensor([0, 4, 7], dtype=torch.int32)
 
+    _patch_missing_cdiv(monkeypatch, chunk_o_update)
     monkeypatch.setattr(chunk_o_update, "chunk_fwd_kernel_o_update", fake_kernel)
     monkeypatch.setattr(
         chunk_o_update,

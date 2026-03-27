@@ -77,14 +77,13 @@ def _validate_optional_output(
     *,
     expected_shape: tuple[int, ...] | None,
     expected_device: torch.device,
-    expected_dtype: torch.dtype,
 ) -> None:
     if tensor is None:
         return
     if tensor.device != expected_device:
         raise ValueError(f"{name} must be on device {expected_device}, got {tensor.device}")
-    if tensor.dtype != expected_dtype:
-        raise ValueError(f"{name} must have dtype {expected_dtype}, got {tensor.dtype}")
+    if tensor.dtype not in (torch.int32, torch.int64):
+        raise ValueError(f"{name} must have int32 or int64 dtype, got {tensor.dtype}")
     if not tensor.is_contiguous():
         raise ValueError(f"{name} must be contiguous")
     if expected_shape is not None and tuple(tensor.shape) != expected_shape:
@@ -131,7 +130,6 @@ def build_chunk_meta_device(
         out_chunk_indices,
         expected_shape=None,
         expected_device=cu_seqlens.device,
-        expected_dtype=cu_seqlens.dtype,
     )
     if out_chunk_indices is not None and (
         out_chunk_indices.ndim != 2 or out_chunk_indices.shape[1] != 2
@@ -144,21 +142,18 @@ def build_chunk_meta_device(
         out_chunk_offsets,
         expected_shape=expected_prefix_shape,
         expected_device=cu_seqlens.device,
-        expected_dtype=cu_seqlens.dtype,
     )
     _validate_optional_output(
         "out_update_chunk_offsets",
         out_update_chunk_offsets,
         expected_shape=expected_prefix_shape,
         expected_device=cu_seqlens.device,
-        expected_dtype=cu_seqlens.dtype,
     )
     _validate_optional_output(
         "out_final_chunk_indices",
         out_final_chunk_indices,
         expected_shape=expected_final_shape,
         expected_device=cu_seqlens.device,
-        expected_dtype=cu_seqlens.dtype,
     )
 
     if num_seqs == 0:
