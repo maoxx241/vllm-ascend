@@ -5,9 +5,7 @@ import torch
 
 import vllm_ascend.patch.worker.patch_gdn_attn as patch_gdn_attn
 from tests.ut.patch.worker.patch_common.test_patch_gdn_attn import (
-    BatchSpec,
-    _build_non_spec_query_start_loc_cpu,
-    _make_builder,
+    _next_power_of_2,
     _prepare_chunk_indices,
     _prepare_chunk_offsets,
     _prepare_final_chunk_indices,
@@ -236,56 +234,80 @@ def test_chunk_gated_delta_rule_fwd_threads_prebuilt_chunk_offsets(
 
 @pytest.mark.skipif(not torch.npu.is_available(), reason="NPU required")
 def test_build_chunk_meta_device_matches_cpu_reference_helpers():
-    device = torch.device("npu")
-    batch_spec = BatchSpec(
-        seq_lens=[8, 12],
-        query_lens=[4, 8],
-        name="pure_non_spec_prefill",
-    )
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
-        num_speculative_tokens=0,
-    )
-    patch_gdn_attn._ensure_chunk_meta_state(builder, device)
+    from vllm_ascend.ops.triton.gdn_chunk_meta import build_chunk_meta_device
 
-    non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(batch_spec, None)
-    expected_chunk_indices_64 = _prepare_chunk_indices(non_spec_query_start_loc_cpu, 64)
-    expected_chunk_offsets_64 = _prepare_chunk_offsets(non_spec_query_start_loc_cpu, 64)
+    device = torch.device("npu")
+    num_heads = 32
+    cu_seqlens = torch.tensor([0, 4, 12], dtype=torch.int32, device=device)
+    cu_seqlens_cpu = cu_seqlens.cpu()
+
+    expected_chunk_indices_64 = _prepare_chunk_indices(cu_seqlens_cpu, 64)
+    expected_chunk_offsets_64 = _prepare_chunk_offsets(cu_seqlens_cpu, 64)
     expected_update_chunk_offsets_64 = _prepare_update_chunk_offsets(
-        non_spec_query_start_loc_cpu,
+        cu_seqlens_cpu,
         64,
     )
     expected_final_chunk_indices_64 = _prepare_final_chunk_indices(
-        non_spec_query_start_loc_cpu,
+        cu_seqlens_cpu,
         64,
     )
     expected_chunk_indices_large_block = _prepare_chunk_indices(
-        non_spec_query_start_loc_cpu,
+        cu_seqlens_cpu,
         patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
     )
+    cumsum_chunk_size = _next_power_of_2(
+        patch_gdn_attn._GDN_CUMSUM_WORKING_SET
+        // (num_heads * patch_gdn_attn._GDN_CHUNK_SIZE)
+    )
     expected_block_indices_cumsum = _prepare_chunk_indices(
-        non_spec_query_start_loc_cpu,
-        builder._ascend_gdn_cumsum_block_size,
+        cu_seqlens_cpu,
+        cumsum_chunk_size,
     )
 
-    chunk_meta = patch_gdn_attn.build_chunk_meta_device(builder, non_spec_query_start_loc_cpu)
+    out_chunk_indices = torch.empty_like(expected_chunk_indices_64, device=device)
+    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
+    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
+    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
 
-    assert torch.equal(chunk_meta.chunk_indices_chunk64.cpu(), expected_chunk_indices_64)
-    assert torch.equal(chunk_meta.chunk_offsets_chunk64.cpu(), expected_chunk_offsets_64)
-    assert torch.equal(
-        chunk_meta.update_chunk_offsets_chunk64.cpu(),
-        expected_update_chunk_offsets_64,
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=64,
+        out_chunk_indices=out_chunk_indices,
+        out_chunk_offsets=out_chunk_offsets,
+        out_update_chunk_offsets=out_update_chunk_offsets,
+        out_final_chunk_indices=out_final_chunk_indices,
     )
-    assert torch.equal(
-        chunk_meta.final_chunk_indices_chunk64.cpu(),
-        expected_final_chunk_indices_64,
+    assert torch.equal(out_chunk_indices.cpu(), expected_chunk_indices_64)
+    assert torch.equal(out_chunk_offsets.cpu(), expected_chunk_offsets_64)
+    assert torch.equal(out_update_chunk_offsets.cpu(), expected_update_chunk_offsets_64)
+    assert torch.equal(out_final_chunk_indices.cpu(), expected_final_chunk_indices_64)
+
+    out_chunk_indices = torch.empty_like(expected_chunk_indices_large_block, device=device)
+    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
+    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
+    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
+
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
+        out_chunk_indices=out_chunk_indices,
+        out_chunk_offsets=out_chunk_offsets,
+        out_update_chunk_offsets=out_update_chunk_offsets,
+        out_final_chunk_indices=out_final_chunk_indices,
     )
-    assert torch.equal(
-        chunk_meta.chunk_indices_large_block.cpu(),
-        expected_chunk_indices_large_block,
+    assert torch.equal(out_chunk_indices.cpu(), expected_chunk_indices_large_block)
+
+    out_chunk_indices = torch.empty_like(expected_block_indices_cumsum, device=device)
+    out_chunk_offsets = torch.empty_like(expected_chunk_offsets_64, device=device)
+    out_update_chunk_offsets = torch.empty_like(expected_update_chunk_offsets_64, device=device)
+    out_final_chunk_indices = torch.empty_like(expected_final_chunk_indices_64, device=device)
+
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=cumsum_chunk_size,
+        out_chunk_indices=out_chunk_indices,
+        out_chunk_offsets=out_chunk_offsets,
+        out_update_chunk_offsets=out_update_chunk_offsets,
+        out_final_chunk_indices=out_final_chunk_indices,
     )
-    assert torch.equal(
-        chunk_meta.block_indices_cumsum.cpu(),
-        expected_block_indices_cumsum,
-    )
+    assert torch.equal(out_chunk_indices.cpu(), expected_block_indices_cumsum)

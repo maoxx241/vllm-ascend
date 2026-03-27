@@ -363,11 +363,11 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     class DummyChunkBuffer:
         def __init__(self, shape):
             self.cpu = torch.zeros(shape, dtype=torch.int32)
+            self.gpu = torch.zeros(shape, dtype=torch.int32, device=device)
             self.copy_calls = 0
 
         def copy_to_gpu(self, num_items: int):
-            self.copy_calls += 1
-            return self.cpu[:num_items].clone()
+            pytest.fail("copy_to_gpu should not be used by build_chunk_meta_device")
 
     slot = SimpleNamespace(
         chunk_indices_chunk64=DummyChunkBuffer((8, 2)),
@@ -382,10 +382,29 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
 
     called_chunk_sizes: list[int] = []
 
-    def fake_build_chunk_meta_device(builder_arg, cu_seqlens_arg, chunk_size):
-        assert builder_arg is builder
-        assert torch.equal(cu_seqlens_arg, cu_seqlens_cpu)
-        called_chunk_sizes.append(chunk_size)
+    def fake_build_chunk_meta_device(**kwargs):
+        assert torch.equal(kwargs["cu_seqlens"], cu_seqlens_cpu)
+        assert kwargs["chunk_size"] in {
+            64,
+            patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
+            builder._ascend_gdn_cumsum_block_size,
+        }
+        if kwargs["chunk_size"] == 64:
+            assert kwargs["out_chunk_indices"] is slot.chunk_indices_chunk64.gpu
+            assert kwargs["out_chunk_offsets"] is slot.chunk_offsets_chunk64.gpu
+            assert kwargs["out_update_chunk_offsets"] is slot.update_chunk_offsets_chunk64.gpu
+            assert kwargs["out_final_chunk_indices"] is slot.final_chunk_indices_chunk64.gpu
+        elif kwargs["chunk_size"] == patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE:
+            assert kwargs["out_chunk_indices"] is slot.chunk_indices_large_block.gpu
+            assert kwargs["out_chunk_offsets"] is None
+            assert kwargs["out_update_chunk_offsets"] is None
+            assert kwargs["out_final_chunk_indices"] is None
+        else:
+            assert kwargs["out_chunk_indices"] is slot.block_indices_cumsum.gpu
+            assert kwargs["out_chunk_offsets"] is None
+            assert kwargs["out_update_chunk_offsets"] is None
+            assert kwargs["out_final_chunk_indices"] is None
+        called_chunk_sizes.append(kwargs["chunk_size"])
 
     monkeypatch.setattr(
         patch_gdn_attn,
