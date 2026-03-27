@@ -404,26 +404,39 @@ def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
     assert set(called_chunk_sizes) == expected_chunk_sizes
     assert len(called_chunk_sizes) == len(expected_chunk_sizes)
 
+    legacy_chunk_indices_64 = _prepare_chunk_indices(cu_seqlens_cpu, 64)
+    legacy_chunk_offsets_64 = _prepare_chunk_offsets(cu_seqlens_cpu, 64)
+    legacy_update_chunk_offsets_64 = _prepare_update_chunk_offsets(cu_seqlens_cpu, 64)
+    legacy_final_chunk_indices_64 = _prepare_final_chunk_indices(cu_seqlens_cpu, 64)
+    legacy_chunk_indices_large_block = _prepare_chunk_indices(
+        cu_seqlens_cpu,
+        patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
+    )
+    legacy_block_indices_cumsum = _prepare_chunk_indices(
+        cu_seqlens_cpu,
+        builder._ascend_gdn_cumsum_block_size,
+    )
+
     chunk64_kwargs = helper_calls[64]
-    assert chunk64_kwargs["out_chunk_indices"].shape == slot.chunk_indices_chunk64.gpu.shape
-    assert chunk64_kwargs["out_chunk_indices"].dtype == slot.chunk_indices_chunk64.gpu.dtype
-    assert chunk64_kwargs["out_chunk_offsets"].shape == slot.chunk_offsets_chunk64.gpu.shape
-    assert chunk64_kwargs["out_chunk_offsets"].dtype == slot.chunk_offsets_chunk64.gpu.dtype
-    assert chunk64_kwargs["out_update_chunk_offsets"].shape == slot.update_chunk_offsets_chunk64.gpu.shape
-    assert chunk64_kwargs["out_update_chunk_offsets"].dtype == slot.update_chunk_offsets_chunk64.gpu.dtype
-    assert chunk64_kwargs["out_final_chunk_indices"].shape == slot.final_chunk_indices_chunk64.gpu.shape
-    assert chunk64_kwargs["out_final_chunk_indices"].dtype == slot.final_chunk_indices_chunk64.gpu.dtype
+    assert chunk64_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_64.shape
+    assert chunk64_kwargs["out_chunk_indices"].dtype == legacy_chunk_indices_64.dtype
+    assert chunk64_kwargs["out_chunk_offsets"].shape == legacy_chunk_offsets_64.shape
+    assert chunk64_kwargs["out_chunk_offsets"].dtype == legacy_chunk_offsets_64.dtype
+    assert chunk64_kwargs["out_update_chunk_offsets"].shape == legacy_update_chunk_offsets_64.shape
+    assert chunk64_kwargs["out_update_chunk_offsets"].dtype == legacy_update_chunk_offsets_64.dtype
+    assert chunk64_kwargs["out_final_chunk_indices"].shape == legacy_final_chunk_indices_64.shape
+    assert chunk64_kwargs["out_final_chunk_indices"].dtype == legacy_final_chunk_indices_64.dtype
 
     large_block_kwargs = helper_calls[patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE]
-    assert large_block_kwargs["out_chunk_indices"].shape == slot.chunk_indices_large_block.gpu.shape
-    assert large_block_kwargs["out_chunk_indices"].dtype == slot.chunk_indices_large_block.gpu.dtype
+    assert large_block_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_large_block.shape
+    assert large_block_kwargs["out_chunk_indices"].dtype == legacy_chunk_indices_large_block.dtype
     assert large_block_kwargs["out_chunk_offsets"] is None
     assert large_block_kwargs["out_update_chunk_offsets"] is None
     assert large_block_kwargs["out_final_chunk_indices"] is None
 
     cumsum_kwargs = helper_calls[builder._ascend_gdn_cumsum_block_size]
-    assert cumsum_kwargs["out_chunk_indices"].shape == slot.block_indices_cumsum.gpu.shape
-    assert cumsum_kwargs["out_chunk_indices"].dtype == slot.block_indices_cumsum.gpu.dtype
+    assert cumsum_kwargs["out_chunk_indices"].shape == legacy_block_indices_cumsum.shape
+    assert cumsum_kwargs["out_chunk_indices"].dtype == legacy_block_indices_cumsum.dtype
     assert cumsum_kwargs["out_chunk_offsets"] is None
     assert cumsum_kwargs["out_update_chunk_offsets"] is None
     assert cumsum_kwargs["out_final_chunk_indices"] is None
