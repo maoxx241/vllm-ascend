@@ -4,13 +4,6 @@ import pytest
 import torch
 
 import vllm_ascend.patch.worker.patch_gdn_attn as patch_gdn_attn
-from tests.ut.patch.worker.patch_common.test_patch_gdn_attn import (
-    _next_power_of_2,
-    _prepare_chunk_indices,
-    _prepare_chunk_offsets,
-    _prepare_final_chunk_indices,
-    _prepare_update_chunk_offsets,
-)
 from vllm_ascend.ops.triton.fla import chunk, chunk_o, chunk_o_update
 
 
@@ -66,6 +59,62 @@ class _GatherResult:
         if isinstance(item, tuple):
             item = item[0]
         return self.items[item]
+
+
+def _next_power_of_2(value: int) -> int:
+    if value <= 1:
+        return 1
+    return 1 << (value - 1).bit_length()
+
+
+def _prepare_chunk_indices(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
+    lens = (cu_seqlens[1:] - cu_seqlens[:-1]).tolist()
+    pairs: list[list[int]] = []
+    for seq_idx, seq_len in enumerate(lens):
+        num_chunks = (seq_len + chunk_size - 1) // chunk_size
+        for chunk_idx in range(num_chunks):
+            pairs.append([seq_idx, chunk_idx])
+    if not pairs:
+        return torch.empty((0, 2), dtype=cu_seqlens.dtype, device=cu_seqlens.device)
+    return torch.tensor(pairs, dtype=cu_seqlens.dtype, device=cu_seqlens.device)
+
+
+def _prepare_chunk_offsets(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
+    lens = cu_seqlens[1:] - cu_seqlens[:-1]
+    num_chunks = torch.div(
+        lens + chunk_size - 1,
+        chunk_size,
+        rounding_mode="floor",
+    )
+    offsets = torch.zeros(len(num_chunks) + 1, dtype=cu_seqlens.dtype)
+    torch.cumsum(num_chunks, dim=0, out=offsets[1:])
+    return offsets.to(cu_seqlens.device)
+
+
+def _prepare_update_chunk_offsets(
+    cu_seqlens: torch.Tensor, chunk_size: int
+) -> torch.Tensor:
+    lens = cu_seqlens[1:] - cu_seqlens[:-1]
+    num_chunks = torch.div(
+        lens + chunk_size - 1,
+        chunk_size,
+        rounding_mode="floor",
+    ) + 1
+    offsets = torch.zeros(len(num_chunks) + 1, dtype=cu_seqlens.dtype)
+    torch.cumsum(num_chunks, dim=0, out=offsets[1:])
+    return offsets.to(cu_seqlens.device)
+
+
+def _prepare_final_chunk_indices(
+    cu_seqlens: torch.Tensor, chunk_size: int
+) -> torch.Tensor:
+    lens = cu_seqlens[1:] - cu_seqlens[:-1]
+    num_chunks = torch.div(
+        lens + chunk_size - 1,
+        chunk_size,
+        rounding_mode="floor",
+    ) + 1
+    return (torch.cumsum(num_chunks, dim=0) - 1).to(cu_seqlens.device)
 
 
 def test_chunk_fwd_o_uses_prebuilt_chunk_offsets(monkeypatch: pytest.MonkeyPatch):
