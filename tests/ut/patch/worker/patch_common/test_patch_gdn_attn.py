@@ -339,6 +339,76 @@ def test_builder_prebuilds_non_spec_chunk_metadata_exactly(
     )
 
 
+def test_builder_delegates_non_spec_chunk_metadata_to_device_helper(monkeypatch):
+    device = torch.device("cpu")
+    batch_spec = BatchSpec(
+        seq_lens=[8, 12],
+        query_lens=[4, 8],
+        name="pure_non_spec_prefill",
+    )
+    cu_seqlens_cpu = _build_non_spec_query_start_loc_cpu(batch_spec, None)
+    builder = _make_builder(
+        device=device,
+        num_heads=32,
+        num_speculative_tokens=0,
+    )
+    builder._ascend_gdn_chunk_meta_device = SimpleNamespace(type="npu")
+    builder._ascend_gdn_chunk_size = patch_gdn_attn._GDN_CHUNK_SIZE
+    builder._ascend_gdn_large_block_size = patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE
+    builder._ascend_gdn_cumsum_block_size = _next_power_of_2(
+        patch_gdn_attn._GDN_CUMSUM_WORKING_SET
+        // (32 * patch_gdn_attn._GDN_CHUNK_SIZE)
+    )
+
+    class DummyChunkBuffer:
+        def __init__(self, shape):
+            self.cpu = torch.zeros(shape, dtype=torch.int32)
+            self.copy_calls = 0
+
+        def copy_to_gpu(self, num_items: int):
+            self.copy_calls += 1
+            return self.cpu[:num_items].clone()
+
+    slot = SimpleNamespace(
+        chunk_indices_chunk64=DummyChunkBuffer((8, 2)),
+        chunk_offsets_chunk64=DummyChunkBuffer((8,)),
+        update_chunk_offsets_chunk64=DummyChunkBuffer((8,)),
+        final_chunk_indices_chunk64=DummyChunkBuffer((8,)),
+        chunk_indices_large_block=DummyChunkBuffer((8, 2)),
+        block_indices_cumsum=DummyChunkBuffer((8, 2)),
+    )
+    builder._ascend_gdn_chunked_prefill_pool_idx = -1
+    builder._ascend_gdn_chunked_prefill_pool = [slot]
+
+    called_chunk_sizes: list[int] = []
+
+    def fake_build_chunk_meta_device(builder_arg, cu_seqlens_arg, chunk_size):
+        assert builder_arg is builder
+        assert torch.equal(cu_seqlens_arg, cu_seqlens_cpu)
+        called_chunk_sizes.append(chunk_size)
+
+    monkeypatch.setattr(
+        patch_gdn_attn,
+        "build_chunk_meta_device",
+        fake_build_chunk_meta_device,
+        raising=False,
+    )
+
+    patch_gdn_attn._build_non_spec_chunked_prefill_meta(builder, cu_seqlens_cpu)
+
+    assert called_chunk_sizes == [
+        64,
+        patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
+        builder._ascend_gdn_cumsum_block_size,
+    ]
+    assert slot.chunk_indices_chunk64.copy_calls == 0
+    assert slot.chunk_offsets_chunk64.copy_calls == 0
+    assert slot.update_chunk_offsets_chunk64.copy_calls == 0
+    assert slot.final_chunk_indices_chunk64.copy_calls == 0
+    assert slot.chunk_indices_large_block.copy_calls == 0
+    assert slot.block_indices_cumsum.copy_calls == 0
+
+
 @pytest.mark.parametrize(
     ("batch_spec", "num_speculative_tokens", "num_decode_draft_tokens_cpu"),
     [
