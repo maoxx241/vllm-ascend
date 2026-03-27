@@ -18,6 +18,7 @@ from dataclasses import dataclass
 import torch
 import vllm.v1.attention.backends.gdn_attn as gdn_attn
 from vllm.v1.utils import CpuGpuBuffer
+from vllm_ascend.ops.triton.gdn_chunk_meta import build_chunk_meta_device
 
 _GDN_CHUNK_SIZE = 64
 # Keep this aligned with solve_tril.LARGE_BLOCK_T in ops/triton/fla/solve_tril.py.
@@ -384,23 +385,37 @@ def _build_non_spec_chunked_prefill_meta(builder, cu_seqlens_cpu: torch.Tensor) 
     chunk_counts_chunk64 = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_chunk_size)
     chunk_counts_large = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_large_block_size)
     chunk_counts_cumsum = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_cumsum_block_size)
-    num_chunk_indices_chunk64 = _fill_chunk_indices_cpu(slot.chunk_indices_chunk64.cpu, chunk_counts_chunk64)
-    num_chunk_offsets_chunk64 = _fill_chunk_offsets_cpu(slot.chunk_offsets_chunk64.cpu, chunk_counts_chunk64)
-    num_update_chunk_offsets_chunk64 = _fill_update_chunk_offsets_cpu(
-        slot.update_chunk_offsets_chunk64.cpu, chunk_counts_chunk64
-    )
-    num_final_chunk_indices_chunk64 = _fill_final_chunk_indices_cpu(
-        slot.final_chunk_indices_chunk64.cpu, chunk_counts_chunk64
-    )
-    num_chunk_indices_large = _fill_chunk_indices_cpu(slot.chunk_indices_large_block.cpu, chunk_counts_large)
-    num_block_indices_cumsum = _fill_chunk_indices_cpu(slot.block_indices_cumsum.cpu, chunk_counts_cumsum)
+    num_seqs = chunk_counts_chunk64.numel()
+    num_chunk_indices_chunk64 = int(chunk_counts_chunk64.sum().item())
+    num_chunk_indices_large = int(chunk_counts_large.sum().item())
+    num_block_indices_cumsum = int(chunk_counts_cumsum.sum().item())
 
-    chunk_indices_chunk64 = slot.chunk_indices_chunk64.copy_to_gpu(num_chunk_indices_chunk64)
-    chunk_offsets_chunk64 = slot.chunk_offsets_chunk64.copy_to_gpu(num_chunk_offsets_chunk64)
-    update_chunk_offsets_chunk64 = slot.update_chunk_offsets_chunk64.copy_to_gpu(num_update_chunk_offsets_chunk64)
-    final_chunk_indices_chunk64 = slot.final_chunk_indices_chunk64.copy_to_gpu(num_final_chunk_indices_chunk64)
-    chunk_indices_large_block = slot.chunk_indices_large_block.copy_to_gpu(num_chunk_indices_large)
-    block_indices_cumsum = slot.block_indices_cumsum.copy_to_gpu(num_block_indices_cumsum)
+    chunk_indices_chunk64 = slot.chunk_indices_chunk64.gpu[:num_chunk_indices_chunk64]
+    chunk_offsets_chunk64 = slot.chunk_offsets_chunk64.gpu[: num_seqs + 1]
+    update_chunk_offsets_chunk64 = slot.update_chunk_offsets_chunk64.gpu[: num_seqs + 1]
+    final_chunk_indices_chunk64 = slot.final_chunk_indices_chunk64.gpu[:num_seqs]
+    chunk_indices_large_block = slot.chunk_indices_large_block.gpu[:num_chunk_indices_large]
+    block_indices_cumsum = slot.block_indices_cumsum.gpu[:num_block_indices_cumsum]
+
+    cu_seqlens = cu_seqlens_cpu.to(slot.chunk_offsets_chunk64.gpu.device, non_blocking=True)
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_chunk_size,
+        out_chunk_indices=chunk_indices_chunk64,
+        out_chunk_offsets=chunk_offsets_chunk64,
+        out_update_chunk_offsets=update_chunk_offsets_chunk64,
+        out_final_chunk_indices=final_chunk_indices_chunk64,
+    )
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_large_block_size,
+        out_chunk_indices=chunk_indices_large_block,
+    )
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_cumsum_block_size,
+        out_chunk_indices=block_indices_cumsum,
+    )
     return GDNChunkedPrefillMetadata(
         chunk_indices_chunk64=chunk_indices_chunk64,
         chunk_offsets_chunk64=chunk_offsets_chunk64,
