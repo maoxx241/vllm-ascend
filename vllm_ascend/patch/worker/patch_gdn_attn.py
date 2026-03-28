@@ -70,6 +70,17 @@ class _GDNCausalConv1dHostBufferSlot:
     has_initial_state_cpu: torch.Tensor
 
 
+@dataclass
+class _GDNChunkMetaShapeInfo:
+    chunk_counts_chunk64: torch.Tensor
+    chunk_counts_large_block: torch.Tensor
+    chunk_counts_cumsum: torch.Tensor
+    num_seqs: int
+    num_chunk_indices_chunk64: int
+    num_chunk_indices_large_block: int
+    num_block_indices_cumsum: int
+
+
 def _next_power_of_2(value: int) -> int:
     if value <= 1:
         return 1
@@ -120,6 +131,151 @@ def _fill_final_chunk_indices_cpu(out: torch.Tensor, chunk_counts: torch.Tensor)
         torch.cumsum(chunk_counts + 1, dim=0, out=out[: chunk_counts.numel()])
         out[: chunk_counts.numel()].sub_(1)
     return chunk_counts.numel()
+
+
+def _build_chunk_meta_shape_info(builder, cu_seqlens_cpu: torch.Tensor) -> _GDNChunkMetaShapeInfo:
+    chunk_counts_chunk64 = _prepare_chunk_counts_cpu(
+        cu_seqlens_cpu,
+        builder._ascend_gdn_chunk_size,
+    )
+    chunk_counts_large_block = _prepare_chunk_counts_cpu(
+        cu_seqlens_cpu,
+        builder._ascend_gdn_large_block_size,
+    )
+    chunk_counts_cumsum = _prepare_chunk_counts_cpu(
+        cu_seqlens_cpu,
+        builder._ascend_gdn_cumsum_block_size,
+    )
+    return _GDNChunkMetaShapeInfo(
+        chunk_counts_chunk64=chunk_counts_chunk64,
+        chunk_counts_large_block=chunk_counts_large_block,
+        chunk_counts_cumsum=chunk_counts_cumsum,
+        num_seqs=chunk_counts_chunk64.numel(),
+        num_chunk_indices_chunk64=int(chunk_counts_chunk64.sum().item()),
+        num_chunk_indices_large_block=int(chunk_counts_large_block.sum().item()),
+        num_block_indices_cumsum=int(chunk_counts_cumsum.sum().item()),
+    )
+
+
+def _allocate_chunk_meta_cpu_tensors(shape_info: _GDNChunkMetaShapeInfo) -> dict[str, torch.Tensor]:
+    return {
+        "chunk_indices_chunk64": torch.empty(
+            (shape_info.num_chunk_indices_chunk64, 2),
+            dtype=torch.int32,
+        ),
+        "chunk_offsets_chunk64": torch.empty(
+            (shape_info.num_seqs + 1,),
+            dtype=torch.int64,
+        ),
+        "update_chunk_offsets_chunk64": torch.empty(
+            (shape_info.num_seqs + 1,),
+            dtype=torch.int64,
+        ),
+        "final_chunk_indices_chunk64": torch.empty(
+            (shape_info.num_seqs,),
+            dtype=torch.int64,
+        ),
+        "chunk_indices_large_block": torch.empty(
+            (shape_info.num_chunk_indices_large_block, 2),
+            dtype=torch.int32,
+        ),
+        "block_indices_cumsum": torch.empty(
+            (shape_info.num_block_indices_cumsum, 2),
+            dtype=torch.int32,
+        ),
+    }
+
+
+def _slice_chunk_meta_slot_tensors(
+    slot: _GDNChunkedPrefillBufferSlot,
+    shape_info: _GDNChunkMetaShapeInfo,
+) -> dict[str, torch.Tensor]:
+    return {
+        "chunk_indices_chunk64": slot.chunk_indices_chunk64.gpu[: shape_info.num_chunk_indices_chunk64],
+        "chunk_offsets_chunk64": slot.chunk_offsets_chunk64.gpu[: shape_info.num_seqs + 1],
+        "update_chunk_offsets_chunk64": slot.update_chunk_offsets_chunk64.gpu[: shape_info.num_seqs + 1],
+        "final_chunk_indices_chunk64": slot.final_chunk_indices_chunk64.gpu[: shape_info.num_seqs],
+        "chunk_indices_large_block": slot.chunk_indices_large_block.gpu[: shape_info.num_chunk_indices_large_block],
+        "block_indices_cumsum": slot.block_indices_cumsum.gpu[: shape_info.num_block_indices_cumsum],
+    }
+
+
+def _fill_chunk_meta_cpu_tensors(
+    tensors: dict[str, torch.Tensor],
+    shape_info: _GDNChunkMetaShapeInfo,
+) -> None:
+    _fill_chunk_indices_cpu(
+        tensors["chunk_indices_chunk64"],
+        shape_info.chunk_counts_chunk64,
+    )
+    _fill_chunk_offsets_cpu(
+        tensors["chunk_offsets_chunk64"],
+        shape_info.chunk_counts_chunk64,
+    )
+    _fill_update_chunk_offsets_cpu(
+        tensors["update_chunk_offsets_chunk64"],
+        shape_info.chunk_counts_chunk64,
+    )
+    _fill_final_chunk_indices_cpu(
+        tensors["final_chunk_indices_chunk64"],
+        shape_info.chunk_counts_chunk64,
+    )
+    _fill_chunk_indices_cpu(
+        tensors["chunk_indices_large_block"],
+        shape_info.chunk_counts_large_block,
+    )
+    _fill_chunk_indices_cpu(
+        tensors["block_indices_cumsum"],
+        shape_info.chunk_counts_cumsum,
+    )
+
+
+def _fill_chunk_meta_device_tensors(
+    builder,
+    cu_seqlens: torch.Tensor,
+    tensors: dict[str, torch.Tensor],
+) -> None:
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_chunk_size,
+        out_chunk_indices=tensors["chunk_indices_chunk64"],
+        out_chunk_offsets=tensors["chunk_offsets_chunk64"],
+        out_update_chunk_offsets=tensors["update_chunk_offsets_chunk64"],
+        out_final_chunk_indices=tensors["final_chunk_indices_chunk64"],
+    )
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_large_block_size,
+        out_chunk_indices=tensors["chunk_indices_large_block"],
+    )
+    build_chunk_meta_device(
+        cu_seqlens=cu_seqlens,
+        chunk_size=builder._ascend_gdn_cumsum_block_size,
+        out_chunk_indices=tensors["block_indices_cumsum"],
+    )
+
+
+def _build_chunked_prefill_metadata(
+    builder,
+    tensors: dict[str, torch.Tensor],
+    *,
+    slot: _GDNChunkedPrefillBufferSlot | None = None,
+) -> GDNChunkedPrefillMetadata:
+    device = builder._ascend_gdn_chunk_meta_device
+    if device.type == "cpu":
+        tensors = {
+            name: tensor.to(device)
+            for name, tensor in tensors.items()
+        }
+    return GDNChunkedPrefillMetadata(
+        chunk_indices_chunk64=tensors["chunk_indices_chunk64"],
+        chunk_offsets_chunk64=tensors["chunk_offsets_chunk64"],
+        update_chunk_offsets_chunk64=tensors["update_chunk_offsets_chunk64"],
+        final_chunk_indices_chunk64=tensors["final_chunk_indices_chunk64"],
+        chunk_indices_large_block=tensors["chunk_indices_large_block"],
+        block_indices_cumsum=tensors["block_indices_cumsum"],
+        _buffer_slot=slot,
+    )
 
 
 def _get_gdn_num_heads(builder) -> int:
@@ -398,32 +554,10 @@ def _build_non_spec_causal_conv1d_host_meta(
 
 
 def _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu: torch.Tensor) -> GDNChunkedPrefillMetadata:
-    chunk_counts_chunk64 = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_chunk_size)
-    chunk_counts_large = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_large_block_size)
-    chunk_counts_cumsum = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_cumsum_block_size)
-    num_seqs = chunk_counts_chunk64.numel()
-    chunk_indices_chunk64 = torch.empty((int(chunk_counts_chunk64.sum().item()), 2), dtype=torch.int32)
-    chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int64)
-    update_chunk_offsets_chunk64 = torch.empty((num_seqs + 1,), dtype=torch.int64)
-    final_chunk_indices_chunk64 = torch.empty((num_seqs,), dtype=torch.int64)
-    chunk_indices_large_block = torch.empty((int(chunk_counts_large.sum().item()), 2), dtype=torch.int32)
-    block_indices_cumsum = torch.empty((int(chunk_counts_cumsum.sum().item()), 2), dtype=torch.int32)
-
-    _fill_chunk_indices_cpu(chunk_indices_chunk64, chunk_counts_chunk64)
-    _fill_chunk_offsets_cpu(chunk_offsets_chunk64, chunk_counts_chunk64)
-    _fill_update_chunk_offsets_cpu(update_chunk_offsets_chunk64, chunk_counts_chunk64)
-    _fill_final_chunk_indices_cpu(final_chunk_indices_chunk64, chunk_counts_chunk64)
-    _fill_chunk_indices_cpu(chunk_indices_large_block, chunk_counts_large)
-    _fill_chunk_indices_cpu(block_indices_cumsum, chunk_counts_cumsum)
-
-    return GDNChunkedPrefillMetadata(
-        chunk_indices_chunk64=chunk_indices_chunk64.to(builder._ascend_gdn_chunk_meta_device),
-        chunk_offsets_chunk64=chunk_offsets_chunk64.to(builder._ascend_gdn_chunk_meta_device),
-        update_chunk_offsets_chunk64=update_chunk_offsets_chunk64.to(builder._ascend_gdn_chunk_meta_device),
-        final_chunk_indices_chunk64=final_chunk_indices_chunk64.to(builder._ascend_gdn_chunk_meta_device),
-        chunk_indices_large_block=chunk_indices_large_block.to(builder._ascend_gdn_chunk_meta_device),
-        block_indices_cumsum=block_indices_cumsum.to(builder._ascend_gdn_chunk_meta_device),
-    )
+    shape_info = _build_chunk_meta_shape_info(builder, cu_seqlens_cpu)
+    tensors = _allocate_chunk_meta_cpu_tensors(shape_info)
+    _fill_chunk_meta_cpu_tensors(tensors, shape_info)
+    return _build_chunked_prefill_metadata(builder, tensors)
 
 
 def _build_non_spec_chunked_prefill_meta(
@@ -435,52 +569,14 @@ def _build_non_spec_chunked_prefill_meta(
     if device.type == "cpu":
         return _build_non_spec_chunked_prefill_meta_cpu(builder, cu_seqlens_cpu)
 
+    shape_info = _build_chunk_meta_shape_info(builder, cu_seqlens_cpu)
     builder._ascend_gdn_chunked_prefill_pool_idx = (builder._ascend_gdn_chunked_prefill_pool_idx + 1) % len(
         builder._ascend_gdn_chunked_prefill_pool
     )
     slot = builder._ascend_gdn_chunked_prefill_pool[builder._ascend_gdn_chunked_prefill_pool_idx]
-    chunk_counts_chunk64 = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_chunk_size)
-    chunk_counts_large = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_large_block_size)
-    chunk_counts_cumsum = _prepare_chunk_counts_cpu(cu_seqlens_cpu, builder._ascend_gdn_cumsum_block_size)
-    num_seqs = chunk_counts_chunk64.numel()
-    num_chunk_indices_chunk64 = int(chunk_counts_chunk64.sum().item())
-    num_chunk_indices_large = int(chunk_counts_large.sum().item())
-    num_block_indices_cumsum = int(chunk_counts_cumsum.sum().item())
-
-    chunk_indices_chunk64 = slot.chunk_indices_chunk64.gpu[:num_chunk_indices_chunk64]
-    chunk_offsets_chunk64 = slot.chunk_offsets_chunk64.gpu[: num_seqs + 1]
-    update_chunk_offsets_chunk64 = slot.update_chunk_offsets_chunk64.gpu[: num_seqs + 1]
-    final_chunk_indices_chunk64 = slot.final_chunk_indices_chunk64.gpu[:num_seqs]
-    chunk_indices_large_block = slot.chunk_indices_large_block.gpu[:num_chunk_indices_large]
-    block_indices_cumsum = slot.block_indices_cumsum.gpu[:num_block_indices_cumsum]
-
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
-        chunk_size=builder._ascend_gdn_chunk_size,
-        out_chunk_indices=chunk_indices_chunk64,
-        out_chunk_offsets=chunk_offsets_chunk64,
-        out_update_chunk_offsets=update_chunk_offsets_chunk64,
-        out_final_chunk_indices=final_chunk_indices_chunk64,
-    )
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
-        chunk_size=builder._ascend_gdn_large_block_size,
-        out_chunk_indices=chunk_indices_large_block,
-    )
-    build_chunk_meta_device(
-        cu_seqlens=cu_seqlens,
-        chunk_size=builder._ascend_gdn_cumsum_block_size,
-        out_chunk_indices=block_indices_cumsum,
-    )
-    return GDNChunkedPrefillMetadata(
-        chunk_indices_chunk64=chunk_indices_chunk64,
-        chunk_offsets_chunk64=chunk_offsets_chunk64,
-        update_chunk_offsets_chunk64=update_chunk_offsets_chunk64,
-        final_chunk_indices_chunk64=final_chunk_indices_chunk64,
-        chunk_indices_large_block=chunk_indices_large_block,
-        block_indices_cumsum=block_indices_cumsum,
-        _buffer_slot=slot,
-    )
+    tensors = _slice_chunk_meta_slot_tensors(slot, shape_info)
+    _fill_chunk_meta_device_tensors(builder, cu_seqlens, tensors)
+    return _build_chunked_prefill_metadata(builder, tensors, slot=slot)
 
 
 def _patched_build(

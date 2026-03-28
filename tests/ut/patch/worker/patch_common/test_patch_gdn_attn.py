@@ -7,9 +7,6 @@ import pytest
 import torch
 
 import vllm_ascend.patch.worker.patch_gdn_attn as patch_gdn_attn
-from vllm_ascend.patch.worker.patch_qwen3_5 import (
-    get_non_spec_causal_conv1d_host_args,
-)
 from vllm.config.compilation import CUDAGraphMode
 from vllm.v1.attention.backend import CommonAttentionMetadata
 from vllm.v1.attention.backends.gdn_attn import GDNAttentionMetadataBuilder
@@ -20,6 +17,10 @@ from vllm_ascend.ops.triton.fla.utils import (
     prepare_final_chunk_indices as runtime_prepare_final_chunk_indices,
     prepare_update_chunk_offsets as runtime_prepare_update_chunk_offsets,
 )
+from vllm_ascend.patch.worker.patch_qwen3_5 import (
+    get_non_spec_causal_conv1d_host_args,
+    to_int64_tuple,
+)
 
 
 @dataclass
@@ -29,7 +30,7 @@ class BatchSpec:
     name: str = "unnamed"
 
     @property
-    def batch_size(self):
+    def batch_size(self) -> int:
         return len(self.seq_lens)
 
 
@@ -67,7 +68,7 @@ def create_common_attn_metadata(
     ).view(batch_spec.batch_size, max_blocks)
     slot_mapping = torch.arange(num_tokens, dtype=torch.int64, device=device)
 
-    common_attn_metadata = CommonAttentionMetadata(
+    return CommonAttentionMetadata(
         query_start_loc=query_start_loc,
         query_start_loc_cpu=query_start_loc_cpu,
         seq_lens=seq_lens,
@@ -81,7 +82,6 @@ def create_common_attn_metadata(
         slot_mapping=slot_mapping,
         causal=True,
     )
-    return common_attn_metadata
 
 
 def _make_vllm_config(
@@ -135,69 +135,85 @@ def _make_builder(*, device: torch.device, num_heads: int, num_speculative_token
     return GDNAttentionMetadataBuilder(spec, ["layer0"], vllm_config, device)
 
 
-def _next_power_of_2(value: int) -> int:
-    if value <= 1:
-        return 1
-    return 1 << (value - 1).bit_length()
-
-
-def _prepare_chunk_indices(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
-    return runtime_prepare_chunk_indices(cu_seqlens, chunk_size)
-
-
-def _prepare_chunk_offsets(cu_seqlens: torch.Tensor, chunk_size: int) -> torch.Tensor:
-    return runtime_prepare_chunk_offsets(cu_seqlens, chunk_size)
-
-
-def _prepare_update_chunk_offsets(
-    cu_seqlens: torch.Tensor, chunk_size: int
-) -> torch.Tensor:
-    return runtime_prepare_update_chunk_offsets(cu_seqlens, chunk_size)
-
-
-def _prepare_final_chunk_indices(
-    cu_seqlens: torch.Tensor, chunk_size: int
-) -> torch.Tensor:
-    return runtime_prepare_final_chunk_indices(cu_seqlens, chunk_size)
-
-
-def _build_non_spec_query_start_loc_cpu(
-    batch_spec: BatchSpec, spec_mask_cpu: torch.Tensor | None
-) -> torch.Tensor:
-    query_lens = torch.tensor(batch_spec.query_lens, dtype=torch.int32)
-    if spec_mask_cpu is not None:
-        query_lens = query_lens[~spec_mask_cpu]
-    query_start_loc = torch.zeros(query_lens.numel() + 1, dtype=torch.int32)
-    torch.cumsum(query_lens, dim=0, out=query_start_loc[1:])
-    return query_start_loc
-
-
-def _build_expected_non_spec_cache_indices_cpu(
+def _build_attn_metadata(
     batch_spec: BatchSpec,
-    block_size: int,
-    spec_mask_cpu: torch.Tensor | None,
-) -> torch.Tensor:
-    max_blocks = (max(batch_spec.seq_lens) + block_size - 1) // block_size
-    block_table_tensor_cpu = torch.arange(
-        batch_spec.batch_size * max_blocks,
-        dtype=torch.int32,
-    ).view(batch_spec.batch_size, max_blocks)
-    cache_indices_cpu = block_table_tensor_cpu[:, 0]
-    if spec_mask_cpu is not None:
-        cache_indices_cpu = cache_indices_cpu[~spec_mask_cpu]
-    return cache_indices_cpu
+    *,
+    num_speculative_tokens: int,
+    num_decode_draft_tokens_cpu: torch.Tensor | None,
+):
+    device = torch.device("cpu")
+    common_attn_metadata = create_common_attn_metadata(
+        batch_spec=batch_spec,
+        block_size=16,
+        device=device,
+    )
+    builder = _make_builder(
+        device=device,
+        num_heads=32,
+        num_speculative_tokens=num_speculative_tokens,
+    )
+    num_accepted_tokens = None
+    if num_decode_draft_tokens_cpu is not None:
+        num_accepted_tokens = torch.ones(
+            batch_spec.batch_size,
+            dtype=torch.int32,
+            device=device,
+        )
+
+    attn_metadata = builder.build(
+        0,
+        common_attn_metadata,
+        num_accepted_tokens=num_accepted_tokens,
+        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
+    )
+    return builder, common_attn_metadata, attn_metadata
 
 
-def _build_expected_non_spec_has_initial_state_cpu(
-    batch_spec: BatchSpec,
-    spec_mask_cpu: torch.Tensor | None,
-) -> torch.Tensor:
-    query_lens_cpu = torch.tensor(batch_spec.query_lens, dtype=torch.int32)
-    seq_lens_cpu = torch.tensor(batch_spec.seq_lens, dtype=torch.int32)
-    has_initial_state_cpu = seq_lens_cpu - query_lens_cpu > 0
-    if spec_mask_cpu is not None:
-        has_initial_state_cpu = has_initial_state_cpu[~spec_mask_cpu]
-    return has_initial_state_cpu
+def _assert_chunk_meta_matches_runtime(builder, chunk_meta, cu_seqlens: torch.Tensor) -> None:
+    assert torch.equal(
+        chunk_meta.chunk_indices_chunk64,
+        runtime_prepare_chunk_indices(cu_seqlens, patch_gdn_attn._GDN_CHUNK_SIZE),
+    )
+    assert torch.equal(
+        chunk_meta.chunk_offsets_chunk64,
+        runtime_prepare_chunk_offsets(cu_seqlens, patch_gdn_attn._GDN_CHUNK_SIZE),
+    )
+    assert torch.equal(
+        chunk_meta.update_chunk_offsets_chunk64,
+        runtime_prepare_update_chunk_offsets(
+            cu_seqlens,
+            patch_gdn_attn._GDN_CHUNK_SIZE,
+        ),
+    )
+    assert torch.equal(
+        chunk_meta.final_chunk_indices_chunk64,
+        runtime_prepare_final_chunk_indices(
+            cu_seqlens,
+            patch_gdn_attn._GDN_CHUNK_SIZE,
+        ),
+    )
+    assert torch.equal(
+        chunk_meta.chunk_indices_large_block,
+        runtime_prepare_chunk_indices(
+            cu_seqlens,
+            patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
+        ),
+    )
+    assert torch.equal(
+        chunk_meta.block_indices_cumsum,
+        runtime_prepare_chunk_indices(
+            cu_seqlens,
+            builder._ascend_gdn_cumsum_block_size,
+        ),
+    )
+
+
+def _expected_conv1d_host_args(attn_metadata) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:
+    return (
+        to_int64_tuple(attn_metadata.non_spec_query_start_loc),
+        to_int64_tuple(attn_metadata.non_spec_state_indices_tensor),
+        to_int64_tuple(attn_metadata.has_initial_state),
+    )
 
 
 @pytest.mark.parametrize(
@@ -233,321 +249,33 @@ def _build_expected_non_spec_has_initial_state_cpu(
     ],
     ids=lambda case: case.name if isinstance(case, BatchSpec) else None,
 )
-def test_builder_prebuilds_non_spec_chunk_metadata_exactly(
+def test_non_spec_prefill_fallback_meta_matches_original_inputs_and_runtime_helpers(
     batch_spec: BatchSpec,
     num_speculative_tokens: int,
     num_decode_draft_tokens_cpu: torch.Tensor | None,
 ):
-    device = torch.device("cpu")
-    num_heads = 32
-    common_attn_metadata = create_common_attn_metadata(
-        batch_spec=batch_spec,
-        block_size=16,
-        device=device,
-    )
-    builder = _make_builder(
-        device=device,
-        num_heads=num_heads,
-        num_speculative_tokens=num_speculative_tokens,
-    )
-
-    num_accepted_tokens = None
-    spec_mask_cpu = None
-    if num_decode_draft_tokens_cpu is not None:
-        num_accepted_tokens = torch.ones(
-            batch_spec.batch_size, dtype=torch.int32, device=device
-        )
-        spec_mask_cpu = num_decode_draft_tokens_cpu >= 0
-
-    attn_metadata = builder.build(
-        0,
-        common_attn_metadata,
-        num_accepted_tokens=num_accepted_tokens,
-        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
-    )
-
-    non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(
+    builder, _, attn_metadata = _build_attn_metadata(
         batch_spec,
-        spec_mask_cpu,
-    )
-    legacy_chunk_indices_64 = _prepare_chunk_indices(non_spec_query_start_loc_cpu, 64)
-    legacy_chunk_offsets_64 = _prepare_chunk_offsets(non_spec_query_start_loc_cpu, 64)
-    legacy_update_chunk_offsets_64 = _prepare_update_chunk_offsets(
-        non_spec_query_start_loc_cpu,
-        64,
-    )
-    legacy_final_chunk_indices_64 = _prepare_final_chunk_indices(
-        non_spec_query_start_loc_cpu,
-        64,
-    )
-    legacy_chunk_indices_large_block = _prepare_chunk_indices(
-        non_spec_query_start_loc_cpu,
-        patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
-    )
-    optim_block_size = _next_power_of_2(
-        patch_gdn_attn._GDN_CUMSUM_WORKING_SET
-        // (num_heads * patch_gdn_attn._GDN_CHUNK_SIZE)
-    )
-    legacy_block_indices_cumsum = _prepare_chunk_indices(
-        non_spec_query_start_loc_cpu,
-        optim_block_size,
-    )
-
-    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
-    assert fallback_meta is not None
-    prebuilt_meta = fallback_meta.chunk
-    assert prebuilt_meta is not None
-    assert torch.equal(prebuilt_meta.chunk_indices_chunk64, legacy_chunk_indices_64)
-    assert torch.equal(prebuilt_meta.chunk_offsets_chunk64, legacy_chunk_offsets_64)
-    assert torch.equal(
-        prebuilt_meta.update_chunk_offsets_chunk64, legacy_update_chunk_offsets_64
-    )
-    assert torch.equal(
-        prebuilt_meta.final_chunk_indices_chunk64, legacy_final_chunk_indices_64
-    )
-    assert torch.equal(
-        prebuilt_meta.chunk_indices_large_block,
-        legacy_chunk_indices_large_block,
-    )
-    assert torch.equal(
-        prebuilt_meta.block_indices_cumsum,
-        legacy_block_indices_cumsum,
-    )
-
-
-def test_builder_delegates_device_fill_for_non_spec_chunk_metadata(monkeypatch):
-    device = torch.device("cpu")
-    batch_spec = BatchSpec(
-        seq_lens=[8, 12],
-        query_lens=[4, 8],
-        name="pure_non_spec_prefill",
-    )
-    cu_seqlens_cpu = _build_non_spec_query_start_loc_cpu(batch_spec, None)
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
-        num_speculative_tokens=0,
-    )
-    builder._ascend_gdn_chunk_meta_device = SimpleNamespace(type="npu")
-    builder._ascend_gdn_chunk_size = patch_gdn_attn._GDN_CHUNK_SIZE
-    builder._ascend_gdn_large_block_size = patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE
-    builder._ascend_gdn_cumsum_block_size = _next_power_of_2(
-        patch_gdn_attn._GDN_CUMSUM_WORKING_SET
-        // (32 * patch_gdn_attn._GDN_CHUNK_SIZE)
-    )
-
-    class DummyChunkBuffer:
-        def __init__(self, shape):
-            self.cpu = torch.zeros(shape, dtype=torch.int32)
-            self.gpu = torch.zeros(shape, dtype=torch.int32)
-
-        def copy_to_gpu(self, num_items: int):
-            pytest.fail("copy_to_gpu should not be used by build_chunk_meta_device")
-
-    slot = SimpleNamespace(
-        chunk_indices_chunk64=DummyChunkBuffer((8, 2)),
-        chunk_offsets_chunk64=DummyChunkBuffer((8,)),
-        update_chunk_offsets_chunk64=DummyChunkBuffer((8,)),
-        final_chunk_indices_chunk64=DummyChunkBuffer((8,)),
-        chunk_indices_large_block=DummyChunkBuffer((8, 2)),
-        block_indices_cumsum=DummyChunkBuffer((8, 2)),
-    )
-    builder._ascend_gdn_chunked_prefill_pool_idx = -1
-    builder._ascend_gdn_chunked_prefill_pool = [slot]
-
-    called_chunk_sizes: list[int] = []
-    helper_calls: dict[int, dict[str, object]] = {}
-
-    def fake_build_chunk_meta_device(**kwargs):
-        assert torch.equal(kwargs["cu_seqlens"].cpu(), cu_seqlens_cpu)
-        called_chunk_sizes.append(kwargs["chunk_size"])
-        helper_calls[kwargs["chunk_size"]] = kwargs
-
-    monkeypatch.setattr(
-        patch_gdn_attn,
-        "build_chunk_meta_device",
-        fake_build_chunk_meta_device,
-        raising=False,
-    )
-
-    patch_gdn_attn._build_non_spec_chunked_prefill_meta(
-        builder,
-        cu_seqlens_cpu,
-        cu_seqlens_cpu,
-    )
-
-    expected_chunk_sizes = {
-        64,
-        patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
-        builder._ascend_gdn_cumsum_block_size,
-    }
-    assert set(called_chunk_sizes) == expected_chunk_sizes
-    assert len(called_chunk_sizes) == len(expected_chunk_sizes)
-
-    legacy_chunk_indices_64 = _prepare_chunk_indices(cu_seqlens_cpu, 64)
-    legacy_chunk_offsets_64 = _prepare_chunk_offsets(cu_seqlens_cpu, 64)
-    legacy_update_chunk_offsets_64 = _prepare_update_chunk_offsets(cu_seqlens_cpu, 64)
-    legacy_final_chunk_indices_64 = _prepare_final_chunk_indices(cu_seqlens_cpu, 64)
-    legacy_chunk_indices_large_block = _prepare_chunk_indices(
-        cu_seqlens_cpu,
-        patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE,
-    )
-    legacy_block_indices_cumsum = _prepare_chunk_indices(
-        cu_seqlens_cpu,
-        builder._ascend_gdn_cumsum_block_size,
-    )
-
-    chunk64_kwargs = helper_calls[64]
-    assert chunk64_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_64.shape
-    assert chunk64_kwargs["out_chunk_indices"].dtype == legacy_chunk_indices_64.dtype
-    assert chunk64_kwargs["out_chunk_offsets"].shape == legacy_chunk_offsets_64.shape
-    assert chunk64_kwargs["out_chunk_offsets"].dtype == legacy_chunk_offsets_64.dtype
-    assert chunk64_kwargs["out_update_chunk_offsets"].shape == legacy_update_chunk_offsets_64.shape
-    assert chunk64_kwargs["out_update_chunk_offsets"].dtype == legacy_update_chunk_offsets_64.dtype
-    assert chunk64_kwargs["out_final_chunk_indices"].shape == legacy_final_chunk_indices_64.shape
-    assert chunk64_kwargs["out_final_chunk_indices"].dtype == slot.final_chunk_indices_chunk64.gpu.dtype
-
-    large_block_kwargs = helper_calls[patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE]
-    assert large_block_kwargs["out_chunk_indices"].shape == legacy_chunk_indices_large_block.shape
-    assert large_block_kwargs["out_chunk_indices"].dtype == legacy_chunk_indices_large_block.dtype
-    assert large_block_kwargs.get("out_chunk_offsets") is None
-    assert large_block_kwargs.get("out_update_chunk_offsets") is None
-    assert large_block_kwargs.get("out_final_chunk_indices") is None
-
-    cumsum_kwargs = helper_calls[builder._ascend_gdn_cumsum_block_size]
-    assert cumsum_kwargs["out_chunk_indices"].shape == legacy_block_indices_cumsum.shape
-    assert cumsum_kwargs["out_chunk_indices"].dtype == legacy_block_indices_cumsum.dtype
-    assert cumsum_kwargs.get("out_chunk_offsets") is None
-    assert cumsum_kwargs.get("out_update_chunk_offsets") is None
-    assert cumsum_kwargs.get("out_final_chunk_indices") is None
-
-
-def test_builder_prebuilt_chunk_indices_match_runtime_prepare_helpers():
-    device = torch.device("cpu")
-    batch_spec = BatchSpec(
-        seq_lens=[8, 4, 0, 12],
-        query_lens=[4, 4, 0, 8],
-        name="mixed_spec_non_spec_with_padding",
-    )
-    common_attn_metadata = create_common_attn_metadata(
-        batch_spec=batch_spec,
-        block_size=16,
-        device=device,
-    )
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
-        num_speculative_tokens=3,
-    )
-    num_accepted_tokens = torch.ones(batch_spec.batch_size, dtype=torch.int32, device=device)
-    num_decode_draft_tokens_cpu = torch.tensor([-1, 3, -1, -1], dtype=torch.int32)
-
-    attn_metadata = builder.build(
-        0,
-        common_attn_metadata,
-        num_accepted_tokens=num_accepted_tokens,
+        num_speculative_tokens=num_speculative_tokens,
         num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
     )
 
     fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
     assert fallback_meta is not None
+    assert fallback_meta.causal_conv1d is not None
     assert fallback_meta.chunk is not None
 
-    runtime_chunk_indices = runtime_prepare_chunk_indices(
+    assert get_non_spec_causal_conv1d_host_args(
+        attn_metadata,
         attn_metadata.non_spec_query_start_loc,
-        64,
-    )
-    assert torch.equal(
-        fallback_meta.chunk.chunk_indices_chunk64,
-        runtime_chunk_indices,
-    )
+        attn_metadata.non_spec_state_indices_tensor,
+        attn_metadata.has_initial_state,
+    ) == _expected_conv1d_host_args(attn_metadata)
 
-
-@pytest.mark.parametrize(
-    ("batch_spec", "num_speculative_tokens", "num_decode_draft_tokens_cpu"),
-    [
-        (
-            BatchSpec(
-                seq_lens=[8, 12],
-                query_lens=[4, 8],
-                name="pure_non_spec_prefill",
-            ),
-            0,
-            None,
-        ),
-        (
-            BatchSpec(
-                seq_lens=[8, 4, 0, 12],
-                query_lens=[4, 4, 0, 8],
-                name="mixed_spec_non_spec_with_padding",
-            ),
-            3,
-            torch.tensor([-1, 3, -1, -1], dtype=torch.int32),
-        ),
-    ],
-    ids=lambda case: case.name if isinstance(case, BatchSpec) else None,
-)
-def test_builder_prebuilds_non_spec_causal_conv1d_host_metadata(
-    batch_spec: BatchSpec,
-    num_speculative_tokens: int,
-    num_decode_draft_tokens_cpu: torch.Tensor | None,
-):
-    device = torch.device("cpu")
-    common_attn_metadata = create_common_attn_metadata(
-        batch_spec=batch_spec,
-        block_size=16,
-        device=device,
-    )
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
-        num_speculative_tokens=num_speculative_tokens,
-    )
-
-    num_accepted_tokens = None
-    spec_mask_cpu = None
-    if num_decode_draft_tokens_cpu is not None:
-        num_accepted_tokens = torch.ones(
-            batch_spec.batch_size, dtype=torch.int32, device=device
-        )
-        spec_mask_cpu = num_decode_draft_tokens_cpu >= 0
-
-    attn_metadata = builder.build(
-        0,
-        common_attn_metadata,
-        num_accepted_tokens=num_accepted_tokens,
-        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
-    )
-
-    non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(
-        batch_spec,
-        spec_mask_cpu,
-    )
-    expected_cache_indices_cpu = _build_expected_non_spec_cache_indices_cpu(
-        batch_spec,
-        block_size=16,
-        spec_mask_cpu=spec_mask_cpu,
-    )
-    expected_has_initial_state_cpu = _build_expected_non_spec_has_initial_state_cpu(
-        batch_spec,
-        spec_mask_cpu,
-    )
-
-    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
-    assert fallback_meta is not None
-    prebuilt_meta = fallback_meta.causal_conv1d
-    assert prebuilt_meta is not None
-    assert torch.equal(
-        prebuilt_meta.query_start_loc_cpu,
-        non_spec_query_start_loc_cpu,
-    )
-    assert torch.equal(
-        prebuilt_meta.cache_indices_cpu,
-        expected_cache_indices_cpu,
-    )
-    assert torch.equal(
-        prebuilt_meta.has_initial_state_cpu,
-        expected_has_initial_state_cpu,
+    _assert_chunk_meta_matches_runtime(
+        builder,
+        fallback_meta.chunk,
+        attn_metadata.non_spec_query_start_loc,
     )
 
 
@@ -582,138 +310,92 @@ def test_build_non_spec_causal_conv1d_host_meta_avoids_seq_lens_cpu_fallback():
     )
 
 
-def test_builder_passes_device_non_spec_query_start_loc_to_chunk_meta(monkeypatch):
-    device = torch.device("cpu")
-    common_attn_metadata = create_common_attn_metadata(
-        batch_spec=BatchSpec(
-            seq_lens=[8, 4, 0, 12],
-            query_lens=[4, 4, 0, 8],
-            name="mixed_spec_non_spec_with_padding",
-        ),
-        block_size=16,
-        device=device,
+def test_builder_uses_device_chunk_builder_with_non_spec_query_start_loc(monkeypatch):
+    batch_spec = BatchSpec(
+        seq_lens=[8, 4, 0, 12],
+        query_lens=[4, 4, 0, 8],
+        name="mixed_spec_non_spec_with_padding",
     )
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
+    builder, common_attn_metadata, _ = _build_attn_metadata(
+        batch_spec,
         num_speculative_tokens=3,
+        num_decode_draft_tokens_cpu=torch.tensor([-1, 3, -1, -1], dtype=torch.int32),
     )
-    captured: dict[str, object] = {}
-    num_accepted_tokens = torch.ones(4, dtype=torch.int32, device=device)
-    num_decode_draft_tokens_cpu = torch.tensor([-1, 3, -1, -1], dtype=torch.int32)
 
-    def fake_build_non_spec_chunked_prefill_meta(
-        builder_arg,
-        cu_seqlens_cpu,
-        cu_seqlens,
-    ):
-        captured["builder"] = builder_arg
-        captured["cu_seqlens_cpu"] = cu_seqlens_cpu
-        captured["cu_seqlens"] = cu_seqlens
-        return SimpleNamespace(marker="chunk")
+    class DummyChunkBuffer:
+        def __init__(self, shape, dtype):
+            self.cpu = torch.zeros(shape, dtype=dtype)
+            self.gpu = torch.zeros(shape, dtype=dtype)
+
+        def copy_to_gpu(self, *args, **kwargs):
+            pytest.fail("copy_to_gpu should not be used by build_chunk_meta_device")
+
+    builder._ascend_gdn_chunk_meta_initialized = True
+    builder._ascend_gdn_chunk_meta_device = SimpleNamespace(type="npu")
+    builder._ascend_gdn_chunk_size = patch_gdn_attn._GDN_CHUNK_SIZE
+    builder._ascend_gdn_large_block_size = patch_gdn_attn._GDN_SOLVE_TRIL_LARGE_BLOCK_SIZE
+    builder._ascend_gdn_cumsum_block_size = 256
+    builder._ascend_gdn_chunked_prefill_pool_idx = -1
+    builder._ascend_gdn_chunked_prefill_pool = [
+        SimpleNamespace(
+            chunk_indices_chunk64=DummyChunkBuffer((8, 2), torch.int32),
+            chunk_offsets_chunk64=DummyChunkBuffer((8,), torch.int64),
+            update_chunk_offsets_chunk64=DummyChunkBuffer((8,), torch.int64),
+            final_chunk_indices_chunk64=DummyChunkBuffer((8,), torch.int64),
+            chunk_indices_large_block=DummyChunkBuffer((8, 2), torch.int32),
+            block_indices_cumsum=DummyChunkBuffer((8, 2), torch.int32),
+        )
+    ]
+    builder._ascend_gdn_causal_conv1d_host_meta_initialized = True
+    builder._ascend_gdn_causal_conv1d_host_pool = []
+    builder._ascend_gdn_causal_conv1d_host_pool_idx = -1
+
+    helper_calls: dict[int, dict[str, object]] = {}
+
+    def fake_build_chunk_meta_device(**kwargs):
+        helper_calls[kwargs["chunk_size"]] = kwargs
 
     monkeypatch.setattr(
         patch_gdn_attn,
-        "_build_non_spec_chunked_prefill_meta",
-        fake_build_non_spec_chunked_prefill_meta,
-    )
-    monkeypatch.setattr(
-        patch_gdn_attn,
-        "_build_non_spec_causal_conv1d_host_meta",
-        lambda *args, **kwargs: None,
+        "build_chunk_meta_device",
+        fake_build_chunk_meta_device,
+        raising=False,
     )
 
     attn_metadata = builder.build(
         0,
         common_attn_metadata,
-        num_accepted_tokens=num_accepted_tokens,
-        num_decode_draft_tokens_cpu=num_decode_draft_tokens_cpu,
+        num_accepted_tokens=torch.ones(batch_spec.batch_size, dtype=torch.int32),
+        num_decode_draft_tokens_cpu=torch.tensor([-1, 3, -1, -1], dtype=torch.int32),
     )
 
-    assert captured["builder"] is builder
-    expected_non_spec_query_start_loc_cpu = _build_non_spec_query_start_loc_cpu(
-        BatchSpec(
-            seq_lens=[8, 4, 0, 12],
-            query_lens=[4, 4, 0, 8],
-            name="mixed_spec_non_spec_with_padding",
-        ),
-        num_decode_draft_tokens_cpu >= 0,
+    expected_chunk_indices = runtime_prepare_chunk_indices(
+        attn_metadata.non_spec_query_start_loc,
+        patch_gdn_attn._GDN_CHUNK_SIZE,
     )
-    assert torch.equal(
-        captured["cu_seqlens_cpu"],
-        expected_non_spec_query_start_loc_cpu,
+    expected_chunk_offsets = runtime_prepare_chunk_offsets(
+        attn_metadata.non_spec_query_start_loc,
+        patch_gdn_attn._GDN_CHUNK_SIZE,
     )
-    assert captured["cu_seqlens"] is attn_metadata.non_spec_query_start_loc
-    assert captured["cu_seqlens"] is not common_attn_metadata.query_start_loc_cpu
-    fallback_meta = getattr(attn_metadata, "non_spec_prefill_fallback_meta", None)
-    assert fallback_meta is not None
-    assert getattr(fallback_meta.chunk, "marker", None) == "chunk"
-
-
-def test_get_non_spec_causal_conv1d_host_args_prefers_prefill_fallback_meta():
-    attn_metadata = SimpleNamespace(
-        non_spec_prefill_fallback_meta=patch_gdn_attn.GDNPrefillFallbackMeta(
-            causal_conv1d=patch_gdn_attn.GDNCausalConv1dHostMetadata(
-                query_start_loc_cpu=torch.tensor([0, 4, 12], dtype=torch.int32),
-                cache_indices_cpu=torch.tensor([3, 9], dtype=torch.int32),
-                has_initial_state_cpu=torch.tensor([True, False]),
-            ),
-            chunk=None,
-        ),
+    expected_update_chunk_offsets = runtime_prepare_update_chunk_offsets(
+        attn_metadata.non_spec_query_start_loc,
+        patch_gdn_attn._GDN_CHUNK_SIZE,
+    )
+    expected_final_chunk_indices = runtime_prepare_final_chunk_indices(
+        attn_metadata.non_spec_query_start_loc,
+        patch_gdn_attn._GDN_CHUNK_SIZE,
     )
 
-    host_args = get_non_spec_causal_conv1d_host_args(
-        attn_metadata,
-        non_spec_query_start_loc=torch.tensor([0, 1], dtype=torch.int32),
-        non_spec_state_indices_tensor=torch.tensor([100], dtype=torch.int32),
-        has_initial_state=torch.tensor([False]),
-    )
-
-    assert host_args == ((0, 4, 12), (3, 9), (1, 0))
-
-
-def test_allocate_chunked_prefill_slot_uses_cpugpubuffer(monkeypatch):
-    class DummyCpuGpuBuffer:
-        def __init__(
-            self,
-            *size,
-            dtype: torch.dtype,
-            device: torch.device,
-            pin_memory: bool,
-            with_numpy: bool = True,
-        ) -> None:
-            self.cpu = torch.zeros(*size, dtype=dtype, device="cpu")
-            self.gpu = torch.zeros_like(self.cpu, device=device)
-            self.dtype = dtype
-            self.device = device
-            self.pin_memory = pin_memory
-            self.with_numpy = with_numpy
-
-    device = torch.device("cpu")
-    builder = _make_builder(
-        device=device,
-        num_heads=32,
-        num_speculative_tokens=0,
-    )
-    monkeypatch.setattr(patch_gdn_attn, "CpuGpuBuffer", DummyCpuGpuBuffer)
-
-    slot = patch_gdn_attn._allocate_chunked_prefill_slot(builder, device)
-
-    assert isinstance(slot.chunk_indices_chunk64, DummyCpuGpuBuffer)
-    assert isinstance(slot.chunk_offsets_chunk64, DummyCpuGpuBuffer)
-    assert isinstance(slot.update_chunk_offsets_chunk64, DummyCpuGpuBuffer)
-    assert isinstance(slot.final_chunk_indices_chunk64, DummyCpuGpuBuffer)
-    assert slot.chunk_indices_chunk64.pin_memory is True
-    assert slot.chunk_indices_chunk64.with_numpy is False
-    assert slot.chunk_indices_chunk64.device == device
-    assert slot.chunk_indices_chunk64.cpu.shape == (
-        builder.vllm_config.scheduler_config.max_num_batched_tokens,
-        2,
-    )
-    assert slot.chunk_indices_chunk64.gpu.shape == (
-        builder.vllm_config.scheduler_config.max_num_batched_tokens,
-        2,
-    )
+    chunk64_call = helper_calls[patch_gdn_attn._GDN_CHUNK_SIZE]
+    assert chunk64_call["cu_seqlens"] is attn_metadata.non_spec_query_start_loc
+    assert chunk64_call["out_chunk_indices"].shape == expected_chunk_indices.shape
+    assert chunk64_call["out_chunk_indices"].dtype == expected_chunk_indices.dtype
+    assert chunk64_call["out_chunk_offsets"].shape == expected_chunk_offsets.shape
+    assert chunk64_call["out_chunk_offsets"].dtype == torch.int64
+    assert chunk64_call["out_update_chunk_offsets"].shape == expected_update_chunk_offsets.shape
+    assert chunk64_call["out_update_chunk_offsets"].dtype == torch.int64
+    assert chunk64_call["out_final_chunk_indices"].shape == expected_final_chunk_indices.shape
+    assert chunk64_call["out_final_chunk_indices"].dtype == torch.int64
 
 
 @pytest.mark.parametrize(
@@ -724,26 +406,29 @@ def test_allocate_chunked_prefill_slot_uses_cpugpubuffer(monkeypatch):
     ],
 )
 def test_builder_skips_prebuilt_meta_without_non_spec_prefill(batch_spec: BatchSpec):
-    device = torch.device("cpu")
     builder = _make_builder(
-        device=device,
+        device=torch.device("cpu"),
         num_heads=32,
         num_speculative_tokens=3 if batch_spec.name == "spec_only" else 0,
     )
     common_attn_metadata = create_common_attn_metadata(
         batch_spec=batch_spec,
         block_size=16,
-        device=device,
+        device=torch.device("cpu"),
     )
 
     num_accepted_tokens = None
     num_decode_draft_tokens_cpu = None
     if batch_spec.name == "spec_only":
         num_accepted_tokens = torch.ones(
-            batch_spec.batch_size, dtype=torch.int32, device=device
+            batch_spec.batch_size,
+            dtype=torch.int32,
+            device="cpu",
         )
         num_decode_draft_tokens_cpu = torch.full(
-            (batch_spec.batch_size,), 3, dtype=torch.int32
+            (batch_spec.batch_size,),
+            3,
+            dtype=torch.int32,
         )
 
     attn_metadata = builder.build(
