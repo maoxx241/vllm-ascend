@@ -4,22 +4,48 @@
 #include <string>
 #include "toolchain/slog.h"
 
+namespace optiling {
+
+inline const char *GetLogOpName(const char *opname)
+{
+    return opname == nullptr ? "MoeGatingTopK" : opname;
+}
+
+inline const char *GetLogOpName(const std::string &opname)
+{
+    return opname.empty() ? "MoeGatingTopK" : opname.c_str();
+}
+
+template <typename Context>
+inline const char *GetLogOpName(const Context *context)
+{
+    if (context == nullptr || context->GetNodeName() == nullptr) {
+        return "MoeGatingTopK";
+    }
+    return context->GetNodeName();
+}
+
+}  // namespace optiling
+
 #define OP_LOGI(opname, ...)
 #define OP_LOGW(opname, ...)             \
     do {                                 \
-        printf("[WARN][%s] ", (opname), ##__VA_ARGS__); \
+        printf("[WARN][%s] ", optiling::GetLogOpName(opname)); \
+        printf(__VA_ARGS__);             \
         printf("\n");                    \
     } while (0)
 
 #define OP_LOGE_WITHOUT_REPORT(opname, ...) \
     do {                                    \
-        printf("[ERRORx][%s] ", (opname), ##__VA_ARGS__);  \
+        printf("[ERRORx][%s] ", optiling::GetLogOpName(opname));  \
+        printf(__VA_ARGS__);                \
         printf("\n");                       \
     } while (0)
 
 #define OP_LOGE(opname, ...)              \
     do {                                  \
-        printf("[ERROR][%s] ", (opname), ##__VA_ARGS__);    \
+        printf("[ERROR][%s] ", optiling::GetLogOpName(opname));    \
+        printf(__VA_ARGS__);              \
         printf("\n");                     \
     } while (0)
 
