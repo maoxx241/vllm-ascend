@@ -453,6 +453,7 @@ class NPUModelRunner(GPUModelRunner):
             pin_memory=self.pin_memory,
         )
         self._dsa_positions_np_buf = self._dsa_positions_cpu_buf.numpy()
+        self._optimistic_seq_lens_np = self.optimistic_seq_lens_cpu.numpy()
 
         self.use_eagle = (
             vllm_config.speculative_config.use_eagle()
@@ -466,11 +467,12 @@ class NPUModelRunner(GPUModelRunner):
 
         self._set_up_drafter()
 
-        # Backends that consume CPU seq_lens (AscendAttentionBackend,
-        # AscendMLABackend, and DSV4 compressed attention metadata) need
-        # ``optimistic_seq_lens_cpu`` to match the corrected GPU seq_lens
-        # in async spec decode mode; others (SFA, GDN, etc.) do not.
-        self._needs_seq_lens_cpu_sync = self.use_compress or issubclass(
+        # Backends that consume CPU seq_lens (AscendAttentionBackend and
+        # AscendMLABackend) need ``optimistic_seq_lens_cpu`` to match the
+        # corrected GPU seq_lens in async spec decode mode. Single-rank DSV4
+        # compressed metadata refreshes CPU seq_lens after deferred state
+        # correction, so it does not need this valid-count event wait.
+        self._needs_seq_lens_cpu_sync = issubclass(
             self.attn_backend, (AscendAttentionBackend, AscendMLABackend)
         )
 
@@ -1233,33 +1235,50 @@ class NPUModelRunner(GPUModelRunner):
             and self.valid_sampled_token_count_gpu is not None  # type: ignore[has-type]
             and prev_req_id_to_index
         )
+        defer_compressed_slot_mapping = (
+            self.use_compress and self.pcp_size == 1 and self.dcp_size == 1
+        )
 
-        if self._needs_seq_lens_cpu_sync and async_spec_decode_active:
+        if (
+            self._needs_seq_lens_cpu_sync
+            or (self.use_compress and not defer_compressed_slot_mapping)
+        ) and async_spec_decode_active:
             self._correct_optimistic_seq_lens_cpu(num_reqs)
 
         num_computed_tokens_for_compress = (
             self.input_batch.num_computed_tokens_cpu[:num_reqs]
         )
-        if self.use_compress and async_spec_decode_active:
-            # ``self.use_compress`` implies ``_needs_seq_lens_cpu_sync``, so
-            # ``optimistic_seq_lens_cpu`` was corrected just above. DSV4
-            # compressed KV slot mapping is CPU-built today; derive the
-            # corrected num_computed_tokens from the corrected seq_lens to
-            # avoid another NPU->CPU sync.
+        if (
+            self.use_compress
+            and not defer_compressed_slot_mapping
+            and async_spec_decode_active
+        ):
+            # CP/DCP remains on the original CPU-list path in this PR.
+            # Keep the existing correctness sync there; only single-rank DSV4
+            # defers compact slot mapping until CPU state correction.
             num_computed_tokens_for_compress = (
                 self.optimistic_seq_lens_cpu[:num_reqs].numpy()
                 - num_scheduled_tokens[:num_reqs]
             )
 
-        (positions_compressed_list, req_indices_compressed_list,
-         num_scheduled_tokens_compressed_list) = get_compressed_pos_and_indices(
-            num_computed_tokens_for_compress,
-            num_scheduled_tokens[:num_reqs], self.arange_np[:num_reqs],
-            self.use_compress,
-            self.kv_cache_config.kv_cache_groups)
+        positions_compressed_list = None
+        req_indices_compressed_list = None
+        num_scheduled_tokens_compressed_list = None
+        if not defer_compressed_slot_mapping:
+            (
+                positions_compressed_list,
+                req_indices_compressed_list,
+                num_scheduled_tokens_compressed_list,
+            ) = get_compressed_pos_and_indices(
+                num_computed_tokens_for_compress,
+                num_scheduled_tokens[:num_reqs],
+                self.arange_np[:num_reqs],
+                self.use_compress,
+                self.kv_cache_config.kv_cache_groups,
+            )
         # For non-PCP, compute slot_mapping on GPU. PCP slot_mapping was
         # already computed on GPU before PCP split the positions.
-        if self.pcp_size <= 1:
+        if self.pcp_size <= 1 and not defer_compressed_slot_mapping:
             self.input_batch.block_table.compute_slot_mapping(
                 num_reqs,
                 self.query_start_loc.gpu[: num_reqs + 1],
@@ -1639,9 +1658,9 @@ class NPUModelRunner(GPUModelRunner):
         device->host on a side stream at the end of the *previous* step (see
         :meth:`_copy_valid_sampled_token_count`). The host buffer must not be
         read until that copy has completed, otherwise the correction consumes
-        stale counts and corrupts the CPU seq_lens. DeepSeek-V4 builds its
-        compressed-KV slot mapping from these CPU seq_lens, so the race
-        surfaces as an accuracy regression there.
+        stale counts and corrupts the CPU seq_lens. Callers that still build
+        metadata from optimistic CPU seq_lens need this correction before
+        attention metadata construction.
 
         Synchronizing on the event before the host read mirrors vLLM's own
         :meth:`_get_valid_sampled_token_count`. Because the copy was launched a
@@ -2086,6 +2105,9 @@ class NPUModelRunner(GPUModelRunner):
                     return self.kv_connector_no_forward(scheduler_output, self.vllm_config)
                 num_scheduled_tokens_np = np.array(tokens, dtype=np.int32)
                 max_num_scheduled_tokens = int(num_scheduled_tokens_np.max())
+                defer_compressed_slot_mapping = (
+                    self.use_compress and self.pcp_size == 1 and self.dcp_size == 1
+                )
                 (
                     logits_indices,
                     spec_decode_metadata,
@@ -2204,6 +2226,31 @@ class NPUModelRunner(GPUModelRunner):
                         self.query_pos.np[:total_num_scheduled_tokens],
                         out=dsa_positions_np,
                     )
+                    if defer_compressed_slot_mapping:
+                        np.add(
+                            self.input_batch.num_computed_tokens_cpu[:num_reqs],
+                            num_scheduled_tokens_np[:num_reqs],
+                            out=self._optimistic_seq_lens_np[:num_reqs],
+                        )
+                        self._optimistic_seq_lens_np[num_reqs:].fill(0)
+                        (
+                            positions_compressed_list,
+                            req_indices_compressed_list,
+                            num_scheduled_tokens_compressed_list,
+                        ) = get_compressed_pos_and_indices(
+                            self.input_batch.num_computed_tokens_cpu[:num_reqs],
+                            num_scheduled_tokens_np[:num_reqs],
+                            self.arange_np[:num_reqs],
+                            self.use_compress,
+                            self.kv_cache_config.kv_cache_groups,
+                        )
+                        self.input_batch.block_table.compute_slot_mapping(
+                            num_reqs,
+                            self.query_start_loc.gpu[: num_reqs + 1],
+                            self.positions[:total_num_scheduled_tokens],
+                            positions_compressed_list,
+                            req_indices_compressed_list,
+                        )
 
                 use_spec_decode = len(scheduler_output.scheduled_spec_decode_tokens) > 0
                 ubatch_slices_attn = ubatch_slices_padded if pad_attn else ubatch_slices
