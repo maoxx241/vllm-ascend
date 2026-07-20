@@ -106,6 +106,9 @@ class KimiK3MLP(nn.Module):
 class _KimiRoutedOutputTransform(nn.Module):
     """Non-owning callable used by MoERunner after routed expert combine."""
 
+    _norm: nn.Module | None
+    _up_proj: nn.Module
+
     def __init__(self, norm: nn.Module | None, up_proj: nn.Module) -> None:
         super().__init__()
         # The owning KimiK3MoE registers these modules under checkpoint names.
@@ -114,8 +117,10 @@ class _KimiRoutedOutputTransform(nn.Module):
         object.__setattr__(self, "_up_proj", up_proj)
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
-        norm = object.__getattribute__(self, "_norm")
-        up_proj = object.__getattribute__(self, "_up_proj")
+        # Dynamo fullgraph can trace normal attribute access, but not an
+        # explicit call to object.__getattribute__.
+        norm = self._norm
+        up_proj = self._up_proj
         if norm is not None:
             hidden_states = norm(hidden_states)
         return up_proj(hidden_states)[0]
