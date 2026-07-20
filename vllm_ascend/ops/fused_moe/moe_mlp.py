@@ -26,7 +26,12 @@ from vllm_ascend.device.device_op import DeviceOperator
 from vllm_ascend.device.mxfp_compat import (
     ensure_mxfp8_moe_available,
 )
-from vllm_ascend.ops.activation import AscendSwigluOAIAndMul, AscendSwigluStepAndMul
+from vllm_ascend.ops.activation import (
+    AscendSwigluOAIAndMul,
+    AscendSwigluStepAndMul,
+    SituActivationConfig,
+    situ_and_mul,
+)
 from vllm_ascend.ops.fused_moe.moe_runtime_args import MoEMlpComputeInput
 from vllm_ascend.quantization.quant_type import QuantType
 from vllm_ascend.utils import (
@@ -85,6 +90,188 @@ def _require_single_tensor_for_swiglu_quant(
     return tensor_or_list
 
 
+def _as_grouped_matmul_weights(
+    tensor_or_list: list[torch.Tensor] | torch.Tensor,
+) -> list[torch.Tensor]:
+    return tensor_or_list if isinstance(tensor_or_list, list) else [tensor_or_list]
+
+
+def _maybe_transpose_moe_weights(
+    tensor_or_list: list[torch.Tensor] | torch.Tensor,
+) -> list[torch.Tensor] | torch.Tensor:
+    if isinstance(tensor_or_list, list):
+        return [tensor.transpose(1, 2) for tensor in tensor_or_list]
+    return tensor_or_list.transpose(1, 2)
+
+
+def _w4a16_mxfp4_situ_apply_mlp(
+    *,
+    hidden_states: torch.Tensor,
+    w1: list[torch.Tensor] | torch.Tensor,
+    w1_scale: list[torch.Tensor] | torch.Tensor,
+    w2: list[torch.Tensor] | torch.Tensor,
+    w2_scale: list[torch.Tensor] | torch.Tensor,
+    group_list: torch.Tensor,
+    group_list_type: int,
+    activation: SituActivationConfig,
+    weight_quant_type: torch.dtype | None,
+    scale_type: torch.dtype | None,
+    use_bf16: bool,
+) -> tuple[torch.Tensor, object]:
+    """W4A16 MXFP4 baseline: GMM1 -> SiTU -> GMM2.
+
+    Existing MXFP4 kernels fuse GMM1 with SwiGLU. SiTU is not expressible by
+    those kernels, but W4A16 keeps activations in FP16/BF16, so both quantized
+    grouped matmuls remain reusable with the exact pointwise activation between
+    them.
+    """
+    w1_tensor = _require_single_tensor_for_swiglu_quant(w1, name="w1")
+    w1_scale_tensor = _require_single_tensor_for_swiglu_quant(w1_scale, name="w1_scale")
+    cumulative_group_list = cumsum_group_list(group_list, group_list_type, 0)
+    gate_up_out = torch_npu.npu_grouped_matmul(
+        x=[hidden_states],
+        weight=[w1_tensor],
+        antiquant_scale=[w1_scale_tensor],
+        group_list=cumulative_group_list,
+        split_item=3,
+        group_type=0,
+        output_dtype=hidden_states.dtype,
+    )[0]
+    hidden_states = situ_and_mul(
+        gate_up_out,
+        beta=activation.beta,
+        linear_beta=activation.linear_beta,
+    )
+    before_gmm2_evt = torch.npu.current_stream().record_event()
+    hidden_states = DeviceOperator.npu_grouped_matmul_gmm2(
+        hidden_states=hidden_states,
+        weight=w2,
+        weight_scale=w2_scale,
+        per_token_scale=None,
+        group_list=group_list,
+        group_list_type=group_list_type,
+        input_dtype=hidden_states.dtype,
+        act_quant_type=None,
+        weight_quant_type=weight_quant_type,
+        scale_type=scale_type,
+        per_token_scale_type=None,
+        use_bf16=use_bf16,
+        use_mxfp_quant=True,
+        bias=None,
+        fallback_output_dtype=hidden_states.dtype,
+        mxfp_quant_dtype=QuantType.W4A16MXFP4,
+    )
+    return hidden_states, before_gmm2_evt
+
+
+def _w4a8_situ_fallback_apply_mlp(
+    *,
+    hidden_states: torch.Tensor,
+    w1: list[torch.Tensor] | torch.Tensor,
+    w1_scale: list[torch.Tensor] | torch.Tensor,
+    w2: list[torch.Tensor] | torch.Tensor,
+    w2_scale: list[torch.Tensor] | torch.Tensor,
+    group_list: torch.Tensor,
+    group_list_type: int,
+    dynamic_scale: torch.Tensor | None,
+    w1_scale_bias: torch.Tensor | None,
+    w2_scale_bias: torch.Tensor | None,
+    activation: SituActivationConfig,
+    act_quant_type: torch.dtype,
+    weight_quant_type: torch.dtype | None,
+    scale_type: torch.dtype | None,
+    per_token_scale_type: torch.dtype | None,
+    use_bf16: bool,
+    is_per_channel_weight: bool,
+) -> tuple[torch.Tensor, object]:
+    """Temporary W4A8 SiTU fallback: GMM1 -> SiTU -> quant -> GMM2.
+
+    The existing optimized W4A8 paths fuse SwiGLU and therefore cannot be
+    reused for Kimi K3. Keep all SiTU-specific layout handling in this
+    fallback until a fused SiTU kernel is available. In particular, the
+    ModelSlim per-channel scale is exposed as ``[E, N]`` for the fused kernel,
+    while generic GMM needs ``[E, 1, N]``. The singleton axis below is only a
+    call-local view; the packed W4 weight (two int4 values per int8 byte) is
+    passed through unchanged and is never repacked.
+    """
+    input_hidden_dtype = hidden_states.dtype
+    if dynamic_scale is None:
+        unquantized_hidden_states = hidden_states
+        hidden_states, pertoken_scale = DeviceOperator.npu_dynamic_quant(
+            hidden_states=hidden_states,
+            dynamic_scale=None,
+            act_quant_type=act_quant_type,
+            use_mxfp_quant=False,
+        )
+        dispose_tensor(unquantized_hidden_states)
+        externally_quantized_hidden_states = None
+    else:
+        pertoken_scale = dynamic_scale
+        externally_quantized_hidden_states = hidden_states
+
+    weight_prefetch_method = get_weight_prefetch_method()
+    if weight_prefetch_method:
+        weight_prefetch_method.maybe_prefetch_moe_weight_postprocess(hidden_states)
+
+    w1_scale_list = _as_grouped_matmul_weights(w1_scale)
+    w2_scale_list = _as_grouped_matmul_weights(w2_scale)
+    output_dtype = w2_scale_list[0].dtype
+    bias1, bias2 = None, None
+    if w1_scale_bias is not None:
+        if group_list_type == 0:
+            group_list = torch.cat([group_list[:1], torch.diff(group_list, dim=0)])
+            group_list_type = 1
+        bias1 = w1_scale_bias
+        bias2 = w2_scale_bias
+        output_dtype = torch.bfloat16
+
+    gmm1_scale = [scale.to(w2_scale_list[0].dtype) for scale in w1_scale_list]
+    if is_per_channel_weight:
+        gmm1_scale = [scale.unsqueeze(-2) for scale in gmm1_scale]
+
+    gate_up_out = torch_npu.npu_grouped_matmul(
+        x=[hidden_states],
+        weight=_as_grouped_matmul_weights(w1),
+        scale=gmm1_scale,
+        bias=bias1,
+        per_token_scale=[pertoken_scale],
+        split_item=2,
+        group_list_type=group_list_type,
+        group_type=0,
+        group_list=group_list,
+        output_dtype=output_dtype,
+    )[0]
+    if externally_quantized_hidden_states is not None:
+        dispose_tensor(externally_quantized_hidden_states)
+
+    hidden_states = situ_and_mul(
+        gate_up_out,
+        beta=activation.beta,
+        linear_beta=activation.linear_beta,
+    )
+    hidden_states, situ_out_scale = torch_npu.npu_dynamic_quant(hidden_states)
+    before_gmm2_evt = torch.npu.current_stream().record_event()
+    hidden_states = DeviceOperator.npu_grouped_matmul_gmm2(
+        hidden_states=hidden_states,
+        weight=w2,
+        weight_scale=w2_scale,
+        per_token_scale=situ_out_scale,
+        group_list=group_list,
+        group_list_type=group_list_type,
+        input_dtype=input_hidden_dtype,
+        act_quant_type=act_quant_type,
+        weight_quant_type=weight_quant_type,
+        scale_type=scale_type,
+        per_token_scale_type=per_token_scale_type,
+        use_bf16=use_bf16,
+        use_mxfp_quant=False,
+        bias=bias2,
+        fallback_output_dtype=output_dtype,
+        mxfp_quant_dtype=QuantType.W4A8,
+    )
+    return hidden_states, before_gmm2_evt
+
+
 def quant_apply_mlp(
     hidden_states: torch.Tensor,
     w1: list[torch.Tensor] | torch.Tensor,
@@ -107,11 +294,61 @@ def quant_apply_mlp(
     scale_type: torch.dtype | None = None,
     per_token_scale_type: torch.dtype | None = None,
     use_bf16: bool = True,
-    activation: str | None = None,
+    activation: str | MoEActivation | SituActivationConfig | None = None,
     swiglu_limit: float = 0.0,
     use_w4a8_per_channel_gmm_swiglu: bool = False,
 ) -> torch.Tensor:
     input_hidden_dtype = hidden_states.dtype
+
+    situ_activation = activation if isinstance(activation, SituActivationConfig) else None
+    if situ_activation is not None and mxfp_quant_dtype == QuantType.W4A16MXFP4:
+        if dynamic_scale is not None:
+            raise ValueError("W4A16 MXFP4 SiTU expects unquantized FP16/BF16 activations.")
+        if any(value is not None for value in (w1_scale_bias, w2_scale_bias, w1_offset, w2_offset)):
+            raise NotImplementedError("W4A16 MXFP4 SiTU does not support bias or antiquant offsets.")
+        return _w4a16_mxfp4_situ_apply_mlp(
+            hidden_states=hidden_states,
+            w1=w1,
+            w1_scale=w1_scale,
+            w2=w2,
+            w2_scale=w2_scale,
+            group_list=group_list,
+            group_list_type=group_list_type,
+            activation=situ_activation,
+            weight_quant_type=weight_quant_type,
+            scale_type=scale_type,
+            use_bf16=use_bf16,
+        )
+
+    if situ_activation is not None:
+        if mxfp_quant_dtype != QuantType.W4A8:
+            raise NotImplementedError(
+                f"SiTU quantized MoE currently supports only W4A8 and W4A16 MXFP4; got {mxfp_quant_dtype}."
+            )
+        if use_mxfp_quant:
+            raise ValueError("W4A8 SiTU fallback does not use MXFP activation quantization.")
+        if w1_offset is not None or w2_offset is not None:
+            raise NotImplementedError("W4A8 SiTU fallback does not support antiquant offsets.")
+        return _w4a8_situ_fallback_apply_mlp(
+            hidden_states=hidden_states,
+            w1=w1,
+            w1_scale=w1_scale,
+            w2=w2,
+            w2_scale=w2_scale,
+            group_list=group_list,
+            group_list_type=group_list_type,
+            dynamic_scale=dynamic_scale,
+            w1_scale_bias=w1_scale_bias,
+            w2_scale_bias=w2_scale_bias,
+            activation=situ_activation,
+            act_quant_type=act_quant_type,
+            weight_quant_type=weight_quant_type,
+            scale_type=scale_type,
+            per_token_scale_type=per_token_scale_type,
+            use_bf16=use_bf16,
+            is_per_channel_weight=use_w4a8_per_channel_gmm_swiglu,
+        )
+
     use_gmm_swiglu_quant_fusion = use_mxfp_quant or (fusion and not dynamic_eplb)
 
     if use_mxfp_quant:
@@ -363,12 +600,12 @@ def quant_apply_mlp(
 
 def unquant_apply_mlp(
     hidden_states: torch.Tensor,
-    w1: torch.Tensor,
-    w2: torch.Tensor,
+    w1: list[torch.Tensor] | torch.Tensor,
+    w2: list[torch.Tensor] | torch.Tensor,
     group_list: torch.Tensor,
     w1_bias: torch.Tensor = None,
     w2_bias: torch.Tensor = None,
-    activation: str | None = None,
+    activation: str | MoEActivation | SituActivationConfig | None = None,
     group_list_type: int = 1,
     topk_scales: torch.Tensor | None = None,
     need_trans: bool = True,
@@ -378,12 +615,12 @@ def unquant_apply_mlp(
     topk_ids: torch.Tensor | None = None,
 ) -> torch.Tensor:
     if need_trans:
-        w1 = w1.transpose(1, 2)
-        w2 = w2.transpose(1, 2)
+        w1 = _maybe_transpose_moe_weights(w1)
+        w2 = _maybe_transpose_moe_weights(w2)
 
     gate_up_out = torch_npu.npu_grouped_matmul(
         x=[hidden_states],
-        weight=[w1],
+        weight=_as_grouped_matmul_weights(w1),
         bias=[w1_bias.to(dtype=torch.float32)] if w1_bias is not None else None,
         split_item=2,
         group_list_type=group_list_type,
@@ -415,8 +652,15 @@ def unquant_apply_mlp(
             topk_ids=topk_ids,
         )
 
-    if activation == MoEActivation.SWIGLUOAI:
-        num_experts, _, hidden_size = w1.shape
+    if isinstance(activation, SituActivationConfig):
+        gate_up_out = situ_and_mul(
+            gate_up_out,
+            beta=activation.beta,
+            linear_beta=activation.linear_beta,
+        )
+    elif activation == MoEActivation.SWIGLUOAI:
+        w1_tensor = _require_single_tensor_for_swiglu_quant(w1, name="w1")
+        num_experts, _, hidden_size = w1_tensor.shape
         gate_up_out = AscendSwigluOAIAndMul.swiglu_oai_forward(gate_up_out.view(-1, hidden_size))
     elif activation == MoEActivation.SWIGLUSTEP:
         gate_up_out = AscendSwigluStepAndMul.swiglustep_forward(gate_up_out, limit=swiglu_limit or 7.0)
@@ -438,7 +682,7 @@ def unquant_apply_mlp(
 
     hidden_states = torch_npu.npu_grouped_matmul(
         x=[gate_up_out],
-        weight=[w2],
+        weight=_as_grouped_matmul_weights(w2),
         bias=[w2_bias.to(dtype=torch.float32)] if w2_bias is not None else None,
         split_item=2,
         group_list_type=group_list_type,
