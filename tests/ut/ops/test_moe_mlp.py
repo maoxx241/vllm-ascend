@@ -149,7 +149,7 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
         torch.testing.assert_close(second_call.kwargs["x"][0], expected_activation, rtol=0, atol=0)
         mock_swiglu.assert_not_called()
 
-    def test_w4a16_mxfp4_situ_uses_two_grouped_matmuls_without_swiglu_fusion(self):
+    def test_w4a16_mxfp4_situ_ignores_dispatch_scale_and_uses_two_grouped_matmuls(self):
         hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
         gate_up_out = torch.tensor(
             [[-8.0, 1.0, -30.0, 40.0], [0.5, 7.0, -2.0, 3.0]],
@@ -194,6 +194,7 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
                 w2=[torch.randn(1, 2, 4)],
                 w2_scale=[torch.ones(1)],
                 group_list=torch.tensor([2]),
+                dynamic_scale=torch.ones(2, 1),
                 activation=activation,
                 use_mxfp_quant=True,
                 mxfp_quant_dtype=QuantType.W4A16MXFP4,

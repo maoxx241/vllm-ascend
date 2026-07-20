@@ -302,10 +302,6 @@ def quant_apply_mlp(
 
     situ_activation = activation if isinstance(activation, SituActivationConfig) else None
     if situ_activation is not None and mxfp_quant_dtype == QuantType.W4A16MXFP4:
-        if dynamic_scale is not None:
-            raise ValueError("W4A16 MXFP4 SiTU expects unquantized FP16/BF16 activations.")
-        if any(value is not None for value in (w1_scale_bias, w2_scale_bias, w1_offset, w2_offset)):
-            raise NotImplementedError("W4A16 MXFP4 SiTU does not support bias or antiquant offsets.")
         return _w4a16_mxfp4_situ_apply_mlp(
             hidden_states=hidden_states,
             w1=w1,
