@@ -1,4 +1,5 @@
-from unittest.mock import Mock, patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 import torch
@@ -6,7 +7,9 @@ import torch.nn as nn
 
 from tests.ut.base import TestBase
 from tests.ut.quantization.conftest_quantization import create_mock_ascend_config, create_mock_vllm_config
+from vllm_ascend.ops.activation import SituActivationConfig
 from vllm_ascend.quantization.methods.w4a16_mxfp4 import AscendW4A16MXFP4FusedMoEMethod
+from vllm_ascend.quantization.quant_type import QuantType
 
 
 class TestAscendW4A16MXFP4MoEMethod(TestBase):
@@ -24,6 +27,56 @@ class TestAscendW4A16MXFP4MoEMethod(TestBase):
         mock_ensure.return_value = None
         mock_ep_group.return_value = Mock()
         self.scheme = AscendW4A16MXFP4FusedMoEMethod()
+
+    def test_compressed_tensors_packed_weights_reach_mxfp4_runtime_contract(self):
+        self.scheme.use_weight_packed = True
+        layer = SimpleNamespace(
+            n_shared_experts=0,
+            moe_config=SimpleNamespace(num_logical_experts=2),
+            w13_weight_packed=torch.randint(0, 255, (2, 8, 2), dtype=torch.uint8),
+            w2_weight_packed=torch.randint(0, 255, (2, 4, 2), dtype=torch.uint8),
+            w13_weight_scale=torch.ones(2, 8, 1, dtype=torch.uint8),
+            w2_weight_scale=torch.ones(2, 4, 1, dtype=torch.uint8),
+            swiglu_limit=0.0,
+        )
+        x = torch.randn(3, 4, dtype=torch.bfloat16)
+        router_logits = torch.randn(3, 2)
+        topk_weights = torch.ones(3, 1, dtype=torch.bfloat16)
+        topk_ids = torch.zeros(3, 1, dtype=torch.int32)
+        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+        comm_method = MagicMock()
+        expected = object()
+        comm_method.fused_experts.return_value = expected
+
+        with (
+            patch(
+                "vllm_ascend.quantization.methods.w4a16_mxfp4.select_experts",
+                return_value=(topk_weights, topk_ids),
+            ),
+            patch(
+                "vllm_ascend.quantization.methods.w4a16_mxfp4._EXTRA_CTX",
+                SimpleNamespace(moe_comm_method=comm_method),
+            ),
+        ):
+            result = self.scheme.apply(
+                layer=layer,
+                x=x,
+                router_logits=router_logits,
+                top_k=1,
+                renormalize=True,
+                num_experts=2,
+                enable_force_load_balance=False,
+                activation=activation,
+            )
+
+        self.assertIs(result, expected)
+        fused_input = comm_method.fused_experts.call_args.kwargs["fused_experts_input"]
+        self.assertIs(fused_input.weights.w1, layer.w13_weight_packed)
+        self.assertIs(fused_input.weights.w2, layer.w2_weight_packed)
+        self.assertIs(fused_input.weights.w1_scale, layer.w13_weight_scale)
+        self.assertIs(fused_input.weights.w2_scale, layer.w2_weight_scale)
+        self.assertEqual(fused_input.quant.quant_type, QuantType.W4A16MXFP4)
+        self.assertIs(fused_input.activation, activation)
 
     @pytest.mark.skip("Execute after the issue is fixed")
     def test_get_weight_static_method(self):
