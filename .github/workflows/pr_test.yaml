@@ -40,6 +40,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   lint-and-select-tests:
     if: ${{ github.event.action != 'labeled' || github.event.label.name == 'ready' }}
@@ -83,6 +87,7 @@ jobs:
       - name: Checkout vllm-project/vllm-ascend repo
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       - name: Read verified vLLM refs
@@ -150,7 +155,7 @@ jobs:
           UV_SYSTEM_PYTHON: 1
         run: |
           pip install uv
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           pip install uc-manager
           uv pip install -r requirements-dev.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
@@ -162,14 +167,14 @@ jobs:
           TERM: xterm-256color
           SHELLCHECK_OPTS: "--exclude=SC2046,SC2006,SC2086"
         run: |
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           pre-commit run --all-files --hook-stage manual --show-diff-on-failure
 
       - name: Run mypy
         run: |
           PYTHONPATH="$PYTHONPATH:$(pwd)/vllm-empty"
           export PYTHONPATH
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           for python_version in "3.10" "3.11" "3.12"; do
             echo "============================"
             tools/mypy.sh 1 "$python_version"
@@ -185,11 +190,12 @@ jobs:
         id: scope
         if: steps.filter.outputs.src == 'true'
         run: |
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git fetch origin ${{ github.base_ref }}
           pip install regex
           python3 .github/workflows/scripts/select_tests.py \
-            --diff-base origin/${{ github.base_ref }}
+            --diff-base origin/${{ github.base_ref }} \
+            --exclude-npu-types 310p
 
       - name: Set no-tests output when source paths unchanged
         id: noop

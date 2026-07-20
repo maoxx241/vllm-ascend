@@ -7,6 +7,9 @@ on:
       - '.github/workflows/labled_download_model.yaml'
     types: [labeled, synchronize]
 
+permissions:
+  contents: read
+
 defaults:
   run:
     shell: bash -el {0}
@@ -47,12 +50,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           JSON_PATH=".github/workflows/misc/model_dataset_list.json"
 
-          git fetch origin main
+          git fetch origin "${{ github.base_ref }}"
 
-          git show origin/main:$JSON_PATH > /tmp/models_main.json || \
+          git show "origin/${{ github.base_ref }}:$JSON_PATH" > /tmp/models_main.json || \
             echo '{"models":[], "datasets":[]}' > /tmp/models_main.json
 
           cp $JSON_PATH /tmp/models_pr.json

@@ -182,6 +182,24 @@ def test_route_helpers():
     )
 
 
+def test_exclude_npu_types():
+    groups = defaultdict(
+        list,
+        {
+            (1, select_tests.NpuType.A2): ["test_a2.py"],
+            (1, select_tests.NpuType._310P): ["test_310p.py"],
+            (0, select_tests.NpuType.CPU): ["test_cpu.py"],
+        },
+    )
+
+    select_tests._exclude_npu_types(groups, {select_tests.NpuType._310P})
+
+    assert groups == {
+        (1, select_tests.NpuType.A2): ["test_a2.py"],
+        (0, select_tests.NpuType.CPU): ["test_cpu.py"],
+    }
+
+
 def test_scan_ut_test_dir(tmp_path):
     groups = defaultdict(list)
     missing = tmp_path / "missing"
