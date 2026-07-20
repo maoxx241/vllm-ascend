@@ -1734,6 +1734,118 @@ at::Tensor chunk_fwd_o_meta(
     return o;
 }
 
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor,
+           at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor>
+chunk_kda_fwd_meta(
+    const at::Tensor &q,
+    const at::Tensor &k,
+    const at::Tensor &v,
+    const at::Tensor &gk,
+    const at::Tensor &beta,
+    double scale,
+    int64_t chunk_size,
+    c10::string_view layout,
+    const c10::optional<at::Tensor> &initial_state,
+    c10::optional<bool> output_final_state,
+    c10::optional<at::IntArrayRef> cu_seqlens,
+    c10::optional<at::IntArrayRef> chunk_indices,
+    c10::optional<bool> return_intermediate,
+    c10::optional<bool> safe_gate,
+    c10::optional<bool> transpose_state_layout)
+{
+    std::string layout_str(layout.data(), layout.size());
+    bool is_tnd = layout_str == "TND";
+    bool is_ntd = layout_str == "NTD";
+    bool is_bnsd = layout_str == "BNSD";
+    bool is_rank3 = is_tnd || is_ntd;
+    bool is_internal_layout = is_bnsd || is_ntd;
+
+    auto q_sizes = q.sizes();
+    auto v_sizes = v.sizes();
+    int64_t B = is_rank3 ? 1 : q_sizes[0];
+    int64_t T = is_tnd ? q_sizes[0] : (is_ntd ? q_sizes[1] : (is_bnsd ? q_sizes[2] : q_sizes[1]));
+    int64_t K = is_rank3 ? q_sizes[2] : q_sizes[3];
+    int64_t HV = is_tnd ? v_sizes[1] : (is_ntd ? v_sizes[0] : (is_bnsd ? v_sizes[1] : v_sizes[2]));
+    int64_t V = is_rank3 ? v_sizes[2] : v_sizes[3];
+    int64_t seq_num = cu_seqlens.has_value() ? static_cast<int64_t>(cu_seqlens->size()) - 1 : B;
+    int64_t total_chunks = 0;
+    if (chunk_indices.has_value()) {
+        total_chunks = static_cast<int64_t>(chunk_indices->size()) / 2;
+    } else if (cu_seqlens.has_value()) {
+        for (size_t i = 0; i + 1 < cu_seqlens->size(); ++i) {
+            total_chunks += ((*cu_seqlens)[i + 1] - (*cu_seqlens)[i] + chunk_size - 1) / chunk_size;
+        }
+    } else {
+        total_chunks = (T + chunk_size - 1) / chunk_size;
+    }
+
+    at::Tensor o = at::empty_like(v);
+    at::Tensor final_state_work = at::empty({seq_num, HV, K, V}, q.options().dtype(at::kFloat));
+    at::Tensor final_state = output_final_state.value_or(false) ?
+        final_state_work : at::empty({0}, q.options().dtype(at::kFloat));
+    at::Tensor g = gk.scalar_type() == at::kFloat ? gk : at::empty(gk.sizes(), gk.options().dtype(at::kFloat));
+    at::Tensor aqk = is_rank3 ? (is_internal_layout ? at::empty({HV, T, chunk_size}, q.options()) :
+        at::empty({T, HV, chunk_size}, q.options())) : (is_internal_layout ?
+        at::empty({B, HV, T, chunk_size}, q.options()) : at::empty({B, T, HV, chunk_size}, q.options()));
+    at::Tensor akk = at::empty_like(aqk);
+    at::Tensor w = is_rank3 ? (is_internal_layout ? at::empty({HV, T, K}, q.options()) :
+        at::empty({T, HV, K}, q.options())) : (is_internal_layout ?
+        at::empty({B, HV, T, K}, q.options()) : at::empty({B, T, HV, K}, q.options()));
+    at::Tensor u = at::empty_like(v);
+    at::Tensor qg = at::empty_like(w);
+    at::Tensor kg = at::empty_like(w);
+    at::Tensor v_new = at::empty_like(v);
+    at::Tensor h = is_rank3 ? (is_internal_layout ? at::empty({HV, total_chunks, K, V}, q.options()) :
+        at::empty({total_chunks, HV, K, V}, q.options())) : (is_internal_layout ?
+        at::empty({B, HV, total_chunks, K, V}, q.options()) :
+        at::empty({B, total_chunks, HV, K, V}, q.options()));
+    at::Tensor initial_state_tensor = initial_state.value_or(at::Tensor());
+    at::Tensor initial_state_out = initial_state_tensor.defined() ? initial_state_tensor : at::empty({0}, q.options());
+    (void)k;
+    (void)beta;
+    (void)scale;
+    (void)return_intermediate;
+    (void)safe_gate;
+    (void)transpose_state_layout;
+    return std::make_tuple(o, final_state, g, aqk, akk, w, u, qg, kg, v_new, h, initial_state_out);
+}
+
+at::Tensor kda_gate_cumsum_meta(
+    const at::Tensor &g,
+    int64_t chunk_size,
+    const c10::optional<at::Tensor> &A_log,
+    const c10::optional<at::Tensor> &dt_bias,
+    c10::optional<at::IntArrayRef> cu_seqlens,
+    c10::optional<bool> use_gate_in_kernel,
+    c10::optional<bool> safe_gate,
+    c10::optional<double> lower_bound,
+    c10::string_view layout)
+{
+    (void)chunk_size;
+    (void)A_log;
+    (void)dt_bias;
+    (void)cu_seqlens;
+    (void)use_gate_in_kernel;
+    (void)safe_gate;
+    (void)lower_bound;
+    (void)layout;
+    return at::empty(g.sizes(), g.options().dtype(at::kFloat));
+}
+
+at::Tensor kda_layout_swap12_meta(
+    const at::Tensor &x,
+    const c10::optional<at::Tensor> &dependency)
+{
+    std::vector<int64_t> y_sizes(x.sizes().begin(), x.sizes().end());
+    if (x.dim() == 3) {
+        std::swap(y_sizes[0], y_sizes[1]);
+    } else {
+        std::swap(y_sizes[1], y_sizes[2]);
+    }
+    (void)dependency;
+    return at::empty(y_sizes, x.options());
+}
+
 void store_kv_block_metadata(
     const at::Tensor &slot_mapping_npu,
     const at::Tensor &group_len,
@@ -1773,6 +1885,12 @@ TORCH_LIBRARY_IMPL_EXPAND(CONCAT(_C, _ascend), Meta, ops) {
     ops.impl("chunk_gated_delta_rule_fwd_h", &vllm_ascend::meta::chunk_gated_delta_rule_fwd_h_meta);
     // chunk_fwd_o
     ops.impl("chunk_fwd_o", &vllm_ascend::meta::chunk_fwd_o_meta);
+    // chunk_kda_fwd
+    ops.impl("chunk_kda_fwd", &vllm_ascend::meta::chunk_kda_fwd_meta);
+    // kda_gate_cumsum
+    ops.impl("kda_gate_cumsum", &vllm_ascend::meta::kda_gate_cumsum_meta);
+    // kda_layout_swap12
+    ops.impl("kda_layout_swap12", &vllm_ascend::meta::kda_layout_swap12_meta);
 }
 }
 #else
@@ -1871,6 +1989,12 @@ TORCH_LIBRARY_IMPL_EXPAND(CONCAT(_C, _ascend), Meta, ops) {
     ops.impl("chunk_gated_delta_rule_fwd_h", &vllm_ascend::meta::chunk_gated_delta_rule_fwd_h_meta);
     // chunk_fwd_o
     ops.impl("chunk_fwd_o", &vllm_ascend::meta::chunk_fwd_o_meta);
+    // chunk_kda_fwd
+    ops.impl("chunk_kda_fwd", &vllm_ascend::meta::chunk_kda_fwd_meta);
+    // kda_gate_cumsum
+    ops.impl("kda_gate_cumsum", &vllm_ascend::meta::kda_gate_cumsum_meta);
+    // kda_layout_swap12
+    ops.impl("kda_layout_swap12", &vllm_ascend::meta::kda_layout_swap12_meta);
      // store_kv_block
     ops.impl("store_kv_block_pre", &vllm_ascend::meta::store_kv_block_metadata);
     ops.impl("store_kv_block", &vllm_ascend::meta::store_kv_block);

@@ -134,6 +134,9 @@ elif [[ "$SOC_VERSION" =~ ^ascend910b ]]; then
         "ngram_spec_decode"
         "chunk_fwd_o"
         "chunk_gated_delta_rule_fwd_h"
+        "chunk_kda_fwd"
+        "kda_gate_cumsum"
+        "kda_layout_swap12"
         "store_kv_block"
         "store_kv_block_metadata"
     )
@@ -188,6 +191,9 @@ elif [[ "$SOC_VERSION" =~ ^ascend910_93 ]]; then
         "ngram_spec_decode"
         "chunk_fwd_o"
         "chunk_gated_delta_rule_fwd_h"
+        "chunk_kda_fwd"
+        "kda_gate_cumsum"
+        "kda_layout_swap12"
         "store_kv_block"
         "store_kv_block_metadata"
     )
@@ -221,6 +227,9 @@ elif [[ "$SOC_VERSION" =~ ^ascend950 ]]; then
         "recurrent_gated_delta_rule"
         "chunk_fwd_o"
         "chunk_gated_delta_rule_fwd_h"
+        "chunk_kda_fwd"
+        "kda_gate_cumsum"
+        "kda_layout_swap12"
         "store_kv_block"
         "store_kv_block_metadata"
     )
