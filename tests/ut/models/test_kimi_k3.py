@@ -376,6 +376,28 @@ def test_attention_residual_matches_reference_math():
     torch.testing.assert_close(actual, expected)
 
 
+def test_routed_output_transform_is_non_owning_and_fullgraph_traceable():
+    class TupleProjection(nn.Module):
+        def __init__(self) -> None:
+            super().__init__()
+            self.linear = nn.Linear(4, 3, bias=False)
+
+        def forward(self, hidden_states: torch.Tensor) -> tuple[torch.Tensor, None]:
+            return self.linear(hidden_states), None
+
+    norm = nn.LayerNorm(4)
+    up_proj = TupleProjection()
+    transform = kimi_k3_text._KimiRoutedOutputTransform(norm, up_proj)
+
+    assert not transform._modules
+    assert not transform.state_dict()
+
+    hidden_states = torch.randn(2, 4)
+    expected = up_proj(norm(hidden_states))[0]
+    compiled = torch.compile(transform, backend="eager", fullgraph=True)
+    torch.testing.assert_close(compiled(hidden_states), expected)
+
+
 def test_kimi_k3_latent_moe_wiring_quantizes_only_fused_routed_experts(monkeypatch):
     class StubModule(nn.Module):
         pass
