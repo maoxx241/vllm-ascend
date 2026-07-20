@@ -18,8 +18,7 @@
 name: E2E-upstream
 
 on:
-  schedule:
-    - cron: '0 8 * * 0' # every Sunday at 8:00
+  workflow_dispatch:
 # Bash shells do not use ~/.profile or ~/.bashrc so these shells need to be explicitly
 # declared as "shell: bash -el {0}" on steps that need to be properly activated.
 # It's used to activate ascend-toolkit environment variables.
@@ -82,7 +81,7 @@ jobs:
               pip config set global.trusted-host cache-service.nginx-pypi-cache.svc.cluster.local
               apt-get update -y
               apt install git -y
-              git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+              git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
           - name: Install system dependencies
             run: |
@@ -202,7 +201,7 @@ jobs:
               pip config set global.trusted-host cache-service.nginx-pypi-cache.svc.cluster.local
               apt-get update -y
               apt install git -y
-              git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+              git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
           - name: Install system dependencies
             run: |
@@ -313,7 +312,7 @@ jobs:
               pip config set global.trusted-host cache-service.nginx-pypi-cache.svc.cluster.local
               apt-get update -y
               apt install git -y
-              git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+              git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
           - name: Install system dependencies
             run: |
