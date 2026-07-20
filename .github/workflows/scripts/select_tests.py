@@ -453,6 +453,15 @@ def _dedup_groups(groups: dict[RunnerKey, list[str]]) -> None:
         groups[key] = deduped
 
 
+def _exclude_npu_types(
+    groups: dict[RunnerKey, list[str]],
+    excluded_npu_types: set[NpuType],
+) -> None:
+    for key in list(groups):
+        if key[1] in excluded_npu_types:
+            del groups[key]
+
+
 def _find_runner(
     num_npus: int,
     npu_type: NpuType,
@@ -706,6 +715,13 @@ def main():
         action="store_true",
         help="Run tests for all configured modules regardless of changed files",
     )
+    parser.add_argument(
+        "--exclude-npu-types",
+        nargs="+",
+        choices=[npu_type.value for npu_type in NpuType],
+        default=[],
+        help="NPU types to omit from the generated test matrix",
+    )
 
     args = parser.parse_args()
     docs = list(yaml.safe_load_all(args.config.read_text()))
@@ -814,6 +830,11 @@ def main():
                     filtered.append(t)
             all_groups[key] = filtered
         _dedup_groups(all_groups)
+
+    _exclude_npu_types(
+        all_groups,
+        {NpuType(npu_type) for npu_type in args.exclude_npu_types},
+    )
 
     runners = _load_runners()
     estimated_times = _load_estimated_times(meta)

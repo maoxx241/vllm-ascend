@@ -57,7 +57,7 @@ defaults:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   selected-tests:
@@ -94,7 +94,7 @@ jobs:
           pip config set global.trusted-host cache-service.nginx-pypi-cache.svc.cluster.local
           apt-get update -y
           apt-get install -y python3-pip git vim wget net-tools gcc g++ cmake libnuma-dev curl gnupg2 zstd
-          git config --global --add safe.directory /__w/vllm-ascend/vllm-ascend
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           pip install uv
 
       - name: Checkout vllm-project/vllm repo
@@ -110,9 +110,20 @@ jobs:
           VLLM_TARGET_DEVICE=empty uv pip install .
           pip uninstall -y triton
 
+      - name: Configure GitHub proxy authentication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          proxy_auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$proxy_auth"
+          git config --global \
+            http.https://gh-proxy.test.osinfra.cn/.extraheader \
+            "AUTHORIZATION: basic $proxy_auth"
+
       - name: Checkout vllm-project/vllm-ascend repo
         uses: actions/checkout@v7
         with:
+          token: ${{ github.token }}
           ref: ${{ inputs.ref || github.ref }}
           fetch-depth: 0
           submodules: recursive
@@ -123,6 +134,12 @@ jobs:
           git config user.email "vllm-ascend-ci@users.noreply.github.com"
           git fetch origin ${{ inputs.base_ref }}
           git rebase origin/${{ inputs.base_ref }}
+
+      - name: Remove GitHub proxy authentication
+        if: ${{ always() }}
+        run: |
+          git config --global --unset-all \
+            http.https://gh-proxy.test.osinfra.cn/.extraheader || true
 
       - name: Get csrc hash
         id: get_csrc_hash
