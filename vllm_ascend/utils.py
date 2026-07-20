@@ -762,8 +762,10 @@ def register_ascend_customop(vllm_config: VllmConfig | None = None):
     }
     if vllm_version_is("0.23.0"):
         from vllm_ascend.ops.fused_moe.fused_moe import AscendFusedMoE
+        from vllm_ascend.ops.kimi_kda import AscendKimiGatedDeltaNetAttention
 
         REGISTERED_ASCEND_OPS["FusedMoE"] = AscendFusedMoE
+        REGISTERED_ASCEND_OPS["KimiGatedDeltaNetAttention"] = AscendKimiGatedDeltaNetAttention
 
     if vllm_config is None:
         try:
