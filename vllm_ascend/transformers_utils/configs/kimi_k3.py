@@ -127,6 +127,7 @@ class KimiK3Config(PretrainedConfig):
         ignore_index: int = -100,
         media_placeholder_token_id: int = 163605,
         pad_token_id: int = 0,
+        use_unified_vision_chunk: bool = True,
         **kwargs: Any,
     ) -> None:
         if text_config is None:
@@ -142,6 +143,9 @@ class KimiK3Config(PretrainedConfig):
         self.vision_config = vision_config
         self.ignore_index = ignore_index
         self.media_placeholder_token_id = media_placeholder_token_id
+        # vLLM's OpenAI renderer uses this flag to map standard image/video
+        # content onto the unified ``vision_chunk`` modality registered below.
+        self.use_unified_vision_chunk = use_unified_vision_chunk
 
         # Compressed-tensors configuration lives in the nested text config in
         # the released checkpoint, while vLLM discovers it on the top level.

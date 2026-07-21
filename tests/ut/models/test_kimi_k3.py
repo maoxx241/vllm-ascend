@@ -8,6 +8,7 @@ import pytest
 import torch
 from PIL import Image
 from torch import nn
+from transformers import BatchFeature
 from vllm.multimodal.parse import MultiModalDataItems, VisionChunkProcessorItems
 
 from vllm_ascend.models import kimi_k3, kimi_k3_text, kimi_k3_vit
@@ -85,6 +86,7 @@ def test_kimi_k3_config_preserves_model_contract():
     config = _tiny_k3_config()
     text = config.text_config
     assert config.model_type == "kimi_k3"
+    assert config.use_unified_vision_chunk is True
     assert config.hidden_size == 32
     assert config.vocab_size == text.vocab_size
     assert text.mla_use_nope is True
@@ -413,7 +415,12 @@ def test_kimi_k3_text_loader_maps_real_checkpoint_names_to_shards():
     ]
 
 
-def test_attention_residual_matches_reference_math():
+def test_attention_residual_matches_reference_math(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        kimi_k3_text,
+        "_EXTRA_CTX",
+        SimpleNamespace(flash_comm_v1_enabled=False),
+    )
     torch.manual_seed(7)
     prefix_sum = torch.randn(3, 4, dtype=torch.bfloat16)
     block_residual = torch.randn(3, 2, 4, dtype=torch.bfloat16)
@@ -430,6 +437,45 @@ def test_attention_residual_matches_reference_math():
     score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
     probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
     expected = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    torch.testing.assert_close(actual, expected)
+
+
+def test_attention_residual_flashcomm_reanchors_dynamic_token_shape(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(
+        kimi_k3_text,
+        "_EXTRA_CTX",
+        SimpleNamespace(flash_comm_v1_enabled=True),
+    )
+    torch.manual_seed(11)
+    prefix_sum = torch.randn(5, 4, dtype=torch.bfloat16)
+    block_residual = torch.randn(5, 2, 4, dtype=torch.bfloat16)
+    norm = nn.Module()
+    norm.register_parameter("weight", nn.Parameter(torch.ones(4)))
+    norm.variance_epsilon = 1e-5
+    projection = nn.Linear(4, 1, bias=False)
+    anchor_calls: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+
+    def fake_shape_anchor(x: torch.Tensor, residual: torch.Tensor) -> torch.Tensor:
+        anchor_calls.append((tuple(x.shape), tuple(residual.shape)))
+        assert x.shape == residual.shape
+        return residual
+
+    monkeypatch.setattr(
+        torch.ops.vllm,
+        "maybe_chunk_residual",
+        fake_shape_anchor,
+        raising=False,
+    )
+
+    actual = _apply_attention_residual(prefix_sum, block_residual, projection, norm)
+
+    values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
+    values_fp32 = values.float()
+    normalized = values_fp32 * torch.rsqrt(values_fp32.square().mean(-1, keepdim=True) + 1e-5)
+    score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
+    probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
+    expected = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    assert anchor_calls == [((5, 4), (5, 4))]
     torch.testing.assert_close(actual, expected)
 
 
@@ -536,11 +582,134 @@ def test_decoder_registers_moe_under_checkpoint_module_name(monkeypatch):
     assert "block_sparse_moe.marker" in dict(layer.named_parameters())
 
 
+@pytest.mark.parametrize(
+    ("flashcomm_enabled", "expected_rows", "expected_chunk_calls"),
+    [(True, 3, 1), (False, 6, 0)],
+)
+def test_vl_first_decoder_layer_aligns_flashcomm_attention_and_block_residual(
+    monkeypatch: pytest.MonkeyPatch,
+    flashcomm_enabled: bool,
+    expected_rows: int,
+    expected_chunk_calls: int,
+):
+    class FakeAttention(nn.Module):
+        def forward(self, *, positions, hidden_states, output):
+            del positions
+            attention_shapes.append((tuple(hidden_states.shape), tuple(output.shape)))
+            output.copy_(torch.arange(output.numel(), dtype=output.dtype).reshape(output.shape))
+
+    class ZeroMLP(nn.Module):
+        def forward(self, hidden_states: torch.Tensor):
+            return torch.zeros_like(hidden_states)
+
+    layer = object.__new__(KimiK3DecoderLayer)
+    nn.Module.__init__(layer)
+    layer.is_vl_first_layer = True
+    layer.layer_idx = 0
+    layer.attn_res_block_size = 2
+    layer.input_layernorm = nn.Identity()
+    layer.post_attention_layernorm = nn.Identity()
+    layer.self_attention_res_proj = nn.Identity()
+    layer.self_attention_res_norm = nn.Identity()
+    layer.mlp_res_proj = nn.Identity()
+    layer.mlp_res_norm = nn.Identity()
+    layer.mlp = ZeroMLP()
+    attention_shapes: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+    layer.self_attn = FakeAttention()
+
+    monkeypatch.setattr(
+        kimi_k3_text,
+        "_EXTRA_CTX",
+        SimpleNamespace(flash_comm_v1_enabled=flashcomm_enabled),
+    )
+    monkeypatch.setattr(
+        kimi_k3_text,
+        "get_tensor_model_parallel_world_size",
+        lambda: 2,
+    )
+
+    chunk_calls: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+
+    def fake_chunk_residual(attention_output, block_residual):
+        chunk_calls.append((tuple(attention_output.shape), tuple(block_residual.shape)))
+        return block_residual[: attention_output.shape[0]]
+
+    monkeypatch.setattr(
+        torch.ops.vllm,
+        "maybe_chunk_residual",
+        fake_chunk_residual,
+        raising=False,
+    )
+
+    residual_mix_shapes: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+
+    def fake_attention_residual(prefix_sum, block_residual, projection, norm):
+        del projection, norm
+        residual_mix_shapes.append((tuple(prefix_sum.shape), tuple(block_residual.shape)))
+        assert prefix_sum.shape[0] == block_residual.shape[0]
+        return prefix_sum
+
+    monkeypatch.setattr(
+        kimi_k3_text,
+        "_apply_attention_residual",
+        fake_attention_residual,
+    )
+
+    # FlashComm pads the global first-layer token count to a TP multiple before
+    # the model forward.  Use that real runner invariant in the graph-shape UT.
+    hidden_states = torch.arange(24, dtype=torch.float32).reshape(6, 4)
+    block_residual = hidden_states.new_zeros((6, 0, 4))
+    output, updated_block_residual = layer(
+        torch.arange(6),
+        hidden_states,
+        block_residual,
+    )
+
+    assert attention_shapes == [((6, 4), (expected_rows, 4))]
+    assert len(chunk_calls) == expected_chunk_calls
+    if flashcomm_enabled:
+        assert chunk_calls == [((3, 1, 4), (6, 1, 4))]
+    assert residual_mix_shapes == [((expected_rows, 4), (expected_rows, 1, 4))]
+    assert output.shape == (expected_rows, 4)
+    assert updated_block_residual.shape == (expected_rows, 1, 4)
+    torch.testing.assert_close(
+        updated_block_residual[:, 0],
+        hidden_states[:expected_rows],
+    )
+
+
 def test_processor_injects_k3_image_resolution():
     text = "a<|media_begin|>image<|media_content|><|media_pad|><|media_end|>b"
     chunks = [{"type": "image", "image": Image.new("RGB", (320, 240))}]
     actual = KimiK3Processor._inject_image_sizes(text, chunks)
     assert "image 320x240<|media_content|>" in actual
+
+
+def test_processor_cache_miss_uses_joint_text_and_vision_chunk_path():
+    processor = object.__new__(KimiK3MultiModalProcessor)
+    processor.dummy_inputs = SimpleNamespace(
+        get_dummy_text=MagicMock(return_value="dummy vision prompt"),
+    )
+    expected = BatchFeature(
+        data={
+            "pixel_values": torch.ones((1, 3, 2, 2)),
+            "grid_thws": torch.tensor([[1, 1, 1]]),
+        }
+    )
+    processor._apply_hf_processor_text_mm = MagicMock(return_value=([1, 2, 3], expected, False))
+    item = {"type": "image", "image": Image.new("RGB", (32, 32))}
+    mm_items = MultiModalDataItems({"vision_chunk": VisionChunkProcessorItems([item])})
+
+    actual = processor._apply_hf_processor_mm_only(mm_items, {}, {})
+
+    assert actual is expected
+    processor.dummy_inputs.get_dummy_text.assert_called_once_with({"vision_chunk": 1})
+    processor._apply_hf_processor_text_mm.assert_called_once_with(
+        prompt_text="dummy vision prompt",
+        mm_items=mm_items,
+        hf_processor_mm_kwargs={},
+        tokenization_kwargs={},
+    )
 
 
 def test_cached_prompt_update_matches_k3_image_size_contract():

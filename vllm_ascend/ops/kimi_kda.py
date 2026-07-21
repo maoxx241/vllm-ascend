@@ -30,6 +30,7 @@ from vllm_ascend.ops.kimi_kda_state import kimi_kda_state_shape
 from vllm_ascend.ops.triton.fla.utils import clear_ssm_states
 from vllm_ascend.ops.triton.kda.kda import fused_kda_gate, fused_recurrent_kda
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3TextConfig
+from vllm_ascend.utils import parse_layer_idx, uses_global_inputs_embeds
 
 _KDA_CHUNK_SIZE = 64
 
@@ -135,6 +136,14 @@ class AscendKimiGatedDeltaNetAttention(KimiGatedDeltaNetAttention):
         # checkpoint config is authoritative and uses the sigmoid gate path.
         self.o_norm.eps = config.rms_norm_eps
 
+        # Multimodal inputs_embeds are built before the Ascend forward context,
+        # so the first decoder layer receives the full token sequence.  Every
+        # later layer receives a FlashComm token shard.  Keep this decision
+        # static so Dynamo does not need to infer the layout from tensor shapes.
+        self.is_vl_first_layer = bool(
+            uses_global_inputs_embeds(vllm_config, "vision_chunk") and parse_layer_idx(prefix) == 0
+        )
+
     def get_attn_backend(self) -> type[AttentionBackend]:
         return AscendGDNAttentionBackend
 
@@ -154,6 +163,15 @@ class AscendKimiGatedDeltaNetAttention(KimiGatedDeltaNetAttention):
         output: torch.Tensor,
     ) -> None:
         del positions
+        # KDA metadata and its recurrent state describe the complete sequence.
+        # Unlike Qwen GDN, Kimi's independent q/k/v/g projections do not match
+        # SequenceColumnParallelOp's prefix whitelist.  Gather the token shard
+        # once before all projections instead of gathering for every linear.
+        # The multimodal first layer is already full-sized and must not gather.
+        hidden_states = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(
+            hidden_states.contiguous(),
+            not self.is_vl_first_layer,
+        )
         num_tokens = hidden_states.size(0)
         q = self.q_proj(hidden_states)[0]
         k = self.k_proj(hidden_states)[0]
@@ -185,7 +203,7 @@ class AscendKimiGatedDeltaNetAttention(KimiGatedDeltaNetAttention):
         )
         core_attn_out = self.o_norm(core_attn_out, output_gate)
         core_attn_out = rearrange(core_attn_out, "1 n h d -> n (h d)")
-        output[:num_tokens] = self.o_proj(core_attn_out)[0]
+        output[:] = self.o_proj(core_attn_out)[0]
 
     @staticmethod
     def _run_causal_conv1d(
