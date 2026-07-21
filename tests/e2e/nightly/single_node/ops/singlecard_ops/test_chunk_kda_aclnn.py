@@ -117,6 +117,50 @@ def _layout_swap12_reference(x):
     return x.transpose(1, 2).contiguous()
 
 
+def test_kda_torch_bindings_have_shape_correct_meta_kernels():
+    q = torch.empty((1, 64, 1, 128), device="meta", dtype=torch.bfloat16)
+    k = torch.empty_like(q)
+    v = torch.empty((1, 64, 2, 256), device="meta", dtype=torch.bfloat16)
+    raw_gate = torch.empty((1, 64, 2, 128), device="meta", dtype=torch.bfloat16)
+    beta = torch.empty((1, 64, 2), device="meta", dtype=torch.float32)
+
+    gk = torch.ops._C_ascend.kda_gate_cumsum(raw_gate, 64, layout="BSND")
+    outputs = torch.ops._C_ascend.chunk_kda_fwd(
+        q,
+        k,
+        v,
+        gk,
+        beta,
+        128**-0.5,
+        64,
+        layout="BSND",
+        output_final_state=True,
+        return_intermediate=True,
+    )
+    swapped = torch.ops._C_ascend.kda_layout_swap12(raw_gate)
+
+    assert gk.shape == raw_gate.shape
+    assert gk.dtype == torch.float32
+    assert [tuple(output.shape) for output in outputs] == [
+        (1, 64, 2, 256),
+        (1, 2, 128, 256),
+        (1, 64, 2, 128),
+        (1, 64, 2, 64),
+        (1, 64, 2, 64),
+        (1, 64, 2, 128),
+        (1, 64, 2, 256),
+        (1, 64, 2, 128),
+        (1, 64, 2, 128),
+        (1, 64, 2, 256),
+        (1, 1, 2, 128, 256),
+        (0,),
+    ]
+    assert outputs[0].dtype == torch.bfloat16
+    assert outputs[1].dtype == torch.float32
+    assert swapped.shape == (1, 2, 64, 128)
+    assert swapped.dtype == torch.bfloat16
+
+
 @torch.inference_mode()
 def test_chunk_kda_fwd_matches_reference_bsnd():
     torch.manual_seed(20260720)
