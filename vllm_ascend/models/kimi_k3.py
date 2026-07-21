@@ -362,10 +362,11 @@ class AscendKimiK3ForConditionalGeneration(
         return AscendKimiK3ForCausalLM.get_mamba_state_copy_func()
 
     def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
-        # ModelSlim emits this projector rotation matrix as a conversion
-        # auxiliary.  It is not a parameter of the official Kimi K3 network;
-        # keep the exception exact so all real projector weights are checked.
-        loader = AutoWeightsLoader(self, skip_prefixes=["mm_projector.rot_proj."])
+        # The ModelSlim rotation is only needed for A3 FP4-to-INT4 conversion.
+        # Other SoCs retain the original projector graph and ignore the extra
+        # checkpoint tensor.
+        skip_prefixes = [] if self.mm_projector.rot_proj is not None else ["mm_projector.rot_proj."]
+        loader = AutoWeightsLoader(self, skip_prefixes=skip_prefixes)
         return loader.load_weights(weights, mapper=self.hf_to_vllm_mapper)
 
 

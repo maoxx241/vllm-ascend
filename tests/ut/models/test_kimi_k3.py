@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
 import torch
 from PIL import Image
 from torch import nn
@@ -24,9 +25,10 @@ from vllm_ascend.models.kimi_k3_text import (
     _apply_attention_residual,
     _routed_latent_quant_config,
 )
-from vllm_ascend.models.kimi_k3_vit import KimiK3VisionPatchEmbed
+from vllm_ascend.models.kimi_k3_vit import KimiK3MultiModalProjector, KimiK3VisionPatchEmbed
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3Config
 from vllm_ascend.transformers_utils.processors.kimi_k3 import KimiK3Processor
+from vllm_ascend.utils import AscendDeviceType
 
 
 def _tiny_k3_config() -> KimiK3Config:
@@ -218,7 +220,18 @@ def test_kimi_k3_ignores_ascend_compressed_tensors_for_vision():
     assert actual is None
 
 
-def test_kimi_k3_loader_skips_only_modelslim_projector_rotation(monkeypatch):
+@pytest.mark.parametrize(
+    ("has_rot_proj", "expected_skip_prefixes"),
+    [
+        (True, []),
+        (False, ["mm_projector.rot_proj."]),
+    ],
+)
+def test_kimi_k3_loader_handles_modelslim_projector_rotation(
+    monkeypatch,
+    has_rot_proj,
+    expected_skip_prefixes,
+):
     captured = {}
 
     class StubLoader:
@@ -234,13 +247,15 @@ def test_kimi_k3_loader_skips_only_modelslim_projector_rotation(monkeypatch):
     monkeypatch.setattr(kimi_k3, "AutoWeightsLoader", StubLoader)
     model = AscendKimiK3ForConditionalGeneration.__new__(AscendKimiK3ForConditionalGeneration)
     nn.Module.__init__(model)
+    model.mm_projector = nn.Module()
+    model.mm_projector.rot_proj = nn.Linear(1, 1, bias=False) if has_rot_proj else None
     weights = [("mm_projector.rot_proj.weight", torch.ones(1))]
 
     loaded = model.load_weights(iter(weights))
 
     assert loaded == {"loaded"}
     assert captured["model"] is model
-    assert captured["skip_prefixes"] == ["mm_projector.rot_proj."]
+    assert captured["skip_prefixes"] == expected_skip_prefixes
     assert captured["weights"] == weights
     assert captured["mapper"] is model.hf_to_vllm_mapper
 
@@ -251,6 +266,7 @@ def test_kimi_k3_outer_mapper_covers_real_vision_and_projector_keys():
         "mm_projector.proj.0.weight",
         "mm_projector.proj.2.weight",
         "mm_projector.post_norm.weight",
+        "mm_projector.rot_proj.weight",
         "language_model.model.layers.0.self_attn.g_proj.weight",
     ]
 
@@ -259,8 +275,48 @@ def test_kimi_k3_outer_mapper_covers_real_vision_and_projector_keys():
         "mm_projector.linear_1.weight",
         "mm_projector.linear_2.weight",
         "mm_projector.post_norm.weight",
+        "mm_projector.rot_proj.weight",
         "language_model.model.layers.0.self_attn.g_proj.weight",
     ]
+
+
+@pytest.mark.parametrize(
+    ("device_type", "expected_scale"),
+    [
+        (AscendDeviceType.A3, 2.0),
+        (AscendDeviceType.A2, 1.0),
+    ],
+)
+def test_kimi_k3_projector_applies_rot_proj_only_on_a3(monkeypatch, device_type, expected_scale):
+    class StubReplicatedLinear(nn.Module):
+        def __init__(self, input_size, output_size, **kwargs):
+            super().__init__()
+            self.linear = nn.Linear(input_size, output_size, bias=False)
+
+        def forward(self, hidden_states):
+            return self.linear(hidden_states), None
+
+    monkeypatch.setattr(kimi_k3_vit, "ReplicatedLinear", StubReplicatedLinear)
+    monkeypatch.setattr(kimi_k3_vit, "RMSNorm", lambda *args, **kwargs: nn.Identity())
+    monkeypatch.setattr(kimi_k3_vit, "get_act_fn", lambda *args, **kwargs: nn.Identity())
+    monkeypatch.setattr(kimi_k3_vit, "get_ascend_device_type", lambda: device_type)
+
+    projector = KimiK3MultiModalProjector(_tiny_k3_config().vision_config)
+    with torch.no_grad():
+        projector.linear_1.linear.weight.copy_(torch.eye(projector.input_size))
+        projector.linear_2.linear.weight.zero_()
+        projector.linear_2.linear.weight[:, : projector.linear_2.linear.weight.shape[0]].copy_(
+            torch.eye(projector.linear_2.linear.weight.shape[0])
+        )
+        if projector.rot_proj is not None:
+            projector.rot_proj.linear.weight.copy_(2 * torch.eye(projector.rot_proj.linear.weight.shape[0]))
+
+    image_features = torch.arange(projector.input_size, dtype=torch.float).unsqueeze(0)
+    actual = projector(image_features)
+    expected = image_features[:, : actual.shape[-1]] * expected_scale
+
+    assert (projector.rot_proj is not None) is (device_type == AscendDeviceType.A3)
+    torch.testing.assert_close(actual, expected)
 
 
 def test_kimi_k3_text_loader_maps_real_checkpoint_names_to_shards():

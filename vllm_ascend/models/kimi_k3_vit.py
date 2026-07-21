@@ -28,6 +28,7 @@ from vllm.model_executor.models.utils import maybe_prefix
 from vllm.model_executor.models.vision import is_vit_use_data_parallel, run_dp_sharded_mrope_vision_model
 
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3VisionConfig
+from vllm_ascend.utils import AscendDeviceType, get_ascend_device_type
 
 
 class KimiK3VisionPatchEmbed(nn.Module):
@@ -345,13 +346,28 @@ class KimiK3MultiModalProjector(nn.Module):
         )
         self.act = get_act_fn(config.projector_hidden_act)
         self.post_norm = RMSNorm(config.text_hidden_size, eps=config.projector_ln_eps)
+        # ModelSlim rotates K3's FP4 activations before INT4 inference. Text
+        # embeddings fold this matrix into their input projection, but the
+        # vision path ends in RMSNorm, so the rotation must remain explicit.
+        self.rot_proj: ReplicatedLinear | None = None
+        if get_ascend_device_type() == AscendDeviceType.A3:
+            self.rot_proj = ReplicatedLinear(
+                config.text_hidden_size,
+                config.text_hidden_size,
+                bias=False,
+                quant_config=None,
+                prefix=f"{prefix}.rot_proj",
+            )
 
     def forward(self, image_features: torch.Tensor) -> torch.Tensor:
         hidden_states = image_features.reshape(-1, self.input_size)
         hidden_states = self.linear_1(hidden_states)[0]
         hidden_states = self.act(hidden_states)
         hidden_states = self.linear_2(hidden_states)[0]
-        return self.post_norm(hidden_states)
+        hidden_states = self.post_norm(hidden_states)
+        if self.rot_proj is not None:
+            hidden_states = self.rot_proj(hidden_states)[0]
+        return hidden_states
 
 
 @torch.inference_mode()
