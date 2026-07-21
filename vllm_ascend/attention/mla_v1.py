@@ -746,9 +746,12 @@ class AscendMLAImpl(MLAAttentionImpl):
         self.q_proj = kwargs["q_proj"] if self.q_lora_rank is None else kwargs["q_b_proj"]
         self.kv_b_proj = kwargs["kv_b_proj"]
         self.o_proj = kwargs["o_proj"]
-        self.g_proj = kwargs.get("g_proj")
-        self.use_output_gate = kwargs.get("use_output_gate", False)
-        self.use_mla_rope = kwargs.get("use_mla_rope", True)
+        g_proj = kwargs.get("g_proj")
+        if g_proj is not None and not isinstance(g_proj, torch.nn.Module):
+            raise TypeError("g_proj must be a torch module")
+        self.g_proj: torch.nn.Module | None = g_proj
+        self.use_output_gate = bool(kwargs.get("use_output_gate", False))
+        self.use_mla_rope = bool(kwargs.get("use_mla_rope", True))
         if self.use_output_gate and self.g_proj is None:
             raise ValueError("g_proj is required when MLA output gating is enabled")
         self.vllm_config = get_current_vllm_config()
@@ -1816,6 +1819,7 @@ class AscendMLAImpl(MLAAttentionImpl):
             # Project before MLA preprocess mutates/gathers hidden_states, then
             # apply exactly the same sequence-parallel gather/unpad operation
             # used by q_c and kv_no_split below.
+            assert self.g_proj is not None
             gate = self.g_proj(hidden_states)[0]
             gate = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(gate.contiguous(), need_gather_q_kv)
 
