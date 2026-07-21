@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import MagicMock
 
 import torch
@@ -129,7 +130,7 @@ def test_kimi_k3_mla_tp8_gate_width_matches_local_attention_heads(monkeypatch):
     class StubModule(nn.Module):
         pass
 
-    captures = {}
+    captures: dict[str, Any] = {}
 
     def fake_column_parallel(in_features, out_features, **kwargs):
         module = StubModule()
