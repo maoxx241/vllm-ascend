@@ -1734,6 +1734,143 @@ at::Tensor chunk_fwd_o_meta(
     return o;
 }
 
+std::tuple<at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor,
+           at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor, at::Tensor>
+chunk_kda_fwd_meta(
+    const at::Tensor &q,
+    const at::Tensor &k,
+    const at::Tensor &v,
+    const at::Tensor &gk,
+    const at::Tensor &beta,
+    double scale,
+    int64_t chunk_size,
+    c10::string_view layout,
+    const c10::optional<at::Tensor> &initial_state,
+    c10::optional<bool> output_final_state,
+    c10::optional<at::IntArrayRef> cu_seqlens,
+    c10::optional<at::IntArrayRef> chunk_indices,
+    c10::optional<bool> return_intermediate,
+    c10::optional<bool> safe_gate,
+    c10::optional<bool> transpose_state_layout)
+{
+    std::string layout_str = std::string(layout);
+    bool is_tnd = layout_str == "TND";
+    bool is_ntd = layout_str == "NTD";
+    bool is_bnsd = layout_str == "BNSD";
+    bool is_rank3 = is_tnd || is_ntd;
+    bool is_internal_layout = is_bnsd || is_ntd;
+
+    c10::SymInt B = is_rank3 ? c10::SymInt(1) : q.sym_size(0);
+    c10::SymInt T = is_tnd ? q.sym_size(0) :
+        (is_ntd ? q.sym_size(1) : (is_bnsd ? q.sym_size(2) : q.sym_size(1)));
+    c10::SymInt K = is_rank3 ? q.sym_size(2) : q.sym_size(3);
+    c10::SymInt HV = is_tnd ? v.sym_size(1) :
+        (is_ntd ? v.sym_size(0) : (is_bnsd ? v.sym_size(1) : v.sym_size(2)));
+    c10::SymInt V = is_rank3 ? v.sym_size(2) : v.sym_size(3);
+    // symbolic-meta-ok: cu_seqlens is an IntArrayRef schema argument, not a Tensor shape.
+    c10::SymInt seq_num = cu_seqlens.has_value() ?
+        c10::SymInt(static_cast<int64_t>(cu_seqlens->size()) - 1) : B;
+    c10::SymInt total_chunks(0);
+    if (chunk_indices.has_value()) {
+        // symbolic-meta-ok: chunk_indices is an IntArrayRef schema argument, not a Tensor shape.
+        total_chunks = c10::SymInt(static_cast<int64_t>(chunk_indices->size()) / 2);
+    } else if (cu_seqlens.has_value()) {
+        int64_t concrete_total_chunks = 0;
+        // symbolic-meta-ok: cu_seqlens is an IntArrayRef schema argument, not a Tensor shape.
+        for (size_t i = 0; i + 1 < cu_seqlens->size(); ++i) {
+            concrete_total_chunks += ((*cu_seqlens)[i + 1] - (*cu_seqlens)[i] + chunk_size - 1) / chunk_size;
+        }
+        total_chunks = c10::SymInt(concrete_total_chunks);
+    } else {
+        total_chunks = (T + c10::SymInt(chunk_size - 1)) / c10::SymInt(chunk_size);
+    }
+
+    at::Tensor o = at::empty_like(v);
+    at::Tensor final_state_work = at::empty_symint(
+        c10::SymDimVector{seq_num, HV, K, V}, q.options().dtype(at::kFloat));
+    at::Tensor final_state = output_final_state.value_or(false) ?
+        final_state_work : at::empty_symint(c10::SymDimVector{c10::SymInt(0)}, q.options().dtype(at::kFloat));
+    at::Tensor g = gk.scalar_type() == at::kFloat ?
+        gk : at::empty_symint(gk.sym_sizes(), gk.options().dtype(at::kFloat));
+    c10::SymInt chunk_size_sym(chunk_size);
+    c10::SymDimVector aqk_shape;
+    if (is_rank3) {
+        aqk_shape = is_internal_layout ? c10::SymDimVector{HV, T, chunk_size_sym} :
+            c10::SymDimVector{T, HV, chunk_size_sym};
+    } else {
+        aqk_shape = is_internal_layout ? c10::SymDimVector{B, HV, T, chunk_size_sym} :
+            c10::SymDimVector{B, T, HV, chunk_size_sym};
+    }
+    at::Tensor aqk = at::empty_symint(aqk_shape, q.options());
+    at::Tensor akk = at::empty_like(aqk);
+    c10::SymDimVector w_shape;
+    if (is_rank3) {
+        w_shape = is_internal_layout ? c10::SymDimVector{HV, T, K} : c10::SymDimVector{T, HV, K};
+    } else {
+        w_shape = is_internal_layout ? c10::SymDimVector{B, HV, T, K} : c10::SymDimVector{B, T, HV, K};
+    }
+    at::Tensor w = at::empty_symint(w_shape, q.options());
+    at::Tensor u = at::empty_like(v);
+    at::Tensor qg = at::empty_like(w);
+    at::Tensor kg = at::empty_like(w);
+    at::Tensor v_new = at::empty_like(v);
+    c10::SymDimVector h_shape;
+    if (is_rank3) {
+        h_shape = is_internal_layout ? c10::SymDimVector{HV, total_chunks, K, V} :
+            c10::SymDimVector{total_chunks, HV, K, V};
+    } else {
+        h_shape = is_internal_layout ? c10::SymDimVector{B, HV, total_chunks, K, V} :
+            c10::SymDimVector{B, total_chunks, HV, K, V};
+    }
+    at::Tensor h = at::empty_symint(h_shape, q.options());
+    at::Tensor initial_state_tensor = initial_state.value_or(at::Tensor());
+    at::Tensor initial_state_out = initial_state_tensor.defined() ?
+        initial_state_tensor : at::empty_symint(c10::SymDimVector{c10::SymInt(0)}, q.options());
+    (void)k;
+    (void)beta;
+    (void)scale;
+    (void)return_intermediate;
+    (void)safe_gate;
+    (void)transpose_state_layout;
+    return std::make_tuple(o, final_state, g, aqk, akk, w, u, qg, kg, v_new, h, initial_state_out);
+}
+
+at::Tensor kda_gate_cumsum_meta(
+    const at::Tensor &g,
+    int64_t chunk_size,
+    const c10::optional<at::Tensor> &A_log,
+    const c10::optional<at::Tensor> &dt_bias,
+    c10::optional<at::IntArrayRef> cu_seqlens,
+    c10::optional<bool> use_gate_in_kernel,
+    c10::optional<bool> safe_gate,
+    c10::optional<double> lower_bound,
+    c10::string_view layout)
+{
+    (void)chunk_size;
+    (void)A_log;
+    (void)dt_bias;
+    (void)cu_seqlens;
+    (void)use_gate_in_kernel;
+    (void)safe_gate;
+    (void)lower_bound;
+    (void)layout;
+    return at::empty_symint(g.sym_sizes(), g.options().dtype(at::kFloat));
+}
+
+at::Tensor kda_layout_swap12_meta(
+    const at::Tensor &x,
+    const c10::optional<at::Tensor> &dependency)
+{
+    c10::SymDimVector y_sizes(x.sym_sizes().begin(), x.sym_sizes().end());
+    if (x.dim() == 3) {
+        std::swap(y_sizes[0], y_sizes[1]);
+    } else {
+        std::swap(y_sizes[1], y_sizes[2]);
+    }
+    (void)dependency;
+    return at::empty_symint(y_sizes, x.options());
+}
+
 void store_kv_block_metadata(
     const at::Tensor &slot_mapping_npu,
     const at::Tensor &group_len,
@@ -1773,6 +1910,12 @@ TORCH_LIBRARY_IMPL_EXPAND(CONCAT(_C, _ascend), Meta, ops) {
     ops.impl("chunk_gated_delta_rule_fwd_h", &vllm_ascend::meta::chunk_gated_delta_rule_fwd_h_meta);
     // chunk_fwd_o
     ops.impl("chunk_fwd_o", &vllm_ascend::meta::chunk_fwd_o_meta);
+    // chunk_kda_fwd
+    ops.impl("chunk_kda_fwd", &vllm_ascend::meta::chunk_kda_fwd_meta);
+    // kda_gate_cumsum
+    ops.impl("kda_gate_cumsum", &vllm_ascend::meta::kda_gate_cumsum_meta);
+    // kda_layout_swap12
+    ops.impl("kda_layout_swap12", &vllm_ascend::meta::kda_layout_swap12_meta);
 }
 }
 #else
@@ -1871,6 +2014,12 @@ TORCH_LIBRARY_IMPL_EXPAND(CONCAT(_C, _ascend), Meta, ops) {
     ops.impl("chunk_gated_delta_rule_fwd_h", &vllm_ascend::meta::chunk_gated_delta_rule_fwd_h_meta);
     // chunk_fwd_o
     ops.impl("chunk_fwd_o", &vllm_ascend::meta::chunk_fwd_o_meta);
+    // chunk_kda_fwd
+    ops.impl("chunk_kda_fwd", &vllm_ascend::meta::chunk_kda_fwd_meta);
+    // kda_gate_cumsum
+    ops.impl("kda_gate_cumsum", &vllm_ascend::meta::kda_gate_cumsum_meta);
+    // kda_layout_swap12
+    ops.impl("kda_layout_swap12", &vllm_ascend::meta::kda_layout_swap12_meta);
      // store_kv_block
     ops.impl("store_kv_block_pre", &vllm_ascend::meta::store_kv_block_metadata);
     ops.impl("store_kv_block", &vllm_ascend::meta::store_kv_block);
