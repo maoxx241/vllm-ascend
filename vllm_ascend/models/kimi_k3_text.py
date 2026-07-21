@@ -2,6 +2,7 @@
 """vLLM text model implementation for Kimi K3."""
 
 from collections.abc import Iterable
+from typing import Any
 
 import torch
 from torch import nn
@@ -179,6 +180,7 @@ class KimiK3MoE(nn.Module):
             self.routed_expert_up_proj,
         )
 
+        self.shared_experts: KimiK3MLP | None
         if self.num_shared_experts:
             self.shared_experts = KimiK3MLP(
                 config,
@@ -409,9 +411,10 @@ class KimiK3DecoderLayer(nn.Module):
 
         self.input_layernorm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.post_attention_layernorm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-        self.attn_res_block_size = config.attn_res_block_size
-        if self.attn_res_block_size is None:
+        attn_res_block_size = config.attn_res_block_size
+        if attn_res_block_size is None:
             raise ValueError("Kimi K3 requires attn_res_block_size")
+        self.attn_res_block_size = attn_res_block_size
         self.self_attention_res_norm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.mlp_res_norm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.self_attention_res_proj = ReplicatedLinear(
@@ -445,6 +448,7 @@ class KimiK3DecoderLayer(nn.Module):
             )
 
         if self.layer_idx % self.attn_res_block_size == 0:
+            assert prefix_sum is not None
             block_residual = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
             prefix_sum = None
 
@@ -512,6 +516,8 @@ class KimiK3TextModel(nn.Module):
 
     def initial_block_count(self) -> int:
         block_size = self.config.attn_res_block_size
+        if block_size is None:
+            raise ValueError("Kimi K3 requires attn_res_block_size")
         return sum(layer_idx % block_size == 0 for layer_idx in range(self.start_layer))
 
     def forward(
@@ -546,7 +552,10 @@ class KimiK3TextModel(nn.Module):
         )
         return self.norm(hidden_states)
 
-    def load_weights(self, weights: Iterable[tuple[str, torch.Tensor]]) -> set[str]:
+    def load_weights(
+        self,
+        weights: Iterable[tuple[str, torch.Tensor] | tuple[str, torch.Tensor, dict[str, Any]]],
+    ) -> set[str]:
         stacked_params_mapping = [
             (".gate_up_proj", ".gate_proj", 0),
             (".gate_up_proj", ".up_proj", 1),
@@ -565,7 +574,7 @@ class KimiK3TextModel(nn.Module):
 
         for args in weights:
             name, loaded_weight = args[:2]
-            loader_kwargs = args[2] if len(args) > 2 else {}
+            loader_kwargs: dict[str, Any] = args[2] if len(args) == 3 else {}
             if "rotary_emb" in name:
                 continue
             spec_layer = get_spec_layer_idx_from_weight_name(self.config, name)

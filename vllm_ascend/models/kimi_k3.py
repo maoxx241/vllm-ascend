@@ -289,7 +289,14 @@ class AscendKimiK3ForConditionalGeneration(
         if pixel_values is None:
             return None
         if isinstance(pixel_values, list):
-            pixel_values = torch.cat(pixel_values, dim=0)
+            pixel_tensors: list[torch.Tensor] = []
+            for pixel_value in pixel_values:
+                if not isinstance(pixel_value, torch.Tensor):
+                    raise TypeError(f"pixel_values entries must be tensors, got {type(pixel_value)}")
+                pixel_tensors.append(pixel_value)
+            pixel_values = torch.cat(pixel_tensors, dim=0)
+        elif not isinstance(pixel_values, torch.Tensor):
+            raise TypeError(f"pixel_values must be a tensor or list of tensors, got {type(pixel_values)}")
         if pixel_values.ndim in (3, 5):
             pixel_values = pixel_values.reshape(
                 pixel_values.shape[0] * pixel_values.shape[1],
@@ -299,13 +306,13 @@ class AscendKimiK3ForConditionalGeneration(
         pixel_values = pixel_values.to(target_dtype)
         if not isinstance(grid_thws, torch.Tensor):
             raise TypeError(f"grid_thws must be a tensor, got {type(grid_thws)}")
-        grid_thws = grid_thws.reshape(-1, grid_thws.shape[-1])
-        if grid_thws.ndim != 2 or grid_thws.shape[1] != 3:
-            raise ValueError(f"Unexpected Kimi K3 grid_thws shape: {grid_thws.shape}")
+        grid_thws_tensor: torch.Tensor = grid_thws.reshape(-1, grid_thws.shape[-1])
+        if grid_thws_tensor.ndim != 2 or grid_thws_tensor.shape[1] != 3:
+            raise ValueError(f"Unexpected Kimi K3 grid_thws shape: {grid_thws_tensor.shape}")
         return KimiK3MediaPixelInputs(
             type="pixel_values",
             pixel_values=pixel_values,
-            grid_thws=grid_thws,
+            grid_thws=grid_thws_tensor,
         )
 
     def embed_multimodal(self, **kwargs: object) -> NestedTensors | None:
