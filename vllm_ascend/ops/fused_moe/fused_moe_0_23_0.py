@@ -23,6 +23,7 @@ vllm_ascend.ops.fused_moe.fused_moe only.
 
 from __future__ import annotations
 
+from vllm_ascend.ops.activation import AscendSituAndMul, SituActivationConfig
 from vllm_ascend.ops.fused_moe.fused_moe import (
     _EXTRA_CTX,
     AllGatherCommImpl,
@@ -59,6 +60,26 @@ from vllm_ascend.ops.fused_moe.fused_moe import (
     wraps,
 )
 from vllm_ascend.utils import enable_sp
+
+_SITU_KWARG_MISSING = object()
+
+
+def _normalize_situ_activation_kwargs(kwargs: dict) -> SituActivationConfig | None:
+    """Pop plugin-only SiTU args while keeping upstream vLLM validation valid."""
+    situ_beta = kwargs.pop("situ_beta", _SITU_KWARG_MISSING)
+    situ_linear_beta = kwargs.pop("situ_linear_beta", _SITU_KWARG_MISSING)
+    requested_activation = kwargs.get("activation", "silu")
+    if requested_activation == "situ":
+        kwargs["activation"] = "silu"
+        return SituActivationConfig(
+            beta=1.0 if situ_beta is _SITU_KWARG_MISSING else float(situ_beta),
+            linear_beta=(
+                None if situ_linear_beta is _SITU_KWARG_MISSING or situ_linear_beta is None else float(situ_linear_beta)
+            ),
+        )
+    if situ_beta is not _SITU_KWARG_MISSING or situ_linear_beta is not _SITU_KWARG_MISSING:
+        raise ValueError("situ_beta and situ_linear_beta are valid only when activation='situ'.")
+    return None
 
 
 class AscendMoERunner(MoERunner):
@@ -114,12 +135,16 @@ class AscendMoERunner(MoERunner):
         Ascend-specific MoE computation logic.
         """
         if self.shared_experts is None:
-            result = layer.forward_impl(hidden_states, router_logits)
+            result = layer.forward_impl(
+                hidden_states,
+                router_logits,
+                shared_experts_input=shared_input,
+            )
             # If the layer has shared experts, forward_impl returns a tuple (shared_out, routed_out)
             # Otherwise, it returns just routed_out
             # The torch op expects the same return type based on whether it's moe_forward or moe_forward_shared
         else:
-            result = layer.shared_forward_impl(hidden_states, router_logits)
+            result = layer.shared_forward_impl(hidden_states, router_logits, shared_input)
         return result
 
     def _forward_impl(
@@ -151,10 +176,18 @@ class AscendFusedMoE(FusedMoE):
         _ = kwargs.pop("hash") if "hash" in kwargs else None
         tid2eid = kwargs.pop("tid2eid") if "tid2eid" in kwargs else None
 
+        # Upstream vLLM 0.23 validates activation through
+        # MoEActivation.from_str(), which does not know Kimi SiTU. Keep the
+        # upstream shape/weight setup on the equivalent gated "silu" contract,
+        # then carry the exact Ascend runtime activation separately.
+        runtime_activation = _normalize_situ_activation_kwargs(kwargs)
+
         self._original_routed_scaling_factor = kwargs.get("routed_scaling_factor", 1.0)
         super().__init__(*args, **kwargs)
+        self._ascend_runtime_activation: str | SituActivationConfig = runtime_activation or self.activation or "silu"
         self.use_overlapped = True
         self._routed_input_transform = kwargs.get("routed_input_transform")
+        self._routed_output_transform = kwargs.get("routed_output_transform")
         self._shared_experts = kwargs.get("shared_experts")
         self.shared_expert_stream = None
         has_shared_experts = self._shared_experts is not None
@@ -278,15 +311,9 @@ class AscendFusedMoE(FusedMoE):
         setup_moe_comm_method(self.moe_config)
         self.quant_type = self._get_quant_type()
 
-        self.runner = AscendMoERunner(
-            self.layer_name,
-            self.moe_config,
-            self.router,
-            self._routed_input_transform,
-            kwargs.pop("gate", None),
-            kwargs.pop("shared_experts", None),
-            self.quant_method,
-            self.vllm_config.parallel_config.enable_dbo,
+        self.runner = self._create_runner(
+            gate=kwargs.get("gate"),
+            shared_experts=kwargs.get("shared_experts"),
         )
 
         if self.multistream_overlap_shared_expert:
@@ -308,6 +335,19 @@ class AscendFusedMoE(FusedMoE):
         # PPMissingLayer (nn.Identity) never calls AscendFusedMoE.__init__,
         # so only real MoE layers on this rank are registered.
         VllmEplbAdaptor.register_layer(self)
+
+    def _create_runner(self, *, gate, shared_experts):
+        return AscendMoERunner(
+            layer_name=self.layer_name,
+            moe_config=self.moe_config,
+            router=self.router,
+            routed_input_transform=self._routed_input_transform,
+            gate=gate,
+            shared_experts=shared_experts,
+            quant_method=self.quant_method,
+            enable_dbo=self.vllm_config.parallel_config.enable_dbo,
+            routed_output_transform=self._routed_output_transform,
+        )
 
     def _validate_shared_expert_consistency(self):
         """Validate that split shared expert computation matches integrated
@@ -418,7 +458,11 @@ class AscendFusedMoE(FusedMoE):
         )
 
     def forward_impl(  # type: ignore[override]
-        self, hidden_states: torch.Tensor, router_logits: torch.Tensor, return_with_event: bool = False
+        self,
+        hidden_states: torch.Tensor,
+        router_logits: torch.Tensor,
+        return_with_event: bool = False,
+        shared_experts_input: torch.Tensor | None = None,
     ) -> torch.Tensor | FusedMoEResult:
         assert self.quant_method is not None
 
@@ -443,7 +487,8 @@ class AscendFusedMoE(FusedMoE):
             with npu_stream_switch(AscendFusedMoE.gate_stream, enabled=self.multistream_overlap_gate):
                 # share_expert
                 assert fc3_context.shared_experts is not None
-                shared_out = fc3_context.shared_experts(hidden_states)
+                shared_hidden_states = hidden_states if shared_experts_input is None else shared_experts_input
+                shared_out = fc3_context.shared_experts(shared_hidden_states)
                 # NOTE: This is exactly the opposite of `maybe_all_reduce_tensor_model_parallel`
                 moe_comm_type = _EXTRA_CTX.moe_comm_type
                 if (
@@ -510,7 +555,7 @@ class AscendFusedMoE(FusedMoE):
             scoring_func=self.scoring_func,
             routed_scaling_factor=self._original_routed_scaling_factor,
             e_score_correction_bias=self.e_score_correction_bias,
-            activation=self.activation,
+            activation=self._ascend_runtime_activation,
             apply_router_weight_on_input=self.apply_router_weight_on_input,
             enable_force_load_balance=enable_force_load_balance,
             log2phy=self.log2phy,
@@ -569,7 +614,8 @@ class AscendFusedMoE(FusedMoE):
             has_quantized_shared = hasattr(self._shared_experts.gate_up_proj, "weight_scale") and hasattr(
                 self._shared_experts.down_proj, "weight_scale"
             )
-            if has_quantized_shared and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
+            shared_uses_situ = isinstance(self._shared_experts.act_fn, AscendSituAndMul)
+            if has_quantized_shared and not shared_uses_situ and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
                 torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -617,7 +663,7 @@ class AscendFusedMoE(FusedMoE):
                     bias=None,
                     output_dtype=original_dtype,
                 )
-            elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
+            elif has_quantized_shared and not shared_uses_situ and self.quant_type == QuantType.W4A8MXFP:
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
                 torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -670,7 +716,10 @@ class AscendFusedMoE(FusedMoE):
         return shared_out
 
     def shared_forward_impl(  # type: ignore[override]
-        self, hidden_states: torch.Tensor, router_logits: torch.Tensor
+        self,
+        hidden_states: torch.Tensor,
+        router_logits: torch.Tensor,
+        shared_experts_input: torch.Tensor | None = None,
     ):
         if self.shared_multistream_overlap_gate:
             set_flash_common3_context(shared_experts=self._shared_experts)
@@ -682,7 +731,8 @@ class AscendFusedMoE(FusedMoE):
             # increase with extra hidden states. We also assume that all gate
             # linear is unquantized so that we the weight is pre-casted in
             # process_weights_after_loading of AscendUnquantizedLinearMethod.
-            hidden_states_fp32 = hidden_states.float()
+            router_input = hidden_states if shared_experts_input is None else shared_experts_input
+            hidden_states_fp32 = router_input.float()
             before_routed_experts = torch.npu.current_stream().record_event()
             router_logits = F.linear(hidden_states_fp32, gate.weight_fp32)
             after_routed_experts = torch.npu.current_stream().record_event()
@@ -694,6 +744,7 @@ class AscendFusedMoE(FusedMoE):
             hidden_states=hidden_states,
             router_logits=router_logits,
             return_with_event=True,
+            shared_experts_input=shared_experts_input,
         )
         routed_out = fused_moe_results.routed_out
 
@@ -706,7 +757,7 @@ class AscendFusedMoE(FusedMoE):
             shared_out = fc3_context.shared_out
         else:
             shared_out = self._forward_shared_experts(
-                hidden_states,
+                hidden_states if shared_experts_input is None else shared_experts_input,
                 FusedMoEEvents(
                     after_routed_experts=after_routed_experts,
                     before_routed_experts=before_routed_experts,
