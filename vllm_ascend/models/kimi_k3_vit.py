@@ -33,12 +33,13 @@ from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3VisionConfig
 class KimiK3VisionPatchEmbed(nn.Module):
     def __init__(self, config: KimiK3VisionConfig) -> None:
         super().__init__()
-        patch_size = config.patch_size
-        if isinstance(patch_size, int):
-            patch_size = (patch_size, patch_size)
-        if not isinstance(patch_size, Sequence) or len(patch_size) != 2:
-            raise ValueError(f"Invalid Kimi K3 patch size: {patch_size}")
-        self.patch_size = tuple(patch_size)
+        configured_patch_size: int | Sequence[int] = config.patch_size
+        if isinstance(configured_patch_size, int):
+            self.patch_size = (configured_patch_size, configured_patch_size)
+        elif isinstance(configured_patch_size, Sequence) and len(configured_patch_size) == 2:
+            self.patch_size = (configured_patch_size[0], configured_patch_size[1])
+        else:
+            raise ValueError(f"Invalid Kimi K3 patch size: {configured_patch_size}")
         self.proj = nn.Conv2d(
             3,
             config.hidden_size,

@@ -38,7 +38,7 @@ from vllm_ascend.distributed.parallel_state import get_mc2_group
 from vllm_ascend.eplb.adaptor.vllm_adaptor import VllmEplbAdaptor
 from vllm_ascend.eplb.core.eplb_utils import init_eplb_config
 from vllm_ascend.flash_common3_context import get_flash_common3_context, set_flash_common3_context
-from vllm_ascend.ops.activation import AscendSituAndMul
+from vllm_ascend.ops.activation import AscendSituAndMul, SituActivationConfig
 from vllm_ascend.ops.fused_moe.experts_selector import select_experts, zero_experts_compute
 from vllm_ascend.ops.fused_moe.moe_comm_method import AllGatherCommImpl, FusedExpertsResult, setup_moe_comm_method
 from vllm_ascend.ops.fused_moe.moe_runtime_args import build_fused_experts_input
@@ -156,7 +156,7 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
         num_experts: int = -1,
         expert_map: torch.Tensor | None = None,
         apply_router_weight_on_input: bool = False,
-        activation: str = "silu",
+        activation: str | SituActivationConfig = "silu",
         enable_force_load_balance: bool = False,
         log2phy: torch.Tensor = None,
         global_redundant_expert_num: int = 0,
