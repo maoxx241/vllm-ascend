@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 import torch
@@ -77,7 +78,7 @@ def test_kimi_k3_full_rank_gate_replaces_upstream_low_rank_modules(monkeypatch: 
         self.A_log = nn.Parameter(torch.empty(1, 1, self.num_heads, 1, dtype=torch.float32))
         self.A_log.weight_loader = lambda param, loaded: None
 
-    created = {}
+    created: dict[str, Any] = {}
 
     def fake_column_parallel(input_size, output_size, **kwargs):
         created.update(input_size=input_size, output_size=output_size, kwargs=kwargs)
@@ -224,7 +225,7 @@ def test_recurrent_path_threads_safe_gate_and_spec_metadata(monkeypatch: pytest.
     import vllm_ascend.ops.kimi_kda as kimi_kda
 
     layer = _bare_kimi_kda()
-    calls = {}
+    calls: dict[str, Any] = {}
 
     def fake_gate(g, a_log, head_dim, **kwargs):
         calls["gate"] = (g, a_log, head_dim, kwargs)
@@ -278,7 +279,7 @@ def test_prefill_compacts_empty_rows_and_transposes_cache_boundary(monkeypatch: 
 
     monkeypatch.setattr(kimi_kda, "clear_ssm_states", fake_clear)
 
-    calls = {}
+    calls: dict[str, Any] = {}
 
     def fake_gate_cumsum(raw_gate, chunk_size, **kwargs):
         calls["gate"] = (raw_gate, chunk_size, kwargs)
