@@ -38,6 +38,7 @@ from vllm_ascend.distributed.parallel_state import get_mc2_group
 from vllm_ascend.eplb.adaptor.vllm_adaptor import VllmEplbAdaptor
 from vllm_ascend.eplb.core.eplb_utils import init_eplb_config
 from vllm_ascend.flash_common3_context import get_flash_common3_context, set_flash_common3_context
+from vllm_ascend.ops.activation import AscendSituAndMul, SituActivationConfig
 from vllm_ascend.ops.fused_moe.experts_selector import select_experts, zero_experts_compute
 from vllm_ascend.ops.fused_moe.moe_comm_method import AllGatherCommImpl, FusedExpertsResult, setup_moe_comm_method
 from vllm_ascend.ops.fused_moe.moe_runtime_args import build_fused_experts_input
@@ -155,7 +156,7 @@ class AscendUnquantizedFusedMoEMethod(UnquantizedFusedMoEMethod):
         num_experts: int = -1,
         expert_map: torch.Tensor | None = None,
         apply_router_weight_on_input: bool = False,
-        activation: str = "silu",
+        activation: str | SituActivationConfig = "silu",
         enable_force_load_balance: bool = False,
         log2phy: torch.Tensor = None,
         global_redundant_expert_num: int = 0,
@@ -736,7 +737,12 @@ else:
                 has_quantized_shared = hasattr(self._shared_experts.gate_up_proj, "weight_scale") and hasattr(
                     self._shared_experts.down_proj, "weight_scale"
                 )
-                if has_quantized_shared and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
+                shared_uses_situ = isinstance(self._shared_experts.act_fn, AscendSituAndMul)
+                if (
+                    has_quantized_shared
+                    and not shared_uses_situ
+                    and self.quant_type in (QuantType.W8A8, QuantType.W4A8)
+                ):
                     original_dtype = hidden_states.dtype
                     # Execute dynamic quant concurrently with MoE gate.
                     torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -779,7 +785,7 @@ else:
                         bias=None,
                         output_dtype=original_dtype,
                     )
-                elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
+                elif has_quantized_shared and not shared_uses_situ and self.quant_type == QuantType.W4A8MXFP:
                     original_dtype = hidden_states.dtype
                     # Execute dynamic quant concurrently with MoE gate.
                     torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
