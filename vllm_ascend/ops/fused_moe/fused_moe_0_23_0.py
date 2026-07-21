@@ -184,7 +184,7 @@ class AscendFusedMoE(FusedMoE):
 
         self._original_routed_scaling_factor = kwargs.get("routed_scaling_factor", 1.0)
         super().__init__(*args, **kwargs)
-        self._ascend_runtime_activation = runtime_activation or self.activation
+        self._ascend_runtime_activation: str | SituActivationConfig = runtime_activation or self.activation or "silu"
         self.use_overlapped = True
         self._routed_input_transform = kwargs.get("routed_input_transform")
         self._routed_output_transform = kwargs.get("routed_output_transform")
@@ -555,7 +555,7 @@ class AscendFusedMoE(FusedMoE):
             scoring_func=self.scoring_func,
             routed_scaling_factor=self._original_routed_scaling_factor,
             e_score_correction_bias=self.e_score_correction_bias,
-            activation=getattr(self, "_ascend_runtime_activation", self.activation),
+            activation=self._ascend_runtime_activation,
             apply_router_weight_on_input=self.apply_router_weight_on_input,
             enable_force_load_balance=enable_force_load_balance,
             log2phy=self.log2phy,
