@@ -285,6 +285,16 @@
   tests:
     - tests/e2e/pull_request/four_card/test_deepseek_v4.py
 
+- name: models_kimi_k3
+  optional: false
+  source_file_dependencies:
+    - vllm_ascend/ops/kimi_kda.py
+    - vllm_ascend/ops/kimi_kda_state.py
+    - vllm_ascend/transformers_utils
+  tests:
+    - tests/ut/models/test_kimi_k3.py
+    - tests/ut/ops/test_kimi_kda.py
+
 # Ops
 - name: ops_basic
   optional: false
