@@ -182,7 +182,9 @@ def _w4a8_situ_fallback_apply_mlp(
     scale_type: torch.dtype | None,
     per_token_scale_type: torch.dtype | None,
     use_bf16: bool,
+    use_mxfp_quant: bool,
     is_per_channel_weight: bool,
+    mxfp_quant_dtype: QuantType | None = None,
 ) -> tuple[torch.Tensor, object]:
     """Temporary W4A8 SiTU fallback: GMM1 -> SiTU -> quant -> GMM2.
 
@@ -208,6 +210,11 @@ def _w4a8_situ_fallback_apply_mlp(
     else:
         pertoken_scale = dynamic_scale
         externally_quantized_hidden_states = hidden_states
+        pertoken_scale = (
+            DeviceOperator.maybe_normalize_mxfp_scale_layout(dynamic_scale)
+            if use_mxfp_quant
+            else dynamic_scale
+        )
 
     weight_prefetch_method = get_weight_prefetch_method()
     if weight_prefetch_method:
@@ -215,7 +222,8 @@ def _w4a8_situ_fallback_apply_mlp(
 
     w1_scale_list = _as_grouped_matmul_weights(w1_scale)
     w2_scale_list = _as_grouped_matmul_weights(w2_scale)
-    output_dtype = w2_scale_list[0].dtype
+    output_dtype = (w2_scale[0].dtype if isinstance(w2_scale, list)
+                    else w2_scale.dtype)
     bias1, bias2 = None, None
     if w1_scale_bias is not None:
         if group_list_type == 0:
@@ -232,14 +240,17 @@ def _w4a8_situ_fallback_apply_mlp(
     gate_up_out = torch_npu.npu_grouped_matmul(
         x=[hidden_states],
         weight=_as_grouped_matmul_weights(w1),
-        scale=gmm1_scale,
+        antiquant_scale=gmm1_scale if use_mxfp_quant else None,
+        scale=gmm1_scale if not use_mxfp_quant else None,
         bias=bias1,
         per_token_scale=[pertoken_scale],
         split_item=2,
         group_list_type=group_list_type,
         group_type=0,
         group_list=group_list,
-        output_dtype=output_dtype,
+        per_token_scale_dtype=torch_npu.float8_e8m0fnu if use_mxfp_quant else None,
+        weight_dtype=torch_npu.float4_e2m1fn_x2 if use_mxfp_quant else None,
+        output_dtype=output_dtype if not use_mxfp_quant else torch.bfloat16,
     )[0]
     if externally_quantized_hidden_states is not None:
         dispose_tensor(externally_quantized_hidden_states)
@@ -249,7 +260,12 @@ def _w4a8_situ_fallback_apply_mlp(
         beta=activation.beta,
         linear_beta=activation.linear_beta,
     )
-    hidden_states, situ_out_scale = torch_npu.npu_dynamic_quant(hidden_states)
+    hidden_states, situ_out_scale = DeviceOperator.npu_dynamic_quant(
+        hidden_states=hidden_states,
+        dynamic_scale=None,
+        act_quant_type=act_quant_type,
+        use_mxfp_quant=use_mxfp_quant,
+    )
     before_gmm2_evt = torch.npu.current_stream().record_event()
     hidden_states = DeviceOperator.npu_grouped_matmul_gmm2(
         hidden_states=hidden_states,
@@ -264,10 +280,10 @@ def _w4a8_situ_fallback_apply_mlp(
         scale_type=scale_type,
         per_token_scale_type=per_token_scale_type,
         use_bf16=use_bf16,
-        use_mxfp_quant=False,
+        use_mxfp_quant=use_mxfp_quant,
         bias=bias2,
         fallback_output_dtype=output_dtype,
-        mxfp_quant_dtype=QuantType.W4A8,
+        mxfp_quant_dtype=mxfp_quant_dtype,
     )
     return hidden_states, before_gmm2_evt
 
@@ -317,12 +333,6 @@ def quant_apply_mlp(
         )
 
     if situ_activation is not None:
-        if mxfp_quant_dtype != QuantType.W4A8:
-            raise NotImplementedError(
-                f"SiTU quantized MoE currently supports only W4A8 and W4A16 MXFP4; got {mxfp_quant_dtype}."
-            )
-        if use_mxfp_quant:
-            raise ValueError("W4A8 SiTU fallback does not use MXFP activation quantization.")
         if w1_offset is not None or w2_offset is not None:
             raise NotImplementedError("W4A8 SiTU fallback does not support antiquant offsets.")
         return _w4a8_situ_fallback_apply_mlp(
@@ -343,6 +353,8 @@ def quant_apply_mlp(
             per_token_scale_type=per_token_scale_type,
             use_bf16=use_bf16,
             is_per_channel_weight=use_w4a8_per_channel_gmm_swiglu,
+            use_mxfp_quant=use_mxfp_quant,
+            mxfp_quant_dtype=mxfp_quant_dtype,
         )
 
     use_gmm_swiglu_quant_fusion = use_mxfp_quant or (fusion and not dynamic_eplb)
