@@ -1031,6 +1031,31 @@ def is_vl_model(vllm_config: VllmConfig = None):
     return _IS_VL_MODEL
 
 
+def uses_global_inputs_embeds(vllm_config: VllmConfig, modality: str) -> bool:
+    """Whether the first layer receives global inputs_embeds.
+
+    Ascend's model runner builds multimodal or explicitly supplied prompt
+    embeddings before entering the forward context.  In those paths the first
+    layer has not yet been sequence-sharded by FlashComm.  A multimodal model
+    whose supported inputs are all disabled instead follows the input_ids path
+    and receives the usual token shard.
+    """
+    model_config = getattr(vllm_config, "model_config", None)
+    if model_config is None:
+        return False
+    if getattr(model_config, "enable_prompt_embeds", False):
+        return True
+    if not is_vl_model(vllm_config):
+        return False
+
+    multimodal_config = getattr(model_config, "multimodal_config", None)
+    if multimodal_config is None:
+        return False
+    return bool(
+        getattr(multimodal_config, "enable_mm_embeds", False) or multimodal_config.get_limit_per_prompt(modality) > 0
+    )
+
+
 def has_rope(vllm_config: VllmConfig):
     """Checks if the model uses rope."""
     global _HAS_ROPE

@@ -153,6 +153,19 @@ class KimiK3MultiModalProcessor(BaseMultiModalProcessor[KimiK3ProcessingInfo]):
             "grid_thws": MultiModalFieldConfig.batched("vision_chunk", keep_on_cpu=True),
         }
 
+    def _call_hf_processor(
+        self,
+        prompt: str,
+        mm_data: Mapping[str, object],
+        mm_kwargs: Mapping[str, object],
+        tok_kwargs: Mapping[str, object],
+    ) -> BatchFeature:
+        # Vision chunks require joint text/media processing.  Overriding this
+        # hook also makes the processor-cache miss path use dummy text instead
+        # of the generic image-only helper, which does not support
+        # ``vision_chunks``.
+        return super()._call_hf_processor(prompt, mm_data, mm_kwargs, tok_kwargs)
+
     def _get_prompt_updates(
         self,
         mm_items: MultiModalDataItems,

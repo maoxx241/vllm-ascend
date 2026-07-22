@@ -1195,7 +1195,7 @@ class TestAscendMLAImpl(TestBase):
     @patch("vllm_ascend.attention.mla_v1.maybe_save_kv_layer_to_connector")
     @patch("vllm_ascend.attention.mla_v1.get_weight_prefetch_method", return_value=MagicMock())
     @patch("torch.ops.vllm.maybe_all_gather_and_maybe_unpad")
-    def test_kimi_k3_gate_uses_same_gather_unpad_as_q_and_kv(
+    def test_kimi_k3_gate_gathers_tokens_before_local_head_projection(
         self,
         mock_gather_unpad,
         mock_get_weight_prefetch_method,
@@ -1243,9 +1243,11 @@ class TestAscendMLAImpl(TestBase):
                 output=output,
             )
 
+        self.impl.g_proj.assert_called_once()
+        torch.testing.assert_close(self.impl.g_proj.call_args.args[0], hidden_states.flip(0))
         gathered_widths = [call.args[0].shape[-1] for call in mock_gather_unpad.call_args_list]
         gathered_flags = [call.args[1] for call in mock_gather_unpad.call_args_list]
-        self.assertEqual(gathered_widths, [12 * 128, self.impl.q_lora_rank, 64])
+        self.assertEqual(gathered_widths, [16, self.impl.q_lora_rank, 64])
         self.assertEqual(gathered_flags, [True, True, True])
 
     @patch("vllm_ascend.attention.mla_v1.maybe_save_kv_layer_to_connector")
@@ -1304,7 +1306,11 @@ class TestAscendMLAImpl(TestBase):
         self.assertEqual(o_proj_input.shape, (num_tokens, local_heads * 128))
         torch.testing.assert_close(o_proj_input, expected)
         torch.testing.assert_close(output, projected)
-        mock_gather_unpad.assert_called_once_with(gate_logits.contiguous(), True)
+        mock_gather_unpad.assert_called_once()
+        torch.testing.assert_close(mock_gather_unpad.call_args.args[0], hidden_states)
+        self.assertTrue(mock_gather_unpad.call_args.args[1])
+        self.impl.g_proj.assert_called_once()
+        torch.testing.assert_close(self.impl.g_proj.call_args.args[0], hidden_states)
 
     @patch("vllm_ascend.attention.mla_v1.get_current_vllm_config")
     def test_init_head_padding_for_non_power_of_two(self, mock_get_current_vllm_config):

@@ -43,9 +43,11 @@ from vllm.model_executor.models.utils import (
 )
 from vllm.sequence import IntermediateTensors
 
+from vllm_ascend.ascend_forward_context import _EXTRA_CTX
 from vllm_ascend.ops.activation import AscendSituAndMul
 from vllm_ascend.ops.kimi_kda_state import kimi_kda_state_shape
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3TextConfig
+from vllm_ascend.utils import uses_global_inputs_embeds
 
 
 def _situ_params(config: KimiK3TextConfig) -> tuple[float, float | None]:
@@ -358,7 +360,15 @@ def _apply_attention_residual(
     normalized = values_fp32 * torch.rsqrt(variance + norm.variance_epsilon)
     score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
     probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
-    return torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    mixed = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    if _EXTRA_CTX.flash_comm_v1_enabled:
+        # FlashComm changes the first decoder layer from the global token
+        # layout to a TP-local layout.  The learned-residual arithmetic above
+        # can specialize that derived token dimension to the compile example
+        # size.  Re-anchor it to prefix_sum through the existing no-op residual
+        # helper so later KDA/MLA layers keep the TP-local SymInt dynamic.
+        mixed = torch.ops.vllm.maybe_chunk_residual(prefix_sum, mixed)
+    return mixed
 
 
 class KimiK3DecoderLayer(nn.Module):
@@ -367,6 +377,7 @@ class KimiK3DecoderLayer(nn.Module):
         self.config = config
         self.hidden_size = config.hidden_size
         self.layer_idx = int(prefix.rsplit(".", 1)[1])
+        self.is_vl_first_layer = bool(uses_global_inputs_embeds(vllm_config, "vision_chunk") and self.layer_idx == 0)
         quant_config = vllm_config.quant_config
 
         if config.is_kda_layer(self.layer_idx):
@@ -453,8 +464,27 @@ class KimiK3DecoderLayer(nn.Module):
             prefix_sum = None
 
         hidden_states = self.input_layernorm(hidden_states)
-        attention_output = torch.empty_like(hidden_states)
+        if self.is_vl_first_layer and _EXTRA_CTX.flash_comm_v1_enabled:
+            tp_size = get_tensor_model_parallel_world_size()
+            num_local_tokens = hidden_states.shape[0] // tp_size
+            attention_output = torch.empty(
+                (num_local_tokens, hidden_states.shape[-1]),
+                dtype=hidden_states.dtype,
+                device=hidden_states.device,
+            )
+        else:
+            attention_output = torch.empty_like(hidden_states)
         self.self_attn(positions=positions, hidden_states=hidden_states, output=attention_output)
+
+        # The multimodal first layer transitions from full inputs_embeds to a
+        # FlashComm token shard.  The token axis is dim 0 for both tensors, so
+        # reuse the framework residual sharding op directly.  The singleton
+        # block axis on the output anchor keeps fake/meta and runtime 3-D.
+        if self.is_vl_first_layer and _EXTRA_CTX.flash_comm_v1_enabled:
+            block_residual = torch.ops.vllm.maybe_chunk_residual(
+                attention_output.unsqueeze(1),
+                block_residual,
+            )
         prefix_sum = attention_output if prefix_sum is None else prefix_sum + attention_output
 
         hidden_states = _apply_attention_residual(
