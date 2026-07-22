@@ -12,6 +12,22 @@ from vllm_ascend.utils import enable_custom_op
 torch_npu.npu.config.allow_internal_format = True
 enable_custom_op()
 
+DETERMINISM_REPEATS = 20
+CHUNK_KDA_OUTPUT_NAMES = (
+    "o",
+    "final_state",
+    "g",
+    "aqk",
+    "akk",
+    "w",
+    "u",
+    "qg",
+    "kg",
+    "v_new",
+    "h",
+    "initial_state_out",
+)
+
 
 @dataclass
 class ChunkKdaReferenceResult:
@@ -79,7 +95,7 @@ def chunk_kda_forward_reference(
                 last_g = g_blk[cur_t - 1]
                 qg_blk = q_blk * torch.exp2(g_blk)
                 kg_blk = k_blk * torch.exp2(last_g[None, :] - g_blk)
-                h_prev = state[b, ihv]
+                h_prev = state[b, ihv].clone()
                 v_new_blk = u_blk - w_blk @ h_prev
                 state[b, ihv] = torch.exp2(last_g)[:, None] * h_prev + kg_blk.T @ v_new_blk
 
@@ -98,6 +114,34 @@ def _cleanup_npu():
 
 def _assert_close(name, actual, expected, rtol=5e-2, atol=5e-2):
     torch.testing.assert_close(actual.detach().cpu(), expected.detach().cpu(), rtol=rtol, atol=atol, msg=name)
+
+
+def _snapshot_outputs(outputs):
+    torch.npu.synchronize()
+    return tuple(output.detach().cpu().contiguous() for output in outputs)
+
+
+def _assert_outputs_bitwise_equal(reference, actual, repeat):
+    assert len(reference) == len(actual) == len(CHUNK_KDA_OUTPUT_NAMES)
+    for name, expected, current in zip(CHUNK_KDA_OUTPUT_NAMES, reference, actual):
+        same_metadata = expected.shape == current.shape and expected.dtype == current.dtype
+        same_bits = same_metadata and torch.equal(expected.view(torch.uint8), current.view(torch.uint8))
+        if same_bits:
+            continue
+
+        expected_float = expected.float()
+        current_float = current.float()
+        finite = torch.isfinite(expected_float) & torch.isfinite(current_float)
+        max_abs_diff = (
+            (expected_float[finite] - current_float[finite]).abs().max().item() if finite.any() else float("nan")
+        )
+        expected_nonfinite = (~torch.isfinite(expected_float)).sum().item()
+        current_nonfinite = (~torch.isfinite(current_float)).sum().item()
+        raise AssertionError(
+            f"repeat={repeat} output={name} is not bitwise deterministic: "
+            f"expected_nonfinite={expected_nonfinite}, current_nonfinite={current_nonfinite}, "
+            f"max_abs_diff={max_abs_diff}"
+        )
 
 
 def _gate_cumsum_reference(g, chunk_size, cu_seqlens=None):
@@ -252,19 +296,39 @@ def test_chunk_kda_fwd_c128_v256_path(total_t, hq, hv, kdim, vdim, dtype):
     scale = kdim**-0.5
 
     gk = torch.ops._C_ascend.kda_gate_cumsum(g, 64, layout="BSND")
-    got = torch.ops._C_ascend.chunk_kda_fwd(
-        q,
-        k,
-        v,
-        gk,
-        beta,
-        scale,
-        64,
-        layout="BSND",
-        initial_state=initial_state,
-        output_final_state=True,
-        return_intermediate=True,
+    def run_chunk_kda_fwd():
+        return torch.ops._C_ascend.chunk_kda_fwd(
+            q,
+            k,
+            v,
+            gk,
+            beta,
+            scale,
+            64,
+            layout="BSND",
+            initial_state=initial_state,
+            output_final_state=True,
+            return_intermediate=True,
+        )
+
+    is_a5_determinism_case = (
+        total_t == 128
+        and hq == 2
+        and hv == 2
+        and kdim == 128
+        and vdim == 256
+        and dtype == torch.bfloat16
     )
+    if is_a5_determinism_case:
+        run_chunk_kda_fwd()
+        torch.npu.synchronize()
+        got = run_chunk_kda_fwd()
+        reference_outputs = _snapshot_outputs(got)
+        for repeat in range(1, DETERMINISM_REPEATS):
+            current_outputs = _snapshot_outputs(run_chunk_kda_fwd())
+            _assert_outputs_bitwise_equal(reference_outputs, current_outputs, repeat)
+    else:
+        got = run_chunk_kda_fwd()
     ref = chunk_kda_forward_reference(
         q.cpu(),
         k.cpu(),
