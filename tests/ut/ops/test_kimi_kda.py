@@ -16,6 +16,7 @@ from vllm_ascend.ops.kimi_kda import (
 from vllm_ascend.ops.kimi_kda_state import kimi_kda_state_shape
 from vllm_ascend.ops.triton.kda.kda import fused_kda_gate
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3TextConfig
+from vllm_ascend.utils import uses_global_inputs_embeds
 
 
 def _bare_kimi_kda(*, head_dim: int = 2, lower_bound: float | None = -5.0):
@@ -87,6 +88,7 @@ def test_kimi_k3_full_rank_gate_replaces_upstream_low_rank_modules(monkeypatch: 
     monkeypatch.setattr(KimiGatedDeltaNetAttention, "__init__", fake_upstream_init)
     monkeypatch.setattr(kimi_kda, "ColumnParallelLinear", fake_column_parallel)
     monkeypatch.setattr(kimi_kda, "get_tensor_model_parallel_rank", lambda: 0)
+    monkeypatch.setattr(kimi_kda, "uses_global_inputs_embeds", lambda vllm_config, modality: False)
 
     config = KimiK3TextConfig(
         hidden_size=16,
@@ -122,12 +124,101 @@ def test_kimi_k3_full_rank_gate_replaces_upstream_low_rank_modules(monkeypatch: 
         },
     }
     assert layer.gate_lower_bound == -5.0
+    assert layer.is_vl_first_layer is False
     assert layer.o_norm.eps == 1e-6
     layer.A_log.weight_loader(layer.A_log, torch.arange(128, dtype=torch.float32))
     torch.testing.assert_close(
         layer.A_log.flatten(),
         torch.arange(3, dtype=torch.float32),
     )
+
+
+@pytest.mark.parametrize(
+    ("uses_global_embeds", "prefix", "expected"),
+    [
+        (True, "model.layers.0.self_attn", True),
+        (True, "model.layers.1.self_attn", False),
+        (False, "model.layers.0.self_attn", False),
+    ],
+)
+def test_kimi_kda_identifies_only_global_input_layer_zero_as_already_global(
+    monkeypatch: pytest.MonkeyPatch,
+    uses_global_embeds: bool,
+    prefix: str,
+    expected: bool,
+):
+    import vllm_ascend.ops.kimi_kda as kimi_kda
+
+    def fake_upstream_init(self, config, vllm_config, prefix):
+        del vllm_config, prefix
+        nn.Module.__init__(self)
+        self.hidden_size = config.hidden_size
+        self.head_dim = config.linear_attn_config["head_dim"]
+        self.num_heads = config.linear_attn_config["num_heads"]
+        self.quant_config = None
+        self.o_norm = SimpleNamespace(eps=1e-5)
+        self.A_log = nn.Parameter(torch.empty(1, 1, self.num_heads, 1))
+
+    monkeypatch.setattr(KimiGatedDeltaNetAttention, "__init__", fake_upstream_init)
+    monkeypatch.setattr(
+        kimi_kda,
+        "uses_global_inputs_embeds",
+        lambda vllm_config, modality: uses_global_embeds,
+    )
+    config = KimiK3TextConfig(
+        hidden_size=4,
+        rms_norm_eps=1e-6,
+        linear_attn_config={
+            "kda_layers": [1],
+            "full_attn_layers": [2],
+            "head_dim": 2,
+            "num_heads": 1,
+            "use_full_rank_gate": False,
+        },
+    )
+
+    layer = AscendKimiGatedDeltaNetAttention(
+        config,
+        SimpleNamespace(quant_config=None),
+        prefix=prefix,
+    )
+
+    assert layer.is_vl_first_layer is expected
+
+
+@pytest.mark.parametrize(
+    ("is_vl", "limit", "enable_mm_embeds", "enable_prompt_embeds", "expected"),
+    [
+        (True, 1, False, False, True),
+        (True, 0, False, False, False),
+        (True, 0, True, False, True),
+        (False, 0, False, True, True),
+        (False, 0, False, False, False),
+    ],
+)
+def test_kimi_kda_global_input_layout_matches_runner_input_path(
+    monkeypatch: pytest.MonkeyPatch,
+    is_vl: bool,
+    limit: int,
+    enable_mm_embeds: bool,
+    enable_prompt_embeds: bool,
+    expected: bool,
+):
+    import vllm_ascend.utils as ascend_utils
+
+    monkeypatch.setattr(ascend_utils, "is_vl_model", lambda vllm_config: is_vl)
+    mm_config = SimpleNamespace(
+        enable_mm_embeds=enable_mm_embeds,
+        get_limit_per_prompt=lambda modality: limit,
+    )
+    vllm_config = SimpleNamespace(
+        model_config=SimpleNamespace(
+            enable_prompt_embeds=enable_prompt_embeds,
+            multimodal_config=mm_config,
+        )
+    )
+
+    assert uses_global_inputs_embeds(vllm_config, "vision_chunk") is expected
 
 
 def test_kimi_k3_a_log_loader_trims_padding_then_tp8_shards(monkeypatch):
@@ -166,6 +257,110 @@ def test_kimi_k3_a_log_loader_accepts_converted_4d_weight(monkeypatch):
         param.flatten(),
         torch.arange(72, 84, dtype=torch.float32),
     )
+
+
+@pytest.mark.parametrize(
+    ("case", "is_vl_first_layer", "input_rows", "expected_gather_label"),
+    [
+        ("vl_first_layer", True, 4, False),
+        ("vl_later_layer", False, 2, True),
+        ("text_only_model", False, 2, True),
+    ],
+)
+def test_kimi_kda_flashcomm_gathers_once_before_projections(
+    monkeypatch: pytest.MonkeyPatch,
+    case: str,
+    is_vl_first_layer: bool,
+    input_rows: int,
+    expected_gather_label: bool,
+):
+    """KDA must run its stateful core over global, not SP-local, tokens."""
+    del case
+    import vllm_ascend.ops.kimi_kda as kimi_kda
+
+    class TupleProjection(nn.Module):
+        def __init__(self, out_features: int, name: str) -> None:
+            super().__init__()
+            self.out_features = out_features
+            self.name = name
+
+        def forward(self, hidden_states: torch.Tensor):
+            projection_rows[self.name] = hidden_states.shape[0]
+            values = hidden_states[:, :1].expand(-1, self.out_features).clone()
+            return values, None
+
+    class GateNorm(nn.Module):
+        def forward(self, core_attn_out: torch.Tensor, output_gate: torch.Tensor):
+            norm_shapes.append((tuple(core_attn_out.shape), tuple(output_gate.shape)))
+            return core_attn_out
+
+    class LocalOutputProjection(nn.Module):
+        def forward(self, core_attn_out: torch.Tensor):
+            o_proj_input_rows.append(core_attn_out.shape[0])
+            # Model FlashComm's row-parallel reduce-scatter: the stateful KDA
+            # core sees four global rows while o_proj returns two local rows.
+            local = core_attn_out[:2].repeat(1, 2)
+            return local, None
+
+    layer = _bare_kimi_kda()
+    layer.is_vl_first_layer = is_vl_first_layer
+    layer.local_num_heads = 1
+    layer.prefix = "model.layers.0.self_attn"
+    layer.use_full_rank_gate = True
+
+    projection_rows: dict[str, int] = {}
+    layer.q_proj = TupleProjection(2, "q")
+    layer.k_proj = TupleProjection(2, "k")
+    layer.v_proj = TupleProjection(2, "v")
+    layer.b_proj = TupleProjection(1, "beta")
+    layer.f_a_proj = TupleProjection(2, "f_a")
+    layer.f_b_proj = TupleProjection(2, "f_b")
+    layer.g_proj = TupleProjection(2, "g")
+    norm_shapes: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
+    layer.o_norm = GateNorm()
+    o_proj_input_rows: list[int] = []
+    layer.o_proj = LocalOutputProjection()
+
+    gather_calls: list[tuple[int, bool, bool]] = []
+
+    def fake_gather(hidden_states: torch.Tensor, label: bool):
+        gather_calls.append((hidden_states.shape[0], label, hidden_states.is_contiguous()))
+        if label:
+            return torch.cat((hidden_states, hidden_states + 10), dim=0)
+        return hidden_states
+
+    core_shapes: list[tuple[int, ...]] = []
+
+    def fake_kda_attention(q, k, v, raw_gate, beta, core_attn_out, prefix):
+        del k, v, raw_gate, beta
+        assert prefix == layer.prefix
+        core_shapes.append(tuple(core_attn_out.shape))
+        core_attn_out.copy_(q.reshape(1, q.shape[0], 1, 2))
+
+    monkeypatch.setattr(
+        kimi_kda.torch.ops.vllm,
+        "maybe_all_gather_and_maybe_unpad",
+        fake_gather,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        kimi_kda.torch.ops.vllm,
+        "kda_attention",
+        fake_kda_attention,
+        raising=False,
+    )
+
+    hidden_states = torch.arange(input_rows * 4, dtype=torch.float32).reshape(input_rows, 4)
+    output = torch.full((2, 4), torch.nan)
+    layer(hidden_states, torch.zeros(input_rows, dtype=torch.long), output)
+
+    assert gather_calls == [(input_rows, expected_gather_label, True)]
+    assert set(projection_rows.values()) == {4}
+    assert core_shapes == [(1, 4, 1, 2)]
+    assert norm_shapes == [((1, 4, 1, 2), (4, 1, 2))]
+    assert o_proj_input_rows == [4]
+    expected_output = torch.tensor([[0.0, 0.0, 0.0, 0.0], [4.0, 4.0, 4.0, 4.0]])
+    torch.testing.assert_close(output, expected_output)
 
 
 def test_fused_kda_gate_rejects_invalid_safe_lower_bound_before_launch():

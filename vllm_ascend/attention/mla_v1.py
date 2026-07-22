@@ -1816,12 +1816,13 @@ class AscendMLAImpl(MLAAttentionImpl):
 
         gate = None
         if self.use_output_gate:
-            # Project before MLA preprocess mutates/gathers hidden_states, then
-            # apply exactly the same sequence-parallel gather/unpad operation
-            # used by q_c and kv_no_split below.
+            # Each TP rank owns a different output-head shard in g_proj. Gather
+            # the token shard first, then project the full token sequence into
+            # this rank's local heads. Gathering an already projected gate
+            # would instead concatenate different head shards along tokens.
             assert self.g_proj is not None
-            gate = self.g_proj(hidden_states)[0]
-            gate = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(gate.contiguous(), need_gather_q_kv)
+            gate_input = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(hidden_states.contiguous(), need_gather_q_kv)
+            gate = self.g_proj(gate_input)[0]
 
         # MLA Preprocess
         if (self.fa_quant_layer or self.enable_mlapo) and (
