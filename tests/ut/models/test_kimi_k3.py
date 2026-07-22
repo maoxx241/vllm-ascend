@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 import torch
+import torch_npu
 from PIL import Image
 from torch import nn
 from transformers import BatchFeature
@@ -429,6 +430,20 @@ def test_attention_residual_matches_reference_math(monkeypatch: pytest.MonkeyPat
     norm.variance_epsilon = 1e-5
     projection = nn.Linear(4, 1, bias=False)
 
+    rms_norm_calls: list[tuple[torch.dtype, torch.dtype, float]] = []
+
+    def fake_npu_rms_norm(
+        values: torch.Tensor,
+        weight: torch.Tensor,
+        epsilon: float,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        rms_norm_calls.append((values.dtype, weight.dtype, epsilon))
+        variance = values.square().mean(-1, keepdim=True)
+        normalized = values * torch.rsqrt(variance + epsilon) * weight
+        return normalized, torch.rsqrt(variance + epsilon)
+
+    monkeypatch.setattr(torch_npu, "npu_rms_norm", fake_npu_rms_norm)
+
     actual = _apply_attention_residual(prefix_sum, block_residual, projection, norm)
 
     values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
@@ -437,6 +452,7 @@ def test_attention_residual_matches_reference_math(monkeypatch: pytest.MonkeyPat
     score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
     probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
     expected = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    assert rms_norm_calls == [(torch.float32, torch.float32, 1e-5)]
     torch.testing.assert_close(actual, expected)
 
 
@@ -455,6 +471,15 @@ def test_attention_residual_flashcomm_reanchors_dynamic_token_shape(monkeypatch:
     projection = nn.Linear(4, 1, bias=False)
     anchor_calls: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
 
+    def fake_npu_rms_norm(
+        values: torch.Tensor,
+        weight: torch.Tensor,
+        epsilon: float,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        variance = values.square().mean(-1, keepdim=True)
+        normalized = values * torch.rsqrt(variance + epsilon) * weight
+        return normalized, torch.rsqrt(variance + epsilon)
+
     def fake_shape_anchor(x: torch.Tensor, residual: torch.Tensor) -> torch.Tensor:
         anchor_calls.append((tuple(x.shape), tuple(residual.shape)))
         assert x.shape == residual.shape
@@ -466,6 +491,7 @@ def test_attention_residual_flashcomm_reanchors_dynamic_token_shape(monkeypatch:
         fake_shape_anchor,
         raising=False,
     )
+    monkeypatch.setattr(torch_npu, "npu_rms_norm", fake_npu_rms_norm)
 
     actual = _apply_attention_residual(prefix_sum, block_residual, projection, norm)
 

@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from typing import Any
 
 import torch
+import torch_npu
 from torch import nn
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
@@ -356,10 +357,13 @@ def _apply_attention_residual(
     """Apply K3's learned normalized mixture over residual block starts."""
     values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
     values_fp32 = values.float()
-    variance = values_fp32.square().mean(-1, keepdim=True)
-    normalized = values_fp32 * torch.rsqrt(variance + norm.variance_epsilon)
-    score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
-    probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
+    normalized, _ = torch_npu.npu_rms_norm(
+        values_fp32,
+        norm.weight.float(),
+        norm.variance_epsilon,
+    )
+    scores = torch.matmul(normalized, projection.weight.t().float()).squeeze(-1)
+    probabilities = scores.softmax(-1).unsqueeze(1)
     mixed = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
     if _EXTRA_CTX.flash_comm_v1_enabled:
         # FlashComm changes the first decoder layer from the global token
