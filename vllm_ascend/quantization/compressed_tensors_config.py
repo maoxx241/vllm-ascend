@@ -338,9 +338,7 @@ class AscendCompressedTensorsConfig(QuantizationConfig):
                 f"quant_type={quant_type}, layer_type={layer_type}."
             )
 
-        if quant_type == "W4A16_MXFP4" and format == MXFP4_PACK_QUANTIZED_FORMAT:
-            # compressed-tensors serializes this format as `weight_packed`,
-            # whereas ModelSlim's W4A16_MXFP4 checkpoints use `weight`.
+        if quant_type == "W4A8_MXFP" and format == MXFP4_PACK_QUANTIZED_FORMAT:
             return scheme_cls(use_weight_packed=True)
         return scheme_cls()
 
@@ -362,8 +360,8 @@ class AscendCompressedTensorsConfig(QuantizationConfig):
         """
         # use the per-layer format if defined, otherwise, use global format
         format = format if format is not None else self.quant_format
-        if self._is_w4a16_mxfp4(weight_quant, input_quant, format):
-            return "W4A16_MXFP4"
+        if self._is_packed_mxfp4(weight_quant, input_quant, format):
+            return "W4A8_MXFP"
 
         act_quant_format = is_activation_quantization_format(format)
 
@@ -384,8 +382,8 @@ class AscendCompressedTensorsConfig(QuantizationConfig):
             return "W4A16"
 
         raise NotImplementedError("No compressed-tensors compatible quantization type was found.")
-
-    def _is_w4a16_mxfp4(
+        
+    def _is_packed_mxfp4(
         self,
         weight_quant: "QuantizationArgs",
         input_quant: Optional["QuantizationArgs"],
