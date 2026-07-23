@@ -22,13 +22,17 @@ from vllm.utils.network_utils import make_zmq_socket
 from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 from vllm.v1.core.block_pool import BlockPool
 from vllm.v1.core.kv_cache_manager import KVCacheBlocks
+from vllm.v1.core.kv_cache_utils import BlockHash
 from vllm.v1.core.sched.output import SchedulerOutput
 from vllm.v1.kv_cache_interface import KVCacheConfig
 from vllm.v1.outputs import KVConnectorOutput
 from vllm.v1.request import Request
 from vllm.v1.serial_utils import MsgpackDecoder
 
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import AscendStoreKVConnectorWorkerMetadata
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+    AscendStoreKVConnectorWorkerMetadata,
+    _block_hash_to_bytes,
+)
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler import (
     KVPoolScheduler,
     get_zmq_rpc_path_lookup,
@@ -306,9 +310,10 @@ class LookupKeyServer:
                 kv_group_ids = self.decoder.decode([all_frames[1]])
                 hash_frames = all_frames[2:]
                 hashes_str = self.decoder.decode(hash_frames)
+                block_hashes = [BlockHash(_block_hash_to_bytes(h)) for h in hashes_str]
                 result = self.pool_worker.lookup_scheduler(
                     token_len,
-                    hashes_str,
+                    block_hashes,
                     kv_group_ids,
                     use_layerwise=False,
                 )
