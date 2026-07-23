@@ -703,6 +703,7 @@ class TestAscendFusedMoE:
         layer.moe_load = torch.zeros(2, dtype=torch.int64)
         layer.multi_stage = False
         layer.log2phy = torch.tensor([1, 0])
+        layer._ascend_runtime_activation = "silu"
         return layer
 
     def test_situ_kwargs_are_hidden_from_upstream_activation_validation(self):
@@ -969,20 +970,24 @@ class TestAscendFusedMoESharedExperts:
         torch.testing.assert_close(part1_out, gate_up)
         torch.testing.assert_close(part2_out, F.sigmoid(gate_out) * down_out)
 
-    def test_w8a8_shared_situ_uses_split_linear_activation_linear_path(self, monkeypatch):
+    def test_w8a8_shared_situ_uses_dequant_situ_quant(self, monkeypatch):
         layer = AscendFusedMoE.__new__(AscendFusedMoE)
         if not hasattr(layer, "_forward_shared_experts"):
             pytest.skip("Current AscendFusedMoE does not split shared experts")
         hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
-        gate_up = torch.tensor(
-            [[-8.0, 1.0, -30.0, 40.0], [0.5, 7.0, -2.0, 3.0]],
-            dtype=torch.bfloat16,
-        )
+        gate_up = torch.ones(2, 4, dtype=torch.int32)
+        quantized_input = torch.ones(2, 4, dtype=torch.int8)
+        input_scale = torch.ones(2, dtype=torch.float32)
+        quantized_situ = torch.ones(2, 2, dtype=torch.int8)
+        situ_scale = torch.ones(2, dtype=torch.float32)
         down_out = torch.randn(2, 4, dtype=torch.bfloat16)
-        gate_up_proj = MagicMock(return_value=(gate_up, None))
-        gate_up_proj.weight_scale = torch.ones(1)
-        down_proj = MagicMock(return_value=(down_out, None))
-        down_proj.weight_scale = torch.ones(1)
+        gate_up_proj = MagicMock()
+        gate_up_proj.weight = torch.ones(4, 4, dtype=torch.int8)
+        gate_up_proj.weight_scale = torch.ones(4, dtype=torch.bfloat16)
+        gate_up_proj.weight_scale_fp32 = torch.ones(4, dtype=torch.float32)
+        down_proj = MagicMock()
+        down_proj.weight = torch.ones(2, 4, dtype=torch.int8)
+        down_proj.weight_scale = torch.ones(4, dtype=torch.bfloat16)
         act_fn = AscendSituAndMul(beta=4.0, linear_beta=25.0)
         layer._shared_experts = SimpleNamespace(
             gate_up_proj=gate_up_proj,
@@ -998,14 +1003,18 @@ class TestAscendFusedMoESharedExperts:
             before_gmm2=MagicMock(),
             before_combine=MagicMock(),
         )
-        fast_dynamic_quant = MagicMock()
-        fast_quant_matmul = MagicMock()
+        fast_dynamic_quant = MagicMock(return_value=(quantized_input, input_scale))
+        fast_quant_matmul = MagicMock(side_effect=[gate_up, down_out])
+        custom_ops = SimpleNamespace(
+            dequant_situ_quant=MagicMock(return_value=(quantized_situ, situ_scale)),
+        )
 
         monkeypatch.setattr(fused_moe_legacy_module, "npu_stream_switch", lambda *_args, **_kwargs: nullcontext())
         monkeypatch.setattr(fused_moe_legacy_module, "shared_experts_calculation_stream", MagicMock())
         monkeypatch.setattr(fused_moe_legacy_module.torch.npu, "current_stream", MagicMock(return_value=stream))
         monkeypatch.setattr(fused_moe_legacy_module.torch_npu, "npu_dynamic_quant", fast_dynamic_quant)
         monkeypatch.setattr(fused_moe_legacy_module.torch_npu, "npu_quant_matmul", fast_quant_matmul)
+        monkeypatch.setattr(fused_moe_legacy_module.torch.ops, "_C_ascend", custom_ops)
         monkeypatch.setattr(
             fused_moe_legacy_module,
             "_EXTRA_CTX",
@@ -1014,13 +1023,75 @@ class TestAscendFusedMoESharedExperts:
 
         output = layer._forward_shared_experts(hidden_states, events)
 
-        expected_situ = act_fn(gate_up)
         torch.testing.assert_close(output, down_out)
-        gate_up_proj.assert_called_once_with(hidden_states)
-        down_proj.assert_called_once()
-        torch.testing.assert_close(down_proj.call_args.args[0], expected_situ, rtol=0, atol=0)
-        fast_dynamic_quant.assert_not_called()
-        fast_quant_matmul.assert_not_called()
+        gate_up_proj.assert_not_called()
+        down_proj.assert_not_called()
+        fast_dynamic_quant.assert_called_once_with(hidden_states)
+        assert fast_quant_matmul.call_count == 2
+        situ_call = custom_ops.dequant_situ_quant.call_args.kwargs
+        assert situ_call["x"] is gate_up
+        assert situ_call["weight_scale"] is gate_up_proj.weight_scale_fp32
+        assert situ_call["activation_scale"] is input_scale
+        assert situ_call["beta"] == 4.0
+        assert situ_call["linear_beta"] == 25.0
+
+    def test_w4a8_mxfp_shared_situ_uses_situ_mx_quant(self, monkeypatch):
+        layer = AscendFusedMoE.__new__(AscendFusedMoE)
+        if not hasattr(layer, "_forward_shared_experts"):
+            pytest.skip("Current AscendFusedMoE does not split shared experts")
+        hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
+        quantized_input = torch.ones(2, 4, dtype=torch.float8_e4m3fn)
+        input_scale = torch.ones(2, 1, dtype=torch.float32)
+        gate_up = torch.randn(2, 4, dtype=torch.bfloat16)
+        quantized_situ = torch.ones(2, 2, dtype=torch.float8_e4m3fn)
+        situ_scale = torch.ones(2, 1, dtype=torch.float32)
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        gate_up_proj = MagicMock(return_value=(gate_up, None))
+        gate_up_proj.weight_scale = torch.ones(1)
+        down_proj = MagicMock(return_value=(down_out, None))
+        down_proj.weight_scale = torch.ones(1)
+        layer._shared_experts = SimpleNamespace(
+            gate_up_proj=gate_up_proj,
+            down_proj=down_proj,
+            act_fn=AscendSituAndMul(beta=4.0, linear_beta=25.0),
+        )
+        layer.quant_type = QuantType.W4A8MXFP
+        layer.multistream_overlap_shared_expert = False
+        events = fused_moe_module.FusedMoEEvents(
+            before_routed_experts=MagicMock(),
+            before_dispatch=MagicMock(),
+            before_gmm2=MagicMock(),
+            before_combine=MagicMock(),
+        )
+        custom_ops = SimpleNamespace(
+            situ_mx_quant=MagicMock(return_value=(quantized_situ, situ_scale)),
+        )
+
+        monkeypatch.setattr(fused_moe_legacy_module, "npu_stream_switch", lambda *_args, **_kwargs: nullcontext())
+        monkeypatch.setattr(fused_moe_legacy_module, "shared_experts_calculation_stream", MagicMock())
+        monkeypatch.setattr(fused_moe_legacy_module.torch.npu, "current_stream", MagicMock(return_value=MagicMock()))
+        monkeypatch.setattr(
+            fused_moe_legacy_module.torch_npu,
+            "npu_dynamic_mx_quant",
+            MagicMock(return_value=(quantized_input, input_scale)),
+        )
+        monkeypatch.setattr(fused_moe_legacy_module.torch.ops, "_C_ascend", custom_ops)
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "_EXTRA_CTX",
+            SimpleNamespace(moe_comm_type=MoECommType.ALLGATHER),
+        )
+
+        output = layer._forward_shared_experts(hidden_states, events)
+
+        assert output is down_out
+        gate_up_proj.assert_called_once_with((quantized_input, input_scale))
+        down_proj.assert_called_once_with((quantized_situ, situ_scale))
+        situ_call = custom_ops.situ_mx_quant.call_args.kwargs
+        assert situ_call["x"] is gate_up
+        assert situ_call["beta"] == 4.0
+        assert situ_call["linear_beta"] == 25.0
+        assert situ_call["dst_type"] == fused_moe_module.SITU_MX_DST_TYPE_E4M3FN
 
     def test_internal_router_uses_full_shared_input_for_latent_moe(self, monkeypatch):
         layer = AscendFusedMoE.__new__(AscendFusedMoE)

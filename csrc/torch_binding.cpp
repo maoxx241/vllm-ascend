@@ -54,6 +54,10 @@
 #include "attention/store_kv_block/store_kv_block_torch_adpt.h"
 #include "attention/store_kv_block_metadata/store_kv_block_metadata_torch_adpt.cpp"
 #include "attention/fused_gdn_gating/fused_gdn_gating_torch_adpt.h"
+#ifndef ASCEND_PLATFORM_310P
+#include "moe/dequant_situ_quant/dequant_situ_quant_torch_adpt.h"
+#include "moe/situ_mx_quant/situ_mx_quant_torch_adpt.h"
+#endif
 #include <c10/core/Device.h>
 #include <c10/core/Scalar.h>
 #include <c10/util/Exception.h>
@@ -2619,6 +2623,28 @@ TORCH_LIBRARY_EXPAND(CONCAT(_C, _ascend), ops)
         "bool use_beta_sigmoid_in_kernel=False, bool allow_neg_eigval=False, "
         "bool safe_gate=True, float lower_bound=-5.0) -> Tensor output");
     ops.impl("recurrent_kda", torch::kPrivateUse1, &vllm_ascend::recurrent_kda);
+
+    ops.def(
+        "dequant_situ_quant(Tensor x, "
+        "                   *, Tensor? weight_scale=None, "
+        "                   Tensor? activation_scale=None, "
+        "                   Tensor? bias=None, "
+        "                   Tensor? quant_scale=None, "
+        "                   Tensor? quant_offset=None, "
+        "                   Tensor? group_index=None, "
+        "                   float beta=4.0, "
+        "                   float linear_beta=25.0, "
+        "                   bool activate_left=True, "
+        "                   str quant_mode=\"dynamic\") -> (Tensor y, Tensor scale)");
+    ops.impl("dequant_situ_quant", torch::kPrivateUse1, &vllm_ascend::dequant_situ_quant);
+
+    ops.def(
+        "situ_mx_quant(Tensor x, "
+        "              float beta=1.0, "
+        "              float linear_beta=0.0, "
+        "              bool activate_left=False, "
+        "              int dst_type=36) -> (Tensor y, Tensor mxscale)");
+    ops.impl("situ_mx_quant", torch::kPrivateUse1, &vllm_ascend::situ_mx_quant);
 
 #ifdef VLLM_ENABLE_ATB_AND_DIRECT_KERNELS
     // Direct kernel custom ops

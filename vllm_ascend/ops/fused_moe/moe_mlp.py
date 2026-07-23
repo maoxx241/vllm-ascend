@@ -42,6 +42,7 @@ from vllm_ascend.utils import (
 )
 
 ASCEND_DEVICE_TYPE = get_ascend_device_type()
+SITU_MX_DST_TYPE_E4M3FN = 36
 
 
 def _custom_gmm_swiglu_enabled(fusion, dynamic_eplb):
@@ -164,7 +165,7 @@ def _w4a16_mxfp4_situ_apply_mlp(
     return hidden_states, before_gmm2_evt
 
 
-def _w4a8_situ_fallback_apply_mlp(
+def _w4a8_situ_apply_mlp(
     *,
     hidden_states: torch.Tensor,
     w1: list[torch.Tensor] | torch.Tensor,
@@ -186,15 +187,13 @@ def _w4a8_situ_fallback_apply_mlp(
     is_per_channel_weight: bool,
     mxfp_quant_dtype: QuantType | None = None,
 ) -> tuple[torch.Tensor, object]:
-    """Temporary W4A8 SiTU fallback: GMM1 -> SiTU -> quant -> GMM2.
+    """Apply the dedicated SiTU path: GMM1 -> SiTU quant -> GMM2.
 
     The existing optimized W4A8 paths fuse SwiGLU and therefore cannot be
-    reused for Kimi K3. Keep all SiTU-specific layout handling in this
-    fallback until a fused SiTU kernel is available. In particular, the
-    ModelSlim per-channel scale is exposed as ``[E, N]`` for the fused kernel,
-    while generic GMM needs ``[E, 1, N]``. The singleton axis below is only a
-    call-local view; the packed W4 weight (two int4 values per int8 byte) is
-    passed through unchanged and is never repacked.
+    reused for Kimi K3. Keep its A3 and A5 operator selection local to this
+    branch. ModelSlim exposes per-channel scale as ``[E, N]`` for the fused
+    kernel, while generic GMM needs ``[E, 1, N]``. The singleton axis below is
+    only a call-local view; the packed W4 weight is never repacked.
     """
     input_hidden_dtype = hidden_states.dtype
     if dynamic_scale is None:
@@ -252,17 +251,28 @@ def _w4a8_situ_fallback_apply_mlp(
     if externally_quantized_hidden_states is not None:
         dispose_tensor(externally_quantized_hidden_states)
 
-    hidden_states = situ_and_mul(
-        gate_up_out,
-        beta=activation.beta,
-        linear_beta=activation.linear_beta,
-    )
-    hidden_states, situ_out_scale = DeviceOperator.npu_dynamic_quant(
-        hidden_states=hidden_states,
-        dynamic_scale=None,
-        act_quant_type=act_quant_type,
-        use_mxfp_quant=use_mxfp_quant,
-    )
+    if use_mxfp_quant:
+        hidden_states, situ_out_scale = torch.ops._C_ascend.situ_mx_quant(
+            x=gate_up_out,
+            beta=activation.beta,
+            linear_beta=activation.linear_beta or 0.0,
+            activate_left=True,
+            dst_type=SITU_MX_DST_TYPE_E4M3FN,
+        )
+    else:
+        hidden_states, situ_out_scale = torch.ops._C_ascend.dequant_situ_quant(
+            x=gate_up_out,
+            weight_scale=None,
+            activation_scale=None,
+            bias=None,
+            quant_scale=None,
+            quant_offset=None,
+            group_index=None,
+            beta=activation.beta,
+            linear_beta=activation.linear_beta,
+            activate_left=True,
+            quant_mode="dynamic",
+        )
     before_gmm2_evt = torch.npu.current_stream().record_event()
     hidden_states = DeviceOperator.npu_grouped_matmul_gmm2(
         hidden_states=hidden_states,
@@ -314,6 +324,8 @@ def quant_apply_mlp(
     input_hidden_dtype = hidden_states.dtype
 
     situ_activation = activation if isinstance(activation, SituActivationConfig) else None
+    if situ_activation is not None and dynamic_eplb:
+        raise NotImplementedError("Kimi K3 SiTU does not support dynamic EPLB TensorLists.")
     if situ_activation is not None and mxfp_quant_dtype == QuantType.W4A16MXFP4:
         return _w4a16_mxfp4_situ_apply_mlp(
             hidden_states=hidden_states,
@@ -331,8 +343,8 @@ def quant_apply_mlp(
 
     if situ_activation is not None:
         if w1_offset is not None or w2_offset is not None:
-            raise NotImplementedError("W4A8 SiTU fallback does not support antiquant offsets.")
-        return _w4a8_situ_fallback_apply_mlp(
+            raise NotImplementedError("W4A8 SiTU does not support antiquant offsets.")
+        return _w4a8_situ_apply_mlp(
             hidden_states=hidden_states,
             w1=w1,
             w1_scale=w1_scale,

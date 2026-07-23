@@ -26,6 +26,7 @@ from __future__ import annotations
 from vllm_ascend.ops.activation import AscendSituAndMul, SituActivationConfig
 from vllm_ascend.ops.fused_moe.fused_moe import (
     _EXTRA_CTX,
+    SITU_MX_DST_TYPE_E4M3FN,
     AllGatherCommImpl,
     AscendUnquantizedFusedMoEMethod,
     F,
@@ -615,7 +616,7 @@ class AscendFusedMoE(FusedMoE):
                 self._shared_experts.down_proj, "weight_scale"
             )
             shared_uses_situ = isinstance(self._shared_experts.act_fn, AscendSituAndMul)
-            if has_quantized_shared and not shared_uses_situ and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
+            if has_quantized_shared and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
                 torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -634,24 +635,39 @@ class AscendFusedMoE(FusedMoE):
                 # Execute activation concurrently with gmm2.
 
                 maybe_wait_event(fused_moe_evts.before_gmm2)
-                clamp_limit = fused_moe_evts.swiglu_limit or 0.0
-                group_index = None
-                if clamp_limit <= 0.0:
-                    group_index = torch.empty((1,), dtype=torch.int64, device=hidden_states.device)
-                    group_index.fill_(hidden_states.shape[0])
-                quantized_x, swiglu_out_scale = torch.ops._C_ascend.npu_dequant_swiglu_quant(
-                    x=hidden_states,
-                    weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
-                    activation_scale=pertoken_scale,
-                    bias=None,
-                    quant_scale=None,
-                    quant_offset=None,
-                    group_index=group_index,
-                    activate_left=True,
-                    quant_mode=1,
-                    swiglu_mode=1,
-                    clamp_limit=clamp_limit,
-                )
+                if shared_uses_situ:
+                    quantized_x, swiglu_out_scale = torch.ops._C_ascend.dequant_situ_quant(
+                        x=hidden_states,
+                        weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
+                        activation_scale=pertoken_scale,
+                        bias=None,
+                        quant_scale=None,
+                        quant_offset=None,
+                        group_index=None,
+                        beta=self._shared_experts.act_fn.beta,
+                        linear_beta=self._shared_experts.act_fn.linear_beta,
+                        activate_left=True,
+                        quant_mode="dynamic",
+                    )
+                else:
+                    clamp_limit = fused_moe_evts.swiglu_limit or 0.0
+                    group_index = None
+                    if clamp_limit <= 0.0:
+                        group_index = torch.empty((1,), dtype=torch.int64, device=hidden_states.device)
+                        group_index.fill_(hidden_states.shape[0])
+                    quantized_x, swiglu_out_scale = torch.ops._C_ascend.npu_dequant_swiglu_quant(
+                        x=hidden_states,
+                        weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
+                        activation_scale=pertoken_scale,
+                        bias=None,
+                        quant_scale=None,
+                        quant_offset=None,
+                        group_index=group_index,
+                        activate_left=True,
+                        quant_mode=1,
+                        swiglu_mode=1,
+                        clamp_limit=clamp_limit,
+                    )
                 # Execute the down projection concurrently with the combine
                 # communication.
                 maybe_wait_event(fused_moe_evts.before_combine)
@@ -663,7 +679,7 @@ class AscendFusedMoE(FusedMoE):
                     bias=None,
                     output_dtype=original_dtype,
                 )
-            elif has_quantized_shared and not shared_uses_situ and self.quant_type == QuantType.W4A8MXFP:
+            elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
                 torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -676,14 +692,23 @@ class AscendFusedMoE(FusedMoE):
                 hidden_states = self._shared_experts.gate_up_proj((quantized_x, pertoken_scale))[0]
                 # Execute activation concurrently with gmm2.
                 maybe_wait_event(fused_moe_evts.before_gmm2)
-                quantized_x, swiglu_out_scale, _ = torch.ops._C_ascend.npu_swiglu_group_quant(
-                    hidden_states,
-                    topk_weight=None,
-                    group_index=None,
-                    dst_type=torch.float8_e4m3fn,
-                    quant_mode=2,
-                    clamp_value=fused_moe_evts.swiglu_limit,
-                )
+                if shared_uses_situ:
+                    quantized_x, swiglu_out_scale = torch.ops._C_ascend.situ_mx_quant(
+                        x=hidden_states,
+                        beta=self._shared_experts.act_fn.beta,
+                        linear_beta=self._shared_experts.act_fn.linear_beta or 0.0,
+                        activate_left=True,
+                        dst_type=SITU_MX_DST_TYPE_E4M3FN,
+                    )
+                else:
+                    quantized_x, swiglu_out_scale, _ = torch.ops._C_ascend.npu_swiglu_group_quant(
+                        hidden_states,
+                        topk_weight=None,
+                        group_index=None,
+                        dst_type=torch.float8_e4m3fn,
+                        quant_mode=2,
+                        clamp_value=fused_moe_evts.swiglu_limit,
+                    )
                 # Execute the down projection concurrently with the combine
                 # communication.
                 maybe_wait_event(fused_moe_evts.before_combine)
