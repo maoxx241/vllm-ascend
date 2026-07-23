@@ -31,7 +31,6 @@ from vllm.entrypoints.openai.engine.protocol import (
     FunctionCall,
     ToolCall,
 )
-from vllm.exceptions import VLLMValidationError
 from vllm.parser.abstract_parser import DelegatingParser
 from vllm.parser.parser_manager import ParserManager
 from vllm.reasoning.abs_reasoning_parsers import (
@@ -118,11 +117,6 @@ def _request_uses_thinking(request: Any) -> bool:
 def adjust_kimi_k3_request(request: Any):
     """Preserve K3's adjacent control/text markers during detokenization."""
 
-    if not isinstance(request, ChatCompletionRequest):
-        raise VLLMValidationError(
-            "Kimi K3 reasoning and tool use are currently supported through /v1/chat/completions only.",
-            parameter="request",
-        )
     if hasattr(request, "skip_special_tokens"):
         request.skip_special_tokens = False
     if hasattr(request, "spaces_between_special_tokens"):
@@ -167,10 +161,7 @@ def _state_machine_for_request(
     elif choice == "none" or (choice is None and not tools):
         tool_mode = "none"
     elif choice is None:
-        raise KimiK3XTMLParseError(
-            "Kimi K3 requires explicit tool_choice='auto' when tools are supplied; "
-            "null is not used as an implicit auto sentinel."
-        )
+        tool_mode = "auto"
     else:
         raise KimiK3XTMLParseError(f"Unsupported K3 tool_choice: {choice!r}.")
 

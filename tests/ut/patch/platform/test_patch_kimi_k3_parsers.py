@@ -5,7 +5,6 @@ from types import SimpleNamespace
 
 import pytest
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
-from vllm.exceptions import VLLMValidationError
 from vllm.parser import ParserManager
 from vllm.reasoning.abs_reasoning_parsers import ReasoningParserManager
 from vllm.tool_parsers.abstract_tool_parser import ToolParserManager
@@ -142,13 +141,19 @@ def test_kimi_k3_rejects_partial_parser_configuration(
         )
 
 
-def test_kimi_k3_rejects_non_chat_request_adjustment():
+def test_kimi_k3_adjusts_non_chat_requests_without_rejecting_them():
     parser = KimiK3ReasoningParser(
         TOKENIZER,
         chat_template_kwargs={"thinking": True},
     )
-    with pytest.raises(VLLMValidationError, match="/v1/chat/completions only"):
-        parser.adjust_request(SimpleNamespace(skip_special_tokens=True))
+    request = SimpleNamespace(
+        skip_special_tokens=True,
+        spaces_between_special_tokens=True,
+    )
+
+    assert parser.adjust_request(request) is request
+    assert request.skip_special_tokens is False
+    assert request.spaces_between_special_tokens is False
 
 
 def test_reasoning_compatibility_adapter_streams_content_when_thinking_is_disabled():
@@ -628,34 +633,38 @@ def test_named_choice_filters_prompt_tools_and_uses_required_instruction():
     assert request.tool_choice.function.name == "get_time"
 
 
-def test_chat_params_reject_response_format_and_reserved_overrides():
-    with pytest.raises(VLLMValidationError, match="does not yet support"):
-        prepare_kimi_k3_chat_template_kwargs(_request(response_format={"type": "json_object"}))
+def test_chat_params_accept_kimi_native_kwargs_and_optional_openai_fields():
+    response_format = {"type": "json_object"}
+    request = _request(
+        chat_template_kwargs={
+            "thinking": True,
+            "thinking_effort": "max",
+            "response_format": response_format,
+            "return_tensors": "pt",
+        },
+        response_format=response_format,
+        structured_outputs={"json": {"type": "object"}},
+        chat_template="{{ ignored by the K3 renderer }}",
+        add_generation_prompt=False,
+        continue_final_message=True,
+    )
 
-    with pytest.raises(VLLMValidationError, match="cannot override"):
-        prepare_kimi_k3_chat_template_kwargs(_request(chat_template_kwargs={"thinking": False}))
+    prepare_kimi_k3_chat_template_kwargs(request)
+    params = request.build_chat_params(None, "auto")
 
-    with pytest.raises(VLLMValidationError, match="structured_outputs"):
-        prepare_kimi_k3_chat_template_kwargs(_request(structured_outputs={"json": {"type": "object"}}))
-
-    with pytest.raises(VLLMValidationError, match="does not accept"):
-        prepare_kimi_k3_chat_template_kwargs(_request(chat_template="{{ unsafe }}"))
-
-    with pytest.raises(VLLMValidationError, match="cannot override"):
-        prepare_kimi_k3_chat_template_kwargs(_request(chat_template_kwargs={"return_tensors": "pt"}))
-
-    with pytest.raises(VLLMValidationError, match="add_generation_prompt=true"):
-        prepare_kimi_k3_chat_template_kwargs(
-            _request(
-                add_generation_prompt=False,
-                continue_final_message=True,
-            )
-        )
+    assert params.chat_template_kwargs["thinking"] is True
+    assert params.chat_template_kwargs["thinking_effort"] == "max"
+    assert params.chat_template_kwargs["response_format"] == response_format
+    assert params.chat_template_kwargs["return_tensors"] == "pt"
 
 
-def test_chat_params_reject_explicit_null_tool_choice_with_tools():
-    with pytest.raises(VLLMValidationError, match="explicit tool_choice='auto'"):
-        prepare_kimi_k3_chat_template_kwargs(_request(tool_choice=None))
+def test_chat_params_treat_null_tool_choice_with_tools_as_auto():
+    request = _request(tool_choice=None)
+
+    prepare_kimi_k3_chat_template_kwargs(request)
+
+    assert request.tool_choice == "auto"
+    assert request.chat_template_kwargs["tool_choice"] == "auto"
 
 
 def test_chat_params_set_canonical_sampling_and_reasoning_controls():
