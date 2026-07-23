@@ -203,11 +203,13 @@
 #
 # ** 7c. Files: platform/patch_kimi_k3_renderer.py,
 #               platform/patch_kimi_k3_chat_params.py,
-#               platform/patch_kimi_k3_parsers.py**
+#               platform/patch_kimi_k3_parsers.py,
+#               platform/kimi_k3_xtml.py**
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   1. `vllm.renderers.registry`,
 #      `vllm.entrypoints.serve.render.serving.OpenAIServingRender`,
 #      `vllm.entrypoints.openai.chat_completion.serving.OpenAIServingChat`,
+#      `vllm.parser.ParserManager`,
 #      `vllm.reasoning.ReasoningParserManager`,
 #      `vllm.tool_parsers.ToolParserManager`,
 #    Why:
@@ -217,10 +219,14 @@
 #       does not pass all K3 request controls to the custom encoder.
 #    How:
 #       Automatically select a dedicated K3 renderer from `model_type` while
-#       retaining HF tokenizer loading, call `TikTokenTokenizer.apply_chat_template`
-#       directly, map request controls only on K3 serving instances, and
-#       register K3 reasoning/tool parsers with streaming support. Required and
-#       named calls stay on the XTML path rather than generic JSON grammar.
+#       retaining HF tokenizer loading, call
+#       `TikTokenTokenizer.apply_chat_template(tokenize=True)` directly with
+#       server-owned multimodal prompts, and map typed request controls only on
+#       K3 serving instances. A K3-local unified state machine parses reasoning,
+#       response, and tools for both full and streaming output while preserving
+#       the original `tool_choice`. Required and named calls stay on the XTML
+#       path rather than generic JSON grammar and fail explicitly if no valid
+#       call is produced.
 #    Related PR (if no, explain why):
 #       No. This is a compatibility implementation for the K3 model source
 #       protocol; it should be proposed to vLLM after the public model/parser

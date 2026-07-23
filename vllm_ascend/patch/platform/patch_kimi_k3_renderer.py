@@ -36,6 +36,7 @@ from vllm.entrypoints.chat_utils import (
     parse_chat_messages,
     parse_chat_messages_async,
 )
+from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.base import BaseRenderer
 from vllm.renderers.inputs import DictPrompt
@@ -46,7 +47,26 @@ from vllm.utils.async_utils import make_async
 
 KIMI_K3_MODEL_TYPE = "kimi_k3"
 KIMI_K3_RENDERER_MODE = "kimi_k3"
+KIMI_K3_IMAGE_PROMPT = "<|media_begin|>image<|media_content|><|media_pad|><|media_end|>"
+KIMI_K3_PROMPT_TOOL_CHOICE_KEY = "_kimi_k3_prompt_tool_choice"
+_KIMI_K3_PROMPT_TOOL_CHOICE_PREFIX = "kimi_k3:"
+_KIMI_K3_PROMPT_TOOL_CHOICES = frozenset({"none", "auto", "required"})
 _ORIGINAL_TOKENIZER_ARGS_ATTR = "_ascend_original_kimi_k3_tokenizer_args_from_config"
+
+
+def encode_kimi_k3_prompt_tool_choice(tool_choice: str) -> str:
+    if tool_choice not in _KIMI_K3_PROMPT_TOOL_CHOICES:
+        raise ValueError(f"Unsupported Kimi K3 prompt tool choice: {tool_choice!r}.")
+    return _KIMI_K3_PROMPT_TOOL_CHOICE_PREFIX + tool_choice
+
+
+def decode_kimi_k3_prompt_tool_choice(encoded_choice: str) -> str:
+    if not encoded_choice.startswith(_KIMI_K3_PROMPT_TOOL_CHOICE_PREFIX):
+        raise ValueError("Malformed Kimi K3 prompt tool choice.")
+    tool_choice = encoded_choice[len(_KIMI_K3_PROMPT_TOOL_CHOICE_PREFIX) :]
+    if tool_choice not in _KIMI_K3_PROMPT_TOOL_CHOICES:
+        raise ValueError(f"Unsupported Kimi K3 prompt tool choice: {tool_choice!r}.")
+    return tool_choice
 
 
 def is_kimi_k3_model_config(model_config: ModelConfig) -> bool:
@@ -57,10 +77,7 @@ def is_kimi_k3_model_config(model_config: ModelConfig) -> bool:
 def _normalize_developer_messages(
     conversation: list[ConversationMessage],
 ) -> list[ConversationMessage]:
-    """Match the HF renderer's developer-to-system compatibility behavior."""
-
-    if not any(message["role"] == "developer" for message in conversation):
-        return conversation
+    """Convert developer roles without reordering or flattening their content."""
 
     converted: list[ConversationMessage] = []
     for message in conversation:
@@ -71,37 +88,26 @@ def _normalize_developer_messages(
             converted.append(converted_message)  # type: ignore[arg-type]
         else:
             converted.append(message)
+    return converted
 
-    system_contents: list[str] = []
-    non_system: list[ConversationMessage] = []
-    needs_consolidation = False
-    for index, message in enumerate(converted):
-        if message["role"] != "system":
-            non_system.append(message)
+
+def _trusted_image_prompts(
+    conversation: list[ConversationMessage],
+) -> list[str]:
+    """Build server-owned image prompts for structured OpenAI content parts."""
+
+    image_prompts: list[str] = []
+    for message in conversation:
+        content = message.get("content")
+        if not isinstance(content, list):
             continue
-
-        if index > 0 or system_contents:
-            needs_consolidation = True
-        content = message.get("content", "")
-        if isinstance(content, list):
-            parts = []
-            for part in content:
-                if isinstance(part, dict) and "text" in part:
-                    parts.append(part["text"])
-                elif isinstance(part, str):
-                    parts.append(part)
-            content = "\n".join(parts)
-        if content:
-            system_contents.append(content)
-
-    if not needs_consolidation:
-        return converted
-
-    merged_system: ConversationMessage = {
-        "role": "system",
-        "content": "\n\n".join(system_contents),
-    }
-    return [merged_system, *non_system]
+        for part in content:
+            if isinstance(part, dict) and part.get("type") in (
+                "image",
+                "image_url",
+            ):
+                image_prompts.append(KIMI_K3_IMAGE_PROMPT)
+    return image_prompts
 
 
 class KimiK3Renderer(BaseRenderer[HfTokenizer]):
@@ -120,31 +126,62 @@ class KimiK3Renderer(BaseRenderer[HfTokenizer]):
 
     def _apply_chat_template(
         self,
-        conversation: list[ConversationMessage],
+        conversation_data: list[ConversationMessage],
         **kwargs: Any,
-    ) -> str | list[int]:
+    ) -> list[int]:
         # K3's Python encoder is the source of truth. In particular, do not let
         # an optional server/request Jinja value replace or filter its kwargs.
-        kwargs.pop("chat_template", None)
-        return self.get_tokenizer().apply_chat_template(
-            conversation=conversation,
+        prompt_tool_choice = kwargs.pop(KIMI_K3_PROMPT_TOOL_CHOICE_KEY, None)
+        for protected_key in (
+            "add_generation_prompt",
+            "chat_template",
+            "continue_final_message",
+            "conversation",
+            "enable_thinking",
+            "image_prompts",
+            "max_length",
+            "padding",
+            "reasoning_effort",
+            "return_dict",
+            "return_tensors",
+            "tokenize",
+            "truncation",
+        ):
+            kwargs.pop(protected_key, None)
+        if prompt_tool_choice is not None:
+            # vLLM 0.23 treats the literal string ``auto`` as an unset value
+            # while merging ChatParams defaults. The private typed key survives
+            # that merge so a server default cannot turn an auto request into
+            # a required/none prompt.
+            kwargs["tool_choice"] = decode_kimi_k3_prompt_tool_choice(prompt_tool_choice)
+        if kwargs.get("response_format") is not None or kwargs.get("response_schema") is not None:
+            raise VLLMValidationError(
+                "Kimi K3 does not yet support response_format with its XTML response envelope.",
+                parameter="response_format",
+            )
+        prompt = self.get_tokenizer().apply_chat_template(
+            conversation=conversation_data,
+            tokenize=True,
+            add_generation_prompt=True,
+            image_prompts=_trusted_image_prompts(conversation_data),
+            padding=False,
+            truncation=False,
+            return_tensors=None,
+            return_dict=False,
             **kwargs,
         )
+        if not isinstance(prompt, list) or any(not isinstance(token_id, int) for token_id in prompt):
+            raise TypeError("Kimi K3 tokenizer must return a flat list of token IDs.")
+        return prompt
 
-    def render_messages(
+    def _render_conversation(
         self,
-        messages: list[ChatCompletionMessageParam],
+        conversation: list[ConversationMessage],
+        mm_data,
+        mm_uuids,
         params: ChatParams,
     ) -> tuple[list[ConversationMessage], DictPrompt]:
-        conversation, mm_data, mm_uuids = parse_chat_messages(
-            messages,
-            self.model_config,
-            content_format="string",
-            media_io_kwargs=params.media_io_kwargs,
-            mm_processor_kwargs=params.mm_processor_kwargs,
-        )
         conversation = _normalize_developer_messages(conversation)
-
         prompt_raw = self._apply_chat_template(
             conversation,
             **params.get_apply_chat_template_kwargs(),
@@ -154,8 +191,26 @@ class KimiK3Renderer(BaseRenderer[HfTokenizer]):
             prompt["multi_modal_data"] = mm_data
         if mm_uuids is not None:
             prompt["multi_modal_uuids"] = mm_uuids
-
         return conversation, prompt
+
+    def render_messages(
+        self,
+        messages: list[ChatCompletionMessageParam],
+        params: ChatParams,
+    ) -> tuple[list[ConversationMessage], DictPrompt]:
+        conversation, mm_data, mm_uuids = parse_chat_messages(
+            messages,
+            self.model_config,
+            content_format="openai",
+            media_io_kwargs=params.media_io_kwargs,
+            mm_processor_kwargs=params.mm_processor_kwargs,
+        )
+        return self._render_conversation(
+            conversation,
+            mm_data,
+            mm_uuids,
+            params,
+        )
 
     async def render_messages_async(
         self,
@@ -165,7 +220,7 @@ class KimiK3Renderer(BaseRenderer[HfTokenizer]):
         conversation, mm_data, mm_uuids = await parse_chat_messages_async(
             messages,
             self.model_config,
-            content_format="string",
+            content_format="openai",
             media_io_kwargs=params.media_io_kwargs,
             mm_processor_kwargs=params.mm_processor_kwargs,
         )

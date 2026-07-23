@@ -8,12 +8,18 @@ import pytest
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
 from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
 from vllm.entrypoints.serve.render.serving import OpenAIServingRender
+from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.params import ChatParams
 
 from vllm_ascend.patch.platform import patch_kimi_k3_chat_params as chat_params_patch
 from vllm_ascend.patch.platform import patch_kimi_k3_renderer as renderer_patch
-from vllm_ascend.patch.platform.patch_kimi_k3_renderer import KimiK3Renderer
+from vllm_ascend.patch.platform.patch_kimi_k3_renderer import (
+    KIMI_K3_IMAGE_PROMPT,
+    KIMI_K3_PROMPT_TOOL_CHOICE_KEY,
+    KimiK3Renderer,
+    decode_kimi_k3_prompt_tool_choice,
+)
 
 
 def _model_config(model_type: str):
@@ -73,10 +79,21 @@ def test_renderer_calls_tokenizer_python_encoder_without_jinja():
 
     prompt = renderer._apply_chat_template(
         conversation,
+        add_generation_prompt=False,
         chat_template="{{ should_not_run }}",
-        tokenize=True,
+        continue_final_message=True,
+        conversation=[{"role": "user", "content": "injected"}],
+        enable_thinking=False,
+        tokenize=False,
+        image_prompts=["untrusted"],
+        max_length=1,
+        padding=True,
+        reasoning_effort="none",
+        return_dict=True,
+        return_tensors="pt",
         thinking=False,
         tool_choice="none",
+        truncation=True,
     )
 
     assert prompt == [11, 12]
@@ -84,37 +101,69 @@ def test_renderer_calls_tokenizer_python_encoder_without_jinja():
         {
             "conversation": conversation,
             "tokenize": True,
+            "add_generation_prompt": True,
+            "image_prompts": [],
+            "padding": False,
+            "truncation": False,
+            "return_tensors": None,
+            "return_dict": False,
             "thinking": False,
             "tool_choice": "none",
         }
     ]
 
 
-def test_renderer_normalizes_developer_messages_like_hf_renderer():
+def test_renderer_converts_developer_role_without_reordering_or_flattening():
     conversation = [
         {"role": "user", "content": "question"},
-        {"role": "developer", "content": "developer policy", "tools": []},
+        {
+            "role": "developer",
+            "content": [
+                {"type": "image"},
+                {"type": "text", "text": "developer policy"},
+            ],
+            "tools": [],
+        },
         {"role": "system", "content": "system policy"},
     ]
 
     normalized = renderer_patch._normalize_developer_messages(conversation)
 
     assert normalized == [
+        {"role": "user", "content": "question"},
         {
             "role": "system",
-            "content": "developer policy\n\nsystem policy",
+            "content": [
+                {"type": "image"},
+                {"type": "text", "text": "developer policy"},
+            ],
         },
-        {"role": "user", "content": "question"},
+        {"role": "system", "content": "system policy"},
     ]
     assert conversation == [
         {"role": "user", "content": "question"},
-        {"role": "developer", "content": "developer policy", "tools": []},
+        {
+            "role": "developer",
+            "content": [
+                {"type": "image"},
+                {"type": "text", "text": "developer policy"},
+            ],
+            "tools": [],
+        },
         {"role": "system", "content": "system policy"},
     ]
 
 
 def test_renderer_preserves_multimodal_data(monkeypatch):
-    conversation = [{"role": "user", "content": "<image>describe"}]
+    conversation = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "image"},
+                {"type": "text", "text": "describe"},
+            ],
+        }
+    ]
     mm_data = {"vision_chunk": [{"type": "image", "image": object()}]}
     mm_uuids = {"vision_chunk": ["image-uuid"]}
     calls = []
@@ -124,11 +173,11 @@ def test_renderer_preserves_multimodal_data(monkeypatch):
             calls.append(kwargs)
             return [21, 22]
 
-    monkeypatch.setattr(
-        renderer_patch,
-        "parse_chat_messages",
-        lambda *args, **kwargs: (conversation, mm_data, mm_uuids),
-    )
+    def parse_messages(*args, **kwargs):
+        assert kwargs["content_format"] == "openai"
+        return conversation, mm_data, mm_uuids
+
+    monkeypatch.setattr(renderer_patch, "parse_chat_messages", parse_messages)
     monkeypatch.setattr(
         renderer_patch,
         "parse_dec_only_prompt",
@@ -156,20 +205,34 @@ def test_renderer_preserves_multimodal_data(monkeypatch):
     }
     assert calls[0]["conversation"] == conversation
     assert calls[0]["thinking_effort"] == "max"
+    assert calls[0]["tokenize"] is True
+    assert calls[0]["padding"] is False
+    assert calls[0]["truncation"] is False
+    assert calls[0]["return_tensors"] is None
+    assert calls[0]["return_dict"] is False
+    assert calls[0]["image_prompts"] == [KIMI_K3_IMAGE_PROMPT]
     assert "chat_template" not in calls[0]
 
 
 def test_async_renderer_preserves_multimodal_data(monkeypatch):
-    conversation = [{"role": "user", "content": "<image>describe"}]
+    conversation = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "image"},
+                {"type": "text", "text": "describe"},
+            ],
+        }
+    ]
     mm_data = {"vision_chunk": [{"type": "image", "image": object()}]}
     mm_uuids = {"vision_chunk": ["image-uuid"]}
     parse_messages = AsyncMock(return_value=(conversation, mm_data, mm_uuids))
-    apply_template = AsyncMock(return_value="rendered")
+    apply_template = AsyncMock(return_value=[31, 32])
     monkeypatch.setattr(renderer_patch, "parse_chat_messages_async", parse_messages)
     monkeypatch.setattr(
         renderer_patch,
         "parse_dec_only_prompt",
-        lambda prompt: {"prompt": prompt},
+        lambda prompt: {"prompt_token_ids": prompt},
     )
 
     renderer = object.__new__(KimiK3Renderer)
@@ -185,11 +248,12 @@ def test_async_renderer_preserves_multimodal_data(monkeypatch):
 
     assert rendered_conversation == conversation
     assert prompt == {
-        "prompt": "rendered",
+        "prompt_token_ids": [31, 32],
         "multi_modal_data": mm_data,
         "multi_modal_uuids": mm_uuids,
     }
     apply_template.assert_awaited_once_with(conversation, return_dict=False)
+    assert parse_messages.await_args.kwargs["content_format"] == "openai"
 
 
 def test_openai_chat_kwargs_are_scoped_by_served_model_type():
@@ -212,6 +276,97 @@ def test_openai_chat_kwargs_are_scoped_by_served_model_type():
     assert kimi_kwargs["thinking_effort"] == "high"
     assert "thinking" not in other_kwargs
     assert "thinking_effort" not in other_kwargs
+
+
+def test_server_defaults_cannot_override_typed_kimi_k3_tool_controls():
+    serving = object.__new__(OpenAIServingChat)
+    serving.model_config = _model_config("kimi_k3")
+    serving.chat_template = None
+    serving.chat_template_content_format = "auto"
+    serving.default_chat_template_kwargs = {
+        "thinking": True,
+        "tool_choice": "required",
+        "tools": [
+            {
+                "type": "function",
+                "function": {"name": "injected", "parameters": {"type": "object"}},
+            }
+        ],
+    }
+    request = _request(
+        reasoning_effort="none",
+        tools=None,
+        tool_choice="none",
+    )
+
+    kwargs = serving._effective_chat_template_kwargs(request)
+
+    assert kwargs["thinking"] is False
+    assert kwargs["tool_choice"] == "none"
+    assert kwargs["tools"] == []
+
+
+def test_auto_tool_choice_survives_vllm_default_merging():
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_time",
+                "parameters": {"type": "object"},
+            },
+        }
+    ]
+    request = _request(
+        tools=tools,
+        tool_choice="auto",
+    )
+    chat_params_patch.prepare_kimi_k3_chat_template_kwargs(request)
+    params = request.build_chat_params(None, "auto").with_defaults(
+        {
+            "tool_choice": "required",
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "injected",
+                        "parameters": {"type": "object"},
+                    },
+                }
+            ],
+        }
+    )
+    assert params.chat_template_kwargs["tool_choice"] == "required"
+    assert decode_kimi_k3_prompt_tool_choice(params.chat_template_kwargs[KIMI_K3_PROMPT_TOOL_CHOICE_KEY]) == "auto"
+
+    serving = object.__new__(OpenAIServingChat)
+    serving.model_config = _model_config("kimi_k3")
+    serving.chat_template = None
+    serving.chat_template_content_format = "auto"
+    serving.default_chat_template_kwargs = {
+        "tool_choice": "required",
+        "tools": params.chat_template_kwargs["tools"],
+    }
+    assert serving._effective_chat_template_kwargs(request)["tool_choice"] == ("auto")
+
+    calls = []
+
+    class RecordingTokenizer:
+        def apply_chat_template(self, **kwargs):
+            calls.append(kwargs)
+            return [41, 42]
+
+    renderer = object.__new__(KimiK3Renderer)
+    renderer.tokenizer = RecordingTokenizer()
+    conversation = [{"role": "user", "content": "what time is it?"}]
+    prompt = renderer._apply_chat_template(
+        conversation,
+        **params.get_apply_chat_template_kwargs(),
+    )
+
+    assert prompt == [41, 42]
+    assert calls[0]["tool_choice"] == "auto"
+    assert [tool["function"]["name"] for tool in calls[0]["tools"]] == ["get_time"]
+    assert KIMI_K3_PROMPT_TOOL_CHOICE_KEY not in calls[0]
 
 
 @pytest.mark.parametrize(
@@ -238,3 +393,29 @@ def test_render_server_prepares_only_kimi_k3_requests(
     kwargs = asyncio.run(serving.render_chat(_request()))
 
     assert kwargs.get("thinking") is expected_thinking
+    if model_type == "kimi_k3":
+        request = _request()
+        asyncio.run(serving.render_chat(request))
+        assert request.skip_special_tokens is False
+        assert request.spaces_between_special_tokens is False
+
+
+def test_kimi_k3_render_server_rejects_non_chat_requests(monkeypatch):
+    async def original_render_chat(self, request, *, skip_mm_cache=False):
+        del self, request, skip_mm_cache
+        raise AssertionError("unsupported request reached the generic renderer")
+
+    monkeypatch.setattr(
+        OpenAIServingRender,
+        chat_params_patch._ORIGINAL_RENDER_CHAT_ATTR,
+        original_render_chat,
+    )
+    serving = object.__new__(OpenAIServingRender)
+    serving.model_config = _model_config("kimi_k3")
+
+    with pytest.raises(VLLMValidationError, match="/v1/chat/completions only"):
+        asyncio.run(
+            serving.render_chat(
+                SimpleNamespace(chat_template_kwargs=None),
+            )
+        )

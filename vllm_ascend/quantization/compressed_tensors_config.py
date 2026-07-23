@@ -382,7 +382,7 @@ class AscendCompressedTensorsConfig(QuantizationConfig):
             return "W4A16"
 
         raise NotImplementedError("No compressed-tensors compatible quantization type was found.")
-        
+
     def _is_packed_mxfp4(
         self,
         weight_quant: "QuantizationArgs",

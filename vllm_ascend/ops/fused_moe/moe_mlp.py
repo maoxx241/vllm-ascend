@@ -211,9 +211,7 @@ def _w4a8_situ_fallback_apply_mlp(
         pertoken_scale = dynamic_scale
         externally_quantized_hidden_states = hidden_states
         pertoken_scale = (
-            DeviceOperator.maybe_normalize_mxfp_scale_layout(dynamic_scale)
-            if use_mxfp_quant
-            else dynamic_scale
+            DeviceOperator.maybe_normalize_mxfp_scale_layout(dynamic_scale) if use_mxfp_quant else dynamic_scale
         )
 
     weight_prefetch_method = get_weight_prefetch_method()
@@ -222,8 +220,7 @@ def _w4a8_situ_fallback_apply_mlp(
 
     w1_scale_list = _as_grouped_matmul_weights(w1_scale)
     w2_scale_list = _as_grouped_matmul_weights(w2_scale)
-    output_dtype = (w2_scale[0].dtype if isinstance(w2_scale, list)
-                    else w2_scale.dtype)
+    output_dtype = w2_scale[0].dtype if isinstance(w2_scale, list) else w2_scale.dtype
     bias1, bias2 = None, None
     if w1_scale_bias is not None:
         if group_list_type == 0:
