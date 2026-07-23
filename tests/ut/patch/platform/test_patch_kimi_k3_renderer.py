@@ -8,7 +8,6 @@ import pytest
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
 from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
 from vllm.entrypoints.serve.render.serving import OpenAIServingRender
-from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.params import ChatParams
 
@@ -89,6 +88,8 @@ def test_renderer_calls_tokenizer_python_encoder_without_jinja():
         max_length=1,
         padding=True,
         reasoning_effort="none",
+        response_format={"type": "json_object"},
+        response_schema={"type": "object"},
         return_dict=True,
         return_tensors="pt",
         thinking=False,
@@ -109,6 +110,8 @@ def test_renderer_calls_tokenizer_python_encoder_without_jinja():
             "return_dict": False,
             "thinking": False,
             "tool_choice": "none",
+            "response_format": {"type": "json_object"},
+            "response_schema": {"type": "object"},
         }
     ]
 
@@ -400,10 +403,10 @@ def test_render_server_prepares_only_kimi_k3_requests(
         assert request.spaces_between_special_tokens is False
 
 
-def test_kimi_k3_render_server_rejects_non_chat_requests(monkeypatch):
+def test_kimi_k3_render_server_delegates_non_chat_requests(monkeypatch):
     async def original_render_chat(self, request, *, skip_mm_cache=False):
-        del self, request, skip_mm_cache
-        raise AssertionError("unsupported request reached the generic renderer")
+        del self, skip_mm_cache
+        return request
 
     monkeypatch.setattr(
         OpenAIServingRender,
@@ -413,9 +416,5 @@ def test_kimi_k3_render_server_rejects_non_chat_requests(monkeypatch):
     serving = object.__new__(OpenAIServingRender)
     serving.model_config = _model_config("kimi_k3")
 
-    with pytest.raises(VLLMValidationError, match="/v1/chat/completions only"):
-        asyncio.run(
-            serving.render_chat(
-                SimpleNamespace(chat_template_kwargs=None),
-            )
-        )
+    request = SimpleNamespace(chat_template_kwargs=None)
+    assert asyncio.run(serving.render_chat(request)) is request

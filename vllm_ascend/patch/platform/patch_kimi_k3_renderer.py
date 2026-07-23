@@ -36,7 +36,6 @@ from vllm.entrypoints.chat_utils import (
     parse_chat_messages,
     parse_chat_messages_async,
 )
-from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.base import BaseRenderer
 from vllm.renderers.inputs import DictPrompt
@@ -154,11 +153,6 @@ class KimiK3Renderer(BaseRenderer[HfTokenizer]):
             # that merge so a server default cannot turn an auto request into
             # a required/none prompt.
             kwargs["tool_choice"] = decode_kimi_k3_prompt_tool_choice(prompt_tool_choice)
-        if kwargs.get("response_format") is not None or kwargs.get("response_schema") is not None:
-            raise VLLMValidationError(
-                "Kimi K3 does not yet support response_format with its XTML response envelope.",
-                parameter="response_format",
-            )
         prompt = self.get_tokenizer().apply_chat_template(
             conversation=conversation_data,
             tokenize=True,

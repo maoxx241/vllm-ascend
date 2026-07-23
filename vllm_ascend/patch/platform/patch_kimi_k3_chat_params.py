@@ -42,30 +42,6 @@ _ORIGINAL_RENDER_CHAT_ATTR = "_ascend_original_kimi_k3_render_chat"
 _ORIGINAL_EFFECTIVE_KWARGS_ATTR = "_ascend_original_kimi_k3_effective_chat_template_kwargs"
 _PREPARED_ATTR = "_kimi_k3_chat_params_prepared"
 
-_RESERVED_CHAT_TEMPLATE_KWARGS = frozenset(
-    {
-        "add_generation_prompt",
-        "chat_template",
-        "continue_final_message",
-        "conversation",
-        "enable_thinking",
-        "image_prompts",
-        KIMI_K3_PROMPT_TOOL_CHOICE_KEY,
-        "max_length",
-        "padding",
-        "response_format",
-        "response_schema",
-        "return_dict",
-        "return_tensors",
-        "thinking",
-        "thinking_effort",
-        "tokenize",
-        "tool_choice",
-        "tools",
-        "truncation",
-    }
-)
-
 _REASONING_EFFORT_MAP = {
     "minimal": "low",
     "low": "low",
@@ -100,72 +76,58 @@ def _named_tool_choice(request: ChatCompletionRequest) -> str | None:
 
 
 def prepare_kimi_k3_chat_template_kwargs(request: ChatCompletionRequest) -> None:
-    """Install typed K3 controls while rejecting conflicting free-form kwargs."""
+    """Merge OpenAI controls with K3-native tokenizer kwargs.
+
+    Preserve explicitly supplied native kwargs and only derive values from
+    typed OpenAI fields when their native counterpart is absent.
+    """
 
     if getattr(request, _PREPARED_ATTR, False):
         return
 
     user_kwargs = request.chat_template_kwargs or {}
-    reserved_overrides = sorted(_RESERVED_CHAT_TEMPLATE_KWARGS.intersection(user_kwargs))
-    if reserved_overrides:
-        raise VLLMValidationError(
-            "Kimi K3 chat_template_kwargs cannot override typed protocol fields: " + ", ".join(reserved_overrides),
-            parameter="chat_template_kwargs",
-        )
-    if request.chat_template is not None:
-        raise VLLMValidationError(
-            "Kimi K3 uses its tokenizer-owned chat encoder and does not accept a request chat_template.",
-            parameter="chat_template",
-        )
-    if not request.add_generation_prompt or request.continue_final_message:
-        raise VLLMValidationError(
-            "Kimi K3 requires add_generation_prompt=true and does not yet support continue_final_message.",
-            parameter="add_generation_prompt",
-        )
-    if request.response_format is not None:
-        raise VLLMValidationError(
-            "Kimi K3 does not yet support response_format with its XTML response envelope.",
-            parameter="response_format",
-        )
-    if request.structured_outputs is not None:
-        raise VLLMValidationError(
-            "Kimi K3 does not yet support structured_outputs with its XTML response envelope.",
-            parameter="structured_outputs",
-        )
-    if request.tools and request.tool_choice is None:
-        raise VLLMValidationError(
-            "Kimi K3 requires explicit tool_choice='auto' when tools are provided; null is not an implicit auto mode.",
-            parameter="tool_choice",
-        )
     template_kwargs = dict(user_kwargs)
     request_tools = [_model_dump(tool) for tool in (request.tools or [])]
 
-    template_kwargs["thinking"] = request.reasoning_effort != "none"
-    # Always materialize the typed request value so neither CLI defaults nor
-    # request-independent chat-template kwargs can inject a different tool set.
-    template_kwargs["tools"] = request_tools
-
-    if template_kwargs["thinking"]:
+    if "thinking" not in user_kwargs and request.reasoning_effort is not None:
+        template_kwargs["thinking"] = request.reasoning_effort != "none"
+    if (
+        "thinking_effort" not in user_kwargs
+        and template_kwargs.get("thinking", True)
+        and request.reasoning_effort in _REASONING_EFFORT_MAP
+    ):
         template_kwargs["thinking_effort"] = _REASONING_EFFORT_MAP.get(
             request.reasoning_effort,
             "max",
         )
 
-    named_tool = _named_tool_choice(request)
-    if named_tool:
-        matching_tools = [tool for tool in request_tools if _tool_name(tool) == named_tool]
-        if not matching_tools:
-            raise VLLMValidationError(
-                f"Named Kimi K3 tool choice {named_tool!r} is not declared.",
-                parameter="tool_choice",
-            )
-        template_kwargs["tool_choice"] = "required"
-        template_kwargs["tools"] = matching_tools
-    elif isinstance(request.tool_choice, str):
-        template_kwargs["tool_choice"] = request.tool_choice
-    else:
-        template_kwargs["tool_choice"] = "none"
-    template_kwargs[KIMI_K3_PROMPT_TOOL_CHOICE_KEY] = encode_kimi_k3_prompt_tool_choice(template_kwargs["tool_choice"])
+    if "tools" not in user_kwargs:
+        template_kwargs["tools"] = request_tools
+
+    if "tool_choice" not in user_kwargs:
+        named_tool = _named_tool_choice(request)
+        if named_tool:
+            matching_tools = [tool for tool in request_tools if _tool_name(tool) == named_tool]
+            if not matching_tools:
+                raise VLLMValidationError(
+                    f"Named Kimi K3 tool choice {named_tool!r} is not declared.",
+                    parameter="tool_choice",
+                )
+            template_kwargs["tool_choice"] = "required"
+            template_kwargs["tools"] = matching_tools
+        elif isinstance(request.tool_choice, str):
+            template_kwargs["tool_choice"] = request.tool_choice
+        elif request.tool_choice is None:
+            template_kwargs["tool_choice"] = "auto" if template_kwargs.get("tools") else "none"
+            if template_kwargs["tool_choice"] == "auto":
+                request.tool_choice = "auto"
+
+    prompt_tool_choice = template_kwargs.get("tool_choice")
+    if isinstance(prompt_tool_choice, str) and prompt_tool_choice in {"none", "auto", "required"}:
+        template_kwargs[KIMI_K3_PROMPT_TOOL_CHOICE_KEY] = encode_kimi_k3_prompt_tool_choice(prompt_tool_choice)
+
+    if "response_format" not in user_kwargs and request.response_format is not None:
+        template_kwargs["response_format"] = _model_dump(request.response_format)
 
     request.chat_template_kwargs = template_kwargs
     request.skip_special_tokens = False
@@ -188,12 +150,7 @@ async def _render_chat_with_kimi_k3_params(
     *,
     skip_mm_cache: bool = False,
 ):
-    if is_kimi_k3_model_config(self.model_config):
-        if not isinstance(request, ChatCompletionRequest):
-            raise VLLMValidationError(
-                "Kimi K3 reasoning and tool use are currently supported through /v1/chat/completions only.",
-                parameter="request",
-            )
+    if is_kimi_k3_model_config(self.model_config) and isinstance(request, ChatCompletionRequest):
         prepare_kimi_k3_chat_template_kwargs(request)
 
     original = getattr(type(self), _ORIGINAL_RENDER_CHAT_ATTR)
