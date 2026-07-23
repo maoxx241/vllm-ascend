@@ -49,6 +49,7 @@
 #include "attention/ngram_spec_decode/ngram_spec_decode_torch_adpt.h"
 #include "moe/causal_conv1d_v310/causal_conv1d_310_torch_adpt.h"
 #include "attention/recurrent_gated_delta_rule/recurrent_gated_delta_rule_torch_adpt.h"
+#include "attention/recurrent_kda/recurrent_kda_torch_adpt.h"
 #include "attention/recurrent_gated_delta_rule_v310/recurrent_gated_delta_rule_310_torch_adpt.h"
 #include "attention/store_kv_block/store_kv_block_torch_adpt.h"
 #include "attention/store_kv_block_metadata/store_kv_block_metadata_torch_adpt.cpp"
@@ -2609,6 +2610,15 @@ TORCH_LIBRARY_EXPAND(CONCAT(_C, _ascend), ops)
         "                               Tensor? g=None, "
         "                               Tensor? gk=None) -> Tensor");
     ops.impl("npu_recurrent_gated_delta_rule", torch::kPrivateUse1, &vllm_ascend::npu_recurrent_gated_delta_rule);
+
+    ops.def(
+        "recurrent_kda(Tensor query, Tensor key, Tensor value, Tensor gate, Tensor beta, "
+        "Tensor(a!) initial_state, Tensor cu_seqlens, Tensor ssm_state_indices, Tensor A_log, Tensor dt_bias, *, "
+        "Tensor? num_accepted_tokens=None, float scale=0.08838834764831845, "
+        "bool use_qk_l2norm_in_kernel=True, bool use_gate_in_kernel=True, "
+        "bool use_beta_sigmoid_in_kernel=False, bool allow_neg_eigval=False, "
+        "bool safe_gate=True, float lower_bound=-5.0) -> Tensor output");
+    ops.impl("recurrent_kda", torch::kPrivateUse1, &vllm_ascend::recurrent_kda);
 
 #ifdef VLLM_ENABLE_ATB_AND_DIRECT_KERNELS
     // Direct kernel custom ops

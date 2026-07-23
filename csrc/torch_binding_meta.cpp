@@ -787,6 +787,46 @@ at::Tensor npu_recurrent_gated_delta_rule_meta(
     return output;
 }
 
+at::Tensor recurrent_kda_meta(
+    const at::Tensor& query,
+    const at::Tensor& key,
+    const at::Tensor& value,
+    const at::Tensor& gate,
+    const at::Tensor& beta,
+    at::Tensor& initial_state,
+    const at::Tensor& actual_seq_lengths,
+    const at::Tensor& ssm_state_indices,
+    const at::Tensor& a_log,
+    const at::Tensor& dt_bias,
+    const c10::optional<at::Tensor>& num_accepted_tokens,
+    double scale,
+    bool use_qk_l2norm_in_kernel,
+    bool use_gate_in_kernel,
+    bool use_beta_sigmoid_in_kernel,
+    bool allow_neg_eigval,
+    bool safe_gate,
+    double lower_bound)
+{
+    (void)query;
+    (void)key;
+    (void)gate;
+    (void)beta;
+    (void)actual_seq_lengths;
+    (void)ssm_state_indices;
+    (void)a_log;
+    (void)dt_bias;
+    (void)num_accepted_tokens;
+    (void)scale;
+    (void)use_qk_l2norm_in_kernel;
+    (void)use_gate_in_kernel;
+    (void)use_beta_sigmoid_in_kernel;
+    (void)allow_neg_eigval;
+    (void)safe_gate;
+    (void)lower_bound;
+    (void)initial_state;
+    return at::empty_symint(value.sym_sizes(), value.options());
+}
+
 std::tuple<at::Tensor, at::Tensor> npu_fused_gdn_gating_meta(
     const at::Tensor& A_log,
     const at::Tensor& a,
@@ -1926,6 +1966,7 @@ TORCH_LIBRARY_IMPL_EXPAND(CONCAT(_C, _ascend), Meta, ops) {
     ops.impl("npu_gemma_rms_norm", &vllm_ascend::meta::npu_gemma_rms_norm_meta);
     // recurrent_gated_delta_rule meta implementation
     ops.impl("npu_recurrent_gated_delta_rule", &vllm_ascend::meta::npu_recurrent_gated_delta_rule_meta);
+    ops.impl("recurrent_kda", &vllm_ascend::meta::recurrent_kda_meta);
     // Launch host print from device
     ops.impl("device_print", &vllm_ascend::meta::device_print_meta);
     // launch host print from device for tensors

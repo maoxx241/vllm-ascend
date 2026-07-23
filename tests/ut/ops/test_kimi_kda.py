@@ -416,22 +416,22 @@ def test_ascendc_runtime_error_propagates(monkeypatch: pytest.MonkeyPatch):
         )
 
 
-def test_recurrent_path_threads_safe_gate_and_spec_metadata(monkeypatch: pytest.MonkeyPatch):
+def test_recurrent_path_uses_ascendc_with_safe_gate_and_spec_metadata(monkeypatch: pytest.MonkeyPatch):
     import vllm_ascend.ops.kimi_kda as kimi_kda
 
     layer = _bare_kimi_kda()
-    calls: dict[str, Any] = {}
+    calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
 
-    def fake_gate(g, a_log, head_dim, **kwargs):
-        calls["gate"] = (g, a_log, head_dim, kwargs)
-        return torch.zeros(*g.shape[:-1], 1, head_dim, dtype=torch.float32)
+    def fake_recurrent(*args, **kwargs):
+        calls.append((args, kwargs))
+        return args[0].clone()
 
-    def fake_recurrent(**kwargs):
-        calls["recurrent"] = kwargs
-        return kwargs["q"].clone(), kwargs["initial_state"]
-
-    monkeypatch.setattr(kimi_kda, "fused_kda_gate", fake_gate)
-    monkeypatch.setattr(kimi_kda, "fused_recurrent_kda", fake_recurrent)
+    monkeypatch.setattr(
+        kimi_kda.torch.ops._C_ascend,
+        "recurrent_kda",
+        fake_recurrent,
+        raising=False,
+    )
 
     q = torch.randn(1, 3, 1, 2)
     raw_gate = torch.randn(1, 3, 1, 2)
@@ -454,12 +454,25 @@ def test_recurrent_path_threads_safe_gate_and_spec_metadata(monkeypatch: pytest.
     )
 
     assert torch.equal(out, q)
-    gate_kwargs = calls["gate"][3]
-    assert gate_kwargs["safe_gate"] is True
-    assert gate_kwargs["lower_bound"] == -5.0
-    recurrent_kwargs = calls["recurrent"]
-    assert recurrent_kwargs["num_accepted_tokens"] is accepted
-    assert recurrent_kwargs["ssm_state_indices"] is state_indices
+    assert len(calls) == 1
+    args, kwargs = calls[0]
+    for actual, expected in zip(args[:5], (q, q, q, raw_gate, beta)):
+        assert torch.equal(actual, expected)
+    assert args[5] is state
+    assert args[6] is cu_seqlens
+    assert args[7] is state_indices
+    assert args[8].shape == (1,)
+    assert args[9].shape == (2,)
+    assert kwargs == {
+        "num_accepted_tokens": accepted,
+        "scale": 2**-0.5,
+        "use_qk_l2norm_in_kernel": True,
+        "use_gate_in_kernel": True,
+        "use_beta_sigmoid_in_kernel": False,
+        "allow_neg_eigval": False,
+        "safe_gate": True,
+        "lower_bound": -5.0,
+    }
 
 
 def test_prefill_compacts_empty_rows_and_transposes_cache_boundary(monkeypatch: pytest.MonkeyPatch):

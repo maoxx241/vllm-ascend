@@ -5,7 +5,7 @@
 The vLLM implementation provides the projections, cache specification, and
 opaque ``kda_attention`` custom op.  This OOT replacement keeps that public
 surface while routing prefill through the Kimi AscendC kernels and decode
-through the existing Triton recurrent KDA kernel.
+through the recurrent KDA AscendC kernel.
 """
 
 from functools import partial
@@ -28,7 +28,7 @@ from vllm.v1.attention.backends.utils import PAD_SLOT_ID
 from vllm_ascend.ops.gdn_attn_builder import AscendGDNAttentionBackend
 from vllm_ascend.ops.kimi_kda_state import kimi_kda_state_shape
 from vllm_ascend.ops.triton.fla.utils import clear_ssm_states
-from vllm_ascend.ops.triton.kda.kda import fused_kda_gate, fused_recurrent_kda
+from vllm_ascend.ops.triton.kda.kda import fused_kda_gate
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3TextConfig
 from vllm_ascend.utils import parse_layer_idx, uses_global_inputs_embeds
 
@@ -272,19 +272,25 @@ class AscendKimiGatedDeltaNetAttention(KimiGatedDeltaNetAttention):
         *,
         num_accepted_tokens: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        gate = self._recurrent_gate(raw_gate)
-        out, _ = fused_recurrent_kda(
-            q=q,
-            k=k,
-            v=v,
-            g=gate,
-            beta=beta,
-            initial_state=recurrent_state,
-            inplace_final_state=True,
-            use_qk_l2norm_in_kernel=True,
-            cu_seqlens=cu_seqlens,
-            ssm_state_indices=state_indices,
+        out = torch.ops._C_ascend.recurrent_kda(
+            q.contiguous(),
+            k.contiguous(),
+            v.contiguous(),
+            raw_gate.contiguous(),
+            beta.contiguous(),
+            recurrent_state,
+            cu_seqlens,
+            state_indices,
+            self.A_log.reshape(-1).contiguous(),
+            self.dt_bias.contiguous(),
             num_accepted_tokens=num_accepted_tokens,
+            scale=self.head_dim**-0.5,
+            use_qk_l2norm_in_kernel=True,
+            use_gate_in_kernel=True,
+            use_beta_sigmoid_in_kernel=False,
+            allow_neg_eigval=False,
+            safe_gate=self.gate_lower_bound is not None,
+            lower_bound=self.gate_lower_bound if self.gate_lower_bound is not None else -5.0,
         )
         return out
 
