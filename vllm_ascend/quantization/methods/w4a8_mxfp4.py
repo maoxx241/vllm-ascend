@@ -124,16 +124,8 @@ class AscendW4A8MXFPDynamicFusedMoEMethod(AscendMoEScheme):
     ) -> dict[str, Any]:
         param_dict = {}
 
-        w13_weight_name = (
-            "w13_weight_packed"
-            if self.use_weight_packed
-            else "w13_weight"
-        )
-        w2_weight_name = (
-            "w2_weight_packed"
-            if self.use_weight_packed
-            else "w2_weight"
-        )
+        w13_weight_name = "w13_weight_packed" if self.use_weight_packed else "w13_weight"
+        w2_weight_name = "w2_weight_packed" if self.use_weight_packed else "w2_weight"
 
         param_dict[w13_weight_name] = torch.empty(
             num_experts,

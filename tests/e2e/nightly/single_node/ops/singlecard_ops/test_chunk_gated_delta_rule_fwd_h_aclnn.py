@@ -152,10 +152,7 @@ def _chunk_gated_delta_rule_fwd_h_kda_reference(k, w, u, gk, initial_state, chun
                 token_slice = slice(token_start, token_end)
                 current_h = state[batch_idx, v_head_idx]
                 h[batch_idx, v_head_idx, chunk_idx] = current_h
-                v_work = (
-                    u[batch_idx, v_head_idx, token_slice]
-                    - w[batch_idx, v_head_idx, token_slice] @ current_h
-                )
+                v_work = u[batch_idx, v_head_idx, token_slice] - w[batch_idx, v_head_idx, token_slice] @ current_h
                 v_new[batch_idx, v_head_idx, token_slice] = v_work
                 last_gk = gk[batch_idx, v_head_idx, token_end - 1]
                 state[batch_idx, v_head_idx] = (

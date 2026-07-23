@@ -296,6 +296,7 @@ def test_chunk_kda_fwd_c128_v256_path(total_t, hq, hv, kdim, vdim, dtype):
     scale = kdim**-0.5
 
     gk = torch.ops._C_ascend.kda_gate_cumsum(g, 64, layout="BSND")
+
     def run_chunk_kda_fwd():
         return torch.ops._C_ascend.chunk_kda_fwd(
             q,
@@ -312,12 +313,7 @@ def test_chunk_kda_fwd_c128_v256_path(total_t, hq, hv, kdim, vdim, dtype):
         )
 
     is_a5_determinism_case = (
-        total_t == 128
-        and hq == 2
-        and hv == 2
-        and kdim == 128
-        and vdim == 256
-        and dtype == torch.bfloat16
+        total_t == 128 and hq == 2 and hv == 2 and kdim == 128 and vdim == 256 and dtype == torch.bfloat16
     )
     if is_a5_determinism_case:
         run_chunk_kda_fwd()
