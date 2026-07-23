@@ -58,6 +58,8 @@ if vllm_version_is("0.23.0"):
 else:
     from vllm.model_executor.layers.fused_moe.unquantized_fused_moe_method import UnquantizedFusedMoEMethod
 
+SITU_MX_DST_TYPE_E4M3FN = 36
+
 
 def get_compressed_expert_map(expert_map: torch.Tensor) -> str:
     global_indices = torch.where(expert_map != -1)[0]
@@ -738,11 +740,7 @@ else:
                     self._shared_experts.down_proj, "weight_scale"
                 )
                 shared_uses_situ = isinstance(self._shared_experts.act_fn, AscendSituAndMul)
-                if (
-                    has_quantized_shared
-                    and not shared_uses_situ
-                    and self.quant_type in (QuantType.W8A8, QuantType.W4A8)
-                ):
+                if has_quantized_shared and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
                     original_dtype = hidden_states.dtype
                     # Execute dynamic quant concurrently with MoE gate.
                     torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -761,19 +759,34 @@ else:
                     # Execute activation concurrently with gmm2.
 
                     maybe_wait_event(fused_moe_evts.before_gmm2)
-                    quantized_x, swiglu_out_scale = torch.ops._C_ascend.npu_dequant_swiglu_quant(
-                        x=hidden_states,
-                        weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
-                        activation_scale=pertoken_scale,
-                        bias=None,
-                        quant_scale=None,
-                        quant_offset=None,
-                        group_index=None,
-                        activate_left=True,
-                        quant_mode=1,
-                        swiglu_mode=1,
-                        clamp_limit=fused_moe_evts.swiglu_limit,
-                    )
+                    if shared_uses_situ:
+                        quantized_x, swiglu_out_scale = torch.ops._C_ascend.dequant_situ_quant(
+                            x=hidden_states,
+                            weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
+                            activation_scale=pertoken_scale,
+                            bias=None,
+                            quant_scale=None,
+                            quant_offset=None,
+                            group_index=None,
+                            beta=self._shared_experts.act_fn.beta,
+                            linear_beta=self._shared_experts.act_fn.linear_beta,
+                            activate_left=True,
+                            quant_mode="dynamic",
+                        )
+                    else:
+                        quantized_x, swiglu_out_scale = torch.ops._C_ascend.npu_dequant_swiglu_quant(
+                            x=hidden_states,
+                            weight_scale=self._shared_experts.gate_up_proj.weight_scale_fp32,
+                            activation_scale=pertoken_scale,
+                            bias=None,
+                            quant_scale=None,
+                            quant_offset=None,
+                            group_index=None,
+                            activate_left=True,
+                            quant_mode=1,
+                            swiglu_mode=1,
+                            clamp_limit=fused_moe_evts.swiglu_limit,
+                        )
                     # Execute the down projection concurrently with the combine
                     # communication.
                     maybe_wait_event(fused_moe_evts.before_combine)
@@ -785,7 +798,7 @@ else:
                         bias=None,
                         output_dtype=original_dtype,
                     )
-                elif has_quantized_shared and not shared_uses_situ and self.quant_type == QuantType.W4A8MXFP:
+                elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
                     original_dtype = hidden_states.dtype
                     # Execute dynamic quant concurrently with MoE gate.
                     torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
@@ -798,14 +811,23 @@ else:
                     hidden_states = self._shared_experts.gate_up_proj((quantized_x, pertoken_scale))[0]
                     # Execute activation concurrently with gmm2.
                     maybe_wait_event(fused_moe_evts.before_gmm2)
-                    quantized_x, swiglu_out_scale, _ = torch.ops._C_ascend.npu_swiglu_group_quant(
-                        hidden_states,
-                        topk_weight=None,
-                        group_index=None,
-                        dst_type=torch.float8_e4m3fn,
-                        quant_mode=2,
-                        clamp_value=fused_moe_evts.swiglu_limit,
-                    )
+                    if shared_uses_situ:
+                        quantized_x, swiglu_out_scale = torch.ops._C_ascend.situ_mx_quant(
+                            x=hidden_states,
+                            beta=self._shared_experts.act_fn.beta,
+                            linear_beta=self._shared_experts.act_fn.linear_beta or 0.0,
+                            activate_left=True,
+                            dst_type=SITU_MX_DST_TYPE_E4M3FN,
+                        )
+                    else:
+                        quantized_x, swiglu_out_scale, _ = torch.ops._C_ascend.npu_swiglu_group_quant(
+                            hidden_states,
+                            topk_weight=None,
+                            group_index=None,
+                            dst_type=torch.float8_e4m3fn,
+                            quant_mode=2,
+                            clamp_value=fused_moe_evts.swiglu_limit,
+                        )
                     # Execute the down projection concurrently with the combine
                     # communication.
                     maybe_wait_event(fused_moe_evts.before_combine)
