@@ -662,6 +662,32 @@ class TestAscendMoERunner:
         if hasattr(runner, "_maybe_reduce_shared_expert_output"):
             assert runner._maybe_reduce_shared_expert_output("shared") == "shared"
 
+    def test_allgather_reduces_before_routed_output_transform(self, monkeypatch):
+        runner = AscendMoERunner.__new__(AscendMoERunner)
+        routed_output_transform = MagicMock(return_value="transformed")
+        runner.routed_output_transform = routed_output_transform
+        reduce_mock = MagicMock(return_value="reduced")
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "_EXTRA_CTX",
+            SimpleNamespace(
+                moe_comm_type=MoECommType.ALLGATHER,
+                flash_comm_v1_enabled=False,
+            ),
+        )
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "tensor_model_parallel_all_reduce",
+            reduce_mock,
+        )
+
+        result = runner.apply_routed_output_transform("partial")
+
+        assert runner._fused_output_is_reduced is True
+        assert result == "transformed"
+        reduce_mock.assert_called_once_with("partial")
+        routed_output_transform.assert_called_once_with("reduced")
+
     @pytest.mark.parametrize("has_shared_experts", [False, True])
     def test_forward_impl_delegates_to_layer(self, monkeypatch, has_shared_experts):
         runner = AscendMoERunner.__new__(AscendMoERunner)
