@@ -286,6 +286,14 @@ __aicore__ inline void ComputeVfSitu(__local_mem__ T* gateUbAddr, __local_mem__ 
     float negScalarOne = -1.0f;
     float scalarTwo = 2.0f;
     float negTwo = -2.0f;
+    // Two-path tanh (adapted from tanh.h reference):
+    //   |x| < 0.6:  degree-9 polynomial, FMA Horner (matches tanh.h exactly)
+    //   |x| >= 0.6: sigmoid decomposition, sign naturally preserved
+    float tanhC1 = -0.333327681f;
+    float tanhC2 = 0.133152977f;
+    float tanhC3 = -0.0523039624f;
+    float tanhC4 = 0.0157396831f;
+    float tanhThreshold = 0.6f;
     __VEC_SCOPE__
     {
         AscendC::MicroAPI::RegTensor<T> vregGate;
@@ -293,13 +301,15 @@ __aicore__ inline void ComputeVfSitu(__local_mem__ T* gateUbAddr, __local_mem__ 
         AscendC::MicroAPI::RegTensor<float> gateF;
         AscendC::MicroAPI::RegTensor<float> upF;
         AscendC::MicroAPI::RegTensor<float> gateDivBeta;
-        AscendC::MicroAPI::RegTensor<float> tanhResult;
+        AscendC::MicroAPI::RegTensor<float> polyReg;     // sigmoid path result
+        AscendC::MicroAPI::RegTensor<float> x2;          // x² for Horner / temp
+        AscendC::MicroAPI::MaskReg cmpMask;              // comparison result for Select
         AscendC::MicroAPI::RegTensor<float> negGate;
-        AscendC::MicroAPI::RegTensor<float> expReg;
-        AscendC::MicroAPI::RegTensor<float> addsReg;
+        AscendC::MicroAPI::RegTensor<float> expReg;      // sigmoid Exp
         AscendC::MicroAPI::RegTensor<float> oneReg;
-        AscendC::MicroAPI::RegTensor<float> sigmoidReg;
-        AscendC::MicroAPI::RegTensor<float> situA;
+        AscendC::MicroAPI::RegTensor<float> sigmoidReg;  // sigmoid result / linear_beta work reg
+        AscendC::MicroAPI::RegTensor<float> c1Reg;       // tanh polynomial coeff c1 (preloaded)
+        AscendC::MicroAPI::RegTensor<float> c2Reg;       // tanh polynomial coeff c2 (preloaded)
         AscendC::MicroAPI::RegTensor<float> outFReg;
         AscendC::MicroAPI::RegTensor<T> outTReg;
         AscendC::MicroAPI::MaskReg mask = AscendC::MicroAPI::CreateMask<float, MicroAPI::MaskPattern::ALL>();
@@ -307,6 +317,8 @@ __aicore__ inline void ComputeVfSitu(__local_mem__ T* gateUbAddr, __local_mem__ 
         AscendC::MicroAPI::MaskReg mask2 = AscendC::MicroAPI::UpdateMask<float>(mask2Num);
         AscendC::MicroAPI::MaskReg mask3 = AscendC::MicroAPI::UpdateMask<T>(mask3Num);
         AscendC::MicroAPI::Duplicate(oneReg, scalarOne);
+        AscendC::MicroAPI::Duplicate(c1Reg, tanhC1);
+        AscendC::MicroAPI::Duplicate(c2Reg, tanhC2);
         for (uint16_t dim0vfLoopIdx = 0; dim0vfLoopIdx < dim0VfTimes; dim0vfLoopIdx++) {
             for (uint16_t dim1vfLoopIdx = 0; dim1vfLoopIdx < dim1VfTimes; dim1vfLoopIdx++) {
                 AscendC::MicroAPI::AddrReg srcIdxOffset = AscendC::MicroAPI::CreateAddrReg<T>(
@@ -318,38 +330,84 @@ __aicore__ inline void ComputeVfSitu(__local_mem__ T* gateUbAddr, __local_mem__ 
                 AscendC::MicroAPI::Cast<float, T, CAST_ZERO>(gateF, vregGate, mask);
                 AscendC::MicroAPI::Cast<float, T, CAST_ZERO>(upF, vregUp, mask);
 
-                // tanh(x) = 2 * sigmoid(2x) - 1, where x = gate / beta
-                AscendC::MicroAPI::Muls(gateDivBeta, gateF, invBeta, mask);
-                AscendC::MicroAPI::Muls(negGate, gateDivBeta, negTwo, mask);
-                AscendC::MicroAPI::Exp(expReg, negGate, mask);
-                AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask);
-                AscendC::MicroAPI::Div(tanhResult, oneReg, addsReg, mask);
-                AscendC::MicroAPI::Muls(tanhResult, tanhResult, scalarTwo, mask);
-                AscendC::MicroAPI::Adds(tanhResult, tanhResult, negScalarOne, mask);
-                AscendC::MicroAPI::Muls(tanhResult, tanhResult, beta, mask);
+                // Two-path tanh(gate/beta) — adapted from tanh.h reference:
+                //   small |x|: degree-7 polynomial (Horner)
+                //   large |x|: sigmoid decomposition on |x|, sign restore
+                AscendC::MicroAPI::Muls(gateDivBeta, gateF, invBeta, mask); // x = gate/beta
 
-                // sigmoid(gate) = 1 / (1 + exp(-gate))
-                AscendC::MicroAPI::Muls(negGate, gateF, negScalarOne, mask);
-                AscendC::MicroAPI::Exp(expReg, negGate, mask);
-                AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask);
-                AscendC::MicroAPI::Div(sigmoidReg, oneReg, addsReg, mask);
+                // --- Polynomial path (all x, used for |x| < 0.6) ---
+                // tanh(x) ≈ x * (1 + c1*x² + c2*x⁴ + c3*x⁶ + c4*x⁸)
+                // FMA Horner (matches tanh.h reference: 7 ops, 7 roundings)
+                AscendC::MicroAPI::Mul(x2, gateDivBeta, gateDivBeta, mask);     // x²
+                AscendC::MicroAPI::Muls(sigmoidReg, x2, tanhC4, mask);          // c4*x²
+                AscendC::MicroAPI::Adds(sigmoidReg, sigmoidReg, tanhC3, mask);  // +c3
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c2Reg, mask); // *x²+c2
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c1Reg, mask); // *x²+c1
+                AscendC::MicroAPI::Mul(sigmoidReg, sigmoidReg, x2, mask);       // *x²
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, gateDivBeta, gateDivBeta, mask); // *x+x = x*(p+1)
 
-                AscendC::MicroAPI::Mul(situA, tanhResult, sigmoidReg, mask);
+                // --- Sigmoid path (used for |x| >= 0.6) ---
+                // tanh(x) = 2*sigmoid(2x) - 1 = 2/(1+exp(-2x)) - 1, sign naturally preserved
+                AscendC::MicroAPI::Muls(negGate, gateDivBeta, negTwo, mask); // -2x
+                AscendC::MicroAPI::Exp(expReg, negGate, mask);
+                AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask);    // 1+exp(-2x)
+                AscendC::MicroAPI::Div(polyReg, oneReg, expReg, mask);       // sigmoid = 1/(1+exp(-2x))
+                AscendC::MicroAPI::Muls(polyReg, polyReg, scalarTwo, mask);  // 2*sigmoid
+                AscendC::MicroAPI::Adds(polyReg, polyReg, negScalarOne, mask); // 2*sigmoid - 1
+
+                // --- Path selection: sigmoid if |x| >= 0.6, else polynomial ---
+                AscendC::MicroAPI::Muls(x2, gateDivBeta, negScalarOne, mask);
+                AscendC::MicroAPI::Max(x2, gateDivBeta, x2, mask);           // |x|
+                AscendC::MicroAPI::Duplicate(expReg, tanhThreshold);         // 0.6
+                AscendC::MicroAPI::Compare<float, CMPMODE::GE>(cmpMask, x2, expReg, mask);
+                AscendC::MicroAPI::Select(sigmoidReg, polyReg, sigmoidReg, cmpMask);
+                // sigmoidReg = tanh(gate/beta) — save to negGate (free after |x|)
+                AscendC::MicroAPI::Mul(negGate, sigmoidReg, oneReg, mask);   // negGate = tanh
+
+                // sigmoid(gate) = 1 / (1 + exp(-gate))  → result in polyReg
+                AscendC::MicroAPI::Muls(polyReg, gateF, negScalarOne, mask); // -gate
+                AscendC::MicroAPI::Exp(expReg, polyReg, mask);
+                AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask);
+                AscendC::MicroAPI::Div(polyReg, oneReg, expReg, mask);       // sigmoid(gate)
+
+                // situ_a = beta * tanh * sigmoid
+                AscendC::MicroAPI::Mul(polyReg, negGate, polyReg, mask);     // tanh * sigmoid
+                AscendC::MicroAPI::Muls(polyReg, polyReg, beta, mask);       // * beta
 
                 // Optional: up = linear_beta * tanh(up / linear_beta)
+                // Uses sigmoidReg/negGate as work registers to preserve polyReg (situ_a)
                 if constexpr (hasLinearBeta) {
-                    AscendC::MicroAPI::Muls(upF, upF, invLinearBeta, mask);
-                    AscendC::MicroAPI::Muls(negGate, upF, negTwo, mask);
-                    AscendC::MicroAPI::Exp(expReg, negGate, mask);
-                    AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask);
-                    AscendC::MicroAPI::Div(upF, oneReg, addsReg, mask);
-                    AscendC::MicroAPI::Muls(upF, upF, scalarTwo, mask);
-                    AscendC::MicroAPI::Adds(upF, upF, negScalarOne, mask);
-                    AscendC::MicroAPI::Muls(upF, upF, linearBeta, mask);
+                    AscendC::MicroAPI::Muls(upF, upF, invLinearBeta, mask); // x = up/lb
+
+                    // Poly path → sigmoidReg (FMA Horner)
+                    AscendC::MicroAPI::Mul(x2, upF, upF, mask);
+                    AscendC::MicroAPI::Muls(sigmoidReg, x2, tanhC4, mask);
+                    AscendC::MicroAPI::Adds(sigmoidReg, sigmoidReg, tanhC3, mask);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c2Reg, mask);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c1Reg, mask);
+                    AscendC::MicroAPI::Mul(sigmoidReg, sigmoidReg, x2, mask);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, upF, upF, mask);
+
+                    // Sigmoid path on x (sign naturally preserved) → negGate
+                    AscendC::MicroAPI::Muls(expReg, upF, negTwo, mask);      // -2x
+                    AscendC::MicroAPI::Exp(expReg, expReg, mask);
+                    AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask); // 1+exp(-2x)
+                    AscendC::MicroAPI::Div(negGate, oneReg, expReg, mask);
+                    AscendC::MicroAPI::Muls(negGate, negGate, scalarTwo, mask);
+                    AscendC::MicroAPI::Adds(negGate, negGate, negScalarOne, mask); // 2*sig-1
+
+                    // Path selection → sigmoidReg = tanh(up/lb)
+                    AscendC::MicroAPI::Muls(x2, upF, negScalarOne, mask);
+                    AscendC::MicroAPI::Max(x2, upF, x2, mask);               // |x|
+                    AscendC::MicroAPI::Duplicate(expReg, tanhThreshold);
+                    AscendC::MicroAPI::Compare<float, CMPMODE::GE>(cmpMask, x2, expReg, mask);
+                    AscendC::MicroAPI::Select(sigmoidReg, negGate, sigmoidReg, cmpMask);
+
+                    AscendC::MicroAPI::Muls(upF, sigmoidReg, linearBeta, mask);
                 }
 
                 // situOut = situ_a * up
-                AscendC::MicroAPI::Mul(outFReg, situA, upF, mask);
+                AscendC::MicroAPI::Mul(outFReg, polyReg, upF, mask);
 
                 AscendC::MicroAPI::Cast<T, float, CAST_FP32_TO_BF16>(outTReg, outFReg, mask);
                 AscendC::MicroAPI::AddrReg outOffset = AscendC::MicroAPI::CreateAddrReg<T>(dim0vfLoopIdx, alignDim1Out,
@@ -367,36 +425,76 @@ __aicore__ inline void ComputeVfSitu(__local_mem__ T* gateUbAddr, __local_mem__ 
                 AscendC::MicroAPI::Cast<float, T, CAST_ZERO>(gateF, vregGate, mask1);
                 AscendC::MicroAPI::Cast<float, T, CAST_ZERO>(upF, vregUp, mask1);
 
-                // tanh(x) = 2 * sigmoid(2x) - 1, where x = gate / beta
+                // Two-path tanh(gate/beta) — tail path
                 AscendC::MicroAPI::Muls(gateDivBeta, gateF, invBeta, mask1);
+
+                // Poly path → sigmoidReg (FMA Horner)
+                AscendC::MicroAPI::Mul(x2, gateDivBeta, gateDivBeta, mask1);
+                AscendC::MicroAPI::Muls(sigmoidReg, x2, tanhC4, mask1);
+                AscendC::MicroAPI::Adds(sigmoidReg, sigmoidReg, tanhC3, mask1);
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c2Reg, mask1);
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c1Reg, mask1);
+                AscendC::MicroAPI::Mul(sigmoidReg, sigmoidReg, x2, mask1);
+                AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, gateDivBeta, gateDivBeta, mask1);
+
+                // Sigmoid path on x → polyReg: tanh(x) = 2/(1+exp(-2x)) - 1
                 AscendC::MicroAPI::Muls(negGate, gateDivBeta, negTwo, mask1);
                 AscendC::MicroAPI::Exp(expReg, negGate, mask1);
-                AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask1);
-                AscendC::MicroAPI::Div(tanhResult, oneReg, addsReg, mask1);
-                AscendC::MicroAPI::Muls(tanhResult, tanhResult, scalarTwo, mask1);
-                AscendC::MicroAPI::Adds(tanhResult, tanhResult, negScalarOne, mask1);
-                AscendC::MicroAPI::Muls(tanhResult, tanhResult, beta, mask1);
+                AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask1);
+                AscendC::MicroAPI::Div(polyReg, oneReg, expReg, mask1);
+                AscendC::MicroAPI::Muls(polyReg, polyReg, scalarTwo, mask1);
+                AscendC::MicroAPI::Adds(polyReg, polyReg, negScalarOne, mask1);
 
-                // sigmoid(gate) = 1 / (1 + exp(-gate))
-                AscendC::MicroAPI::Muls(negGate, gateF, negScalarOne, mask1);
-                AscendC::MicroAPI::Exp(expReg, negGate, mask1);
-                AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask1);
-                AscendC::MicroAPI::Div(sigmoidReg, oneReg, addsReg, mask1);
+                // Path selection → sigmoidReg = tanh
+                AscendC::MicroAPI::Muls(x2, gateDivBeta, negScalarOne, mask1);
+                AscendC::MicroAPI::Max(x2, gateDivBeta, x2, mask1);           // |x|
+                AscendC::MicroAPI::Duplicate(expReg, tanhThreshold);
+                AscendC::MicroAPI::Compare<float, CMPMODE::GE>(cmpMask, x2, expReg, mask1);
+                AscendC::MicroAPI::Select(sigmoidReg, polyReg, sigmoidReg, cmpMask);
+                AscendC::MicroAPI::Mul(negGate, sigmoidReg, oneReg, mask1); // save tanh
 
-                AscendC::MicroAPI::Mul(situA, tanhResult, sigmoidReg, mask1);
+                // sigmoid(gate) → polyReg
+                AscendC::MicroAPI::Muls(polyReg, gateF, negScalarOne, mask1);
+                AscendC::MicroAPI::Exp(expReg, polyReg, mask1);
+                AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask1);
+                AscendC::MicroAPI::Div(polyReg, oneReg, expReg, mask1);
 
+                // situ_a = beta * tanh * sigmoid
+                AscendC::MicroAPI::Mul(polyReg, negGate, polyReg, mask1);
+                AscendC::MicroAPI::Muls(polyReg, polyReg, beta, mask1);
+
+                // Optional: up = linear_beta * tanh(up / linear_beta)
                 if constexpr (hasLinearBeta) {
                     AscendC::MicroAPI::Muls(upF, upF, invLinearBeta, mask1);
-                    AscendC::MicroAPI::Muls(negGate, upF, negTwo, mask1);
-                    AscendC::MicroAPI::Exp(expReg, negGate, mask1);
-                    AscendC::MicroAPI::Adds(addsReg, expReg, scalarOne, mask1);
-                    AscendC::MicroAPI::Div(upF, oneReg, addsReg, mask1);
-                    AscendC::MicroAPI::Muls(upF, upF, scalarTwo, mask1);
-                    AscendC::MicroAPI::Adds(upF, upF, negScalarOne, mask1);
-                    AscendC::MicroAPI::Muls(upF, upF, linearBeta, mask1);
+
+                    AscendC::MicroAPI::Mul(x2, upF, upF, mask1);
+                    AscendC::MicroAPI::Muls(sigmoidReg, x2, tanhC4, mask1);
+                    AscendC::MicroAPI::Adds(sigmoidReg, sigmoidReg, tanhC3, mask1);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c2Reg, mask1);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, x2, c1Reg, mask1);
+                    AscendC::MicroAPI::Mul(sigmoidReg, sigmoidReg, x2, mask1);
+                    AscendC::MicroAPI::FusedMulDstAdd(sigmoidReg, upF, upF, mask1);
+
+                    // Sigmoid path on x → negGate: tanh(x) = 2/(1+exp(-2x)) - 1
+                    AscendC::MicroAPI::Muls(expReg, upF, negTwo, mask1);
+                    AscendC::MicroAPI::Exp(expReg, expReg, mask1);
+                    AscendC::MicroAPI::Adds(expReg, expReg, scalarOne, mask1);
+                    AscendC::MicroAPI::Div(negGate, oneReg, expReg, mask1);
+                    AscendC::MicroAPI::Muls(negGate, negGate, scalarTwo, mask1);
+                    AscendC::MicroAPI::Adds(negGate, negGate, negScalarOne, mask1);
+
+                    // Path selection → sigmoidReg = tanh(up/lb)
+                    AscendC::MicroAPI::Muls(x2, upF, negScalarOne, mask1);
+                    AscendC::MicroAPI::Max(x2, upF, x2, mask1);               // |x|
+                    AscendC::MicroAPI::Duplicate(expReg, tanhThreshold);
+                    AscendC::MicroAPI::Compare<float, CMPMODE::GE>(cmpMask, x2, expReg, mask1);
+                    AscendC::MicroAPI::Select(sigmoidReg, negGate, sigmoidReg, cmpMask);
+
+                    AscendC::MicroAPI::Muls(upF, sigmoidReg, linearBeta, mask1);
                 }
 
-                AscendC::MicroAPI::Mul(outFReg, situA, upF, mask1);
+                // situOut = situ_a * up
+                AscendC::MicroAPI::Mul(outFReg, polyReg, upF, mask1);
 
                 AscendC::MicroAPI::Cast<T, float, CAST_FP32_TO_BF16>(outTReg, outFReg, mask1);
                 DataCopy<T, AscendC::MicroAPI::StoreDist::DIST_PACK_B32>(situUbAddr1, outTReg, outOffset1, mask2);
