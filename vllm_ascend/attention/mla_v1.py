@@ -793,10 +793,11 @@ class AscendMLAImpl(MLAAttentionImpl):
                 )
         register_all_layers_to_shard_weight_series(self.layer_sharding_kwargs)
 
-        # The replacement A3 attention operator accepts arbitrary head counts,
-        # so the legacy next-power-of-two padding path is no longer needed.
-        self.num_heads_padded = self.num_heads
-        self.head_padding = 0
+        # For models whose num_heads is not a power of 2 (e.g., GLM-4.7-Flash
+        # with 20 heads), ascend attention ops require padding heads to the
+        # next power of 2.
+        self.num_heads_padded = 1 << (self.num_heads - 1).bit_length()
+        self.head_padding = self.num_heads_padded - self.num_heads
 
     @staticmethod
     def update_graph_params(
