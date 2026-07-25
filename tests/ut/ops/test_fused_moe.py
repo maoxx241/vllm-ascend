@@ -688,6 +688,89 @@ class TestAscendMoERunner:
         reduce_mock.assert_called_once_with("partial")
         routed_output_transform.assert_called_once_with("reduced")
 
+    def test_flashcomm_tp_shared_experts_gather_and_reduce_scatter(self, monkeypatch):
+        runner = AscendMoERunner.__new__(AscendMoERunner)
+        gather_mock = MagicMock(return_value="gathered")
+        reduce_scatter_mock = MagicMock(return_value="reduced_scatter")
+        all_reduce_mock = MagicMock(return_value="all_reduced")
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "_EXTRA_CTX",
+            SimpleNamespace(
+                moe_comm_type=MoECommType.ALLGATHER,
+                flash_comm_v1_enabled=True,
+            ),
+        )
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "shared_expert_dp_enabled",
+            MagicMock(return_value=False),
+        )
+        monkeypatch.setattr(
+            torch.ops.vllm,
+            "maybe_all_gather_and_maybe_unpad",
+            gather_mock,
+            raising=False,
+        )
+        monkeypatch.setattr(
+            torch.ops.vllm,
+            "maybe_pad_and_reduce",
+            reduce_scatter_mock,
+            raising=False,
+        )
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "tensor_model_parallel_all_reduce",
+            all_reduce_mock,
+        )
+
+        prepared = runner._prepare_shared_expert_input("local")
+        finalized = runner._finalize_shared_expert_output("partial")
+
+        assert prepared == "gathered"
+        assert finalized == "reduced_scatter"
+        gather_mock.assert_called_once_with("local", True)
+        reduce_scatter_mock.assert_called_once_with("partial")
+        all_reduce_mock.assert_not_called()
+
+    def test_shared_expert_dp_keeps_flashcomm_replica_path(self, monkeypatch):
+        runner = AscendMoERunner.__new__(AscendMoERunner)
+        gather_mock = MagicMock()
+        reduce_scatter_mock = MagicMock()
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "_EXTRA_CTX",
+            SimpleNamespace(
+                moe_comm_type=MoECommType.ALLGATHER,
+                flash_comm_v1_enabled=True,
+            ),
+        )
+        monkeypatch.setattr(
+            fused_moe_legacy_module,
+            "shared_expert_dp_enabled",
+            MagicMock(return_value=True),
+        )
+        monkeypatch.setattr(
+            torch.ops.vllm,
+            "maybe_all_gather_and_maybe_unpad",
+            gather_mock,
+            raising=False,
+        )
+        monkeypatch.setattr(
+            torch.ops.vllm,
+            "maybe_pad_and_reduce",
+            reduce_scatter_mock,
+            raising=False,
+        )
+
+        prepared = runner._prepare_shared_expert_input("local")
+        finalized = runner._finalize_shared_expert_output("partial")
+
+        assert prepared == "local"
+        assert finalized == "partial"
+        gather_mock.assert_not_called()
+        reduce_scatter_mock.assert_not_called()
+
     @pytest.mark.parametrize("has_shared_experts", [False, True])
     def test_forward_impl_delegates_to_layer(self, monkeypatch, has_shared_experts):
         runner = AscendMoERunner.__new__(AscendMoERunner)
