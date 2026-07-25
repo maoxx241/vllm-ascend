@@ -105,12 +105,15 @@ class AscendMoERunner(MoERunner):
         # a nonlinear transform (for example RMSNorm) cannot be applied to
         # per-rank partials before they are summed.
         moe_comm_type = _EXTRA_CTX.moe_comm_type
-        return moe_comm_type in {
-            MoECommType.ALLTOALL,
-            MoECommType.MC2,
-            MoECommType.FUSED_MC2,
-        } or (moe_comm_type == MoECommType.ALLGATHER and _EXTRA_CTX.flash_comm_v1_enabled) or (
-            self._allgather_requires_early_routed_reduce
+        return (
+            moe_comm_type
+            in {
+                MoECommType.ALLTOALL,
+                MoECommType.MC2,
+                MoECommType.FUSED_MC2,
+            }
+            or (moe_comm_type == MoECommType.ALLGATHER and _EXTRA_CTX.flash_comm_v1_enabled)
+            or (self._allgather_requires_early_routed_reduce)
         )
 
     def apply_routed_output_transform(
@@ -244,7 +247,7 @@ class AscendFusedMoE(FusedMoE):
         self.shared_multistream_overlap_gate = ascend_config.multistream_overlap_gate and has_shared_experts
         if self.multistream_overlap_shared_expert:
             logger.info_once("[fused_moe/layer] Multistream overlap shared expert is enabled.")
-        if enable_sp() and has_shared_experts:
+        if enable_sp() and has_shared_experts and shared_expert_dp_enabled():
             logger.info_once(
                 "[fused_moe/layer] Sequence parallelism is enabled, shared experts are replicated for best performance."
             )
@@ -426,6 +429,29 @@ class AscendFusedMoE(FusedMoE):
     def set_lora_context(self, lora_context):
         self._ascend_moe_lora_context = lora_context
 
+    @property
+    def _flashcomm_uses_tp_shared_experts(self) -> bool:
+        return _EXTRA_CTX.flash_comm_v1_enabled and not shared_expert_dp_enabled()
+
+    def _prepare_shared_expert_input(self, hidden_states: torch.Tensor) -> torch.Tensor:
+        if self._flashcomm_uses_tp_shared_experts:
+            hidden_states = torch.ops.vllm.maybe_all_gather_and_maybe_unpad(hidden_states, True)
+        return hidden_states
+
+    def _finalize_shared_expert_output(self, shared_out: torch.Tensor) -> torch.Tensor:
+        if self._flashcomm_uses_tp_shared_experts:
+            return torch.ops.vllm.maybe_pad_and_reduce(shared_out)
+
+        # NOTE: This is exactly the opposite of
+        # `maybe_all_reduce_tensor_model_parallel`.
+        moe_comm_type = _EXTRA_CTX.moe_comm_type
+        if (
+            moe_comm_type in {MoECommType.ALLTOALL, MoECommType.MC2, MoECommType.FUSED_MC2}
+            and not shared_expert_dp_enabled()
+        ):
+            shared_out = tensor_model_parallel_all_reduce(shared_out)
+        return shared_out
+
     def update_expert_map(self, new_expert_map):
         self._expert_map = new_expert_map
 
@@ -505,14 +531,9 @@ class AscendFusedMoE(FusedMoE):
                 # share_expert
                 assert fc3_context.shared_experts is not None
                 shared_hidden_states = hidden_states if shared_experts_input is None else shared_experts_input
+                shared_hidden_states = self._prepare_shared_expert_input(shared_hidden_states)
                 shared_out = fc3_context.shared_experts(shared_hidden_states)
-                # NOTE: This is exactly the opposite of `maybe_all_reduce_tensor_model_parallel`
-                moe_comm_type = _EXTRA_CTX.moe_comm_type
-                if (
-                    moe_comm_type in {MoECommType.ALLTOALL, MoECommType.MC2, MoECommType.FUSED_MC2}
-                    and not shared_expert_dp_enabled()
-                ):
-                    shared_out = tensor_model_parallel_all_reduce(shared_out)
+                shared_out = self._finalize_shared_expert_output(shared_out)
                 set_flash_common3_context(shared_out=shared_out)
                 input_ids = getattr(get_forward_context(), "input_ids", None)
                 topk_weights, topk_ids = select_experts(
@@ -627,6 +648,10 @@ class AscendFusedMoE(FusedMoE):
                 torch.npu.current_stream().wait_event(evt)
 
         with npu_stream_switch(shared_experts_calculation_stream(), enabled=self.multistream_overlap_shared_expert):
+            # Ensure the shared experts wait for hidden_states to be ready.
+            torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
+            hidden_states = self._prepare_shared_expert_input(hidden_states)
+
             # Only used for int quantization
             has_quantized_shared = hasattr(self._shared_experts.gate_up_proj, "weight_scale") and hasattr(
                 self._shared_experts.down_proj, "weight_scale"
@@ -635,7 +660,6 @@ class AscendFusedMoE(FusedMoE):
             if has_quantized_shared and self.quant_type in (QuantType.W8A8, QuantType.W4A8):
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
-                torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
                 quantized_x, pertoken_scale = torch_npu.npu_dynamic_quant(hidden_states)
                 # Execute the gate projection and activation concurrently with the
                 # dispatch communication.
@@ -698,7 +722,6 @@ class AscendFusedMoE(FusedMoE):
             elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
                 original_dtype = hidden_states.dtype
                 # Execute dynamic quant concurrently with MoE gate.
-                torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
                 quantized_x, pertoken_scale = torch_npu.npu_dynamic_mx_quant(
                     hidden_states, dst_type=torch.float8_e4m3fn
                 )
@@ -730,8 +753,6 @@ class AscendFusedMoE(FusedMoE):
                 maybe_wait_event(fused_moe_evts.before_combine)
                 shared_out = self._shared_experts.down_proj((quantized_x, swiglu_out_scale))[0]
             else:
-                # Ensure the shared experts wait for hidden_states to be ready.
-                torch.npu.current_stream().wait_event(fused_moe_evts.before_routed_experts)
                 # Execute the gate projection and activation concurrently with the
                 # dispatch communication.
                 maybe_wait_event(fused_moe_evts.before_dispatch)
@@ -746,14 +767,7 @@ class AscendFusedMoE(FusedMoE):
         if self.multistream_overlap_shared_expert:
             torch.npu.current_stream().wait_stream(shared_experts_calculation_stream())
 
-        # NOTE: This is exactly the opposite of
-        # `maybe_all_reduce_tensor_model_parallel`
-        moe_comm_type = _EXTRA_CTX.moe_comm_type
-        if (
-            moe_comm_type in {MoECommType.ALLTOALL, MoECommType.MC2, MoECommType.FUSED_MC2}
-            and not shared_expert_dp_enabled()
-        ):
-            shared_out = tensor_model_parallel_all_reduce(shared_out)
+        shared_out = self._finalize_shared_expert_output(shared_out)
         return shared_out
 
     def shared_forward_impl(  # type: ignore[override]
