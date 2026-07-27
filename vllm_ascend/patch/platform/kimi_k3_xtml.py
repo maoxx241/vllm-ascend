@@ -18,10 +18,12 @@
 
 from __future__ import annotations
 
+import codecs
 import json
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Literal
+from typing import Any, Literal
 
 import regex as re
 
@@ -41,13 +43,108 @@ ARGUMENT_END = f"{CLOSE_TOKEN}argument{SEP_TOKEN}"
 JSON_END = f"{CLOSE_TOKEN}json{SEP_TOKEN}"
 MESSAGE_END = f"{CLOSE_TOKEN}message{SEP_TOKEN}"
 
+# Unpaired surrogates cannot be produced by valid UTF-8 model text, so they
+# preserve structural-token provenance without colliding with ordinary text.
+_OPEN_TOKEN = "\ud800"
+_CLOSE_TOKEN = "\ud801"
+_SEP_TOKEN = "\ud802"
+_END_OF_MSG_TOKEN = "\ud803"
+
+_THINK_START = f"{_OPEN_TOKEN}think{_SEP_TOKEN}"
+_THINK_END = f"{_CLOSE_TOKEN}think{_SEP_TOKEN}"
+_RESPONSE_START = f"{_OPEN_TOKEN}response{_SEP_TOKEN}"
+_RESPONSE_END = f"{_CLOSE_TOKEN}response{_SEP_TOKEN}"
+_TOOLS_START = f"{_OPEN_TOKEN}tools{_SEP_TOKEN}"
+_TOOLS_END = f"{_CLOSE_TOKEN}tools{_SEP_TOKEN}"
+_CALL_END = f"{_CLOSE_TOKEN}call{_SEP_TOKEN}"
+_ARGUMENT_END = f"{_CLOSE_TOKEN}argument{_SEP_TOKEN}"
+_JSON_END = f"{_CLOSE_TOKEN}json{_SEP_TOKEN}"
+_MESSAGE_END = f"{_CLOSE_TOKEN}message{_SEP_TOKEN}"
+
+_CONTROL_TOKEN_TEXT = {
+    OPEN_TOKEN: _OPEN_TOKEN,
+    CLOSE_TOKEN: _CLOSE_TOKEN,
+    SEP_TOKEN: _SEP_TOKEN,
+    END_OF_MSG_TOKEN: _END_OF_MSG_TOKEN,
+}
+_PROTOCOL_TOKEN_TEXT = {value: key for key, value in _CONTROL_TOKEN_TEXT.items()}
+_CONTROL_SENTINELS = tuple(_PROTOCOL_TOKEN_TEXT)
+
 ToolMode = Literal["none", "auto", "required", "named"]
 
 _ATTR_RE = re.compile(r'([A-Za-z_][\w.-]*)="([^"]*)"')
 _UNKNOWN_ENTITY_RE = re.compile(r"&(?!amp;|quot;)")
-_CALL_START_RE = re.compile(re.escape(f"{OPEN_TOKEN}call") + r"(?P<attrs>[^<]*?)" + re.escape(SEP_TOKEN))
-_ARGUMENT_START_RE = re.compile(re.escape(f"{OPEN_TOKEN}argument") + r"(?P<attrs>[^<]*?)" + re.escape(SEP_TOKEN))
-_JSON_START_RE = re.compile(re.escape(f"{OPEN_TOKEN}json") + r"(?P<attrs>[^<]*?)" + re.escape(SEP_TOKEN))
+_CALL_START_RE = re.compile(
+    re.escape(f"{_OPEN_TOKEN}call") + r"(?P<attrs>.*?)" + re.escape(_SEP_TOKEN),
+    re.DOTALL,
+)
+_ARGUMENT_START_RE = re.compile(
+    re.escape(f"{_OPEN_TOKEN}argument") + r"(?P<attrs>.*?)" + re.escape(_SEP_TOKEN),
+    re.DOTALL,
+)
+_JSON_START_RE = re.compile(
+    re.escape(f"{_OPEN_TOKEN}json") + r"(?P<attrs>.*?)" + re.escape(_SEP_TOKEN),
+    re.DOTALL,
+)
+
+_MAX_PENDING_TAG_CHARS = 8192
+
+
+def _has_control_sentinel(text: str) -> bool:
+    return any(sentinel in text for sentinel in _CONTROL_SENTINELS)
+
+
+def _reject_unexpected_control_tokens(text: str) -> None:
+    if _has_control_sentinel(text):
+        raise KimiK3XTMLParseError("Unexpected K3 control token inside text content.")
+
+
+class _KimiK3TokenDecoder:
+    def __init__(self, tokenizer: Any) -> None:
+        self._tokenizer = tokenizer
+        self._control_ids = {
+            int(tokenizer.convert_tokens_to_ids(marker)): protocol_marker
+            for marker, protocol_marker in _CONTROL_TOKEN_TEXT.items()
+        }
+        if len(self._control_ids) != len(_CONTROL_TOKEN_TEXT):
+            raise RuntimeError("Kimi K3 control tokens must have distinct token IDs.")
+
+        model = getattr(tokenizer, "model", None)
+        self._decode_single_token_bytes = getattr(model, "decode_single_token_bytes", None)
+        self._utf8_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+
+    def _reset_utf8_decoder(self) -> None:
+        self._utf8_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+
+    def decode(self, token_ids: Sequence[int]) -> str:
+        parts: list[str] = []
+        for token_id in token_ids:
+            protocol_marker = self._control_ids.get(int(token_id))
+            if protocol_marker is not None:
+                pending = self._utf8_decoder.decode(b"", final=True)
+                if pending:
+                    parts.append(pending)
+                self._reset_utf8_decoder()
+                parts.append(protocol_marker)
+                continue
+
+            if self._decode_single_token_bytes is not None:
+                raw = self._decode_single_token_bytes(int(token_id))
+                decoded = self._utf8_decoder.decode(raw, final=False)
+            else:
+                decoded = self._tokenizer.decode(
+                    [int(token_id)],
+                    skip_special_tokens=False,
+                    spaces_between_special_tokens=False,
+                )
+            if decoded:
+                parts.append(decoded)
+        return "".join(parts)
+
+    def finish(self) -> str:
+        pending = self._utf8_decoder.decode(b"", final=True)
+        self._reset_utf8_decoder()
+        return pending
 
 
 class KimiK3XTMLParseError(RuntimeError):
@@ -66,7 +163,13 @@ class KimiK3ParseSnapshot:
     reasoning: str = ""
     content: str = ""
     tool_calls: tuple[KimiK3ParsedCall, ...] = ()
-    protocol_complete: bool = False
+
+
+@dataclass(frozen=True)
+class KimiK3ToolCallDelta:
+    index: int
+    name: str | None = None
+    arguments: str | None = None
 
 
 def partial_marker_overlap(text: str, marker: str) -> int:
@@ -77,18 +180,6 @@ def partial_marker_overlap(text: str, marker: str) -> int:
         if text.endswith(marker[:overlap]):
             return overlap
     return 0
-
-
-def _safe_prefix(text: str, markers: tuple[str, ...], *, final: bool) -> str:
-    overlap = max((partial_marker_overlap(text, marker) for marker in markers), default=0)
-    if final:
-        # K3 control tokens are atomic. A completed generation ending after a
-        # full ``<|open|>``/``<|close|>`` token but before its tag is malformed,
-        # not user content that may safely be returned.
-        if overlap >= min(len(OPEN_TOKEN), len(CLOSE_TOKEN)):
-            raise KimiK3XTMLParseError("K3 generation ended inside an XTML structural marker.")
-        return text
-    return text[:-overlap] if overlap else text
 
 
 def _decode_attr_value(value: str) -> str:
@@ -188,147 +279,35 @@ def _decode_typed_argument(raw_value: str, value_type: str):
     return value
 
 
-def _parse_call_arguments(body: str) -> str:
-    cursor = 0
-    while cursor < len(body) and body[cursor].isspace():
-        cursor += 1
-    if cursor == len(body):
-        return "{}"
+@dataclass(frozen=True)
+class KimiK3ParseDelta:
+    reasoning: str = ""
+    content: str = ""
+    tool_calls: tuple[KimiK3ToolCallDelta, ...] = ()
 
-    json_match = _JSON_START_RE.match(body, cursor)
-    if json_match is not None:
-        attrs = _require_attrs(
-            json_match.group("attrs"),
-            required=frozenset({"type"}),
-            tag="json",
-        )
-        if attrs["type"] != "object":
-            raise KimiK3XTMLParseError("K3 json arguments must use type='object'.")
-        json_end = body.find(JSON_END, json_match.end())
-        if json_end < 0:
-            raise KimiK3XTMLParseError("K3 json argument block is not closed.")
-        raw_value = body[json_match.end() : json_end]
-        value = _load_json(raw_value)
-        if not isinstance(value, dict):
-            raise KimiK3XTMLParseError("K3 json tool arguments must be an object.")
-        if body[json_end + len(JSON_END) :].strip():
-            raise KimiK3XTMLParseError("K3 call mixes json arguments with typed arguments or stray text.")
-        return _json_compact(value)
-
-    values: dict[str, object] = {}
-    while cursor < len(body):
-        argument_match = _ARGUMENT_START_RE.match(body, cursor)
-        if argument_match is None:
-            raise KimiK3XTMLParseError("Unexpected text or tag in K3 typed arguments.")
-        attrs = _require_attrs(
-            argument_match.group("attrs"),
-            required=frozenset({"key", "type"}),
-            tag="argument",
-        )
-        key = attrs["key"]
-        if not key:
-            raise KimiK3XTMLParseError("K3 argument key must not be empty.")
-        if key in values:
-            raise KimiK3XTMLParseError(f"Duplicate K3 argument key {key!r}.")
-
-        argument_end = body.find(ARGUMENT_END, argument_match.end())
-        if argument_end < 0:
-            raise KimiK3XTMLParseError(f"K3 argument {key!r} is not closed.")
-        raw_value = body[argument_match.end() : argument_end]
-        values[key] = _decode_typed_argument(raw_value, attrs["type"])
-        cursor = argument_end + len(ARGUMENT_END)
-        while cursor < len(body) and body[cursor].isspace():
-            cursor += 1
-
-    return _json_compact(values)
-
-
-def _parse_calls(
-    body: str,
-    *,
-    allowed_tool_names: frozenset[str],
-    validate_tool_names: bool,
-    named_tool: str | None,
-) -> tuple[KimiK3ParsedCall, ...]:
-    calls: list[KimiK3ParsedCall] = []
-    seen_indices: set[int] = set()
-    cursor = 0
-    while cursor < len(body):
-        while cursor < len(body) and body[cursor].isspace():
-            cursor += 1
-        if cursor == len(body):
-            break
-        call_match = _CALL_START_RE.match(body, cursor)
-        if call_match is None:
-            raise KimiK3XTMLParseError("Unexpected text or tag in K3 tools block.")
-        attrs = _require_attrs(
-            call_match.group("attrs"),
-            required=frozenset({"tool", "index"}),
-            tag="call",
-        )
-        name = attrs["tool"]
-        if not name:
-            raise KimiK3XTMLParseError("K3 tool name must not be empty.")
-        try:
-            index = int(attrs["index"])
-        except ValueError as exc:
-            raise KimiK3XTMLParseError("K3 call index must be an integer.") from exc
-        if index <= 0 or str(index) != attrs["index"]:
-            raise KimiK3XTMLParseError("K3 call index must be a canonical positive integer.")
-        expected_index = len(calls) + 1
-        if index != expected_index or index in seen_indices:
-            raise KimiK3XTMLParseError(
-                f"K3 call indices must be unique and sequential from 1; expected {expected_index}, got {index}."
+    def merged(self, other: KimiK3ParseDelta) -> KimiK3ParseDelta:
+        calls: dict[int, KimiK3ToolCallDelta] = {}
+        for call in (*self.tool_calls, *other.tool_calls):
+            previous = calls.get(call.index)
+            if previous is None:
+                calls[call.index] = call
+                continue
+            calls[call.index] = KimiK3ToolCallDelta(
+                index=call.index,
+                name=previous.name if previous.name is not None else call.name,
+                arguments=(previous.arguments or "") + (call.arguments or "")
+                if previous.arguments is not None or call.arguments is not None
+                else None,
             )
-        seen_indices.add(index)
-
-        if validate_tool_names and name not in allowed_tool_names:
-            raise KimiK3XTMLParseError(f"Unknown K3 tool {name!r}.")
-        if named_tool is not None and name != named_tool:
-            raise KimiK3XTMLParseError(f"Named K3 tool choice requires {named_tool!r}, got {name!r}.")
-
-        call_end = body.find(CALL_END, call_match.end())
-        if call_end < 0:
-            raise KimiK3XTMLParseError(f"K3 call {name!r} is not closed.")
-        arguments = _parse_call_arguments(body[call_match.end() : call_end])
-        calls.append(
-            KimiK3ParsedCall(
-                name=name,
-                index=index,
-                arguments=arguments,
-            )
+        return KimiK3ParseDelta(
+            reasoning=self.reasoning + other.reasoning,
+            content=self.content + other.content,
+            tool_calls=tuple(calls.values()),
         )
-        cursor = call_end + len(CALL_END)
-
-    return tuple(calls)
 
 
-def _consume_terminal_envelope(text: str, cursor: int, *, final: bool) -> bool:
-    tail = text[cursor:]
-    if not tail:
-        if final:
-            raise KimiK3XTMLParseError("K3 response is missing the closing message marker.")
-        return False
-
-    if tail.startswith(MESSAGE_END):
-        tail = tail[len(MESSAGE_END) :]
-    elif not final and MESSAGE_END.startswith(tail):
-        return False
-    else:
-        raise KimiK3XTMLParseError("K3 response is missing the closing message marker.")
-
-    if tail.startswith(END_OF_MSG_TOKEN):
-        tail = tail[len(END_OF_MSG_TOKEN) :]
-    elif not final and END_OF_MSG_TOKEN.startswith(tail):
-        return False
-
-    if tail.strip():
-        raise KimiK3XTMLParseError("Unexpected text or additional XTML blocks after the K3 response.")
-    return True
-
-
-class KimiK3XTMLStateMachine:
-    """Parse a K3 assistant envelope without streaming-only fallback rules."""
+class KimiK3XTMLParser:
+    """Incrementally parse one K3 assistant XTML envelope."""
 
     def __init__(
         self,
@@ -337,118 +316,556 @@ class KimiK3XTMLStateMachine:
         tool_mode: ToolMode,
         allowed_tool_names: frozenset[str],
         named_tool: str | None = None,
+        tokenizer: Any | None = None,
     ) -> None:
         self.thinking_enabled = thinking_enabled
         self.tool_mode = tool_mode
         self.allowed_tool_names = allowed_tool_names
         self.named_tool = named_tool
+        self._token_decoder = _KimiK3TokenDecoder(tokenizer) if tokenizer is not None else None
+        self._buffer = ""
+        self._phase = "start"
+        self._reasoning_parts: list[str] = []
+        self._content_parts: list[str] = []
+        self._protocol_complete = False
+        self._finished = False
+        self._active_call_index: int | None = None
+        self._active_call_name: str | None = None
+        self._active_call_style: Literal["typed", "json"] | None = None
+        self._active_argument_key: str | None = None
+        self._active_argument_type: str | None = None
+        self._active_argument_parts: list[str] = []
+        self._seen_argument_keys: set[str] = set()
+        self._streamed_arguments: list[list[str]] = []
+        self._completed_calls: list[KimiK3ParsedCall] = []
 
-    def _validate_required_call(self, *, final: bool, call_count: int) -> None:
-        if final and self.tool_mode in ("required", "named") and call_count == 0:
-            raise KimiK3XTMLParseError(f"K3 tool_choice={self.tool_mode!r} completed without a valid tool call.")
-
-    def parse(self, text: str, *, final: bool) -> KimiK3ParseSnapshot:
-        reasoning = ""
-        cursor = 0
-
-        if self.thinking_enabled:
-            if text.startswith(THINK_START):
-                cursor = len(THINK_START)
-            elif not final and THINK_START.startswith(text):
-                return KimiK3ParseSnapshot()
-
-            think_end = text.find(THINK_END, cursor)
-            if think_end < 0:
-                if any(marker in text[cursor:] for marker in (RESPONSE_START, RESPONSE_END, TOOLS_START)):
-                    raise KimiK3XTMLParseError("K3 response entered response/tools before closing think.")
-                reasoning = _safe_prefix(
-                    text[cursor:],
-                    (THINK_END,),
-                    final=final,
-                )
-                self._validate_required_call(final=final, call_count=0)
-                return KimiK3ParseSnapshot(reasoning=reasoning)
-
-            reasoning = text[cursor:think_end]
-            cursor = think_end + len(THINK_END)
-            response_tail = text[cursor:]
-            if response_tail.startswith(RESPONSE_START):
-                cursor += len(RESPONSE_START)
-            elif not final and RESPONSE_START.startswith(response_tail):
-                return KimiK3ParseSnapshot(reasoning=reasoning)
-            else:
-                raise KimiK3XTMLParseError("K3 think block must be followed by a response block.")
-        else:
-            if text.startswith(RESPONSE_START):
-                cursor = len(RESPONSE_START)
-            elif not final and RESPONSE_START.startswith(text):
-                return KimiK3ParseSnapshot()
-
-        response_end = text.find(RESPONSE_END, cursor)
-        if response_end < 0:
-            response_body = text[cursor:]
-            if any(marker in response_body for marker in (THINK_START, THINK_END, TOOLS_START, TOOLS_END)):
-                raise KimiK3XTMLParseError("Unexpected XTML block before K3 response was closed.")
-            self._validate_required_call(final=final, call_count=0)
-            return KimiK3ParseSnapshot(
-                reasoning=reasoning,
-                content=_safe_prefix(
-                    response_body,
-                    (RESPONSE_END,),
-                    final=final,
-                ),
-            )
-
-        content = text[cursor:response_end]
-        cursor = response_end + len(RESPONSE_END)
-        tail = text[cursor:]
-
-        if not tail:
-            self._validate_required_call(final=final, call_count=0)
-            protocol_complete = _consume_terminal_envelope(
-                text,
-                cursor,
-                final=final,
-            )
-            return KimiK3ParseSnapshot(
-                reasoning=reasoning,
-                content=content,
-                protocol_complete=protocol_complete,
-            )
-
-        if not final and any(marker.startswith(tail) for marker in (TOOLS_START, MESSAGE_END, END_OF_MSG_TOKEN)):
-            return KimiK3ParseSnapshot(reasoning=reasoning, content=content)
-
-        parsed_calls: tuple[KimiK3ParsedCall, ...] = ()
-        if tail.startswith(TOOLS_START):
-            tools_body_start = cursor + len(TOOLS_START)
-            tools_end = text.find(TOOLS_END, tools_body_start)
-            if tools_end < 0:
-                if final:
-                    raise KimiK3XTMLParseError("K3 tools block is not closed.")
-                return KimiK3ParseSnapshot(reasoning=reasoning, content=content)
-
-            parsed_calls = _parse_calls(
-                text[tools_body_start:tools_end],
-                allowed_tool_names=self.allowed_tool_names,
-                validate_tool_names=self.tool_mode != "none",
-                named_tool=self.named_tool,
-            )
-            cursor = tools_end + len(TOOLS_END)
-
-        protocol_complete = _consume_terminal_envelope(text, cursor, final=final)
-
-        self._validate_required_call(
-            final=final,
-            call_count=len(parsed_calls),
+    @property
+    def snapshot(self) -> KimiK3ParseSnapshot:
+        calls = () if self.tool_mode == "none" else tuple(self._completed_calls)
+        return KimiK3ParseSnapshot(
+            reasoning="".join(self._reasoning_parts),
+            content="".join(self._content_parts),
+            tool_calls=calls,
         )
 
-        # ``none`` still parses and validates the envelope, but never emits
-        # hallucinated calls to the API.
-        emitted_calls = () if self.tool_mode == "none" else parsed_calls
-        return KimiK3ParseSnapshot(
-            reasoning=reasoning,
-            content=content,
-            tool_calls=emitted_calls,
-            protocol_complete=protocol_complete,
+    @staticmethod
+    def _add_delta(
+        deltas: dict[int, KimiK3ToolCallDelta],
+        index: int,
+        *,
+        name: str | None = None,
+        arguments: str | None = None,
+    ) -> None:
+        previous = deltas.get(index)
+        if previous is None:
+            deltas[index] = KimiK3ToolCallDelta(
+                index=index,
+                name=name,
+                arguments=arguments,
+            )
+            return
+        deltas[index] = KimiK3ToolCallDelta(
+            index=index,
+            name=previous.name if previous.name is not None else name,
+            arguments=(previous.arguments or "") + (arguments or "")
+            if previous.arguments is not None or arguments is not None
+            else None,
+        )
+
+    def _emit_arguments(
+        self,
+        deltas: dict[int, KimiK3ToolCallDelta],
+        arguments: str,
+    ) -> None:
+        index = self._active_call_index
+        if index is None:
+            raise KimiK3XTMLParseError("K3 streamed arguments have no active call.")
+        self._streamed_arguments[index].append(arguments)
+        if self.tool_mode != "none":
+            self._add_delta(deltas, index, arguments=arguments)
+
+    def _emit_reasoning(self, parts: list[str], value: str) -> None:
+        if value:
+            self._reasoning_parts.append(value)
+            parts.append(value)
+
+    def _emit_content(self, parts: list[str], value: str) -> None:
+        if value:
+            self._content_parts.append(value)
+            parts.append(value)
+
+    def _begin_call(
+        self,
+        raw_attrs: str,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        attrs = _require_attrs(
+            raw_attrs,
+            required=frozenset({"tool", "index"}),
+            tag="call",
+        )
+        name = attrs["tool"]
+        if not name:
+            raise KimiK3XTMLParseError("K3 tool name must not be empty.")
+        try:
+            protocol_index = int(attrs["index"])
+        except ValueError as exc:
+            raise KimiK3XTMLParseError("K3 call index must be an integer.") from exc
+        expected_index = len(self._streamed_arguments) + 1
+        if protocol_index <= 0 or str(protocol_index) != attrs["index"]:
+            raise KimiK3XTMLParseError("K3 call index must be a canonical positive integer.")
+        if protocol_index != expected_index:
+            raise KimiK3XTMLParseError(
+                "K3 call indices must be unique and sequential from 1; "
+                f"expected {expected_index}, got {protocol_index}."
+            )
+        if self.tool_mode != "none" and name not in self.allowed_tool_names:
+            raise KimiK3XTMLParseError(f"Unknown K3 tool {name!r}.")
+        if self.named_tool is not None and name != self.named_tool:
+            raise KimiK3XTMLParseError(f"Named K3 tool choice requires {self.named_tool!r}, got {name!r}.")
+
+        index = protocol_index - 1
+        self._active_call_index = index
+        self._active_call_name = name
+        self._active_call_style = None
+        self._active_argument_key = None
+        self._seen_argument_keys.clear()
+        self._streamed_arguments.append([])
+        if self.tool_mode != "none":
+            self._add_delta(deltas, index, name=name, arguments="")
+
+    def _begin_typed_argument(
+        self,
+        raw_attrs: str,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        if self._active_call_style == "json":
+            raise KimiK3XTMLParseError("K3 call mixes json arguments with typed arguments or stray text.")
+        attrs = _require_attrs(
+            raw_attrs,
+            required=frozenset({"key", "type"}),
+            tag="argument",
+        )
+        key = attrs["key"]
+        value_type = attrs["type"]
+        if not key:
+            raise KimiK3XTMLParseError("K3 argument key must not be empty.")
+        if key in self._seen_argument_keys:
+            raise KimiK3XTMLParseError(f"Duplicate K3 argument key {key!r}.")
+        if value_type not in {"string", "number", "boolean", "null", "object", "array"}:
+            raise KimiK3XTMLParseError(f"Unsupported K3 argument type: {value_type!r}.")
+
+        self._active_call_style = "typed"
+        self._active_argument_key = key
+        self._active_argument_type = value_type
+        self._active_argument_parts.clear()
+        self._seen_argument_keys.add(key)
+        prefix = "{" if len(self._seen_argument_keys) == 1 else ","
+        prefix += _json_compact(key) + ":"
+        if value_type == "string":
+            prefix += '"'
+        self._emit_arguments(deltas, prefix)
+
+    def _begin_json_argument(self, raw_attrs: str) -> None:
+        if self._active_call_style is not None:
+            raise KimiK3XTMLParseError("K3 call mixes json arguments with typed arguments or stray text.")
+        attrs = _require_attrs(
+            raw_attrs,
+            required=frozenset({"type"}),
+            tag="json",
+        )
+        if attrs["type"] != "object":
+            raise KimiK3XTMLParseError("K3 json arguments must use type='object'.")
+        self._active_call_style = "json"
+        self._active_argument_key = None
+        self._active_argument_type = "json"
+        self._active_argument_parts.clear()
+
+    def _stream_open_value(
+        self,
+        marker: str,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> bool:
+        if not _has_control_sentinel(self._buffer):
+            raw_value = self._buffer
+            self._buffer = ""
+            self._append_value_fragment(raw_value, deltas)
+            return False
+
+        marker_index = self._buffer.find(marker)
+        if marker_index >= 0:
+            raw_value = self._buffer[:marker_index]
+            _reject_unexpected_control_tokens(raw_value)
+            self._buffer = self._buffer[marker_index + len(marker) :]
+            self._finish_value(raw_value, deltas)
+            return True
+
+        overlap = partial_marker_overlap(self._buffer, marker)
+        safe_end = len(self._buffer) - overlap
+        if safe_end <= 0:
+            return False
+        raw_value = self._buffer[:safe_end]
+        _reject_unexpected_control_tokens(raw_value)
+        self._buffer = self._buffer[safe_end:]
+        self._append_value_fragment(raw_value, deltas)
+        return False
+
+    def _append_value_fragment(
+        self,
+        raw_value: str,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        value_type = self._active_argument_type
+        if value_type is None:
+            raise KimiK3XTMLParseError("K3 streamed value has no active argument.")
+        self._active_argument_parts.append(raw_value)
+        if not raw_value:
+            return
+        if value_type == "string":
+            self._emit_arguments(
+                deltas,
+                json.dumps(raw_value, ensure_ascii=False)[1:-1],
+            )
+        elif value_type in ("object", "array", "json"):
+            self._emit_arguments(deltas, raw_value)
+
+    def _finish_value(
+        self,
+        raw_value: str,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        self._append_value_fragment(raw_value, deltas)
+        value_type = self._active_argument_type
+        full_value = "".join(self._active_argument_parts)
+        if value_type == "json":
+            value = _load_json(full_value)
+            if not isinstance(value, dict):
+                raise KimiK3XTMLParseError("K3 json tool arguments must be an object.")
+        elif value_type is not None:
+            value = _decode_typed_argument(full_value, value_type)
+            if value_type == "string":
+                self._emit_arguments(deltas, '"')
+            elif value_type not in ("object", "array"):
+                self._emit_arguments(deltas, _json_compact(value))
+        self._active_argument_type = None
+        self._active_argument_key = None
+        self._active_argument_parts.clear()
+
+    def _finish_call(
+        self,
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        index = self._active_call_index
+        name = self._active_call_name
+        if index is None or name is None:
+            raise KimiK3XTMLParseError("K3 call ended without an active call.")
+        if self._active_call_style is None:
+            self._emit_arguments(deltas, "{}")
+        elif self._active_call_style == "typed":
+            self._emit_arguments(deltas, "}")
+        arguments = "".join(self._streamed_arguments[index])
+        value = _load_json(arguments)
+        if not isinstance(value, dict):
+            raise KimiK3XTMLParseError("K3 streamed tool arguments must be an object.")
+        self._completed_calls.append(
+            KimiK3ParsedCall(
+                name=name,
+                index=index + 1,
+                arguments=arguments,
+            )
+        )
+        self._active_call_index = None
+        self._active_call_name = None
+        self._active_call_style = None
+        self._active_argument_key = None
+        self._seen_argument_keys.clear()
+
+    @staticmethod
+    def _partial_tag(buffer: str, prefix: str) -> bool:
+        return prefix.startswith(buffer) or buffer.startswith(prefix)
+
+    def _stream_channel(
+        self,
+        *,
+        end_marker: str,
+        forbidden_markers: tuple[str, ...],
+        final: bool,
+        emit,
+    ) -> bool:
+        if not _has_control_sentinel(self._buffer):
+            safe_text = self._buffer
+            self._buffer = ""
+            emit(safe_text)
+            if final:
+                self._phase = "truncated"
+            return False
+
+        end_index = self._buffer.find(end_marker)
+        if end_index >= 0:
+            before_end = self._buffer[:end_index]
+            if any(marker in before_end for marker in forbidden_markers):
+                raise KimiK3XTMLParseError("Unexpected XTML block before the current K3 channel was closed.")
+            _reject_unexpected_control_tokens(before_end)
+            emit(before_end)
+            self._buffer = self._buffer[end_index + len(end_marker) :]
+            return True
+
+        if any(marker in self._buffer for marker in forbidden_markers):
+            raise KimiK3XTMLParseError("Unexpected XTML block before the current K3 channel was closed.")
+
+        markers = (end_marker, *forbidden_markers)
+        overlap = max((partial_marker_overlap(self._buffer, marker) for marker in markers), default=0)
+        if final:
+            safe_end = len(self._buffer) - overlap
+            safe_text = self._buffer[:safe_end]
+            _reject_unexpected_control_tokens(safe_text)
+            emit(safe_text)
+            self._buffer = ""
+            self._phase = "truncated"
+            return False
+
+        safe_end = len(self._buffer) - overlap
+        if safe_end > 0:
+            safe_text = self._buffer[:safe_end]
+            _reject_unexpected_control_tokens(safe_text)
+            emit(safe_text)
+            self._buffer = self._buffer[safe_end:]
+        return False
+
+    def _process_buffer(
+        self,
+        *,
+        final: bool,
+        reasoning_parts: list[str],
+        content_parts: list[str],
+        deltas: dict[int, KimiK3ToolCallDelta],
+    ) -> None:
+        while True:
+            if self._phase == "start":
+                marker = _THINK_START if self.thinking_enabled else _RESPONSE_START
+                next_phase = "reasoning" if self.thinking_enabled else "response"
+                if self._buffer.startswith(marker):
+                    self._buffer = self._buffer[len(marker) :]
+                    self._phase = next_phase
+                    continue
+                if self._buffer and marker.startswith(self._buffer):
+                    if final:
+                        self._buffer = ""
+                        self._phase = "truncated"
+                    return
+                self._phase = next_phase
+                continue
+
+            if self._phase == "reasoning":
+                if self._stream_channel(
+                    end_marker=_THINK_END,
+                    forbidden_markers=(_RESPONSE_START, _RESPONSE_END, _TOOLS_START, _TOOLS_END),
+                    final=final,
+                    emit=lambda value: self._emit_reasoning(reasoning_parts, value),
+                ):
+                    self._phase = "response_start"
+                    continue
+                return
+
+            if self._phase == "response_start":
+                if self._buffer.startswith(_RESPONSE_START):
+                    self._buffer = self._buffer[len(_RESPONSE_START) :]
+                    self._phase = "response"
+                    continue
+                if not self._buffer or _RESPONSE_START.startswith(self._buffer):
+                    if final:
+                        self._buffer = ""
+                        self._phase = "truncated"
+                    return
+                raise KimiK3XTMLParseError("K3 think block must be followed by a response block.")
+
+            if self._phase == "response":
+                if self._stream_channel(
+                    end_marker=_RESPONSE_END,
+                    forbidden_markers=(_THINK_START, _THINK_END, _TOOLS_START, _TOOLS_END),
+                    final=final,
+                    emit=lambda value: self._emit_content(content_parts, value),
+                ):
+                    self._phase = "post_response"
+                    continue
+                return
+
+            if self._phase == "post_response":
+                if self._buffer.startswith(_TOOLS_START):
+                    self._buffer = self._buffer[len(_TOOLS_START) :]
+                    self._phase = "tools"
+                    continue
+                if self._buffer.startswith(_MESSAGE_END):
+                    self._buffer = self._buffer[len(_MESSAGE_END) :]
+                    self._protocol_complete = True
+                    self._phase = "after_message"
+                    continue
+                if not self._buffer or any(marker.startswith(self._buffer) for marker in (_TOOLS_START, _MESSAGE_END)):
+                    return
+                raise KimiK3XTMLParseError("K3 response is missing the closing message marker.")
+
+            if self._phase == "tools":
+                stripped = self._buffer.lstrip()
+                if stripped != self._buffer:
+                    self._buffer = stripped
+                    continue
+                if self._buffer.startswith(_TOOLS_END):
+                    self._buffer = self._buffer[len(_TOOLS_END) :]
+                    self._phase = "after_tools"
+                    continue
+                if not self._buffer or _TOOLS_END.startswith(self._buffer):
+                    return
+                call_match = _CALL_START_RE.match(self._buffer)
+                if call_match is not None:
+                    self._buffer = self._buffer[call_match.end() :]
+                    self._begin_call(call_match.group("attrs"), deltas)
+                    self._phase = "call"
+                    continue
+                if self._partial_tag(self._buffer, f"{_OPEN_TOKEN}call"):
+                    if len(self._buffer) > _MAX_PENDING_TAG_CHARS:
+                        raise KimiK3XTMLParseError("K3 call tag exceeds the maximum supported length.")
+                    return
+                raise KimiK3XTMLParseError("Unexpected text or tag in K3 tools block.")
+
+            if self._phase == "after_tools":
+                if self._buffer.startswith(_MESSAGE_END):
+                    self._buffer = self._buffer[len(_MESSAGE_END) :]
+                    self._protocol_complete = True
+                    self._phase = "after_message"
+                    continue
+                if not self._buffer or _MESSAGE_END.startswith(self._buffer):
+                    return
+                raise KimiK3XTMLParseError("K3 response is missing the closing message marker.")
+
+            if self._phase == "after_message":
+                if self._buffer.startswith(_END_OF_MSG_TOKEN):
+                    self._buffer = self._buffer[len(_END_OF_MSG_TOKEN) :]
+                    self._phase = "done"
+                    continue
+                if not self._buffer:
+                    if final:
+                        self._phase = "done"
+                    return
+                if _END_OF_MSG_TOKEN.startswith(self._buffer):
+                    if final:
+                        self._buffer = ""
+                        self._phase = "truncated"
+                    return
+                if not self._buffer.strip():
+                    self._buffer = ""
+                    self._phase = "done"
+                    continue
+                raise KimiK3XTMLParseError("Unexpected text or additional XTML blocks after the K3 response.")
+
+            if self._phase == "done":
+                if self._buffer.strip():
+                    raise KimiK3XTMLParseError("Unexpected text or additional XTML blocks after the K3 response.")
+                self._buffer = ""
+                return
+
+            if self._phase == "truncated":
+                if self._buffer:
+                    raise KimiK3XTMLParseError("Unexpected text after a truncated K3 response.")
+                return
+
+            if self._phase in ("typed_value", "json_value"):
+                marker = _JSON_END if self._phase == "json_value" else _ARGUMENT_END
+                if not self._stream_open_value(marker, deltas):
+                    return
+                self._phase = "call"
+                continue
+
+            if self._phase == "call":
+                stripped = self._buffer.lstrip()
+                if stripped != self._buffer:
+                    self._buffer = stripped
+                    continue
+                if self._buffer.startswith(_CALL_END):
+                    self._buffer = self._buffer[len(_CALL_END) :]
+                    self._finish_call(deltas)
+                    self._phase = "tools"
+                    continue
+                if not self._buffer or _CALL_END.startswith(self._buffer):
+                    return
+                argument_match = _ARGUMENT_START_RE.match(self._buffer)
+                if argument_match is not None:
+                    self._buffer = self._buffer[argument_match.end() :]
+                    self._begin_typed_argument(argument_match.group("attrs"), deltas)
+                    self._phase = "typed_value"
+                    continue
+                json_match = _JSON_START_RE.match(self._buffer)
+                if json_match is not None:
+                    self._buffer = self._buffer[json_match.end() :]
+                    self._begin_json_argument(json_match.group("attrs"))
+                    self._phase = "json_value"
+                    continue
+                if any(
+                    self._partial_tag(self._buffer, marker)
+                    for marker in (f"{_OPEN_TOKEN}argument", f"{_OPEN_TOKEN}json")
+                ):
+                    if len(self._buffer) > _MAX_PENDING_TAG_CHARS:
+                        raise KimiK3XTMLParseError("K3 argument tag exceeds the maximum supported length.")
+                    return
+                raise KimiK3XTMLParseError("Unexpected text or tag in K3 typed arguments.")
+
+            raise AssertionError(f"Unknown K3 parser phase: {self._phase}")
+
+    def feed(
+        self,
+        delta_text: str,
+        delta_token_ids: Sequence[int] = (),
+    ) -> KimiK3ParseDelta:
+        if self._finished:
+            raise KimiK3XTMLParseError("K3 parser cannot accept data after finish().")
+        if delta_token_ids and self._token_decoder is not None:
+            protocol_text = self._token_decoder.decode(delta_token_ids)
+        elif delta_text:
+            raise KimiK3XTMLParseError("K3 parsing requires original model output token IDs.")
+        else:
+            return KimiK3ParseDelta()
+
+        if not protocol_text:
+            return KimiK3ParseDelta()
+
+        self._buffer += protocol_text
+        reasoning_parts: list[str] = []
+        content_parts: list[str] = []
+        deltas: dict[int, KimiK3ToolCallDelta] = {}
+        self._process_buffer(
+            final=False,
+            reasoning_parts=reasoning_parts,
+            content_parts=content_parts,
+            deltas=deltas,
+        )
+        return KimiK3ParseDelta(
+            reasoning="".join(reasoning_parts),
+            content="".join(content_parts),
+            tool_calls=tuple(deltas.values()),
+        )
+
+    def finish(self) -> KimiK3ParseDelta:
+        if self._finished:
+            return KimiK3ParseDelta()
+
+        reasoning_parts: list[str] = []
+        content_parts: list[str] = []
+        deltas: dict[int, KimiK3ToolCallDelta] = {}
+        pending = self._token_decoder.finish() if self._token_decoder is not None else ""
+        if pending:
+            self._buffer += pending
+        self._process_buffer(
+            final=True,
+            reasoning_parts=reasoning_parts,
+            content_parts=content_parts,
+            deltas=deltas,
+        )
+
+        if self._protocol_complete and self.tool_mode in ("required", "named") and not self._completed_calls:
+            raise KimiK3XTMLParseError(f"K3 tool_choice={self.tool_mode!r} completed without a valid tool call.")
+
+        self._finished = True
+        return KimiK3ParseDelta(
+            reasoning="".join(reasoning_parts),
+            content="".join(content_parts),
+            tool_calls=tuple(deltas.values()),
         )

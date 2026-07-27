@@ -20,8 +20,8 @@ Kimi K3 deliberately does not publish a Jinja chat template. Its trusted
 remote ``TikTokenTokenizer.apply_chat_template`` implements the XTML protocol,
 including typed tool calls, reasoning controls, and multimodal placeholders.
 The regular HF renderer rejects tokenizers without a Jinja template, so K3
-uses a dedicated renderer while continuing to load the tokenizer through the
-standard HF ``auto`` tokenizer mode.
+uses a dedicated explicit ``kimi_k3`` mode while reusing the standard HF
+tokenizer loader.
 """
 
 from __future__ import annotations
@@ -36,11 +36,16 @@ from vllm.entrypoints.chat_utils import (
     parse_chat_messages,
     parse_chat_messages_async,
 )
+from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
+from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
+from vllm.entrypoints.serve.render.serving import OpenAIServingRender
+from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.base import BaseRenderer
 from vllm.renderers.inputs import DictPrompt
 from vllm.renderers.inputs.preprocess import parse_dec_only_prompt
 from vllm.renderers.params import ChatParams
+from vllm.tokenizers import TokenizerRegistry
 from vllm.tokenizers.hf import HfTokenizer
 from vllm.utils.async_utils import make_async
 
@@ -50,7 +55,18 @@ KIMI_K3_IMAGE_PROMPT = "<|media_begin|>image<|media_content|><|media_pad|><|medi
 KIMI_K3_PROMPT_TOOL_CHOICE_KEY = "_kimi_k3_prompt_tool_choice"
 _KIMI_K3_PROMPT_TOOL_CHOICE_PREFIX = "kimi_k3:"
 _KIMI_K3_PROMPT_TOOL_CHOICES = frozenset({"none", "auto", "required"})
-_ORIGINAL_TOKENIZER_ARGS_ATTR = "_ascend_original_kimi_k3_tokenizer_args_from_config"
+_ORIGINAL_RENDER_CHAT_ATTR = "_ascend_original_kimi_k3_render_chat"
+_ORIGINAL_EFFECTIVE_KWARGS_ATTR = "_ascend_original_kimi_k3_effective_chat_template_kwargs"
+_PREPARED_ATTR = "_kimi_k3_chat_params_prepared"
+
+_REASONING_EFFORT_MAP = {
+    "minimal": "low",
+    "low": "low",
+    "medium": "high",
+    "high": "high",
+    "xhigh": "max",
+    "max": "max",
+}
 
 
 def encode_kimi_k3_prompt_tool_choice(tool_choice: str) -> str:
@@ -71,6 +87,135 @@ def decode_kimi_k3_prompt_tool_choice(encoded_choice: str) -> str:
 def is_kimi_k3_model_config(model_config: ModelConfig) -> bool:
     hf_config = getattr(model_config, "hf_config", None)
     return getattr(hf_config, "model_type", None) == KIMI_K3_MODEL_TYPE
+
+
+def _model_dump(value: Any) -> Any:
+    if hasattr(value, "model_dump"):
+        return value.model_dump(by_alias=True, exclude_none=True)
+    return value
+
+
+def _tool_name(tool: Any) -> str | None:
+    if isinstance(tool, dict):
+        function = tool.get("function")
+        if isinstance(function, dict):
+            return function.get("name")
+        return getattr(function, "name", None)
+    return getattr(getattr(tool, "function", None), "name", None)
+
+
+def _named_tool_choice(request: ChatCompletionRequest) -> str | None:
+    choice = request.tool_choice
+    function = choice.get("function") if isinstance(choice, dict) else getattr(choice, "function", None)
+    if isinstance(function, dict):
+        return function.get("name")
+    return getattr(function, "name", None)
+
+
+def prepare_kimi_k3_chat_template_kwargs(request: ChatCompletionRequest) -> None:
+    """Map typed OpenAI controls to K3's tokenizer-owned encoder."""
+
+    if getattr(request, _PREPARED_ATTR, False):
+        return
+
+    user_kwargs = request.chat_template_kwargs or {}
+    template_kwargs = dict(user_kwargs)
+    fields_set: set[str] = getattr(request, "model_fields_set", set())
+
+    duplicate_controls = {
+        "reasoning_effort",
+        "response_format",
+        "tool_choice",
+        "tools",
+    }.intersection(user_kwargs)
+    if duplicate_controls:
+        parameter = sorted(duplicate_controls)[0]
+        raise VLLMValidationError(
+            f"Kimi K3 {parameter} must use the standard OpenAI request field, not chat_template_kwargs.",
+            parameter=parameter,
+        )
+
+    native_thinking = user_kwargs.get("thinking")
+    if "thinking" in user_kwargs and not isinstance(native_thinking, bool):
+        raise VLLMValidationError(
+            "Kimi K3 chat_template_kwargs.thinking must be a boolean.",
+            parameter="reasoning_effort",
+        )
+    if "reasoning_effort" in fields_set and "thinking" in user_kwargs:
+        typed_thinking = request.reasoning_effort != "none"
+        if native_thinking != typed_thinking:
+            raise VLLMValidationError(
+                "Kimi K3 reasoning_effort conflicts with chat_template_kwargs.thinking.",
+                parameter="reasoning_effort",
+            )
+
+    native_effort = user_kwargs.get("thinking_effort")
+    if native_effort is not None and native_effort not in {"low", "high", "max"}:
+        raise VLLMValidationError(
+            f"Unsupported Kimi K3 thinking_effort: {native_effort!r}.",
+            parameter="reasoning_effort",
+        )
+    if native_effort is not None and native_thinking is False:
+        raise VLLMValidationError(
+            "Kimi K3 thinking_effort requires thinking=true.",
+            parameter="reasoning_effort",
+        )
+    if "reasoning_effort" in fields_set and native_effort is not None:
+        typed_effort = _REASONING_EFFORT_MAP.get(request.reasoning_effort)
+        if native_effort != typed_effort:
+            raise VLLMValidationError(
+                "Kimi K3 reasoning_effort conflicts with chat_template_kwargs.thinking_effort.",
+                parameter="reasoning_effort",
+            )
+    if "reasoning_effort" not in fields_set:
+        if native_thinking is False:
+            request.reasoning_effort = "none"
+        elif native_effort is not None:
+            request.reasoning_effort = native_effort
+
+    if "tool_choice" not in fields_set:
+        request.tool_choice = "auto" if request.tools else "none"
+
+    request_tools = [_model_dump(tool) for tool in (request.tools or [])]
+
+    if "thinking" not in user_kwargs and request.reasoning_effort is not None:
+        template_kwargs["thinking"] = request.reasoning_effort != "none"
+    if (
+        "thinking_effort" not in user_kwargs
+        and template_kwargs.get("thinking", True)
+        and request.reasoning_effort in _REASONING_EFFORT_MAP
+    ):
+        template_kwargs["thinking_effort"] = _REASONING_EFFORT_MAP[request.reasoning_effort]
+
+    template_kwargs["tools"] = request_tools
+
+    named_tool = _named_tool_choice(request)
+    if named_tool:
+        matching_tools = [tool for tool in request_tools if _tool_name(tool) == named_tool]
+        if not matching_tools:
+            raise VLLMValidationError(
+                f"Named Kimi K3 tool choice {named_tool!r} is not declared.",
+                parameter="tool_choice",
+            )
+        template_kwargs["tool_choice"] = "required"
+        template_kwargs["tools"] = matching_tools
+    else:
+        if isinstance(request.tool_choice, str):
+            template_kwargs["tool_choice"] = request.tool_choice
+        elif request.tool_choice is None:
+            template_kwargs["tool_choice"] = "auto" if template_kwargs.get("tools") else "none"
+
+    prompt_tool_choice = template_kwargs.get("tool_choice")
+    if isinstance(prompt_tool_choice, str) and prompt_tool_choice in _KIMI_K3_PROMPT_TOOL_CHOICES:
+        template_kwargs[KIMI_K3_PROMPT_TOOL_CHOICE_KEY] = encode_kimi_k3_prompt_tool_choice(prompt_tool_choice)
+
+    if request.response_format is not None:
+        template_kwargs["response_format"] = _model_dump(request.response_format)
+
+    request.chat_template_kwargs = template_kwargs
+    request.skip_special_tokens = False
+    request.spaces_between_special_tokens = False
+    object.__setattr__(request, _PREPARED_ATTR, True)
 
 
 def _normalize_developer_messages(
@@ -233,29 +378,12 @@ class KimiK3Renderer(BaseRenderer[HfTokenizer]):
         return conversation, prompt
 
 
-if not hasattr(renderer_registry, _ORIGINAL_TOKENIZER_ARGS_ATTR):
-    setattr(
-        renderer_registry,
-        _ORIGINAL_TOKENIZER_ARGS_ATTR,
-        renderer_registry.tokenizer_args_from_config,
+if KIMI_K3_RENDERER_MODE not in TokenizerRegistry.tokenizers:
+    TokenizerRegistry.register(
+        KIMI_K3_RENDERER_MODE,
+        "vllm.tokenizers.hf",
+        "CachedHfTokenizer",
     )
-
-
-@wraps(getattr(renderer_registry, _ORIGINAL_TOKENIZER_ARGS_ATTR))
-def _tokenizer_args_with_kimi_k3_renderer(model_config: ModelConfig, **kwargs):
-    original = getattr(renderer_registry, _ORIGINAL_TOKENIZER_ARGS_ATTR)
-    tokenizer_args = original(model_config, **kwargs)
-    renderer_mode, *remaining_args = tokenizer_args
-
-    # Preserve the standard HF tokenizer loader and explicit non-HF modes. K3
-    # only needs a different renderer when auto/slow/hf resolves to HF.
-    if renderer_mode == "hf" and is_kimi_k3_model_config(model_config):
-        renderer_mode = KIMI_K3_RENDERER_MODE
-
-    return renderer_mode, *remaining_args
-
-
-renderer_registry.tokenizer_args_from_config = _tokenizer_args_with_kimi_k3_renderer
 
 if KIMI_K3_RENDERER_MODE not in renderer_registry.RENDERER_REGISTRY.renderers:
     renderer_registry.RENDERER_REGISTRY.register(
@@ -263,3 +391,58 @@ if KIMI_K3_RENDERER_MODE not in renderer_registry.RENDERER_REGISTRY.renderers:
         __name__,
         "KimiK3Renderer",
     )
+
+
+# vLLM 0.23 has no request-aware renderer hook. Prepare K3-only controls at
+# the single render entry used by both serving and the standalone render API.
+if not hasattr(OpenAIServingRender, _ORIGINAL_RENDER_CHAT_ATTR):
+    setattr(
+        OpenAIServingRender,
+        _ORIGINAL_RENDER_CHAT_ATTR,
+        OpenAIServingRender.render_chat,
+    )
+
+
+@wraps(getattr(OpenAIServingRender, _ORIGINAL_RENDER_CHAT_ATTR))
+async def _render_chat_with_kimi_k3_params(
+    self: OpenAIServingRender,
+    request: ChatCompletionRequest,
+    *,
+    skip_mm_cache: bool = False,
+):
+    if is_kimi_k3_model_config(self.model_config) and isinstance(request, ChatCompletionRequest):
+        prepare_kimi_k3_chat_template_kwargs(request)
+
+    original = getattr(type(self), _ORIGINAL_RENDER_CHAT_ATTR)
+    return await original(self, request, skip_mm_cache=skip_mm_cache)
+
+
+OpenAIServingRender.render_chat = _render_chat_with_kimi_k3_params
+
+
+if not hasattr(OpenAIServingChat, _ORIGINAL_EFFECTIVE_KWARGS_ATTR):
+    setattr(
+        OpenAIServingChat,
+        _ORIGINAL_EFFECTIVE_KWARGS_ATTR,
+        OpenAIServingChat._effective_chat_template_kwargs,
+    )
+
+
+@wraps(getattr(OpenAIServingChat, _ORIGINAL_EFFECTIVE_KWARGS_ATTR))
+def _effective_chat_template_kwargs_with_kimi_k3_params(
+    self: OpenAIServingChat,
+    request: ChatCompletionRequest,
+) -> dict[str, Any]:
+    if is_kimi_k3_model_config(self.model_config):
+        prepare_kimi_k3_chat_template_kwargs(request)
+
+    original = getattr(type(self), _ORIGINAL_EFFECTIVE_KWARGS_ATTR)
+    effective_kwargs = original(self, request)
+    if is_kimi_k3_model_config(self.model_config):
+        prompt_tool_choice = effective_kwargs.get(KIMI_K3_PROMPT_TOOL_CHOICE_KEY)
+        if prompt_tool_choice is not None:
+            effective_kwargs["tool_choice"] = decode_kimi_k3_prompt_tool_choice(prompt_tool_choice)
+    return effective_kwargs
+
+
+OpenAIServingChat._effective_chat_template_kwargs = _effective_chat_template_kwargs_with_kimi_k3_params

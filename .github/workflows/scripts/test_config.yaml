@@ -290,10 +290,16 @@
   source_file_dependencies:
     - vllm_ascend/ops/kimi_kda.py
     - vllm_ascend/ops/kimi_kda_state.py
+    - vllm_ascend/patch/platform/kimi_k3_xtml.py
+    - vllm_ascend/patch/platform/patch_kimi_k3_parsers.py
+    - vllm_ascend/patch/platform/patch_kimi_k3_renderer.py
     - vllm_ascend/transformers_utils
   tests:
     - tests/ut/models/test_kimi_k3.py
     - tests/ut/ops/test_kimi_kda.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_parsers.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_real_tokenizer.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_renderer.py
 
 # Ops
 - name: ops_basic
