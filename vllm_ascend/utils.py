@@ -730,6 +730,9 @@ def register_ascend_customop(vllm_config: VllmConfig | None = None):
         "GatedDeltaNetAttention": AscendGatedDeltaNetAttention,
         "BailingMoELinearAttention": AscendBailingMoELinearAttention,
     }
+    from vllm_ascend.ops.kimi_kda import AscendKimiGatedDeltaNetAttention
+
+    REGISTERED_ASCEND_OPS["KimiGatedDeltaNetAttention"] = AscendKimiGatedDeltaNetAttention
     if vllm_config is None:
         try:
             from vllm.config import get_current_vllm_config
@@ -857,6 +860,11 @@ def enable_sp_by_pass():
 
 
 def enable_sp(vllm_config=None, enable_shared_expert_dp: bool = False) -> bool:
+    """Return whether FlashComm1 sequence parallelism is enabled.
+
+    ``enable_shared_expert_dp`` is retained for compatibility with existing
+    callers but no longer changes the FlashComm1 setting.
+    """
     global _ENABLE_SP
     if vllm_config is None:
         try:
@@ -878,16 +886,15 @@ def enable_sp(vllm_config=None, enable_shared_expert_dp: bool = False) -> bool:
             except RuntimeError:
                 _ENABLE_SP = envs_ascend.VLLM_ASCEND_ENABLE_FLASHCOMM1
 
-        if not _ENABLE_SP and enable_shared_expert_dp:
-            _ENABLE_SP = True
-            logger.info("shared_expert_dp requires enable_sp=True. enable_sp has been set to True.")
-
     return bool(_ENABLE_SP)
 
 
 # TODO remove it after vllm has this func
 def shared_expert_dp_enabled() -> bool:
-    return get_ascend_config().enable_shared_expert_dp or enable_sp() or enable_sp_by_pass()
+    # The graph SP pass still requires replicated shared experts. FlashComm1
+    # handles TP-sharded shared experts explicitly and must not enable shared
+    # expert DP as a side effect.
+    return get_ascend_config().enable_shared_expert_dp or enable_sp_by_pass()
 
 
 def is_moe_model(vllm_config: VllmConfig):
@@ -962,6 +969,31 @@ def is_vl_model(vllm_config: VllmConfig = None):
             else:
                 _IS_VL_MODEL = False
     return _IS_VL_MODEL
+
+
+def uses_global_inputs_embeds(vllm_config: VllmConfig, modality: str) -> bool:
+    """Whether the first layer receives global inputs_embeds.
+
+    Ascend's model runner builds multimodal or explicitly supplied prompt
+    embeddings before entering the forward context.  In those paths the first
+    layer has not yet been sequence-sharded by FlashComm.  A multimodal model
+    whose supported inputs are all disabled instead follows the input_ids path
+    and receives the usual token shard.
+    """
+    model_config = getattr(vllm_config, "model_config", None)
+    if model_config is None:
+        return False
+    if getattr(model_config, "enable_prompt_embeds", False):
+        return True
+    if not is_vl_model(vllm_config):
+        return False
+
+    multimodal_config = getattr(model_config, "multimodal_config", None)
+    if multimodal_config is None:
+        return False
+    return bool(
+        getattr(multimodal_config, "enable_mm_embeds", False) or multimodal_config.get_limit_per_prompt(modality) > 0
+    )
 
 
 def has_rope(vllm_config: VllmConfig):

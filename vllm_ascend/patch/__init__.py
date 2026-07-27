@@ -122,6 +122,29 @@
 #       Remove this patch once upstream exposes a backend dispatch / plugin hook
 #       for selecting the MoE runner implementation.
 #
+# ** 5a. Files: platform/patch_kimi_k3_renderer.py,
+#                platform/patch_kimi_k3_parsers.py,
+#                platform/kimi_k3_xtml.py**
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#   1. `vllm.renderers.registry`,
+#      `vllm.entrypoints.serve.render.serving.OpenAIServingRender`,
+#      `vllm.entrypoints.openai.chat_completion.serving.OpenAIServingChat`,
+#      `vllm.entrypoints.openai.responses.serving.OpenAIServingResponses`,
+#      `vllm.parser.ParserManager`,
+#      `vllm.reasoning.ReasoningParserManager`,
+#      `vllm.tool_parsers.ToolParserManager`
+#    Why:
+#       Kimi K3 uses a tokenizer-owned Python XTML encoder and has no Jinja chat
+#       template. vLLM does not yet provide a native Kimi K3 renderer or parser.
+#    How:
+#       Select a K3 renderer from `model_type`, call the tokenizer's encoder,
+#       pass typed K3 request controls, and use a K3-local state machine for
+#       full and streaming reasoning/tool parsing.
+#    Related PR (if no, explain why):
+#       No. This is compatibility support for the Kimi K3 model protocol.
+#    Future Plan:
+#       Remove these patches once vLLM provides native Kimi K3 support.
+#
 # ** 6. File: platform/patch_kv_cache_coordinator.py**
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   1. `vllm.v1.core.kv_cache_coordinator.HybridKVCacheCoordinator.find_longest_cache_hit_per_group`
