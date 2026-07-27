@@ -289,6 +289,22 @@
   tests:
     - tests/e2e/pull_request/four_card/test_deepseek_v4.py
 
+- name: models_kimi_k3
+  optional: false
+  source_file_dependencies:
+    - vllm_ascend/ops/kimi_kda.py
+    - vllm_ascend/ops/kimi_kda_state.py
+    - vllm_ascend/patch/platform/kimi_k3_xtml.py
+    - vllm_ascend/patch/platform/patch_kimi_k3_parsers.py
+    - vllm_ascend/patch/platform/patch_kimi_k3_renderer.py
+    - vllm_ascend/transformers_utils
+  tests:
+    - tests/ut/models/test_kimi_k3.py
+    - tests/ut/ops/test_kimi_kda.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_parsers.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_real_tokenizer.py
+    - tests/ut/patch/platform/test_patch_kimi_k3_renderer.py
+
 # Ops
 - name: ops_basic
   optional: false
@@ -862,7 +878,7 @@ runner_mapping:
 partition:
   310p_x1: 1
   310p_x4: 1
-  a2_x1: 5
-  a3_x2: 3
-  a3_x4: 3
+  a2_x1: 4
+  a3_x2: 2
+  a3_x4: 2
   cpu_x0: 1

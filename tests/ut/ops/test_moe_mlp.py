@@ -1,16 +1,13 @@
 import unittest
-from contextlib import contextmanager
 from types import SimpleNamespace
 from typing import ClassVar
 from unittest.mock import MagicMock, patch
 
 import torch
-import torch_npu  # noqa: F401  -- registers torch.npu used by the module under test
-from torch.nn import functional as F
 from vllm.model_executor.layers.fused_moe.activation import MoEActivation
 
-from vllm_ascend.ascend_forward_context import MoECommType
-from vllm_ascend.device.device_op import DeviceOperator
+from vllm_ascend.ops.activation import SituActivationConfig
+from vllm_ascend.ops.fused_moe import moe_mlp as moe_mlp_module
 from vllm_ascend.ops.fused_moe.moe_mlp import (
     cumsum_group_list,
     quant_apply_mlp,
@@ -25,8 +22,8 @@ from vllm_ascend.ops.fused_moe.moe_runtime_args import (
 from vllm_ascend.ops.fused_moe.moe_stage_params import MoEMxfpParams
 from vllm_ascend.quantization.quant_type import QuantType
 
-MOE_MLP = "vllm_ascend.ops.fused_moe.moe_mlp"
 MXFP4_TEST_DTYPE = getattr(torch, "float4_e2m1fn_x2", torch.float16)
+MX_SCALE_TEST_DTYPE = getattr(torch, "float8_e8m0fnu", torch.float16)
 
 
 class TestCumsumGroupList(unittest.TestCase):
@@ -110,6 +107,332 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
         self.assertEqual(first_call.kwargs["weight"][0].shape, torch.Size([2, 16, 8]))
         self.assertEqual(second_call.kwargs["weight"][0].shape, torch.Size([2, 8, 8]))
 
+    def test_unquant_apply_mlp_uses_situ_between_grouped_matmuls(self):
+        hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
+        gate_up_out = torch.tensor(
+            [[-8.0, 1.0, -30.0, 40.0], [0.5, 7.0, -2.0, 3.0]],
+            dtype=torch.bfloat16,
+        )
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+        gate = gate_up_out[..., :2].float()
+        up = gate_up_out[..., 2:].float()
+        expected_activation = (4.0 * torch.tanh(gate / 4.0) * torch.sigmoid(gate) * (25.0 * torch.tanh(up / 25.0))).to(
+            gate_up_out.dtype
+        )
+
+        with (
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_grouped_matmul",
+                side_effect=[[gate_up_out], [down_out]],
+                create=True,
+            ) as mock_grouped_matmul,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_swiglu",
+                create=True,
+            ) as mock_swiglu,
+        ):
+            output, _ = unquant_apply_mlp(
+                hidden_states=hidden_states,
+                # FUSED_MC2 stores weights in lists for its monolithic kernel.
+                # The SiTU path must pass those lists directly to GMM.
+                w1=[torch.randn(1, 4, 4)],
+                w2=[torch.randn(1, 2, 4)],
+                group_list=torch.tensor([2]),
+                activation=activation,
+                need_trans=False,
+            )
+
+        self.assertTrue(output is down_out)
+        second_call = mock_grouped_matmul.call_args_list[1]
+        assert len(mock_grouped_matmul.call_args_list[0].kwargs["weight"]) == 1
+        assert len(second_call.kwargs["weight"]) == 1
+        torch.testing.assert_close(second_call.kwargs["x"][0], expected_activation, rtol=0, atol=0)
+        mock_swiglu.assert_not_called()
+
+    def test_w4a16_mxfp4_situ_ignores_dispatch_scale_and_uses_two_grouped_matmuls(self):
+        hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
+        gate_up_out = torch.tensor(
+            [[-8.0, 1.0, -30.0, 40.0], [0.5, 7.0, -2.0, 3.0]],
+            dtype=torch.bfloat16,
+        )
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        event = object()
+        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+        gate = gate_up_out[..., :2].float()
+        up = gate_up_out[..., 2:].float()
+        expected_activation = (4.0 * torch.tanh(gate / 4.0) * torch.sigmoid(gate) * (25.0 * torch.tanh(up / 25.0))).to(
+            gate_up_out.dtype
+        )
+
+        with (
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_grouped_matmul",
+                return_value=[gate_up_out],
+                create=True,
+            ) as mock_gmm1,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_gmm2",
+                return_value=down_out,
+            ) as mock_gmm2,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_swiglu_quant",
+                create=True,
+            ) as mock_fused_gmm,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_swiglu",
+                create=True,
+            ) as mock_swiglu,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch.npu.current_stream",
+                return_value=MagicMock(record_event=MagicMock(return_value=event)),
+            ),
+        ):
+            output, before_gmm2_evt = quant_apply_mlp(
+                hidden_states=hidden_states,
+                w1=[torch.randn(1, 4, 4)],
+                w1_scale=[torch.ones(1)],
+                w2=[torch.randn(1, 2, 4)],
+                w2_scale=[torch.ones(1)],
+                group_list=torch.tensor([2]),
+                dynamic_scale=torch.ones(2, 1),
+                activation=activation,
+                use_mxfp_quant=True,
+                mxfp_quant_dtype=QuantType.W4A16MXFP4,
+                weight_quant_type=MXFP4_TEST_DTYPE,
+                use_bf16=True,
+            )
+
+        self.assertTrue(output is down_out)
+        self.assertIs(before_gmm2_evt, event)
+        torch.testing.assert_close(mock_gmm2.call_args.kwargs["hidden_states"], expected_activation, rtol=0, atol=0)
+        self.assertIsNone(mock_gmm2.call_args.kwargs["per_token_scale"])
+        self.assertEqual(mock_gmm2.call_args.kwargs["mxfp_quant_dtype"], QuantType.W4A16MXFP4)
+        self.assertEqual(mock_gmm1.call_count, 1)
+        mock_fused_gmm.assert_not_called()
+        mock_swiglu.assert_not_called()
+
+    def test_w4a8_situ_preserves_packed_weight_scale_view_and_bias(self):
+        hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
+        quantized_input = torch.ones(2, 4, dtype=torch.int8)
+        input_scale = torch.ones(2, 1, dtype=torch.float32)
+        gate_up_out = torch.tensor(
+            [[-8.0, 1.0, -30.0, 40.0], [0.5, 7.0, -2.0, 3.0]],
+            dtype=torch.bfloat16,
+        )
+        quantized_situ = torch.full((2, 2), 3, dtype=torch.int8)
+        situ_scale = torch.full((2, 1), 0.25, dtype=torch.float32)
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+        w1_scale_bias = [torch.randn(1, 4)]
+        w2_scale_bias = [torch.randn(1, 4)]
+        event = object()
+        custom_ops = SimpleNamespace(
+            grouped_matmul_swiglu_quant_v2=MagicMock(),
+            grouped_matmul_swiglu_quant_weight_nz_tensor_list=MagicMock(),
+            npu_dequant_swiglu_quant=MagicMock(),
+            dequant_situ_quant=MagicMock(return_value=(quantized_situ, situ_scale)),
+        )
+        packed_w1 = torch.ones(1, 4, 1, dtype=torch.int32)
+        w1_scale = torch.ones(1, 4, dtype=torch.int64)
+
+        with (
+            patch.object(moe_mlp_module.torch.ops, "_C_ascend", custom_ops),
+            patch.object(
+                moe_mlp_module,
+                "_EXTRA_CTX",
+                SimpleNamespace(moe_comm_type=moe_mlp_module.MoECommType.MC2),
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_dynamic_quant",
+                return_value=(quantized_input, input_scale),
+            ) as mock_input_quant,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_grouped_matmul",
+                return_value=[gate_up_out],
+                create=True,
+            ) as mock_gmm1,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_gmm2",
+                return_value=down_out,
+            ) as mock_gmm2,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_swiglu_quant",
+                create=True,
+            ) as mock_fused_gmm,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp._custom_gmm_swiglu_enabled",
+                return_value=True,
+            ) as mock_custom_enabled,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_swiglu",
+                create=True,
+            ) as mock_swiglu,
+            patch("vllm_ascend.ops.fused_moe.moe_mlp.dispose_tensor"),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch.npu.current_stream",
+                return_value=MagicMock(record_event=MagicMock(return_value=event)),
+            ),
+        ):
+            output, before_gmm2_evt = quant_apply_mlp(
+                hidden_states=hidden_states,
+                w1=[packed_w1],
+                w1_scale=[w1_scale],
+                w2=[torch.ones(1, 2, 1, dtype=torch.int32)],
+                w2_scale=[torch.ones(1, 4, dtype=torch.int64)],
+                group_list=torch.tensor([2]),
+                activation=activation,
+                fusion=True,
+                mxfp_quant_dtype=QuantType.W4A8,
+                w1_scale_bias=w1_scale_bias,
+                w2_scale_bias=w2_scale_bias,
+                use_w4a8_per_channel_gmm_swiglu=True,
+            )
+
+        self.assertTrue(output is down_out)
+        self.assertIs(before_gmm2_evt, event)
+        mock_input_quant.assert_called_once()
+        first_call = mock_gmm1.call_args
+        self.assertIs(first_call.kwargs["bias"], w1_scale_bias)
+        self.assertEqual(first_call.kwargs["output_dtype"], torch.bfloat16)
+        self.assertIs(first_call.kwargs["weight"][0], packed_w1)
+        self.assertEqual(first_call.kwargs["scale"][0].shape, torch.Size([1, 1, 4]))
+        self.assertEqual(w1_scale.shape, torch.Size([1, 4]))
+        situ_call = custom_ops.dequant_situ_quant.call_args.kwargs
+        self.assertIs(situ_call["x"], gate_up_out)
+        self.assertIsNone(situ_call["weight_scale"])
+        self.assertIsNone(situ_call["activation_scale"])
+        self.assertEqual(situ_call["beta"], 4.0)
+        self.assertEqual(situ_call["linear_beta"], 25.0)
+        self.assertIs(mock_gmm2.call_args.kwargs["bias"], w2_scale_bias)
+        self.assertIs(mock_gmm2.call_args.kwargs["hidden_states"], quantized_situ)
+        self.assertIs(mock_gmm2.call_args.kwargs["per_token_scale"], situ_scale)
+        self.assertEqual(mock_gmm2.call_args.kwargs["mxfp_quant_dtype"], QuantType.W4A8)
+        mock_custom_enabled.assert_not_called()
+        mock_fused_gmm.assert_not_called()
+        mock_swiglu.assert_not_called()
+        custom_ops.grouped_matmul_swiglu_quant_v2.assert_not_called()
+        custom_ops.grouped_matmul_swiglu_quant_weight_nz_tensor_list.assert_not_called()
+        custom_ops.npu_dequant_swiglu_quant.assert_not_called()
+
+    def test_w4a8_swiglu_stays_on_existing_fused_path(self):
+        hidden_states = torch.randn(2, 4, dtype=torch.bfloat16)
+        quantized_input = torch.ones(2, 4, dtype=torch.int8)
+        input_scale = torch.ones(2, 1, dtype=torch.float32)
+        quantized_activation = torch.full((2, 2), 3, dtype=torch.int8)
+        activation_scale = torch.full((2, 1), 0.25, dtype=torch.float32)
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        packed_w1 = torch.ones(1, 4, 1, dtype=torch.int32)
+        w1_scale = torch.ones(1, 4, dtype=torch.int64)
+        event = object()
+
+        with (
+            patch.object(
+                moe_mlp_module,
+                "_EXTRA_CTX",
+                SimpleNamespace(moe_comm_type=moe_mlp_module.MoECommType.MC2),
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_dynamic_quant",
+                return_value=(quantized_input, input_scale),
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_swiglu_quant",
+                return_value=(quantized_activation, activation_scale, None),
+            ) as mock_fused_gmm,
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_gmm2",
+                return_value=down_out,
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp._w4a8_situ_apply_mlp",
+            ) as mock_situ,
+            patch("vllm_ascend.ops.fused_moe.moe_mlp.get_weight_prefetch_method", return_value=None),
+            patch("vllm_ascend.ops.fused_moe.moe_mlp.dispose_tensor"),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch.npu.current_stream",
+                return_value=MagicMock(record_event=MagicMock(return_value=event)),
+            ),
+        ):
+            output, before_gmm2_evt = quant_apply_mlp(
+                hidden_states=hidden_states,
+                w1=[packed_w1],
+                w1_scale=[w1_scale],
+                w2=[torch.ones(1, 2, 1, dtype=torch.int32)],
+                w2_scale=[torch.ones(1, 4, dtype=torch.int64)],
+                group_list=torch.tensor([2]),
+                activation="silu",
+                fusion=True,
+                mxfp_quant_dtype=QuantType.W4A8,
+                use_w4a8_per_channel_gmm_swiglu=True,
+            )
+
+        self.assertIs(output, down_out)
+        self.assertIs(before_gmm2_evt, event)
+        mock_situ.assert_not_called()
+        self.assertIs(mock_fused_gmm.call_args.kwargs["weight"], packed_w1)
+        self.assertIs(mock_fused_gmm.call_args.kwargs["weight_scale"], w1_scale)
+        self.assertEqual(w1_scale.shape, torch.Size([1, 4]))
+
+    def test_w4a8_mxfp_situ_uses_situ_mx_quant(self):
+        hidden_states = torch.ones(2, 4, dtype=torch.float8_e4m3fn)
+        input_scale = torch.ones(2, 1, 2, dtype=MX_SCALE_TEST_DTYPE)
+        gate_up_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        quantized_situ = torch.ones(2, 2, dtype=torch.float8_e4m3fn)
+        situ_scale = torch.ones(2, 1, 2, dtype=MX_SCALE_TEST_DTYPE)
+        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
+        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+        event = object()
+        custom_ops = SimpleNamespace(
+            situ_mx_quant=MagicMock(return_value=(quantized_situ, situ_scale)),
+        )
+
+        with (
+            patch.object(moe_mlp_module.torch.ops, "_C_ascend", custom_ops),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.maybe_normalize_mxfp_scale_layout",
+                return_value=input_scale,
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_grouped_matmul",
+                return_value=[gate_up_out],
+                create=True,
+            ),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_gmm2",
+                return_value=down_out,
+            ) as mock_gmm2,
+            patch("vllm_ascend.ops.fused_moe.moe_mlp.dispose_tensor"),
+            patch("vllm_ascend.ops.fused_moe.moe_mlp.get_weight_prefetch_method", return_value=None),
+            patch(
+                "vllm_ascend.ops.fused_moe.moe_mlp.torch.npu.current_stream",
+                return_value=MagicMock(record_event=MagicMock(return_value=event)),
+            ),
+        ):
+            output, before_gmm2_evt = quant_apply_mlp(
+                hidden_states=hidden_states,
+                w1=[torch.ones(1, 4, 1, dtype=torch.int32)],
+                w1_scale=[torch.ones(1, 1, 4)],
+                w2=[torch.ones(1, 2, 1, dtype=torch.int32)],
+                w2_scale=[torch.ones(1, 1, 4)],
+                group_list=torch.tensor([2]),
+                dynamic_scale=input_scale,
+                activation=activation,
+                use_mxfp_quant=True,
+                mxfp_quant_dtype=QuantType.W4A8MXFP,
+                act_quant_type=torch.float8_e4m3fn,
+            )
+
+        self.assertIs(output, down_out)
+        self.assertIs(before_gmm2_evt, event)
+        situ_call = custom_ops.situ_mx_quant.call_args.kwargs
+        self.assertIs(situ_call["x"], gate_up_out)
+        self.assertEqual(situ_call["beta"], 4.0)
+        self.assertEqual(situ_call["linear_beta"], 25.0)
+        self.assertEqual(situ_call["dst_type"], moe_mlp_module.SITU_MX_DST_TYPE_E4M3FN)
+        self.assertIs(mock_gmm2.call_args.kwargs["hidden_states"], quantized_situ)
+        self.assertIs(mock_gmm2.call_args.kwargs["per_token_scale"], situ_scale)
+
     def test_request_unquant_path(self):
         hidden_states = torch.randn(2, 8)
         expected = torch.randn(2, 8)
@@ -146,8 +469,8 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
 
     def test_request_quant_path(self):
         for quant_type, mxfp_dtype in (
-            (QuantType.W8A8MXFP, torch.float8_e4m3fn),
-            (QuantType.W4A4MXFP, MXFP4_TEST_DTYPE),
+            (QuantType.MXFP8, torch.float8_e4m3fn),
+            (QuantType.MXFP4, MXFP4_TEST_DTYPE),
         ):
             with self.subTest(quant_type=quant_type):
                 hidden_states = torch.randn(2, 8)
@@ -259,322 +582,6 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
         self.assertEqual(quant_kwargs["activation"], MoEActivation.SWIGLUSTEP)
         self.assertEqual(quant_kwargs["swiglu_limit"], 5.0)
         mock_unquant.assert_not_called()
-
-    def test_request_quant_path_passes_gelu_activation(self):
-        expected = torch.randn(1, 2)
-        mlp_compute_input = MoEMlpComputeInput(
-            hidden_states=torch.ones((1, 2), dtype=torch.float32),
-            group_list=torch.tensor([1], dtype=torch.int64),
-            group_list_type=1,
-            dynamic_scale=None,
-            topk_scales=None,
-            weights=MoEWeights(
-                w1=[torch.ones((1, 2, 4), dtype=torch.float32)],
-                w2=[torch.ones((1, 2, 2), dtype=torch.float32)],
-                w1_scale=[torch.ones((1,), dtype=torch.float32)],
-                w2_scale=[torch.ones((1,), dtype=torch.float32)],
-            ),
-            quant=MoEQuantParams(quant_type=QuantType.W8A8),
-            fusion=True,
-            activation=MoEActivation.GELU_TANH,
-        )
-
-        with (
-            patch("vllm_ascend.ops.fused_moe.moe_mlp.quant_apply_mlp", return_value=expected) as mock_quant,
-            patch("vllm_ascend.ops.fused_moe.moe_mlp.unquant_apply_mlp") as mock_unquant,
-        ):
-            output = unified_apply_mlp(mlp_compute_input=mlp_compute_input)
-
-        self.assertTrue(output is expected)
-        quant_kwargs = mock_quant.call_args.kwargs
-        self.assertEqual(quant_kwargs["activation"], MoEActivation.GELU_TANH)
-        mock_unquant.assert_not_called()
-
-
-def _patch_npu_stream():
-    """Patch ``torch.npu.current_stream`` so ``record_event()`` returns a tag."""
-    evt = MagicMock(name="before_gmm2_evt")
-    stream = MagicMock(name="npu_stream")
-    stream.record_event.return_value = evt
-    return patch("torch.npu.current_stream", return_value=stream), evt
-
-
-@contextmanager
-def _mock_w8a8_gelu_compute(gate_up, *, gmm2_out=None, capture_quant=False):
-    """Mock the W8A8 GELU-path NPU ops: dequant GMM1 (``npu_grouped_matmul``),
-    requant (``npu_dynamic_quant``), GMM2 (``npu_grouped_matmul_gmm2``), plus the
-    NPU stream event and ``dispose_tensor``. Yields a namespace with the mocks;
-    when ``capture_quant`` is True, ``captured['x']``/``captured['scale']``
-    record the requant input and the returned per-token scale."""
-    stream_patch, evt = _patch_npu_stream()
-    captured = {}
-
-    def _dynamic_quant(x, dst_type=None):
-        if capture_quant:
-            captured["x"] = x.detach().clone()
-            scale = torch.ones(1, dtype=torch.float32)
-            captured["scale"] = scale
-            return x, scale
-        return x, torch.ones(1)
-
-    with (
-        stream_patch,
-        patch("torch_npu.npu_grouped_matmul", return_value=[gate_up], create=True) as mock_gmm,
-        patch("torch_npu.npu_dynamic_quant", side_effect=_dynamic_quant, create=True) as mock_dq,
-        patch.object(
-            DeviceOperator,
-            "npu_grouped_matmul_gmm2",
-            return_value=gmm2_out if gmm2_out is not None else torch.zeros(1, 4),
-        ) as mock_gmm2,
-        patch(f"{MOE_MLP}.dispose_tensor"),
-    ):
-        yield SimpleNamespace(gmm=mock_gmm, dq=mock_dq, gmm2=mock_gmm2, evt=evt, captured=captured)
-
-
-class _GeluPathBase(unittest.TestCase):
-    """Common helpers for the GELU-path tests."""
-
-    def _common_w8a8_kwargs(
-        self,
-        *,
-        activation,
-        w1_scale_dtype=torch.float32,
-        w2_scale_dtype=torch.float32,
-        w1_scale_bias=None,
-        w2_scale_bias=None,
-        group_list_type=1,
-        group_list=None,
-        dynamic_scale=None,
-    ):
-        return dict(
-            hidden_states=torch.randn(1, 4),
-            w1=torch.randn(1, 8, 4),
-            w1_scale=[torch.randn(1, 8, dtype=w1_scale_dtype)],
-            w2=torch.randn(1, 4, 1),
-            w2_scale=[torch.randn(1, 4, dtype=w2_scale_dtype)],
-            group_list=group_list if group_list is not None else torch.tensor([1], dtype=torch.int64),
-            group_list_type=group_list_type,
-            dynamic_scale=dynamic_scale if dynamic_scale is not None else torch.randn(1, 1),
-            w1_scale_bias=w1_scale_bias,
-            w2_scale_bias=w2_scale_bias,
-            w1_offset=None,
-            w2_offset=None,
-            fusion=False,
-            dynamic_eplb=False,
-            use_mxfp_quant=False,
-            mxfp_quant_dtype=None,
-            act_quant_type=torch.int8,
-            weight_quant_type=torch.float8_e4m3fn,
-            use_bf16=True,
-            activation=activation,
-            swiglu_limit=0.0,
-            use_w4a8_per_channel_gmm_swiglu=False,
-        )
-
-
-class TestQuantApplyMlpGeluPath(_GeluPathBase):
-    """GELU path: dispatch, math, and layout coverage.
-
-    In the in-branch/guard variant the GELU path runs through the existing
-    branch preamble. Stub `_EXTRA_CTX` in setUp so each test can focus on the
-    GELU dispatch/math.
-    """
-
-    def setUp(self):
-        # Configurable forward-context mock; default moe_comm_type is not MC2.
-        self._ctx_mock = MagicMock()
-        self._ctx_mock.moe_comm_type = -1
-        self._patches = [
-            patch(f"{MOE_MLP}._EXTRA_CTX", self._ctx_mock),
-        ]
-        for p in self._patches:
-            p.start()
-        self.addCleanup(self._stop_patches)
-
-    def _stop_patches(self):
-        for p in self._patches:
-            p.stop()
-
-    def test_w8a8_gelu_tanh_applies_correct_activation(self):
-        """W8A8 + gelu_tanh: GMM1(dequant) -> gelu(tanh)·up -> requant -> GMM2."""
-        gate = torch.tensor([[1.0, 2.0, -1.0, 0.5]])
-        up = torch.tensor([[0.5, -0.5, 1.0, 2.0]])
-        gate_up = torch.cat([gate, up], dim=-1)
-        expected = F.gelu(gate, approximate="tanh") * up
-        gmm2_out = torch.tensor([[9.0]])
-        with _mock_w8a8_gelu_compute(gate_up, gmm2_out=gmm2_out, capture_quant=True) as m:
-            out, out_evt = quant_apply_mlp(**self._common_w8a8_kwargs(activation=MoEActivation.GELU_TANH))
-        # GELU math applied with tanh approximation before requantization.
-        self.assertTrue(torch.allclose(m.captured["x"], expected, atol=1e-6))
-        # GMM1 used the dequant form (scale + per_token_scale), not antiquant.
-        gmm1_kwargs = m.gmm.call_args.kwargs
-        self.assertIn("scale", gmm1_kwargs)
-        self.assertIn("per_token_scale", gmm1_kwargs)
-        self.assertNotIn("antiquant_scale", gmm1_kwargs)
-        self.assertEqual(gmm1_kwargs["split_item"], 2)
-        # Requant + GMM2 both invoked; GMM2 received the requant per-token scale.
-        m.dq.assert_called_once()
-        m.gmm2.assert_called_once()
-        self.assertIs(m.gmm2.call_args.kwargs["per_token_scale"], m.captured["scale"])
-        # Return contract: (hidden_states, before_gmm2_evt).
-        self.assertIs(out, gmm2_out)
-        self.assertIs(out_evt, m.evt)
-
-    def test_w8a8_gelu_uses_exact_gelu_approximation(self):
-        """W8A8 + gelu (not tanh): approximate='none', matching the float path."""
-        gate = torch.tensor([[0.5, -0.5, 2.0]])
-        up = torch.tensor([[1.0, 1.0, 0.5]])
-        gate_up = torch.cat([gate, up], dim=-1)
-        expected = F.gelu(gate, approximate="none") * up
-        with _mock_w8a8_gelu_compute(gate_up, gmm2_out=torch.zeros(1, 3), capture_quant=True) as m:
-            quant_apply_mlp(**self._common_w8a8_kwargs(activation=MoEActivation.GELU))
-        # exact GELU (approximate='none') differs from tanh; ensure 'none' used.
-        self.assertFalse(torch.allclose(m.captured["x"], F.gelu(gate, approximate="tanh") * up, atol=1e-6))
-        self.assertTrue(torch.allclose(m.captured["x"], expected, atol=1e-6))
-
-    def test_w4a16_gelu_uses_antiquant_path(self):
-        """W4A16 + gelu: antiquant GMM1 -> gelu·up -> antiquant GMM2, no requant."""
-        gate = torch.tensor([[1.0, -1.0]])
-        up = torch.tensor([[0.5, 2.0]])
-        gate_up = torch.cat([gate, up], dim=-1)
-        expected = F.gelu(gate, approximate="tanh") * up
-        gmm2_out = torch.tensor([[3.0]])
-        stream_patch, evt = _patch_npu_stream()
-        with (
-            stream_patch,
-            patch("torch_npu.npu_grouped_matmul", side_effect=[[gate_up], [gmm2_out]], create=True) as mock_gmm,
-            patch("torch_npu.npu_dynamic_quant", create=True) as mock_dq,
-            patch.object(DeviceOperator, "npu_grouped_matmul_gmm2") as mock_gmm2,
-            patch(f"{MOE_MLP}.dispose_tensor"),
-        ):
-            kwargs = self._common_w8a8_kwargs(activation=MoEActivation.GELU_TANH)
-            # Switch to the W4A16 antiquant layout.
-            kwargs["w1_offset"] = torch.randn(1, 8, 4)
-            kwargs["w2_offset"] = torch.randn(1, 4, 1)
-            out, out_evt = quant_apply_mlp(**kwargs)
-
-        self.assertEqual(mock_gmm.call_count, 2)
-        # Both GMM calls use antiquant (not scale/per_token_scale).
-        for call in mock_gmm.call_args_list:
-            self.assertIn("antiquant_scale", call.kwargs)
-            self.assertIn("antiquant_offset", call.kwargs)
-            self.assertNotIn("scale", call.kwargs)
-        # GMM2 (second call) input is the GELU activation output.
-        gmm2_input = mock_gmm.call_args_list[1].kwargs["x"][0]
-        self.assertTrue(torch.allclose(gmm2_input, expected, atol=1e-6))
-        # W4A16 path does NOT requantize.
-        mock_dq.assert_not_called()
-        mock_gmm2.assert_not_called()
-        self.assertIs(out, gmm2_out)
-        self.assertIs(out_evt, evt)
-
-    def test_w8a8_gelu_with_scale_bias_sets_bias_and_bfloat16(self):
-        """W8A8 + gelu + scale_bias: bias1/bias2 passed, output dtype bfloat16,
-        and group_list_type 0 -> 1 conversion applied."""
-        w1_sb = [torch.zeros(1)]
-        w2_sb = [torch.zeros(1)]
-        with (
-            _mock_w8a8_gelu_compute(torch.zeros(1, 8), gmm2_out=torch.zeros(1, 2)) as m,
-            patch("torch.cat", wraps=torch.cat) as mock_cat,
-        ):
-            quant_apply_mlp(
-                **self._common_w8a8_kwargs(
-                    activation=MoEActivation.GELU_TANH,
-                    w1_scale_bias=w1_sb,
-                    w2_scale_bias=w2_sb,
-                    group_list_type=0,
-                    group_list=torch.tensor([0, 1], dtype=torch.int64),
-                )
-            )
-        # bias1 propagated to GMM1.
-        self.assertIs(m.gmm.call_args.kwargs["bias"], w1_sb)
-        # group_list_type 0 -> 1 conversion invoked (torch.cat + torch.diff).
-        self.assertTrue(mock_cat.called)
-
-    def test_w8a8_gelu_converts_w1_scale_dtype_to_output_dtype(self):
-        """When w1_scale dtype != _output_dtype, it is cast before GMM1."""
-        # w1_scale fp32, w2_scale bf16 -> _output_dtype = bfloat16, so the GELU
-        # path must cast w1_scale to bfloat16 before GMM1.
-        with _mock_w8a8_gelu_compute(torch.zeros(1, 8)) as m:
-            quant_apply_mlp(
-                **self._common_w8a8_kwargs(
-                    activation=MoEActivation.GELU_TANH,
-                    w1_scale_dtype=torch.float32,
-                    w2_scale_dtype=torch.bfloat16,
-                )
-            )
-        self.assertEqual(m.gmm.call_args.kwargs["scale"][0].dtype, torch.bfloat16)
-
-    def test_gelu_path_does_not_call_swiglu_op(self):
-        """GELU path must use torch.gelu, never the SwiGLU NPU op."""
-        with _mock_w8a8_gelu_compute(torch.zeros(1, 8)), patch("torch_npu.npu_swiglu", create=True) as mock_swiglu:
-            quant_apply_mlp(**self._common_w8a8_kwargs(activation=MoEActivation.GELU_TANH))
-        mock_swiglu.assert_not_called()
-
-    def test_fusion_on_gelu_skips_fused_swiglu_quant(self):
-        """Guard: with fusion ON (default), GELU must still skip the fused
-        npu_grouped_matmul_swiglu_quant op and use the non-fused GELU path.
-        This is the case that breaks without the ``and not is_gelu_activation``
-        guard on use_gmm_swiglu_quant_fusion."""
-        kwargs = self._common_w8a8_kwargs(activation=MoEActivation.GELU_TANH)
-        kwargs["fusion"] = True  # -> use_gmm_swiglu_quant_fusion = True
-        with (
-            _mock_w8a8_gelu_compute(torch.zeros(1, 8)) as m,
-            patch.object(DeviceOperator, "npu_grouped_matmul_swiglu_quant") as mock_fused,
-        ):
-            quant_apply_mlp(**kwargs)
-        # Fused SwiGLU+quant op must NOT be called for GELU.
-        mock_fused.assert_not_called()
-        # Non-fused dequant GMM1 (scale + per_token_scale) IS used.
-        self.assertIn("scale", m.gmm.call_args.kwargs)
-        self.assertIn("per_token_scale", m.gmm.call_args.kwargs)
-
-    def test_mc2_gelu_skips_mc2_fused_branch(self):
-        """Guard: under MC2 comm, GELU must skip the all-fused MC2 branch and
-        use the non-fused GELU path. Without the ``and not is_gelu_activation``
-        guard on the MC2 entry, GELU+MC2 would hit npu_dequant_swiglu_quant."""
-        self._ctx_mock.moe_comm_type = MoECommType.MC2  # force is_mc2 True
-        with (
-            _mock_w8a8_gelu_compute(torch.zeros(1, 8)) as m,
-            patch("torch.ops._C_ascend.npu_dequant_swiglu_quant", create=True) as mock_mc2_fused,
-            patch.object(DeviceOperator, "npu_grouped_matmul_swiglu_quant") as mock_fused,
-        ):
-            quant_apply_mlp(**self._common_w8a8_kwargs(activation=MoEActivation.GELU_TANH))
-        # MC2 fused SwiGLU op must NOT be called for GELU.
-        mock_mc2_fused.assert_not_called()
-        mock_fused.assert_not_called()
-        # Non-fused dequant GMM1 IS used instead.
-        self.assertIn("scale", m.gmm.call_args.kwargs)
-
-
-class TestQuantApplyMlpNoGeluImpact(_GeluPathBase):
-    """Non-GELU activations must NOT enter the GELU path (no regression)."""
-
-    def _run_non_gelu(self, activation):
-        with (
-            _mock_w8a8_gelu_compute(torch.zeros(1, 8)),
-            patch(f"{MOE_MLP}._EXTRA_CTX") as mock_ctx,
-            patch(f"{MOE_MLP}.HAS_TRITON", False),
-            patch("torch_npu.npu_swiglu", return_value=torch.zeros(1, 4), create=True) as mock_swiglu,
-            patch("torch.nn.functional.gelu") as mock_gelu,
-        ):
-            mock_ctx.moe_comm_type = -1  # not MoECommType.MC2
-            quant_apply_mlp(**self._common_w8a8_kwargs(activation=activation))
-        return mock_gelu, mock_swiglu
-
-    def test_silu_activation_skips_gelu_path(self):
-        mock_gelu, mock_swiglu = self._run_non_gelu("silu")
-        mock_gelu.assert_not_called()
-        # SwiGLu op IS used by the existing path -> existing logic intact.
-        mock_swiglu.assert_called()
-
-    def test_swiglustep_activation_skips_gelu_path(self):
-        mock_gelu, _ = self._run_non_gelu(MoEActivation.SWIGLUSTEP)
-        mock_gelu.assert_not_called()
-
-    def test_swigluoai_activation_skips_gelu_path(self):
-        mock_gelu, _ = self._run_non_gelu(MoEActivation.SWIGLUOAI)
-        mock_gelu.assert_not_called()
 
 
 if __name__ == "__main__":
