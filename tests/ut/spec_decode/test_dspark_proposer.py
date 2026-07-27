@@ -157,3 +157,17 @@ def test_dspark_receives_all_kernel_block_sizes():
         "                    kernel_block_sizes,"
     )
     assert normalize_index < initialize_index
+
+
+def test_kimi_k3_dspark_uses_media_placeholder_for_multimodal_token():
+    source = inspect.getsource(AscendSpecDecodeBaseProposer.load_model)
+    kimi_k3_index = source.index('"AscendKimiK3ForConditionalGeneration"')
+    media_token_index = source.index(
+        "model.config.media_placeholder_token_id",
+        kimi_k3_index,
+    )
+    generic_image_token_index = source.index(
+        "model.config.image_token_index",
+        media_token_index,
+    )
+    assert kimi_k3_index < media_token_index < generic_image_token_index
