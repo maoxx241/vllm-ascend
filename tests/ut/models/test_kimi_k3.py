@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import pytest
 import torch
-import torch_npu
 from PIL import Image
 from torch import nn
 from transformers import BatchFeature
@@ -430,19 +429,24 @@ def test_attention_residual_matches_reference_math(monkeypatch: pytest.MonkeyPat
     norm.variance_epsilon = 1e-5
     projection = nn.Linear(4, 1, bias=False)
 
-    rms_norm_calls: list[tuple[torch.dtype, torch.dtype, float]] = []
+    kernel_calls: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
 
-    def fake_npu_rms_norm(
-        values: torch.Tensor,
-        weight: torch.Tensor,
-        epsilon: float,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        rms_norm_calls.append((values.dtype, weight.dtype, epsilon))
-        variance = values.square().mean(-1, keepdim=True)
-        normalized = values * torch.rsqrt(variance + epsilon) * weight
-        return normalized, torch.rsqrt(variance + epsilon)
+    def fake_apply_attn_res(
+        prefix_sum: torch.Tensor,
+        block_residual: torch.Tensor,
+        projection: nn.Module,
+        norm: nn.Module,
+    ) -> torch.Tensor:
+        kernel_calls.append((tuple(prefix_sum.shape), tuple(block_residual.shape)))
+        values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
+        values_fp32 = values.float()
+        variance = values_fp32.square().mean(-1, keepdim=True)
+        normalized = values_fp32 * torch.rsqrt(variance + norm.variance_epsilon)
+        score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
+        probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
+        return torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
 
-    monkeypatch.setattr(torch_npu, "npu_rms_norm", fake_npu_rms_norm)
+    monkeypatch.setattr(kimi_k3_text, "apply_attn_res", fake_apply_attn_res)
 
     actual = _apply_attention_residual(prefix_sum, block_residual, projection, norm)
 
@@ -452,7 +456,7 @@ def test_attention_residual_matches_reference_math(monkeypatch: pytest.MonkeyPat
     score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
     probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
     expected = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
-    assert rms_norm_calls == [(torch.float32, torch.float32, 1e-5)]
+    assert kernel_calls == [((3, 4), (3, 2, 4))]
     torch.testing.assert_close(actual, expected)
 
 
@@ -471,14 +475,20 @@ def test_attention_residual_flashcomm_reanchors_dynamic_token_shape(monkeypatch:
     projection = nn.Linear(4, 1, bias=False)
     anchor_calls: list[tuple[tuple[int, ...], tuple[int, ...]]] = []
 
-    def fake_npu_rms_norm(
-        values: torch.Tensor,
-        weight: torch.Tensor,
-        epsilon: float,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        variance = values.square().mean(-1, keepdim=True)
-        normalized = values * torch.rsqrt(variance + epsilon) * weight
-        return normalized, torch.rsqrt(variance + epsilon)
+    def fake_apply_attn_res(
+        prefix_sum: torch.Tensor,
+        block_residual: torch.Tensor,
+        projection: nn.Module,
+        norm: nn.Module,
+    ) -> torch.Tensor:
+        values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
+        values_fp32 = values.float()
+        normalized = values_fp32 * torch.rsqrt(
+            values_fp32.square().mean(-1, keepdim=True) + norm.variance_epsilon
+        )
+        score_weight = norm.weight.float() * projection.weight.squeeze(0).float()
+        probabilities = (normalized * score_weight).sum(-1).softmax(-1).unsqueeze(1)
+        return torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
 
     def fake_shape_anchor(x: torch.Tensor, residual: torch.Tensor) -> torch.Tensor:
         anchor_calls.append((tuple(x.shape), tuple(residual.shape)))
@@ -491,7 +501,7 @@ def test_attention_residual_flashcomm_reanchors_dynamic_token_shape(monkeypatch:
         fake_shape_anchor,
         raising=False,
     )
-    monkeypatch.setattr(torch_npu, "npu_rms_norm", fake_npu_rms_norm)
+    monkeypatch.setattr(kimi_k3_text, "apply_attn_res", fake_apply_attn_res)
 
     actual = _apply_attention_residual(prefix_sum, block_residual, projection, norm)
 

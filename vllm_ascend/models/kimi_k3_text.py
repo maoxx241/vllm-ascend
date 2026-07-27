@@ -5,7 +5,6 @@ from collections.abc import Iterable
 from typing import Any
 
 import torch
-import torch_npu
 from torch import nn
 from vllm.compilation.decorators import support_torch_compile
 from vllm.config import CacheConfig, VllmConfig
@@ -47,6 +46,7 @@ from vllm.sequence import IntermediateTensors
 from vllm_ascend.ascend_forward_context import _EXTRA_CTX
 from vllm_ascend.ops.activation import AscendSituAndMul
 from vllm_ascend.ops.kimi_kda_state import kimi_kda_state_shape
+from vllm_ascend.ops.triton.attn_res import apply_attn_res
 from vllm_ascend.transformers_utils.configs.kimi_k3 import KimiK3TextConfig
 from vllm_ascend.utils import uses_global_inputs_embeds
 
@@ -355,16 +355,7 @@ def _apply_attention_residual(
     norm: RMSNorm,
 ) -> torch.Tensor:
     """Apply K3's learned normalized mixture over residual block starts."""
-    values = torch.cat((block_residual, prefix_sum.unsqueeze(1)), dim=1)
-    values_fp32 = values.float()
-    normalized, _ = torch_npu.npu_rms_norm(
-        values_fp32,
-        norm.weight.float(),
-        norm.variance_epsilon,
-    )
-    scores = torch.matmul(normalized, projection.weight.t().float()).squeeze(-1)
-    probabilities = scores.softmax(-1).unsqueeze(1)
-    mixed = torch.matmul(probabilities, values_fp32).squeeze(1).to(values.dtype)
+    mixed = apply_attn_res(prefix_sum, block_residual, projection, norm)
     if _EXTRA_CTX.flash_comm_v1_enabled:
         # FlashComm changes the first decoder layer from the global token
         # layout to a TP-local layout.  The learned-residual arithmetic above
