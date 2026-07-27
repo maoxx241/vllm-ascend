@@ -60,6 +60,7 @@ from vllm_ascend.distributed.parallel_state import (
     get_mlp_tp_group,
     get_otp_group,
 )
+from vllm_ascend.ops.parallel_types import AscendLinearParallelMode
 from vllm_ascend.utils import (
     enable_dsa_cp,
     enable_sp,
@@ -496,11 +497,23 @@ def _get_row_parallel_op(
 
 
 def get_parallel_op(disable_tp, prefix, layer, direct):
-    if (
-        disable_tp
-        or ("shared_experts" in prefix and shared_expert_dp_enabled())
-        or ("shared_expert" in prefix and shared_expert_dp_enabled())
-        or ("share_expert" in prefix and shared_expert_dp_enabled())  # "share_expert" added for Step3p5
+    parallel_mode = getattr(type(layer), "ascend_parallel_mode", AscendLinearParallelMode.DEFAULT)
+    if not isinstance(parallel_mode, AscendLinearParallelMode):
+        raise TypeError(f"Invalid Ascend linear parallel mode: {parallel_mode!r}")
+    if disable_tp and parallel_mode is AscendLinearParallelMode.TENSOR_PARALLEL:
+        raise ValueError("Tensor-parallel mode cannot be combined with disable_tp")
+    if parallel_mode is AscendLinearParallelMode.TENSOR_PARALLEL:
+        tp_group = get_tp_group()
+        return None, tp_group.rank_in_group, tp_group.world_size
+
+    shared_expert_is_replicated = parallel_mode is AscendLinearParallelMode.DEFAULT and shared_expert_dp_enabled()
+    if disable_tp or (
+        shared_expert_is_replicated
+        and (
+            "shared_experts" in prefix
+            or "shared_expert" in prefix
+            or "share_expert" in prefix  # "share_expert" added for Step3p5
+        )
     ):
         return None, 0, 1
     custom_op: (

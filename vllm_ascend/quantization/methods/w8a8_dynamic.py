@@ -53,6 +53,7 @@ class AscendW8A8DynamicLinearMethod(AscendLinearScheme):
     """
 
     act_quant_type: torch.dtype = torch.int8
+    shared_expert_quant_type: QuantType = QuantType.W8A8
 
     def __init__(self):
         pass

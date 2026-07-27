@@ -20,6 +20,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import dataclass, field
+
 import torch
 from torch import nn
 from vllm.config import CacheConfig, get_current_vllm_config
@@ -33,7 +35,23 @@ from vllm.v1.attention.backend import AttentionMetadata  # type: ignore
 
 from vllm_ascend.ascend_config import get_ascend_config
 from vllm_ascend.ascend_forward_context import _EXTRA_CTX
+from vllm_ascend.ops.parallel_types import AscendTokenLayout
 from vllm_ascend.utils import is_vl_model, parse_layer_idx
+
+
+@dataclass(frozen=True)
+class AscendMLAFeatures:
+    """Ascend-specific modules and execution semantics for MLA."""
+
+    input_layout: AscendTokenLayout
+    output_gate: nn.Module | None = None
+
+
+@dataclass
+class AscendMLAModules(MLAModules):
+    """MLA modules with an explicit Ascend feature contract."""
+
+    features: AscendMLAFeatures = field(kw_only=True)
 
 
 class IndexerWrapper(nn.Module):
@@ -99,6 +117,7 @@ class AscendMultiHeadLatentAttention(MultiHeadLatentAttentionWrapper):
             ascend_indexer = IndexerWrapper(mla_modules.indexer)
         else:
             ascend_indexer = None
+        ascend_features = mla_modules.features if isinstance(mla_modules, AscendMLAModules) else None
         self.mla_attn = MLAAttention(
             num_heads=num_heads,
             scale=scale,
@@ -114,7 +133,7 @@ class AscendMultiHeadLatentAttention(MultiHeadLatentAttentionWrapper):
             use_sparse=mla_modules.is_sparse,
             indexer=ascend_indexer,
             skip_topk=skip_topk,
-            topk_indices_buffer=getattr(mla_modules, "topk_indices_buffer", None),
+            topk_indices_buffer=mla_modules.topk_indices_buffer,
             # extra args
             rotary_emb=mla_modules.rotary_emb,
             fused_qkv_a_proj=mla_modules.fused_qkv_a_proj,
@@ -124,6 +143,7 @@ class AscendMultiHeadLatentAttention(MultiHeadLatentAttentionWrapper):
             kv_a_proj_with_mqa=mla_modules.kv_a_proj_with_mqa,
             kv_a_layernorm=mla_modules.kv_a_layernorm,
             o_proj=mla_modules.o_proj,
+            ascend_mla_features=ascend_features,
             layer_name=f"{prefix}.attn",
         )
 
@@ -138,14 +158,17 @@ class AscendMultiHeadLatentAttention(MultiHeadLatentAttentionWrapper):
 
         self.mla_attn.process_weights_after_loading = wrapped_process_weights
 
-        # For VL models (e.g. Kimi K2.5), inputs_embeds at layer 0 comes from
-        # the vision encoder as full [N, H] — it has NOT been reduce-scattered.
-        # We detect this statically at init time (not at runtime via shape checks,
-        # which break graph-mode compilation) so the branch is a constant to dynamo.
         vllm_config = get_current_vllm_config()
-        _is_vl = is_vl_model(vllm_config)
-        _layer_idx = parse_layer_idx(prefix)
-        self.is_vl_first_layer = bool(_is_vl and _layer_idx == 0)
+        if ascend_features is None:
+            # Preserve the generic MLA convention for models that do not
+            # declare an explicit input layout.
+            self.input_layout = (
+                AscendTokenLayout.GLOBAL
+                if is_vl_model(vllm_config) and parse_layer_idx(prefix) == 0
+                else AscendTokenLayout.TOKEN_SHARDED
+            )
+        else:
+            self.input_layout = ascend_features.input_layout
 
         compilation_config = vllm_config.compilation_config
         if prefix in compilation_config.static_forward_context:
@@ -161,7 +184,7 @@ class AscendMultiHeadLatentAttention(MultiHeadLatentAttentionWrapper):
     ) -> torch.Tensor:
         hidden_dim = self.hidden_size
 
-        if _EXTRA_CTX.flash_comm_v1_enabled and self.tp_size > 1 and self.is_vl_first_layer:
+        if _EXTRA_CTX.flash_comm_v1_enabled and self.tp_size > 1 and self.input_layout is AscendTokenLayout.GLOBAL:
             need_gather_q_kv = False
             n_out = hidden_states.shape[0] // self.tp_size
             output = torch.empty((n_out, hidden_dim), dtype=hidden_states.dtype, device=hidden_states.device)

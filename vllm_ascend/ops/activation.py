@@ -15,8 +15,11 @@
 # This file is a part of the vllm-ascend project.
 #
 
+from dataclasses import dataclass
+
 import torch
 import torch_npu
+from torch import nn
 from vllm.model_executor.layers.activation import (
     QuickGELU,
     SiluAndMul,
@@ -24,6 +27,66 @@ from vllm.model_executor.layers.activation import (
     SwigluOAIAndMul,
     SwigluStepAndMul,
 )
+
+
+def _validate_situ_params(beta: float, linear_beta: float | None) -> None:
+    if beta <= 0:
+        raise ValueError(f"SiTU beta must be positive, got {beta}.")
+    if linear_beta is not None and linear_beta <= 0:
+        raise ValueError(f"SiTU linear_beta must be positive, got {linear_beta}.")
+
+
+@dataclass(frozen=True, slots=True)
+class SituActivationConfig:
+    """Runtime parameters for Kimi's SiTU gated activation."""
+
+    beta: float = 1.0
+    linear_beta: float | None = None
+
+    def __post_init__(self) -> None:
+        _validate_situ_params(self.beta, self.linear_beta)
+
+
+def situ_and_mul(
+    x: torch.Tensor,
+    *,
+    beta: float = 1.0,
+    linear_beta: float | None = None,
+) -> torch.Tensor:
+    """Apply Kimi SiTU using FP32 intermediates and restore input dtype.
+
+    The input layout is the same contiguous ``[gate, up]`` layout used by
+    ``SiluAndMul``.  Kimi K3 uses ``beta=4`` and ``linear_beta=25``.
+    """
+    d = x.shape[-1] // 2
+    gate = x[..., :d].to(torch.float32)
+    up = x[..., d:].to(torch.float32)
+    gate = beta * torch.tanh(gate / beta) * torch.sigmoid(gate)
+    if linear_beta is not None:
+        up = linear_beta * torch.tanh(up / linear_beta)
+    return (gate * up).to(x.dtype)
+
+
+class AscendSituAndMul(nn.Module):
+    """Reusable module wrapper around :func:`situ_and_mul`."""
+
+    def __init__(self, beta: float = 1.0, linear_beta: float | None = None) -> None:
+        super().__init__()
+        self.config = SituActivationConfig(beta=beta, linear_beta=linear_beta)
+
+    @property
+    def beta(self) -> float:
+        return self.config.beta
+
+    @property
+    def linear_beta(self) -> float | None:
+        return self.config.linear_beta
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return situ_and_mul(x, beta=self.beta, linear_beta=self.linear_beta)
+
+    def extra_repr(self) -> str:
+        return f"beta={self.beta}, linear_beta={self.linear_beta}"
 
 
 class AscendQuickGELU(QuickGELU):

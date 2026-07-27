@@ -47,6 +47,11 @@ class AscendLinearScheme(ABC):
     or do nothing.
     """
 
+    # Linear schemes that support the split shared-expert fast path override
+    # this with the matching runtime ABI. Schemes without that capability are
+    # executed through their own LinearMethod implementation.
+    shared_expert_quant_type: QuantType = QuantType.NONE
+
     @abstractmethod
     def get_weight(self, input_size: int, output_size: int, params_dtype: torch.dtype) -> dict[str, Any]:
         """Return weight tensor specifications.

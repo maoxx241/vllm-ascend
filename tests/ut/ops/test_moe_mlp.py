@@ -11,6 +11,7 @@ from vllm.model_executor.layers.fused_moe.activation import MoEActivation
 
 from vllm_ascend.ascend_forward_context import MoECommType
 from vllm_ascend.device.device_op import DeviceOperator
+from vllm_ascend.ops.activation import SituActivationConfig
 from vllm_ascend.ops.fused_moe.moe_mlp import (
     cumsum_group_list,
     quant_apply_mlp,
@@ -73,6 +74,33 @@ class TestW4A8RuntimeFlags(unittest.TestCase):
         self.assertFalse(
             MoEQuantParams(quant_type=QuantType.W8A8, is_per_channel_weight=True).use_w4a8_per_channel_gmm_swiglu
         )
+
+
+class TestSituMlpDispatch(unittest.TestCase):
+    def test_w4a16_mxfp_keeps_unquantized_activation_path(self):
+        expected = (object(), object())
+        with (
+            patch(
+                f"{MOE_MLP}._w4a16_mxfp_situ_apply_mlp",
+                return_value=expected,
+            ) as w4a16_apply,
+            patch(f"{MOE_MLP}._w4a8_situ_apply_mlp") as w4a8_apply,
+        ):
+            result = quant_apply_mlp(
+                hidden_states=torch.randn(2, 8),
+                w1=torch.randn(2, 8, 16),
+                w1_scale=torch.randn(2, 16),
+                w2=torch.randn(2, 8, 8),
+                w2_scale=torch.randn(2, 8),
+                group_list=torch.tensor([1, 1]),
+                use_mxfp_quant=True,
+                mxfp_quant_dtype=QuantType.W4A16MXFP,
+                activation=SituActivationConfig(beta=4.0, linear_beta=25.0),
+            )
+
+        self.assertIs(result, expected)
+        w4a16_apply.assert_called_once()
+        w4a8_apply.assert_not_called()
 
 
 class TestUnifiedApplyMlpRequest(unittest.TestCase):
