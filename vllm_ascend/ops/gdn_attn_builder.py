@@ -832,7 +832,10 @@ class AscendGDNAttentionMetadataBuilder(GDNAttentionMetadataBuilder):
                 non_blocking=True,
             )
             num_accepted_tokens = self.num_accepted_tokens[:spec_batch_size]
-            num_accepted_tokens[num_spec_decodes:].fill_(1)
+            # Graph-padding rows have zero query length, so they must accept
+            # zero tokens. Passing one accepted token for an empty row is an
+            # invalid input to both causal conv1d and recurrent GDN/KDA.
+            num_accepted_tokens[num_spec_decodes:].fill_(0)
 
         if (
             self.use_full_cuda_graph

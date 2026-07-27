@@ -604,6 +604,52 @@ def test_full_graph_spec_actual_seq_lengths_use_padded_builder_buffer():
         attn_metadata.spec_decode_metadata.actual_seq_lengths,
         torch.tensor([0, 4, 4, 0, 0], dtype=torch.int32),
     )
+    assert torch.equal(
+        attn_metadata.num_accepted_tokens,
+        torch.tensor([2, 4, 0, 0], dtype=torch.int32),
+    )
+
+
+def test_full_graph_k7_dummy_row_accepts_zero_tokens():
+    batch_spec = BatchSpec(
+        seq_lens=[8],
+        query_lens=[8],
+        name="full_graph_k7_one_real_one_dummy",
+    )
+    common_attn_metadata = create_common_attn_metadata(
+        batch_spec=batch_spec,
+        block_size=16,
+        device=torch.device("cpu"),
+    )
+    # A size-16 graph for K=7 is one real 8-token request plus one
+    # zero-length padding request.
+    common_attn_metadata.num_reqs = 2
+    builder = _make_builder(
+        device=torch.device("cpu"),
+        num_heads=32,
+        num_speculative_tokens=7,
+        cudagraph_mode=CUDAGraphMode.FULL_DECODE_ONLY,
+    )
+
+    attn_metadata = builder.build(
+        0,
+        common_attn_metadata,
+        num_accepted_tokens=torch.tensor([6], dtype=torch.int32),
+        num_decode_draft_tokens_cpu=torch.tensor([7], dtype=torch.int32),
+    )
+
+    assert torch.equal(
+        attn_metadata.spec_query_start_loc,
+        torch.tensor([0, 8, 8], dtype=torch.int32),
+    )
+    assert torch.equal(
+        attn_metadata.spec_decode_metadata.actual_seq_lengths,
+        torch.tensor([0, 8, 0], dtype=torch.int32),
+    )
+    assert torch.equal(
+        attn_metadata.num_accepted_tokens,
+        torch.tensor([6, 0], dtype=torch.int32),
+    )
 
 
 def test_full_graph_without_runtime_spec_resets_captured_spec_inputs():
