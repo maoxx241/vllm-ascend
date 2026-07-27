@@ -18,6 +18,7 @@ import os
 
 import vllm_ascend.patch.platform.patch_camem_allocator  # noqa
 import vllm_ascend.patch.platform.patch_distributed  # noqa
+import vllm_ascend.patch.platform.patch_kimi_k3_chat_params  # noqa
 import vllm_ascend.patch.platform.patch_kimi_k3_config  # noqa
 import vllm_ascend.patch.platform.patch_kimi_k3_parsers  # noqa
 import vllm_ascend.patch.platform.patch_kimi_k3_renderer  # noqa
