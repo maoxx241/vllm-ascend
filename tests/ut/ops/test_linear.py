@@ -269,6 +269,31 @@ class TestGetParallelOpShareExpert(unittest.TestCase):
             self.assertEqual(tp_rank, 0)
             self.assertEqual(tp_size, 1)
 
+    def test_model_declared_tensor_parallel_bypasses_prefix_dispatch(self):
+        from vllm_ascend.ops.linear_op import (
+            AscendLinearParallelMode,
+            get_parallel_op,
+        )
+
+        class TensorParallelSharedExpert:
+            ascend_parallel_mode = AscendLinearParallelMode.TENSOR_PARALLEL
+
+        self.mock_group.rank_in_group = 3
+        self.mock_group.world_size = 8
+
+        with patch("vllm_ascend.ops.linear_op._get_column_parallel_op") as get_column_op:
+            custom_op, tp_rank, tp_size = get_parallel_op(
+                False,
+                "model.layers.0.self_attn.g_proj",
+                TensorParallelSharedExpert(),
+                "column",
+            )
+
+        self.assertIsNone(custom_op)
+        self.assertEqual(tp_rank, 3)
+        self.assertEqual(tp_size, 8)
+        get_column_op.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -41,6 +41,8 @@ from .registry import register_scheme
 class AscendW4A8MXFPDynamicLinearMethod(AscendLinearScheme):
     """Linear method for Ascend W4A8_MXFP (Microscaling) quantization."""
 
+    shared_expert_quant_type = QuantType.W4A8MXFP
+
     def __init__(self):
         ensure_mxfp4_linear_available("W8A8_MXFP8 linear quantization")
         vllm_config = get_current_vllm_config()
@@ -116,14 +118,23 @@ class AscendW4A8MXFPDynamicFusedMoEMethod(AscendMoEScheme):
 
     @staticmethod
     def get_weight(
-        num_experts: int, intermediate_size_per_partition: int, hidden_sizes: int, params_dtype: torch.dtype
+        num_experts: int,
+        intermediate_size_per_partition: int,
+        hidden_sizes: int,
+        params_dtype: torch.dtype,
     ) -> dict[str, Any]:
         param_dict = {}
         param_dict["w13_weight"] = torch.empty(
-            num_experts, 2 * intermediate_size_per_partition, hidden_sizes // 2, dtype=torch.uint8
+            num_experts,
+            2 * intermediate_size_per_partition,
+            hidden_sizes // 2,
+            dtype=torch.uint8,
         )
         param_dict["w2_weight"] = torch.empty(
-            num_experts, hidden_sizes, intermediate_size_per_partition // 2, dtype=torch.uint8
+            num_experts,
+            hidden_sizes,
+            intermediate_size_per_partition // 2,
+            dtype=torch.uint8,
         )
         return param_dict
 
@@ -232,10 +243,16 @@ class AscendW4A8MXFPDynamicFusedMoEMethod(AscendMoEScheme):
 
     def process_weights_after_loading(self, layer):
         layer.w13_weight.data = torch_npu.npu_format_cast(
-            layer.w13_weight.data, 29, customize_dtype=torch.float8_e4m3fn, input_dtype=torch_npu.float4_e2m1fn_x2
+            layer.w13_weight.data,
+            29,
+            customize_dtype=torch.float8_e4m3fn,
+            input_dtype=torch_npu.float4_e2m1fn_x2,
         )
         layer.w2_weight.data = torch_npu.npu_format_cast(
-            layer.w2_weight.data, 29, customize_dtype=torch.float8_e4m3fn, input_dtype=torch_npu.float4_e2m1fn_x2
+            layer.w2_weight.data,
+            29,
+            customize_dtype=torch.float8_e4m3fn,
+            input_dtype=torch_npu.float4_e2m1fn_x2,
         )
         layer.w13_weight.data = layer.w13_weight.data.transpose(1, 2)
         layer.w2_weight.data = layer.w2_weight.data.transpose(1, 2)
@@ -243,3 +260,66 @@ class AscendW4A8MXFPDynamicFusedMoEMethod(AscendMoEScheme):
         layer.w13_weight_scale.data = layer.w13_weight_scale.data.reshape(g, n, k // 2, 2).transpose(-3, -2)
         g, n, k = layer.w2_weight_scale.shape
         layer.w2_weight_scale.data = layer.w2_weight_scale.data.reshape(g, n, k // 2, 2).transpose(-3, -2)
+
+
+@register_scheme("W4A8_MXFP_PACKED", "linear")
+class AscendW4A8MXFPCompressedTensorsLinearMethod(AscendW4A8MXFPDynamicLinearMethod):
+    """Load compressed-tensors MXFP4 weights before normal Ascend execution."""
+
+    @staticmethod
+    def get_weight(input_size: int, output_size: int, params_dtype: torch.dtype) -> dict[str, Any]:
+        return {
+            "weight_packed": torch.empty(
+                output_size,
+                input_size // 2,
+                dtype=torch.uint8,
+            )
+        }
+
+    def process_weights_after_loading(self, layer):
+        layer.weight = torch.nn.Parameter(
+            layer.weight_packed.data,
+            requires_grad=False,
+        )
+        delattr(layer, "weight_packed")
+        super().process_weights_after_loading(layer)
+
+
+@register_scheme("W4A8_MXFP_PACKED", "moe")
+class AscendW4A8MXFPCompressedTensorsFusedMoEMethod(AscendW4A8MXFPDynamicFusedMoEMethod):
+    """Load compressed-tensors MXFP4 expert weights into the standard MoE ABI."""
+
+    @staticmethod
+    def get_weight(
+        num_experts: int,
+        intermediate_size_per_partition: int,
+        hidden_sizes: int,
+        params_dtype: torch.dtype,
+    ) -> dict[str, Any]:
+        return {
+            "w13_weight_packed": torch.empty(
+                num_experts,
+                2 * intermediate_size_per_partition,
+                hidden_sizes // 2,
+                dtype=torch.uint8,
+            ),
+            "w2_weight_packed": torch.empty(
+                num_experts,
+                hidden_sizes,
+                intermediate_size_per_partition // 2,
+                dtype=torch.uint8,
+            ),
+        }
+
+    def process_weights_after_loading(self, layer):
+        layer.w13_weight = torch.nn.Parameter(
+            layer.w13_weight_packed.data,
+            requires_grad=False,
+        )
+        delattr(layer, "w13_weight_packed")
+        layer.w2_weight = torch.nn.Parameter(
+            layer.w2_weight_packed.data,
+            requires_grad=False,
+        )
+        delattr(layer, "w2_weight_packed")
+        super().process_weights_after_loading(layer)

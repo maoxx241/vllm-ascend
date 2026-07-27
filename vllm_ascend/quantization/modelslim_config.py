@@ -110,6 +110,11 @@ packed_modules_model_mapping: dict[str, dict[str, list[str]]] = {
         "experts": ["experts.0.gate_proj", "experts.0.up_proj", "experts.0.down_proj"],
         "fused_qkv_a_proj": ["q_a_proj", "kv_a_proj_with_mqa"],
     },
+    "kimi_k3": {
+        "gate_up_proj": ["gate_proj", "up_proj"],
+        "experts": ["experts.0.w1", "experts.0.w3", "experts.0.w2"],
+        "fused_qkv_a_proj": ["q_a_proj", "kv_a_proj_with_mqa"],
+    },
     "deepseek_v32": {
         "gate_up_proj": ["gate_proj", "up_proj"],
         "experts": ["experts.0.gate_proj", "experts.0.up_proj", "experts.0.down_proj"],
@@ -369,6 +374,17 @@ def get_packed_modules_mapping(model_type: str) -> dict[str, list[str]]:
         Returns empty dict if model_type is not found.
     """
     return packed_modules_model_mapping.get(model_type, {})
+
+
+def _get_packed_modules_mapping_for_hf_config(
+    hf_config: PretrainedConfig,
+) -> dict[str, list[str]]:
+    mapping_key = getattr(
+        hf_config,
+        "modelslim_packed_modules_mapping_key",
+        hf_config.model_type,
+    )
+    return get_packed_modules_mapping(mapping_key)
 
 
 def _is_missing_v_shard(shard_key: str, quant_description: Mapping[str, Any]) -> bool:
@@ -663,7 +679,8 @@ class AscendModelSlimConfig(QuantizationConfig):
         )
 
         vllm_config = get_current_vllm_config()
-        model_type = vllm_config.model_config.hf_config.model_type
+        hf_config = vllm_config.model_config.hf_config
+        model_type = hf_config.model_type
 
         if model_type in ["minimax", "minimax_m2"]:
             # Adapt to Minimax architecture: update layer names to MoE convention
@@ -680,8 +697,7 @@ class AscendModelSlimConfig(QuantizationConfig):
             # Adapt to bailing_hybrid architecture: update layer names to MoE convention
             prefix = prefix.replace("linear_attn", "attention")
             prefix = prefix.replace("self_attn", "attention")
-        if model_type in packed_modules_model_mapping:
-            self.packed_modules_mapping = packed_modules_model_mapping[model_type]
+        self.packed_modules_mapping = _get_packed_modules_mapping_for_hf_config(hf_config)
         prefix = self.quant_prefix_mapper(model_type, prefix)
 
         if isinstance(layer, LinearBase):

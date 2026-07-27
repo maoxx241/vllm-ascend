@@ -70,6 +70,13 @@ def register_service_profiling():
 
 
 def register_model():
+    # General plugins are loaded before EngineArgs constructs ModelConfig.
+    # Keep K3's config and model registration in the normal model-plugin
+    # lifecycle instead of adding platform side effects.
+    from .transformers_utils.configs.kimi_k3 import register_kimi_k3_config
+
+    register_kimi_k3_config()
+
     from vllm_ascend.patch.hunyuan_vl_processor_compat import (
         install_hunyuan_vl_processor_compat,
     )

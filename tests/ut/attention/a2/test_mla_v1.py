@@ -21,6 +21,8 @@ from vllm_ascend.attention.mla_v1 import (
     PrefillMLAPreprocessResult,
 )
 from vllm_ascend.attention.utils import AscendCommonAttentionMetadata
+from vllm_ascend.ops.mla import AscendMLAFeatures
+from vllm_ascend.ops.parallel_types import AscendTokenLayout
 
 
 class TestAscendMLABackend(TestBase):
@@ -981,21 +983,43 @@ class TestAscendMLAImpl(TestBase):
             "rotary_emb": MagicMock(),
         }
 
-        self.impl = AscendMLAImpl(
-            num_heads=num_heads,
-            head_size=head_size,
-            scale=scale,
-            num_kv_heads=num_kv_heads,
-            alibi_slopes=None,
-            sliding_window=None,
-            kv_cache_dtype=kv_cache_dtype,
-            blocksparse_params=None,
-            logits_soft_cap=None,
-            attn_type=None,
-            kv_sharing_target_layer_name=None,
+        self.impl_init_kwargs = {
+            "num_heads": num_heads,
+            "head_size": head_size,
+            "scale": scale,
+            "num_kv_heads": num_kv_heads,
+            "alibi_slopes": None,
+            "sliding_window": None,
+            "kv_cache_dtype": kv_cache_dtype,
+            "blocksparse_params": None,
+            "logits_soft_cap": None,
+            "attn_type": None,
+            "kv_sharing_target_layer_name": None,
             **kwargs,
-        )
+        }
+        self.impl = AscendMLAImpl(**self.impl_init_kwargs)
         self.impl.fa_quant_layer = False
+
+    def test_typed_output_gate_is_enabled(self):
+        output_gate = torch.nn.Identity()
+        with (
+            patch(
+                "vllm_ascend.attention.mla_v1.get_current_vllm_config",
+                return_value=self.impl.vllm_config,
+            ),
+            patch("vllm_ascend.attention.mla_v1.enable_fa_quant", return_value=False),
+            patch("vllm_ascend.attention.mla_v1.enabling_mlapo", return_value=False),
+        ):
+            impl = AscendMLAImpl(
+                **self.impl_init_kwargs,
+                ascend_mla_features=AscendMLAFeatures(
+                    input_layout=AscendTokenLayout.TOKEN_SHARDED,
+                    output_gate=output_gate,
+                ),
+            )
+
+        self.assertIs(impl.g_proj, output_gate)
+        self.assertTrue(impl.use_output_gate)
 
     def test_init(self):
         self.assertEqual(self.impl.num_heads, 256)

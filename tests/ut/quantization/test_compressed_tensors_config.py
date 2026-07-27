@@ -1,6 +1,8 @@
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import torch
+from compressed_tensors.quantization import QuantizationType
 from vllm.model_executor.layers.attention import Attention
 from vllm.model_executor.layers.fused_moe import RoutedExperts
 from vllm.model_executor.layers.linear import RowParallelLinear, UnquantizedLinearMethod
@@ -10,6 +12,10 @@ from tests.ut.quantization.conftest_quantization import COMPRESSED_TENSORS_W8A8_
 from vllm_ascend.quantization.compressed_tensors_config import AscendCompressedTensorsConfig
 from vllm_ascend.quantization.method_adapters import AscendLinearMethod
 from vllm_ascend.quantization.methods import AscendW8A8DynamicLinearMethod
+from vllm_ascend.quantization.methods.w4a8_mxfp4 import (
+    AscendW4A8MXFPCompressedTensorsFusedMoEMethod,
+    AscendW4A8MXFPCompressedTensorsLinearMethod,
+)
 from vllm_ascend.utils import COMPRESSED_TENSORS_METHOD
 
 
@@ -58,8 +64,6 @@ class TestAscendCompressedTensorsQuanType(TestBase):
         self.assertEqual(result, "W4A8_DYNAMIC")
 
     def test_detect_w4a16(self):
-        from compressed_tensors.quantization import QuantizationType
-
         weight = MagicMock()
         weight.num_bits = 4
         weight.strategy = "group"
@@ -67,6 +71,119 @@ class TestAscendCompressedTensorsQuanType(TestBase):
         weight.type = QuantizationType.INT
         result = self.config._detect_quant_type(weight, None, None)
         self.assertEqual(result, "W4A16")
+
+    def test_packed_mxfp4_selects_explicit_compressed_tensors_schemes(self):
+        self.config.quant_format = "mxfp4-pack-quantized"
+        weight = self._make_weight_quant(
+            num_bits=4,
+            strategy="group",
+            dynamic=False,
+        )
+        weight.type = QuantizationType.FLOAT
+        weight.group_size = 32
+        vllm_config = SimpleNamespace(
+            quant_config=SimpleNamespace(quant_description={"group_size": 32}),
+            compilation_config=SimpleNamespace(mode=None),
+            model_config=SimpleNamespace(enforce_eager=True),
+        )
+        ascend_config = SimpleNamespace(
+            eplb_config=SimpleNamespace(dynamic_eplb=False),
+        )
+
+        with (
+            patch(
+                "vllm_ascend.quantization.methods.w4a8_mxfp4.ensure_mxfp4_linear_available",
+            ),
+            patch(
+                "vllm_ascend.quantization.methods.w4a8_mxfp4.get_current_vllm_config",
+                return_value=vllm_config,
+            ),
+            patch(
+                "vllm_ascend.quantization.methods.w4a8_mxfp4.get_ascend_config",
+                return_value=ascend_config,
+            ),
+            patch(
+                "vllm_ascend.quantization.methods.w4a8_mxfp4.get_ep_group",
+            ),
+        ):
+            linear_scheme = self.config._create_scheme_for_layer_type(
+                weight,
+                None,
+                None,
+                "linear",
+            )
+            moe_scheme = self.config._create_scheme_for_layer_type(
+                weight,
+                None,
+                None,
+                "moe",
+            )
+
+        self.assertIsInstance(
+            linear_scheme,
+            AscendW4A8MXFPCompressedTensorsLinearMethod,
+        )
+        self.assertIsInstance(
+            moe_scheme,
+            AscendW4A8MXFPCompressedTensorsFusedMoEMethod,
+        )
+        self.assertEqual(
+            set(linear_scheme.get_weight(64, 4, torch.bfloat16)),
+            {"weight_packed"},
+        )
+        self.assertEqual(
+            set(moe_scheme.get_weight(2, 8, 64, torch.bfloat16)),
+            {"w13_weight_packed", "w2_weight_packed"},
+        )
+
+    @patch(
+        "vllm_ascend.quantization.methods.w4a8_mxfp4.torch_npu.npu_format_cast",
+        side_effect=lambda tensor, *_args, **_kwargs: tensor,
+    )
+    def test_packed_mxfp4_normalizes_checkpoint_names_after_loading(self, _mock_format_cast):
+        linear_scheme = AscendW4A8MXFPCompressedTensorsLinearMethod.__new__(AscendW4A8MXFPCompressedTensorsLinearMethod)
+        linear = torch.nn.Module()
+        linear.weight_packed = torch.nn.Parameter(
+            torch.zeros(2, 4, dtype=torch.uint8),
+            requires_grad=False,
+        )
+        linear.weight_scale = torch.nn.Parameter(
+            torch.zeros(2, 2, dtype=torch.uint8),
+            requires_grad=False,
+        )
+
+        linear_scheme.process_weights_after_loading(linear)
+
+        self.assertFalse(hasattr(linear, "weight_packed"))
+        self.assertEqual(linear.weight.shape, (4, 2))
+
+        moe_scheme = AscendW4A8MXFPCompressedTensorsFusedMoEMethod.__new__(
+            AscendW4A8MXFPCompressedTensorsFusedMoEMethod
+        )
+        moe = torch.nn.Module()
+        moe.w13_weight_packed = torch.nn.Parameter(
+            torch.zeros(1, 4, 2, dtype=torch.uint8),
+            requires_grad=False,
+        )
+        moe.w2_weight_packed = torch.nn.Parameter(
+            torch.zeros(1, 2, 2, dtype=torch.uint8),
+            requires_grad=False,
+        )
+        moe.w13_weight_scale = torch.nn.Parameter(
+            torch.zeros(1, 4, 2, dtype=torch.uint8),
+            requires_grad=False,
+        )
+        moe.w2_weight_scale = torch.nn.Parameter(
+            torch.zeros(1, 2, 2, dtype=torch.uint8),
+            requires_grad=False,
+        )
+
+        moe_scheme.process_weights_after_loading(moe)
+
+        self.assertFalse(hasattr(moe, "w13_weight_packed"))
+        self.assertFalse(hasattr(moe, "w2_weight_packed"))
+        self.assertEqual(moe.w13_weight.shape, (1, 2, 4))
+        self.assertEqual(moe.w2_weight.shape, (1, 2, 2))
 
     def test_detect_unsupported_raises(self):
         weight = self._make_weight_quant(num_bits=2, strategy="channel", dynamic=False, symmetric=True)

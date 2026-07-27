@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import torch
@@ -106,6 +107,24 @@ class TestAscendModelSlimConfig(TestBase):
             method = self.ascend_config.get_quant_method(linear_layer, ".attn")
             self.assertIs(method, mock_ascend_linear.return_value)
             mock_ascend_linear.assert_called_once_with(mock_scheme)
+
+    def test_get_quant_method_for_non_k3_linear_does_not_read_k3_config(self):
+        hf_config = SimpleNamespace(model_type="llama")
+        mock_config = SimpleNamespace(
+            model_config=SimpleNamespace(
+                hf_config=hf_config,
+                hf_text_config=hf_config,
+            )
+        )
+        linear_layer = MagicMock(spec=LinearBase)
+
+        with (
+            patch("vllm_ascend.quantization.modelslim_config.get_current_vllm_config", return_value=mock_config),
+            patch.object(self.ascend_config, "is_layer_skipped_ascend", return_value=True),
+        ):
+            method = self.ascend_config.get_quant_method(linear_layer, ".attn")
+
+        self.assertIsInstance(method, AscendUnquantizedLinearMethod)
 
     def test_get_quant_method_for_attention(self):
         attention_layer = MagicMock(spec=Attention)

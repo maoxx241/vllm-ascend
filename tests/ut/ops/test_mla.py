@@ -7,7 +7,13 @@ from vllm.forward_context import ForwardContext
 from vllm.model_executor.layers.mla import MLAModules
 
 from tests.ut.base import TestBase
-from vllm_ascend.ops.mla import AscendMultiHeadLatentAttention, IndexerWrapper
+from vllm_ascend.ops.mla import (
+    AscendMLAFeatures,
+    AscendMLAModules,
+    AscendMultiHeadLatentAttention,
+    IndexerWrapper,
+)
+from vllm_ascend.ops.parallel_types import AscendTokenLayout
 
 
 class TestIndexerWrapper(TestBase):
@@ -83,7 +89,7 @@ class TestAscendMultiHeadLatentAttention(TestBase):
         mock_mla_attn.impl = MagicMock()
         mock_mla_attn.impl.process_weights_after_loading = MagicMock()
 
-        with patch("vllm_ascend.ops.mla.MLAAttention", return_value=mock_mla_attn):
+        with patch("vllm_ascend.ops.mla.MLAAttention", return_value=mock_mla_attn) as mock_mla_attention:
             mock_tp_size.return_value = 2
             mock_ascend_config.return_value.enable_shared_expert_dp = True
             mock_vllm_config = MagicMock(spec=VllmConfig)
@@ -109,6 +115,66 @@ class TestAscendMultiHeadLatentAttention(TestBase):
             self.assertEqual(attn.tp_size, 2)
             self.assertTrue(attn.enable_shared_expert_dp)
             self.assertIsNotNone(attn.mla_attn)
+            self.assertIsNone(mock_mla_attention.call_args.kwargs["ascend_mla_features"])
+
+    @patch("vllm_ascend.ops.mla.get_current_vllm_config")
+    @patch("vllm_ascend.ops.mla.get_ascend_config")
+    @patch("vllm_ascend.ops.mla.get_tensor_model_parallel_world_size")
+    def test_typed_ascend_features_are_forwarded(
+        self,
+        mock_tp_size,
+        mock_ascend_config,
+        mock_get_vllm_config,
+    ):
+        output_gate = nn.Identity()
+        features = AscendMLAFeatures(
+            input_layout=AscendTokenLayout.TOKEN_SHARDED,
+            output_gate=output_gate,
+        )
+        mla_modules = AscendMLAModules(
+            kv_a_layernorm=self.mock_mla_modules.kv_a_layernorm,
+            kv_b_proj=self.mock_mla_modules.kv_b_proj,
+            rotary_emb=self.mock_mla_modules.rotary_emb,
+            o_proj=self.mock_mla_modules.o_proj,
+            fused_qkv_a_proj=self.mock_mla_modules.fused_qkv_a_proj,
+            kv_a_proj_with_mqa=self.mock_mla_modules.kv_a_proj_with_mqa,
+            q_a_layernorm=self.mock_mla_modules.q_a_layernorm,
+            q_b_proj=self.mock_mla_modules.q_b_proj,
+            q_proj=self.mock_mla_modules.q_proj,
+            indexer=None,
+            is_sparse=False,
+            topk_indices_buffer=None,
+            features=features,
+        )
+        mock_mla_attn = MagicMock()
+        mock_mla_attn.process_weights_after_loading = MagicMock()
+        mock_mla_attn.impl = MagicMock()
+        mock_mla_attn.impl.process_weights_after_loading = MagicMock()
+        mock_tp_size.return_value = 1
+        mock_ascend_config.return_value.enable_shared_expert_dp = False
+        mock_vllm_config = MagicMock(spec=VllmConfig)
+        mock_vllm_config.model_config.hf_text_config = MagicMock(num_hidden_layers=32)
+        mock_vllm_config.compilation_config = CompilationConfig()
+        mock_get_vllm_config.return_value = mock_vllm_config
+
+        with patch("vllm_ascend.ops.mla.MLAAttention", return_value=mock_mla_attn) as mock_mla_attention:
+            attn = AscendMultiHeadLatentAttention(
+                hidden_size=self.hidden_size,
+                num_heads=self.num_heads,
+                scale=self.scale,
+                qk_nope_head_dim=self.qk_nope_head_dim,
+                qk_rope_head_dim=self.qk_rope_head_dim,
+                v_head_dim=self.v_head_dim,
+                q_lora_rank=self.q_lora_rank,
+                kv_lora_rank=self.kv_lora_rank,
+                mla_modules=mla_modules,
+                cache_config=self.mock_cache_config,
+                quant_config=self.mock_quant_config,
+                prefix=self.prefix,
+            )
+
+        self.assertIs(mock_mla_attention.call_args.kwargs["ascend_mla_features"], features)
+        self.assertIs(attn.input_layout, AscendTokenLayout.TOKEN_SHARDED)
 
     @patch("vllm_ascend.ops.mla.torch.ops.vllm.mla_forward")
     @patch("vllm_ascend.ops.mla.get_current_vllm_config")

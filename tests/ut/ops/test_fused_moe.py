@@ -5,8 +5,10 @@ from unittest.mock import MagicMock
 import pytest
 import torch
 from torch import nn
+from vllm.model_executor.layers.fused_moe.activation import MoEActivation
 
 from vllm_ascend.ascend_forward_context import MoECommType
+from vllm_ascend.ops.activation import SituActivationConfig
 from vllm_ascend.ops.fused_moe import fused_moe as fused_moe_module
 from vllm_ascend.ops.fused_moe.fused_moe import (
     AscendMoERunner,
@@ -166,6 +168,14 @@ def test_unquantized_apply_builds_current_fused_experts_input(monkeypatch, moe_c
 )
 def test_runner_reduction_contract(monkeypatch, moe_comm_type, flash_comm_v1_enabled, expected):
     runner = AscendMoERunner.__new__(AscendMoERunner)
+    runner.routed_output_transform = None
+    runner.moe_config = SimpleNamespace(
+        is_sequence_parallel=False,
+        skip_final_all_reduce=False,
+        tp_size=2,
+        ep_size=1,
+    )
+    runner._shared_experts_use_tp = False
     shared_output = object()
     monkeypatch.setattr(
         fused_moe_module,
@@ -176,6 +186,174 @@ def test_runner_reduction_contract(monkeypatch, moe_comm_type, flash_comm_v1_ena
     assert runner.use_dp_chunking is False
     assert runner._fused_output_is_reduced is expected
     assert runner._maybe_reduce_shared_expert_output(shared_output) is shared_output
+
+
+@pytest.mark.parametrize(
+    ("is_sequence_parallel", "shared_experts_are_tp_sharded", "expected_reduce"),
+    [
+        (False, True, True),
+        (False, False, False),
+        (True, True, False),
+    ],
+)
+def test_allgather_routed_transform_reduction_respects_parallel_layout(
+    monkeypatch,
+    is_sequence_parallel,
+    shared_experts_are_tp_sharded,
+    expected_reduce,
+):
+    runner = AscendMoERunner.__new__(AscendMoERunner)
+    runner.routed_output_transform = object()
+    runner.moe_config = SimpleNamespace(
+        is_sequence_parallel=is_sequence_parallel,
+        skip_final_all_reduce=False,
+        tp_size=2,
+        ep_size=1,
+    )
+    runner._shared_experts_use_tp = shared_experts_are_tp_sharded
+    shared_output = object()
+    reduced_output = object()
+    all_reduce = MagicMock(return_value=reduced_output)
+    monkeypatch.setattr(
+        fused_moe_module,
+        "_EXTRA_CTX",
+        SimpleNamespace(
+            moe_comm_type=MoECommType.ALLGATHER,
+            flash_comm_v1_enabled=False,
+        ),
+    )
+    monkeypatch.setattr(
+        fused_moe_module,
+        "shared_expert_dp_enabled",
+        lambda: not shared_experts_are_tp_sharded,
+    )
+    monkeypatch.setattr(
+        fused_moe_module,
+        "tensor_model_parallel_all_reduce",
+        all_reduce,
+    )
+
+    result = runner._maybe_reduce_shared_expert_output(shared_output)
+
+    if expected_reduce:
+        assert result is reduced_output
+        all_reduce.assert_called_once_with(shared_output)
+    else:
+        assert result is shared_output
+        all_reduce.assert_not_called()
+
+
+def test_sequence_parallel_skips_late_all_reduce(monkeypatch):
+    runner = AscendMoERunner.__new__(AscendMoERunner)
+    runner.routed_output_transform = object()
+    runner.moe_config = SimpleNamespace(
+        is_sequence_parallel=True,
+        skip_final_all_reduce=False,
+        tp_size=2,
+        ep_size=1,
+    )
+    states = torch.randn(2, 4)
+    all_reduce = MagicMock()
+    monkeypatch.setattr(
+        fused_moe_module,
+        "_EXTRA_CTX",
+        SimpleNamespace(
+            moe_comm_type=MoECommType.ALLGATHER,
+            flash_comm_v1_enabled=False,
+        ),
+    )
+    monkeypatch.setattr(
+        fused_moe_module.torch.ops.vllm,
+        "maybe_all_reduce_tensor_model_parallel",
+        all_reduce,
+    )
+
+    result = runner._maybe_reduce_final_output(states, None)
+
+    assert result is states
+    all_reduce.assert_not_called()
+
+
+def test_runner_activation_prefers_explicit_ascend_spec():
+    runner = AscendMoERunner.__new__(AscendMoERunner)
+    nn.Module.__init__(runner)
+    runner.routed_experts = SimpleNamespace(activation=MoEActivation.SILU)
+    runner._ascend_activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+
+    assert runner.activation == SituActivationConfig(beta=4.0, linear_beta=25.0)
+
+    runner._ascend_activation = None
+    assert runner.activation == MoEActivation.SILU
+
+
+class _ProjectionWithQuantType:
+    def __init__(self, quant_type):
+        self.quant_method = SimpleNamespace(
+            quant_method=SimpleNamespace(shared_expert_quant_type=quant_type),
+        )
+
+
+@pytest.mark.parametrize(
+    ("quant_type", "ascend_activation", "expected_compute", "expected_activation"),
+    [
+        (
+            QuantType.W8A8,
+            None,
+            "_compute_int_quantized_shared_experts",
+            "_dynamic_swiglu_shared_expert_quant",
+        ),
+        (
+            QuantType.W4A8MXFP,
+            SituActivationConfig(beta=4.0, linear_beta=25.0),
+            "_compute_mxfp_quantized_shared_experts",
+            "_mxfp_situ_shared_expert_quant",
+        ),
+    ],
+)
+def test_shared_expert_capability_is_selected_at_init(
+    quant_type,
+    ascend_activation,
+    expected_compute,
+    expected_activation,
+):
+    runner = AscendMoERunner.__new__(AscendMoERunner)
+    nn.Module.__init__(runner)
+    runner._shared_experts = SimpleNamespace(
+        gate_up_proj=_ProjectionWithQuantType(quant_type),
+        down_proj=_ProjectionWithQuantType(quant_type),
+    )
+    runner._ascend_activation = ascend_activation
+
+    compute = runner._select_shared_expert_compute()
+
+    assert compute.__func__ is getattr(AscendMoERunner, expected_compute)
+    activation = runner._shared_expert_activation_quant
+    assert activation.__func__ is getattr(AscendMoERunner, expected_activation)
+
+
+@pytest.mark.parametrize(
+    ("gate_up_quant_type", "down_quant_type"),
+    [
+        (QuantType.NONE, QuantType.NONE),
+        (QuantType.W4A8, QuantType.W4A8),
+        (QuantType.W4A8MXFP, QuantType.W8A8),
+    ],
+)
+def test_shared_expert_falls_back_to_projection_quant_method(
+    gate_up_quant_type,
+    down_quant_type,
+):
+    runner = AscendMoERunner.__new__(AscendMoERunner)
+    nn.Module.__init__(runner)
+    runner._shared_experts = SimpleNamespace(
+        gate_up_proj=_ProjectionWithQuantType(gate_up_quant_type),
+        down_proj=_ProjectionWithQuantType(down_quant_type),
+    )
+    runner._ascend_activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
+
+    compute = runner._select_shared_expert_compute()
+
+    assert compute.__func__ is AscendMoERunner._compute_projection_shared_experts
 
 
 class _Projection(nn.Module):
@@ -195,8 +373,8 @@ def test_shared_experts_part2_applies_optional_gate(with_gate):
     runner._shared_experts = SimpleNamespace(
         act_fn=nn.Identity(),
         down_proj=_Projection(),
-        expert_gate=_Gate() if with_gate else None,
     )
+    runner._shared_expert_gate = _Gate() if with_gate else None
     hidden_states = torch.randn(3, 4)
     shared_gate_up = torch.randn(3, 4)
 
@@ -214,6 +392,7 @@ def test_shared_forward_impl_returns_current_runner_contract(monkeypatch, has_sh
     nn.Module.__init__(runner)
     runner._shared_experts = object() if has_shared_experts else None
     hidden_states = torch.randn(2, 4)
+    shared_experts_input = torch.randn(2, 8)
     router_logits = torch.randn(2, 3)
     routed_out = torch.randn(2, 4)
     shared_out = torch.randn(2, 4)
@@ -231,7 +410,11 @@ def test_shared_forward_impl_returns_current_runner_contract(monkeypatch, has_sh
     monkeypatch.setattr(AscendMoERunner, "is_internal_router", property(lambda _: False))
     monkeypatch.setattr(fused_moe_module.torch.npu, "current_stream", lambda: current_stream)
 
-    result = runner.shared_forward_impl(hidden_states, router_logits)
+    result = runner.shared_forward_impl(
+        hidden_states,
+        router_logits,
+        shared_experts_input,
+    )
 
     runner.no_shared_forward_impl.assert_called_once_with(
         hidden_states,
@@ -241,7 +424,7 @@ def test_shared_forward_impl_returns_current_runner_contract(monkeypatch, has_sh
     if has_shared_experts:
         assert result[0] is shared_out
         assert result[1] is routed_out
-        runner._forward_shared_experts.assert_called_once()
+        assert runner._forward_shared_experts.call_args.args[0] is shared_experts_input
     else:
         assert result is routed_out
         runner._forward_shared_experts.assert_not_called()

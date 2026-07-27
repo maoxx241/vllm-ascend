@@ -117,6 +117,7 @@ def test_shared_forward_impl_310_returns_current_runner_contract(monkeypatch, ha
     runner = _build_runner()
     runner._shared_experts = object() if has_shared_experts else None
     hidden_states = torch.randn(2, 4)
+    shared_experts_input = torch.randn(2, 8)
     router_logits = torch.randn(2, 3)
     routed_out = torch.randn(2, 4)
     shared_out = torch.randn(2, 4)
@@ -134,7 +135,11 @@ def test_shared_forward_impl_310_returns_current_runner_contract(monkeypatch, ha
     monkeypatch.setattr(AscendMoERunner310, "is_internal_router", property(lambda _: False))
     monkeypatch.setattr(fused_moe_310_module.torch.npu, "current_stream", lambda: current_stream)
 
-    result = runner.shared_forward_impl(hidden_states, router_logits)
+    result = runner.shared_forward_impl(
+        hidden_states,
+        router_logits,
+        shared_experts_input,
+    )
 
     runner.no_shared_forward_impl.assert_called_once_with(
         hidden_states,
@@ -144,7 +149,7 @@ def test_shared_forward_impl_310_returns_current_runner_contract(monkeypatch, ha
     if has_shared_experts:
         assert result[0] is shared_out
         assert result[1] is routed_out
-        runner._forward_shared_experts.assert_called_once()
+        assert runner._forward_shared_experts.call_args.args[0] is shared_experts_input
     else:
         assert result is routed_out
         runner._forward_shared_experts.assert_not_called()
