@@ -14,6 +14,23 @@ else:
 
 def hf_config_override(hf_config: PretrainedConfig) -> PretrainedConfig:
     initial_architecture = hf_config.architectures[0]
+    if initial_architecture == "DSparkDraftModel" and hf_config.model_type == "qwen3":
+        # vLLM's DSpark support normalizes the training-time checkpoint
+        # architecture before model-registry inspection. Keep the Ascend
+        # override in sync because this module replaces the vLLM hook.
+        dflash_config = getattr(hf_config, "dflash_config", None) or {}
+
+        def get_dflash_value(name: str) -> Any:
+            if isinstance(dflash_config, dict):
+                return dflash_config.get(name)
+            return getattr(dflash_config, name, None)
+
+        updates: dict[str, Any] = {"architectures": ["Qwen3DSparkModel"]}
+        for name in ("mask_token_id", "target_layer_ids"):
+            if (value := get_dflash_value(name)) is not None:
+                updates[name] = value
+        hf_config.update(updates)
+
     if hf_config.model_type in ("deepseek_v3", "deepseek_v32", "deepseek_v4", "glm_moe_dsa"):
         target_model_type = hf_config.model_type
         hf_config.model_type = "deepseek_mtp"
