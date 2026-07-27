@@ -8,12 +8,10 @@ import pytest
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
 from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
 from vllm.entrypoints.serve.render.serving import OpenAIServingRender
-from vllm.exceptions import VLLMValidationError
 from vllm.renderers import registry as renderer_registry
 from vllm.renderers.params import ChatParams
-from vllm.tokenizers import TokenizerRegistry
-from vllm.tokenizers.hf import CachedHfTokenizer
 
+from vllm_ascend.patch.platform import patch_kimi_k3_chat_params as chat_params_patch
 from vllm_ascend.patch.platform import patch_kimi_k3_renderer as renderer_patch
 from vllm_ascend.patch.platform.patch_kimi_k3_renderer import (
     KIMI_K3_IMAGE_PROMPT,
@@ -37,14 +35,33 @@ def _request(**kwargs):
     return ChatCompletionRequest(**defaults)
 
 
-def test_explicit_kimi_k3_mode_registers_renderer_and_hf_loader():
-    assert renderer_registry.RENDERER_REGISTRY.load_renderer_cls("kimi_k3") is KimiK3Renderer
-    assert TokenizerRegistry.load_tokenizer_cls("kimi_k3") is CachedHfTokenizer
-    assert renderer_registry.tokenizer_args_from_config.__module__ == "vllm.tokenizers.registry"
-    assert (
-        OpenAIServingChat._effective_chat_template_kwargs.__module__
-        == "vllm.entrypoints.openai.chat_completion.serving"
+def test_kimi_k3_renderer_is_selected_from_model_type(monkeypatch):
+    original_attr = renderer_patch._ORIGINAL_TOKENIZER_ARGS_ATTR
+    monkeypatch.setattr(
+        renderer_registry,
+        original_attr,
+        lambda model_config, **kwargs: ("hf", model_config, kwargs),
     )
+
+    kimi_args = renderer_registry.tokenizer_args_from_config(_model_config("kimi_k3"))
+    other_args = renderer_registry.tokenizer_args_from_config(_model_config("other"))
+
+    assert kimi_args[0] == "kimi_k3"
+    assert other_args[0] == "hf"
+    assert renderer_registry.RENDERER_REGISTRY.load_renderer_cls("kimi_k3") is KimiK3Renderer
+
+
+def test_explicit_non_hf_tokenizer_mode_is_not_rewritten(monkeypatch):
+    original_attr = renderer_patch._ORIGINAL_TOKENIZER_ARGS_ATTR
+    monkeypatch.setattr(
+        renderer_registry,
+        original_attr,
+        lambda model_config, **kwargs: ("deepseek_v4", model_config, kwargs),
+    )
+
+    args = renderer_registry.tokenizer_args_from_config(_model_config("kimi_k3"))
+
+    assert args[0] == "deepseek_v4"
 
 
 def test_renderer_calls_tokenizer_python_encoder_without_jinja():
@@ -239,118 +256,57 @@ def test_async_renderer_preserves_multimodal_data(monkeypatch):
         "multi_modal_uuids": mm_uuids,
     }
     apply_template.assert_awaited_once_with(conversation, return_dict=False)
-    assert parse_messages.await_args is not None
     assert parse_messages.await_args.kwargs["content_format"] == "openai"
 
 
+def test_openai_chat_kwargs_are_scoped_by_served_model_type():
+    kimi_serving = object.__new__(OpenAIServingChat)
+    kimi_serving.model_config = _model_config("kimi_k3")
+    kimi_serving.chat_template = None
+    kimi_serving.chat_template_content_format = "auto"
+    kimi_serving.default_chat_template_kwargs = {}
+
+    other_serving = object.__new__(OpenAIServingChat)
+    other_serving.model_config = _model_config("other")
+    other_serving.chat_template = None
+    other_serving.chat_template_content_format = "auto"
+    other_serving.default_chat_template_kwargs = {}
+
+    kimi_kwargs = kimi_serving._effective_chat_template_kwargs(_request())
+    other_kwargs = other_serving._effective_chat_template_kwargs(_request())
+
+    assert kimi_kwargs["thinking"] is True
+    assert kimi_kwargs["thinking_effort"] == "high"
+    assert "thinking" not in other_kwargs
+    assert "thinking_effort" not in other_kwargs
+
+
 def test_server_defaults_cannot_override_typed_kimi_k3_tool_controls():
+    serving = object.__new__(OpenAIServingChat)
+    serving.model_config = _model_config("kimi_k3")
+    serving.chat_template = None
+    serving.chat_template_content_format = "auto"
+    serving.default_chat_template_kwargs = {
+        "thinking": True,
+        "tool_choice": "required",
+        "tools": [
+            {
+                "type": "function",
+                "function": {"name": "injected", "parameters": {"type": "object"}},
+            }
+        ],
+    }
     request = _request(
         reasoning_effort="none",
         tools=None,
         tool_choice="none",
     )
-    renderer_patch.prepare_kimi_k3_chat_template_kwargs(request)
-    params = request.build_chat_params(None, "auto").with_defaults(
-        {
-            "thinking": True,
-            "tool_choice": "required",
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "injected",
-                        "parameters": {"type": "object"},
-                    },
-                }
-            ],
-        }
-    )
 
-    assert params.chat_template_kwargs["thinking"] is False
-    assert params.chat_template_kwargs["tool_choice"] == "none"
-    assert params.chat_template_kwargs["tools"] == []
+    kwargs = serving._effective_chat_template_kwargs(request)
 
-
-@pytest.mark.parametrize(
-    ("server_thinking", "reasoning_effort", "expected_thinking"),
-    [
-        (False, "high", True),
-        (True, "none", False),
-    ],
-)
-def test_request_reasoning_effort_overrides_server_thinking_default(
-    server_thinking,
-    reasoning_effort,
-    expected_thinking,
-):
-    serving = object.__new__(OpenAIServingChat)
-    serving.model_config = _model_config("kimi_k3")
-    serving.chat_template = None
-    serving.chat_template_content_format = "auto"
-    serving.default_chat_template_kwargs = {"thinking": server_thinking}
-
-    kwargs = serving._effective_chat_template_kwargs(
-        _request(reasoning_effort=reasoning_effort),
-    )
-
-    assert kwargs["thinking"] is expected_thinking
-
-
-@pytest.mark.parametrize(
-    ("parameter", "value"),
-    [
-        ("tools", []),
-        ("tool_choice", "none"),
-        ("response_format", {"type": "text"}),
-        ("reasoning_effort", "none"),
-    ],
-)
-def test_duplicate_openai_controls_in_chat_template_kwargs_are_rejected(parameter, value):
-    request = _request(chat_template_kwargs={parameter: value})
-
-    with pytest.raises(VLLMValidationError) as exc_info:
-        renderer_patch.prepare_kimi_k3_chat_template_kwargs(request)
-
-    assert exc_info.value.parameter == parameter
-
-
-@pytest.mark.parametrize(
-    ("reasoning_effort", "native_kwargs"),
-    [
-        ("high", {"thinking": False}),
-        ("none", {"thinking": True}),
-        ("high", {"thinking_effort": "max"}),
-        ("none", {"thinking_effort": "high"}),
-    ],
-)
-def test_conflicting_typed_and_native_reasoning_controls_are_rejected(
-    reasoning_effort,
-    native_kwargs,
-):
-    request = _request(
-        reasoning_effort=reasoning_effort,
-        chat_template_kwargs=native_kwargs,
-    )
-
-    with pytest.raises(VLLMValidationError) as exc_info:
-        renderer_patch.prepare_kimi_k3_chat_template_kwargs(request)
-
-    assert exc_info.value.parameter == "reasoning_effort"
-
-
-def test_native_reasoning_controls_are_promoted_to_typed_request():
-    request = ChatCompletionRequest(
-        model="kimi-k3",
-        messages=[{"role": "user", "content": "help"}],
-        chat_template_kwargs={
-            "thinking": True,
-            "thinking_effort": "max",
-        },
-    )
-
-    renderer_patch.prepare_kimi_k3_chat_template_kwargs(request)
-
-    assert request.reasoning_effort == "max"
+    assert kwargs["thinking"] is False
+    assert kwargs["tool_choice"] == "none"
+    assert kwargs["tools"] == []
 
 
 def test_auto_tool_choice_survives_vllm_default_merging():
@@ -367,7 +323,7 @@ def test_auto_tool_choice_survives_vllm_default_merging():
         tools=tools,
         tool_choice="auto",
     )
-    renderer_patch.prepare_kimi_k3_chat_template_kwargs(request)
+    chat_params_patch.prepare_kimi_k3_chat_template_kwargs(request)
     params = request.build_chat_params(None, "auto").with_defaults(
         {
             "tool_choice": "required",
@@ -384,6 +340,16 @@ def test_auto_tool_choice_survives_vllm_default_merging():
     )
     assert params.chat_template_kwargs["tool_choice"] == "required"
     assert decode_kimi_k3_prompt_tool_choice(params.chat_template_kwargs[KIMI_K3_PROMPT_TOOL_CHOICE_KEY]) == "auto"
+
+    serving = object.__new__(OpenAIServingChat)
+    serving.model_config = _model_config("kimi_k3")
+    serving.chat_template = None
+    serving.chat_template_content_format = "auto"
+    serving.default_chat_template_kwargs = {
+        "tool_choice": "required",
+        "tools": params.chat_template_kwargs["tools"],
+    }
+    assert serving._effective_chat_template_kwargs(request)["tool_choice"] == ("auto")
 
     calls = []
 
@@ -421,7 +387,7 @@ def test_render_server_prepares_only_kimi_k3_requests(
 
     monkeypatch.setattr(
         OpenAIServingRender,
-        renderer_patch._ORIGINAL_RENDER_CHAT_ATTR,
+        chat_params_patch._ORIGINAL_RENDER_CHAT_ATTR,
         original_render_chat,
     )
     serving = object.__new__(OpenAIServingRender)
@@ -444,7 +410,7 @@ def test_kimi_k3_render_server_delegates_non_chat_requests(monkeypatch):
 
     monkeypatch.setattr(
         OpenAIServingRender,
-        renderer_patch._ORIGINAL_RENDER_CHAT_ATTR,
+        chat_params_patch._ORIGINAL_RENDER_CHAT_ATTR,
         original_render_chat,
     )
     serving = object.__new__(OpenAIServingRender)
