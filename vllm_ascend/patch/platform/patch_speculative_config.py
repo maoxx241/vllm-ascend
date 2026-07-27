@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, get_args, get_origin
 
+from pydantic.dataclasses import rebuild_dataclass
 from vllm.config.speculative import SpeculativeConfig
+from vllm.utils.hashing import safe_hash
 from vllm.utils.import_utils import LazyLoader
 
 if TYPE_CHECKING:
@@ -151,4 +153,97 @@ def hf_config_override(hf_config: PretrainedConfig) -> PretrainedConfig:
     return hf_config
 
 
+_ORIGINAL_POST_INIT = SpeculativeConfig.__post_init__
+_ORIGINAL_COMPUTE_HASH = SpeculativeConfig.compute_hash
+_ORIGINAL_USE_EAGLE = SpeculativeConfig.use_eagle
+
+
+def _verify_dspark_args(self) -> None:
+    if self.method != "dspark":
+        return
+
+    hf_config = self.draft_model_config.hf_config
+    block_size = getattr(hf_config, "block_size", None)
+    if block_size != 7:
+        raise ValueError(f"This temporary DSpark implementation requires checkpoint block_size=7, got {block_size!r}.")
+    if self.num_speculative_tokens != block_size:
+        raise ValueError(
+            "DSpark requires num_speculative_tokens to equal the checkpoint "
+            f"block_size ({block_size}), got {self.num_speculative_tokens}."
+        )
+    if self.draft_sample_method != "greedy":
+        raise ValueError("This temporary DSpark implementation supports only draft_sample_method='greedy'.")
+
+
+def _dspark_post_init(self):
+    if self.method != "dspark":
+        return _ORIGINAL_POST_INIT(self)
+
+    # v0.23.0 does not know the DSpark method. Let its existing draft-model
+    # path build the ModelConfig without wrapping the checkpoint as EAGLE,
+    # then restore the DSpark identity for the scheduler and proposer.
+    self.method = "draft_model"
+    try:
+        result = _ORIGINAL_POST_INIT(self)
+    except Exception:
+        self.method = "dspark"
+        raise
+
+    self.method = "dspark"
+    self.parallel_drafting = True
+    _verify_dspark_args(self)
+    return result
+
+
+def _compute_hash(self) -> str:
+    if self.method != "dspark":
+        return _ORIGINAL_COMPUTE_HASH(self)
+
+    factors: list[Any] = [True]
+    if self.draft_model_config is not None:
+        layer_ids = getattr(
+            self.draft_model_config.hf_config,
+            "target_layer_ids",
+            None,
+        )
+        if layer_ids is not None:
+            factors.append(tuple(layer_ids))
+    return safe_hash(str(factors).encode(), usedforsecurity=False).hexdigest()
+
+
+def _use_eagle(self) -> bool:
+    return self.method == "dspark" or _ORIGINAL_USE_EAGLE(self)
+
+
+def _use_dspark(self) -> bool:
+    return self.method == "dspark"
+
+
+def _add_dspark_method_to_schema() -> None:
+    annotation = SpeculativeConfig.__pydantic_fields__["method"].annotation
+    method_values: list[Any] = []
+
+    def collect_literal_values(value: Any) -> None:
+        if get_origin(value) is Literal:
+            method_values.extend(get_args(value))
+            return
+        for arg in get_args(value):
+            collect_literal_values(arg)
+
+    collect_literal_values(annotation)
+    if "dspark" not in method_values:
+        method_values.append("dspark")
+    method_literal = Literal.__getitem__(tuple(method_values))
+    method_annotation = method_literal | None
+    SpeculativeConfig.__annotations__["method"] = method_annotation
+    SpeculativeConfig.__dataclass_fields__["method"].type = method_annotation
+
+
 SpeculativeConfig.hf_config_override = hf_config_override
+SpeculativeConfig.__post_init__ = _dspark_post_init
+SpeculativeConfig._verify_dspark_args = _verify_dspark_args
+SpeculativeConfig.compute_hash = _compute_hash
+SpeculativeConfig.use_eagle = _use_eagle
+SpeculativeConfig.use_dspark = _use_dspark
+_add_dspark_method_to_schema()
+rebuild_dataclass(SpeculativeConfig, force=True)

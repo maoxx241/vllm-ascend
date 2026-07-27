@@ -10,6 +10,10 @@ def register_model():
         "KimiK3ForConditionalGeneration",
         "vllm_ascend.models.kimi_k3:AscendKimiK3ForConditionalGeneration",
     )
+    ModelRegistry.register_model(
+        "Qwen3DSparkModel",
+        "vllm_ascend.models.qwen3_dspark:Qwen3DSparkForCausalLM",
+    )
     ModelRegistry.register_model("DeepseekV4ForCausalLM", "vllm_ascend.models.deepseek_v4:AscendDeepseekV4ForCausalLM")
 
     ModelRegistry.register_model("DeepSeekV4MTPModel", "vllm_ascend.models.deepseek_v4_mtp:DeepSeekV4MTP")
