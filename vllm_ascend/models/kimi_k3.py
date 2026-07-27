@@ -17,6 +17,7 @@ from vllm.model_executor.models.interfaces import (
     HasInnerState,
     IsHybrid,
     MixtureOfExperts,
+    SupportsEagle3,
     SupportsMultiModal,
     SupportsPP,
     SupportsQuant,
@@ -220,6 +221,7 @@ class KimiK3MultiModalProcessor(BaseMultiModalProcessor[KimiK3ProcessingInfo]):
 class AscendKimiK3ForConditionalGeneration(
     nn.Module,
     SupportsMultiModal,
+    SupportsEagle3,
     SupportsPP,
     SupportsQuant,
     HasInnerState,
@@ -347,7 +349,7 @@ class AscendKimiK3ForConditionalGeneration(
         intermediate_tensors: IntermediateTensors | None = None,
         inputs_embeds: torch.Tensor | None = None,
         **kwargs: object,
-    ) -> torch.Tensor | IntermediateTensors:
+    ) -> torch.Tensor | IntermediateTensors | tuple[torch.Tensor, list[torch.Tensor]]:
         del kwargs
         if intermediate_tensors is not None:
             inputs_embeds = None
@@ -361,6 +363,12 @@ class AscendKimiK3ForConditionalGeneration(
     def compute_logits(self, hidden_states: torch.Tensor, **kwargs) -> torch.Tensor | None:
         del kwargs
         return self.language_model.compute_logits(hidden_states)
+
+    def set_aux_hidden_state_layers(self, layers: tuple[int, ...]) -> None:
+        self.language_model.set_aux_hidden_state_layers(layers)
+
+    def get_eagle3_default_aux_hidden_state_layers(self) -> tuple[int, ...]:
+        return self.language_model.get_eagle3_default_aux_hidden_state_layers()
 
     @classmethod
     def get_mamba_state_dtype_from_config(cls, vllm_config: VllmConfig):

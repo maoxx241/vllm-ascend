@@ -10,6 +10,7 @@ import torch_npu
 from PIL import Image
 from torch import nn
 from transformers import BatchFeature
+from vllm.model_executor.models.interfaces import supports_eagle3
 from vllm.multimodal.parse import MultiModalDataItems, VisionChunkProcessorItems
 
 from vllm_ascend.models import kimi_k3, kimi_k3_text, kimi_k3_vit
@@ -593,6 +594,31 @@ def test_kimi_k3_dspark_aux_interface_forwards_layers():
     model.model.set_aux_hidden_state_layers.assert_called_once_with((8, 24))
     assert model.supports_eagle3 is True
     assert model.get_eagle3_default_aux_hidden_state_layers() == (8, 24, 52, 68, 84)
+
+
+def test_kimi_k3_multimodal_wrapper_forwards_dspark_aux_interface():
+    model = AscendKimiK3ForConditionalGeneration.__new__(AscendKimiK3ForConditionalGeneration)
+    nn.Module.__init__(model)
+    model.language_model = MagicMock()
+    model.language_model.get_eagle3_default_aux_hidden_state_layers.return_value = (
+        8,
+        24,
+        52,
+        68,
+        84,
+    )
+
+    model.set_aux_hidden_state_layers((8, 24))
+
+    model.language_model.set_aux_hidden_state_layers.assert_called_once_with((8, 24))
+    assert model.get_eagle3_default_aux_hidden_state_layers() == (
+        8,
+        24,
+        52,
+        68,
+        84,
+    )
+    assert supports_eagle3(model)
 
 
 def test_routed_output_transform_is_non_owning_and_fullgraph_traceable():
