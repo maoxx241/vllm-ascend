@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
+import asyncio
 import json
 from types import SimpleNamespace
 
 import pytest
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
+from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
 from vllm.parser import ParserManager
 from vllm.reasoning.abs_reasoning_parsers import ReasoningParserManager
 from vllm.tool_parsers.abstract_tool_parser import ToolParserManager
 
+from vllm_ascend.patch.platform import patch_kimi_k3_parsers as parser_patch
 from vllm_ascend.patch.platform.kimi_k3_xtml import KimiK3XTMLParseError
 from vllm_ascend.patch.platform.patch_kimi_k3_chat_params import (
     prepare_kimi_k3_chat_template_kwargs,
@@ -117,6 +120,102 @@ def test_kimi_k3_parsers_are_registered_and_unified():
         )
         is KimiK3Parser
     )
+
+
+def _run_full_generator_patch(request, parser):
+    received_parsers = []
+    expected_response = object()
+
+    async def original(
+        request,
+        result_generator,
+        request_id,
+        model_name,
+        conversation,
+        tokenizer,
+        request_metadata,
+        received_parser,
+    ):
+        del (
+            request,
+            result_generator,
+            request_id,
+            model_name,
+            conversation,
+            tokenizer,
+            request_metadata,
+        )
+        received_parsers.append(received_parser)
+        return expected_response
+
+    serving = SimpleNamespace(
+        **{
+            parser_patch._ORIGINAL_CHAT_FULL_ATTR: original,
+        }
+    )
+    response = asyncio.run(
+        parser_patch._wrapped_chat_completion_full_generator(
+            serving,
+            request,
+            None,
+            "request-id",
+            "kimi-k3",
+            [],
+            TOKENIZER,
+            SimpleNamespace(),
+            parser,
+        )
+    )
+    assert response is expected_response
+    assert len(received_parsers) == 1
+    return received_parsers[0]
+
+
+def test_chat_full_generator_skips_kimi_parser_for_remote_decode():
+    request = SimpleNamespace(
+        kv_transfer_params={
+            "do_remote_decode": True,
+            "do_remote_prefill": False,
+        }
+    )
+    parser = _parser(thinking=False)
+
+    assert _run_full_generator_patch(request, parser) is None
+
+
+@pytest.mark.parametrize(
+    "kv_transfer_params",
+    [
+        {"do_remote_decode": False, "do_remote_prefill": True},
+        {"do_remote_decode": 1, "do_remote_prefill": False},
+        None,
+    ],
+)
+def test_chat_full_generator_keeps_kimi_parser_outside_remote_decode(
+    kv_transfer_params,
+):
+    request = SimpleNamespace(kv_transfer_params=kv_transfer_params)
+    parser = _parser(thinking=False)
+
+    assert _run_full_generator_patch(request, parser) is parser
+
+
+def test_chat_full_generator_keeps_non_kimi_parser_for_remote_decode():
+    request = SimpleNamespace(kv_transfer_params={"do_remote_decode": True})
+    parser = object()
+
+    assert _run_full_generator_patch(request, parser) is parser
+
+
+def test_chat_full_generator_patch_install_is_idempotent():
+    original = getattr(OpenAIServingChat, parser_patch._ORIGINAL_CHAT_FULL_ATTR)
+    installed = OpenAIServingChat.chat_completion_full_generator
+
+    parser_patch._install_chat_completion_full_generator_patch()
+    parser_patch._install_chat_completion_full_generator_patch()
+
+    assert getattr(OpenAIServingChat, parser_patch._ORIGINAL_CHAT_FULL_ATTR) is original
+    assert OpenAIServingChat.chat_completion_full_generator is installed
 
 
 @pytest.mark.parametrize(

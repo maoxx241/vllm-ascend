@@ -26,6 +26,7 @@ from vllm.model_executor.models.deepseek_eagle3 import Eagle3DeepseekV2ForCausal
 from vllm.model_executor.models.deepseek_v2 import DeepseekV32IndexerCache
 from vllm.model_executor.models.llama_eagle3 import Eagle3LlamaForCausalLM
 from vllm.model_executor.models.qwen3_dflash import DFlashQwen3ForCausalLM
+from vllm.model_executor.models.qwen3_dspark import Qwen3DSparkForCausalLM
 from vllm.triton_utils import HAS_TRITON, triton
 from vllm.utils.platform_utils import is_pin_memory_available
 from vllm.v1.attention.backends.utils import CommonAttentionMetadata
@@ -51,6 +52,9 @@ from vllm_ascend.distributed.parallel_state import get_lmhead_tp_group
 from vllm_ascend.models.llama_eagle3_vwn import Eagle3VwnLlamaForCausalLM
 from vllm_ascend.ops.triton.spec_decode.utils import prepare_inputs_padded_kernel
 from vllm_ascend.ops.triton.triton_utils import get_vectorcore_num
+from vllm_ascend.spec_decode.utils import (
+    disable_flash_comm_v1_for_dspark_markov,
+)
 from vllm_ascend.utils import check_gdn_layer, enable_sp, lmhead_tp_enable, shared_expert_dp_enabled
 from vllm_ascend.worker.utils import copy_snapshot_to_gpu
 
@@ -446,7 +450,7 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
     def _maybe_share_lm_head(self, model: nn.Module) -> None:
         # some model definition do not define lm_head explicitly
         # and reuse embed_tokens for lm_head, e.g., CohereForCausalLM
-        if self.method in ("eagle", "dflash"):
+        if self.method in ("eagle", "dflash", "dspark"):
             # For DFlash drafters trained with a reduced draft vocabulary, the
             # draft model ships its own lm_head of shape [draft_vocab_size,
             # hidden] whose rows map to a trained subset of the target vocab via
@@ -454,17 +458,21 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
             # target lm_head ([target_vocab_size, hidden]) makes the draft emit
             # logits over the wrong vocabulary, so the verifier rejects almost
             # every speculative token. Keep the draft's own lm_head in that case.
-            draft_has_own_lm_head = (
-                self.method == "dflash" and getattr(self.model, "draft_id_to_target_id", None) is not None
+            draft_has_own_lm_head = bool(
+                (self.method == "dflash" and getattr(self.model, "draft_id_to_target_id", None) is not None)
+                or (self.method == "dspark" and getattr(self.model, "has_own_lm_head", False))
             )
             if draft_has_own_lm_head:
-                logger.info(
-                    "[spec_decode/base] DFlash draft uses d2t vocab remapping;"
-                    " keeping the draft's own lm_head instead of sharing the target"
-                    " lm_head."
-                )
+                if self.method == "dspark":
+                    logger.info("[spec_decode/base] DSpark draft has its own lm_head; keeping the checkpoint weights.")
+                else:
+                    logger.info(
+                        "[spec_decode/base] DFlash draft uses d2t vocab remapping;"
+                        " keeping the draft's own lm_head instead of sharing the"
+                        " target lm_head."
+                    )
             else:
-                logger.info("[spec_decode/base] Loading EAGLE/DFLASH LM head weights from the target model.")
+                logger.info("[spec_decode/base] Loading the draft LM head weights from the target model.")
                 if hasattr(model, "lm_head"):
                     self.model.lm_head = model.lm_head
                 elif hasattr(model, "get_language_model") and hasattr(model.get_language_model(), "lm_head"):
@@ -743,12 +751,13 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
         if token_indices_to_sample is None:
             token_indices_to_sample = common_attn_metadata.query_start_loc[1:] - 1
 
-        if self.method in ("eagle3", "dflash"):
+        if self.method in ("eagle3", "dflash", "dspark"):
             assert isinstance(
                 self.get_model(),
                 (
                     Eagle3LlamaForCausalLM,
                     DFlashQwen3ForCausalLM,
+                    Qwen3DSparkForCausalLM,
                     Eagle3VwnLlamaForCausalLM,
                     Eagle3DeepseekV2ForCausalLM,
                 ),
@@ -791,6 +800,11 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
             num_tokens_across_dp,
             _,
         ) = self.runner._sync_metadata_across_dp(num_input_tokens, is_draft_model=True)
+        if self.method == "dspark":
+            # DP synchronization can pad beyond this rank's K * batch query
+            # tokens. Clear the tail before attention metadata slices the full
+            # positions buffer.
+            self._pad_draft_buffers(num_tokens, num_input_tokens)
 
         if self.use_cuda_graph:
             aclgraph_runtime_mode, batch_descriptor = self.runner.cudagraph_dispatcher.dispatch(
@@ -1027,7 +1041,7 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
         return draft_token_ids
 
     def compute_draft_token_ids(self, hidden_states: torch.Tensor):
-        if self.method in ("eagle3", "dflash"):
+        if self.method in ("eagle3", "dflash", "dspark"):
             logits = self.model.logits_processor(self.model.lm_head, hidden_states)
             if not hasattr(self.model, "draft_id_to_target_id") or self.model.draft_id_to_target_id is None:
                 return greedy_sample(logits)
@@ -1058,7 +1072,7 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
         model_input_ids = self.input_ids[:num_input_tokens]
         model_positions = self._get_positions(num_input_tokens)
 
-        if self.method == "dflash":
+        if self.method in ("dflash", "dspark"):
             model_kwargs = self.build_model_inputs_first_pass(num_input_tokens)
         else:
             model_kwargs = {
@@ -1124,14 +1138,33 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
                     num_input_tokens=num_input_tokens,
                 )
 
-        if lmhead_tp_enable():
+        if lmhead_tp_enable() and self.method != "dspark":
             token_indices_to_sample = nn.functional.pad(
                 token_indices_to_sample, (0, max_num_reqs_across_dp - num_indices)
             )
 
         sample_hidden_states = last_hidden_states[token_indices_to_sample]
 
-        if get_ascend_config().enable_reduce_sample:
+        if self.method == "dspark":
+            # Each of the K query positions must contribute its own backbone
+            # logits. Using last_hidden_states directly here makes all seven
+            # positions share the same input on the eager path and collapses
+            # acceptance.
+            with disable_flash_comm_v1_for_dspark_markov():
+                raw_logits = self.model.compute_draft_logits(sample_hidden_states)
+                logits = raw_logits.view(
+                    -1,
+                    self.num_speculative_tokens,
+                    raw_logits.shape[-1],
+                )
+                num_blocks = logits.shape[0]
+                draft_token_ids = self._dspark_draft_buffer[:num_blocks]
+                draft_token_ids[:, 0].copy_(self._dspark_seed_buffer[:num_blocks])
+                for draft_index in range(self.num_speculative_tokens):
+                    markov_embedding = self.model.markov_embed(draft_token_ids[:, draft_index])
+                    logits[:, draft_index].add_(self.model.markov_bias(markov_embedding))
+                    draft_token_ids[:, draft_index + 1].copy_(logits[:, draft_index].argmax(dim=-1))
+        elif get_ascend_config().enable_reduce_sample:
             if self.method in ("eagle3", "dflash", "mtp"):
                 draft_token_ids = self.compute_draft_token_ids(sample_hidden_states)
                 if lmhead_tp_enable():
@@ -1171,7 +1204,9 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
 
         # Early exit if there is only one draft token to be generated.
         if self.num_speculative_tokens == 1 or self.parallel_drafting:
-            # [batch_size, 1]
+            if self.method == "dspark":
+                return self.model.map_draft_to_target(draft_token_ids[:, 1:])
+            # [batch_size, num_speculative_tokens]
             return draft_token_ids.view(-1, self.num_speculative_tokens)
 
         if self.pcp_size > 1 and is_prefill:
@@ -1500,7 +1535,7 @@ class AscendSpecDecodeBaseProposer(SpecDecodeBaseProposer):
             hf_config = getattr(draft_model_config, "hf_config", None)
             architectures = getattr(hf_config, "architectures", []) or []
             return "DeepSeekMTPModel" in architectures
-        return self.method not in ("mtp", "draft_model", "dflash")
+        return self.method not in ("mtp", "draft_model", "dflash", "dspark")
 
     def attn_update_stack_num_spec_norm(
         self,

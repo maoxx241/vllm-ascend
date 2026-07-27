@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Any
 
 from vllm.entrypoints.chat_utils import make_tool_call_id
 from vllm.entrypoints.openai.chat_completion.protocol import ChatCompletionRequest
+from vllm.entrypoints.openai.chat_completion.serving import OpenAIServingChat
 from vllm.entrypoints.openai.engine.protocol import (
     DeltaFunctionCall,
     DeltaMessage,
@@ -67,6 +68,7 @@ if TYPE_CHECKING:
     from vllm.entrypoints.openai.responses.protocol import ResponsesRequest
 
 _ORIGINAL_GET_PARSER_ATTR = "_ascend_original_kimi_k3_get_parser"
+_ORIGINAL_CHAT_FULL_ATTR = "_ascend_original_kimi_k3_chat_completion_full_generator"
 
 __all__ = [
     "ARGUMENT_END",
@@ -536,6 +538,53 @@ class KimiK3Parser(DelegatingParser, _KimiK3StreamingAdapter):
             # chunk so streamed deltas never need to be retracted.
             emit_new_tool_calls=finished,
         )
+
+
+def _is_remote_decode_request(request: ChatCompletionRequest) -> bool:
+    kv_transfer_params = getattr(request, "kv_transfer_params", None)
+    return bool(kv_transfer_params and kv_transfer_params.get("do_remote_decode") is True)
+
+
+async def _wrapped_chat_completion_full_generator(
+    self,
+    request,
+    result_generator,
+    request_id,
+    model_name,
+    conversation,
+    tokenizer,
+    request_metadata,
+    parser=None,
+):
+    original = getattr(self, _ORIGINAL_CHAT_FULL_ATTR)
+    if isinstance(parser, KimiK3Parser) and _is_remote_decode_request(request):
+        # P-side output is an internal transfer token, not a complete K3
+        # response envelope, so strict XTML parsing must not run here.
+        parser = None
+    return await original(
+        request,
+        result_generator,
+        request_id,
+        model_name,
+        conversation,
+        tokenizer,
+        request_metadata,
+        parser,
+    )
+
+
+def _install_chat_completion_full_generator_patch() -> None:
+    if hasattr(OpenAIServingChat, _ORIGINAL_CHAT_FULL_ATTR):
+        return
+    setattr(
+        OpenAIServingChat,
+        _ORIGINAL_CHAT_FULL_ATTR,
+        OpenAIServingChat.chat_completion_full_generator,
+    )
+    OpenAIServingChat.chat_completion_full_generator = _wrapped_chat_completion_full_generator
+
+
+_install_chat_completion_full_generator_patch()
 
 
 if not hasattr(ParserManager, _ORIGINAL_GET_PARSER_ATTR):

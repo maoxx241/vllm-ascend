@@ -1576,6 +1576,7 @@ class TestMooncakeConnectorMetadata(unittest.TestCase):
                 "remote_pcp_size": 1,
                 "remote_dcp_size": 1,
                 "remote_ptp_size": 2,
+                "dspark_draft_kv_tokens": 31,
             },
         )
 
@@ -1589,6 +1590,25 @@ class TestMooncakeConnectorMetadata(unittest.TestCase):
         self.assertEqual(req_meta.remote_host, "localhost")
         self.assertEqual(req_meta.remote_port, 5000)
         self.assertEqual(req_meta.remote_ptp_size, 2)
+        self.assertEqual(req_meta.dspark_draft_kv_tokens, 31)
+
+    def test_add_new_req_defaults_dspark_draft_kv_tokens_to_zero(self):
+        meta = MooncakeConnectorMetadata()
+
+        meta.add_new_req(
+            request_id="req1",
+            local_block_ids=[1],
+            num_external_tokens=16,
+            kv_transfer_params={
+                "remote_block_ids": [2],
+                "remote_engine_id": "remote_engine",
+                "remote_request_id": "remote_req1",
+                "remote_host": "localhost",
+                "remote_port": 5000,
+            },
+        )
+
+        self.assertEqual(meta.requests["req1"].dspark_draft_kv_tokens, 0)
 
 
 class TestMooncakeConnectorSchedulerMatchedTokens(unittest.TestCase):
@@ -1858,6 +1878,54 @@ class TestMooncakeConnectorScheduler(unittest.TestCase):
         self.assertEqual(tokens, 4)
         self.assertTrue(async_flag)
 
+    def test_get_num_new_matched_tokens_dspark_complete_draft_kv(self):
+        self.scheduler.vllm_config.speculative_config = types.SimpleNamespace(method="dspark")
+        self.scheduler.need_truncate = True
+        remote_block_ids = ([10, 11],)
+        request = MockRequest(
+            "req_dspark_complete",
+            prompt_token_ids=list(range(33)),
+            kv_transfer_params={
+                "do_remote_prefill": True,
+                "remote_block_ids": remote_block_ids,
+                "dspark_draft_kv_tokens": 32,
+            },
+        )
+
+        tokens, async_flag = self.scheduler.get_num_new_matched_tokens(request, 5)
+
+        # State-cache remote prefill exposes N - 1 tokens. Complete DSpark
+        # coverage keeps the all-group Mooncake transfer enabled.
+        self.assertEqual(tokens, 27)
+        self.assertTrue(async_flag)
+        self.assertTrue(request.kv_transfer_params["do_remote_prefill"])
+        self.assertIs(request.kv_transfer_params["remote_block_ids"], remote_block_ids)
+
+    def test_get_num_new_matched_tokens_dspark_incomplete_draft_kv(self):
+        self.scheduler.vllm_config.speculative_config = types.SimpleNamespace(method="dspark")
+        self.scheduler.need_truncate = True
+        for draft_kv_tokens in (None, 31):
+            with self.subTest(draft_kv_tokens=draft_kv_tokens):
+                params = {
+                    "do_remote_prefill": True,
+                    "remote_block_ids": ([10, 11],),
+                }
+                if draft_kv_tokens is not None:
+                    params["dspark_draft_kv_tokens"] = draft_kv_tokens
+                request = MockRequest(
+                    "req_dspark_incomplete",
+                    prompt_token_ids=list(range(33)),
+                    kv_transfer_params=params,
+                )
+
+                tokens, async_flag = self.scheduler.get_num_new_matched_tokens(request, 5)
+
+                self.assertEqual(tokens, 0)
+                self.assertFalse(async_flag)
+                self.assertFalse(request.kv_transfer_params["do_remote_prefill"])
+                self.assertEqual(request.kv_transfer_params["remote_block_ids"], tuple())
+                self.assertEqual(request.kv_transfer_params["num_computed_tokens"], 5)
+
     def test_update_state_after_alloc_no_remote_prefill(self):
         request = MockRequest("req1")
         blocks = MagicMock()
@@ -1888,6 +1956,94 @@ class TestMooncakeConnectorScheduler(unittest.TestCase):
         delay_free, params = self.scheduler.request_finished(request, [1, 2, 3])
         self.assertFalse(delay_free)
         self.assertIsNone(params)
+
+    def test_request_finished_carries_dspark_draft_kv_tokens(self):
+        self.scheduler.vllm_config.speculative_config = types.SimpleNamespace(method="dspark")
+        self.scheduler.group_transfer_info = [
+            types.SimpleNamespace(
+                tokens_per_block=16,
+                blocks_per_window=0,
+                is_state_group=False,
+            )
+        ]
+        request = self._make_remote_decode_request(
+            prompt_len=33,
+            request_id="req_dspark",
+        )
+
+        delay_free, params = self.scheduler.request_finished(
+            request,
+            ([10, 11, 12, 13],),
+        )
+
+        self.assertTrue(delay_free)
+        self.assertIsNotNone(params)
+        assert params is not None
+        self.assertEqual(params["remote_block_ids"], ([10, 11, 12],))
+        self.assertEqual(params["dspark_draft_kv_tokens"], 33)
+
+    def test_request_finished_dspark_coverage_uses_truncated_prompt(self):
+        self.scheduler.vllm_config.speculative_config = types.SimpleNamespace(method="dspark")
+        self.scheduler.need_truncate = True
+        self.scheduler.group_transfer_info = [
+            types.SimpleNamespace(
+                tokens_per_block=16,
+                blocks_per_window=0,
+                is_state_group=False,
+            )
+        ]
+        request = self._make_remote_decode_request(
+            prompt_len=33,
+            request_id="req_dspark_truncated",
+        )
+        request.num_prompt_tokens = 33
+        request.max_tokens = 16
+        request._all_token_ids = list(request.prompt_token_ids)
+
+        matched_tokens, async_load = self.scheduler.get_num_new_matched_tokens(
+            request,
+            0,
+        )
+        self.assertEqual(matched_tokens, 0)
+        self.assertFalse(async_load)
+        self.assertEqual(len(request.prompt_token_ids), 32)
+
+        delay_free, params = self.scheduler.request_finished(
+            request,
+            ([10, 11, 12, 13],),
+        )
+
+        self.assertTrue(delay_free)
+        self.assertIsNotNone(params)
+        assert params is not None
+        self.assertEqual(params["remote_block_ids"], ([10, 11],))
+        # The P-side transfer was clipped from N to N - 1 before metadata
+        # creation, so DSpark coverage must describe those 32 tokens.
+        self.assertEqual(params["dspark_draft_kv_tokens"], 32)
+
+    def test_request_finished_non_dspark_omits_dspark_draft_kv_tokens(self):
+        self.scheduler.vllm_config.speculative_config = types.SimpleNamespace(method="eagle3")
+        self.scheduler.group_transfer_info = [
+            types.SimpleNamespace(
+                tokens_per_block=16,
+                blocks_per_window=0,
+                is_state_group=False,
+            )
+        ]
+        request = self._make_remote_decode_request(
+            prompt_len=33,
+            request_id="req_eagle",
+        )
+
+        delay_free, params = self.scheduler.request_finished(
+            request,
+            ([10, 11, 12],),
+        )
+
+        self.assertTrue(delay_free)
+        self.assertIsNotNone(params)
+        assert params is not None
+        self.assertNotIn("dspark_draft_kv_tokens", params)
 
     def test_get_transfer_block_ids_trims_attention_mtp_blocks(self):
         self.scheduler.group_transfer_info = [

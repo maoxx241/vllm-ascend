@@ -133,6 +133,7 @@ from vllm_ascend.sample.sampler import AscendSampler
 from vllm_ascend.spec_decode import get_spec_decode_method
 from vllm_ascend.spec_decode.dflash_proposer import AscendDflashProposer
 from vllm_ascend.spec_decode.draft_proposer import AscendDraftModelProposer
+from vllm_ascend.spec_decode.dspark_proposer import AscendDSparkProposer
 from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer
 from vllm_ascend.spec_decode.extract_hidden_states_proposer import (
     AscendExtractHiddenStatesProposer,
@@ -623,6 +624,7 @@ class NPUModelRunner(GPUModelRunner):
             | AscendStep3p5MTPProposer
             | AscendDraftModelProposer
             | AscendDflashProposer
+            | AscendDSparkProposer
             | AscendSuffixDecodingProposer
             | AscendMedusaProposer
             | AscendExtractHiddenStatesProposer
@@ -642,6 +644,9 @@ class NPUModelRunner(GPUModelRunner):
                 elif self.speculative_config.method == "extract_hidden_states":
                     assert isinstance(self.drafter, AscendExtractHiddenStatesProposer)
                     self.use_aux_hidden_state_outputs = True
+                elif self.speculative_config.method == "dspark":
+                    assert isinstance(self.drafter, AscendDSparkProposer)
+                    self.use_aux_hidden_state_outputs = True
                 self.rejection_sampler = AscendRejectionSampler(self.sampler)
         self.discard_request_indices = self._make_buffer(self.max_num_reqs, dtype=torch.int64)
         self.num_discarded_requests = 0
@@ -650,7 +655,11 @@ class NPUModelRunner(GPUModelRunner):
         return get_spec_decode_method(self.speculative_config.method, self.vllm_config, self.device, self)
 
     def _eagle3_uses_aux_hidden_state(self) -> bool:
-        if self.speculative_config is None or self.speculative_config.method != "eagle3":
+        if self.speculative_config is None:
+            return False
+        if self.speculative_config.method == "dspark":
+            return True
+        if self.speculative_config.method != "eagle3":
             return False
 
         draft_model_config = self.speculative_config.draft_model_config
@@ -661,6 +670,25 @@ class NPUModelRunner(GPUModelRunner):
         if eagle_config is None:
             return True
         return eagle_config.get("use_aux_hidden_state", True)
+
+    def _get_eagle3_aux_layers_from_config(self) -> tuple[int, ...] | None:
+        speculative_config = self.speculative_config
+        if (
+            speculative_config is not None
+            and speculative_config.method == "dspark"
+            and speculative_config.draft_model_config is not None
+        ):
+            hf_config = speculative_config.draft_model_config.hf_config
+            layer_ids = getattr(hf_config, "target_layer_ids", None)
+            if not layer_ids:
+                dflash_config = getattr(hf_config, "dflash_config", None)
+                if isinstance(dflash_config, dict):
+                    layer_ids = dflash_config.get("target_layer_ids")
+            if layer_ids and isinstance(layer_ids, (list, tuple)):
+                # DSpark stores zero-based target layer outputs while the
+                # EAGLE3 capture interface names the following layer boundary.
+                return tuple(layer_id + 1 for layer_id in layer_ids)
+        return super()._get_eagle3_aux_layers_from_config()
 
     def _use_aclgraph(self) -> bool:
         return (
@@ -3246,7 +3274,13 @@ class NPUModelRunner(GPUModelRunner):
                 self.drafter.set_per_group_attn_metadata(
                     kv_cache_gid, cm.block_table_tensor, cm.slot_mapping)
             if self.speculative_config and spec_decode_common_attn_metadata is None:
-                if isinstance(self.drafter, AscendEagleProposer | AscendDraftModelProposer | AscendDflashProposer):
+                if isinstance(
+                    self.drafter,
+                    AscendEagleProposer
+                    | AscendDraftModelProposer
+                    | AscendDflashProposer
+                    | AscendDSparkProposer,
+                ):
                     if self.drafter.attn_layer_names[0] in kv_cache_group.layer_names:
                         spec_decode_common_attn_metadata = cm
                 else:
@@ -3815,11 +3849,33 @@ class NPUModelRunner(GPUModelRunner):
         ):
             assert isinstance(
                 self.drafter,
-                AscendEagleProposer | AscendDflashProposer | AscendDraftModelProposer,
+                AscendEagleProposer
+                | AscendDflashProposer
+                | AscendDSparkProposer
+                | AscendDraftModelProposer,
             )
-            block_size = (self.kernel_block_sizes[0] if isinstance(
-                self.kernel_block_sizes, list) else self.kernel_block_sizes)
-            self.drafter.initialize_attn_backend(kv_cache_config, block_size)
+            if isinstance(self.drafter, AscendDSparkProposer):
+                if isinstance(self.kernel_block_sizes, list):
+                    kernel_block_sizes = [
+                        sizes[0] if isinstance(sizes, list) else sizes
+                        for sizes in self.kernel_block_sizes
+                    ]
+                else:
+                    kernel_block_sizes = [self.kernel_block_sizes]
+                self.drafter.initialize_attn_backend(
+                    kv_cache_config,
+                    kernel_block_sizes,
+                )
+            else:
+                block_size = (
+                    self.kernel_block_sizes[0]
+                    if isinstance(self.kernel_block_sizes, list)
+                    else self.kernel_block_sizes
+                )
+                self.drafter.initialize_attn_backend(
+                    kv_cache_config,
+                    block_size,
+                )
 
         if has_kv_transfer_group():
             get_kv_transfer_group().register_kv_caches(kv_caches)
@@ -5021,7 +5077,10 @@ class NPUModelRunner(GPUModelRunner):
         ):
             assert isinstance(
                 self.drafter,
-                AscendEagleProposer | AscendDflashProposer | AscendExtractHiddenStatesProposer,
+                AscendEagleProposer
+                | AscendDflashProposer
+                | AscendDSparkProposer
+                | AscendExtractHiddenStatesProposer,
             )
             self.drafter.initialize_cudagraph_keys(cudagraph_mode)
 

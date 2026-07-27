@@ -126,6 +126,7 @@ class ReqMeta:
     num_prompt_blocks: int
     remote_block_size: int
     local_full_block_ids: BlockIds = tuple()
+    dspark_draft_kv_tokens: int = 0
 
 
 @dataclass(frozen=True)
@@ -1504,6 +1505,7 @@ class MooncakeConnectorMetadata(KVConnectorMetadata):
             num_prompt_blocks=kv_transfer_params.get("num_prompt_blocks", 0),
             remote_block_size=kv_transfer_params.get("remote_block_size", 0),
             local_full_block_ids=local_full_block_ids or tuple(),
+            dspark_draft_kv_tokens=kv_transfer_params.get("dspark_draft_kv_tokens", 0),
         )
 
 
@@ -1813,6 +1815,23 @@ class MooncakeConnectorScheduler:
             token_ids = request.prompt_token_ids or []
             actual = self._state_prefill_token_count(len(token_ids))
             params["num_computed_tokens"] = num_computed_tokens
+            speculative_config = self.vllm_config.speculative_config
+            if speculative_config is not None and speculative_config.method == "dspark":
+                draft_kv_tokens = int(params.get("dspark_draft_kv_tokens", 0))
+                if draft_kv_tokens < actual:
+                    logger.warning(
+                        "Skipping incomplete DSpark remote KV for request %s: draft_kv_tokens=%d, required_tokens=%d.",
+                        request.request_id,
+                        draft_kv_tokens,
+                        actual,
+                    )
+                    # Do not let update_state_after_alloc enqueue a worker read
+                    # for target KV whose corresponding DSpark draft KV is
+                    # missing. Keep the scheduler's local prefix and compute
+                    # the remaining suffix on D instead.
+                    params["remote_block_ids"] = tuple()
+                    params["do_remote_prefill"] = False
+                    return 0, False
             count = max(actual - num_computed_tokens, 0)
             if count > 0:
                 return count, True
@@ -1912,7 +1931,7 @@ class MooncakeConnectorScheduler:
             logger.info("Delaying free of %d blocks for request %s", sum(computed_block_lens), request.request_id)
             self._reqs_need_send[request.request_id] = time.time()
 
-        return delay_free_blocks, dict(
+        transfer_params = dict(
             do_remote_prefill=True,
             do_remote_decode=False,
             remote_block_ids=computed_block_ids,
@@ -1928,6 +1947,14 @@ class MooncakeConnectorScheduler:
             num_prompt_blocks=num_prompt_blocks,
             remote_block_size=self.block_size,
         )
+        speculative_config = self.vllm_config.speculative_config
+        if speculative_config is not None and speculative_config.method == "dspark":
+            # ``prompt_token_ids`` already reflects any P-side truncation.
+            # For Kimi K3's state-cache path this therefore reports the
+            # actually transferred draft-KV coverage (original N - 1).
+            transfer_params["dspark_draft_kv_tokens"] = len(request.prompt_token_ids)
+
+        return delay_free_blocks, transfer_params
 
     def _port_offset_from_handshake_metadata(
         self,

@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+from contextlib import contextmanager
+
 import numpy as np
 import torch
+from vllm.forward_context import get_forward_context
 
 
 def update_num_computed_tokens_for_batch_change(
@@ -71,3 +74,19 @@ def correct_optimistic_seq_lens_cpu(
     # at zero via the mask multiply.
     correction = (prev_drafts + 1 - valid_counts) * participating
     optimistic_seq_lens_cpu_np[:num_reqs] -= correction.astype(optimistic_seq_lens_cpu_np.dtype, copy=False)
+
+
+@contextmanager
+def disable_flash_comm_v1_for_dspark_markov():
+    """Keep DSpark Markov embeddings full while its logits are full-sequence."""
+    forward_context = get_forward_context()
+    if forward_context is None or not hasattr(forward_context, "flash_comm_v1_enabled"):
+        yield
+        return
+
+    previous = forward_context.flash_comm_v1_enabled
+    try:
+        forward_context.flash_comm_v1_enabled = False
+        yield
+    finally:
+        forward_context.flash_comm_v1_enabled = previous
