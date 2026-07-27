@@ -838,7 +838,7 @@ else:
                         bias=None,
                         output_dtype=original_dtype,
                     )
-                elif has_quantized_shared and self.quant_type == QuantType.W4A8MXFP:
+                elif has_quantized_shared and self.quant_type in (QuantType.W8A8MXFP, QuantType.W4A8MXFP):
                     original_dtype = hidden_states.dtype
                     # Execute dynamic quant concurrently with MoE gate.
                     quantized_x, pertoken_scale = torch_npu.npu_dynamic_mx_quant(
