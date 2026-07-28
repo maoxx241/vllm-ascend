@@ -34,7 +34,13 @@ extern "C" __global__ __aicore__ void chunk_gated_delta_rule_fwd_h(GM_ADDR k, GM
                                                          GM_ADDR final_state, GM_ADDR workspace, GM_ADDR tiling)
 {
     (void)gk;
+    // Host tiling sets keys 1/2 for vHeadDim; register them so binary lookup succeeds.
     KERNEL_TASK_TYPE_DEFAULT(KERNEL_TYPE_MIX_AIC_1_2);
+    if (TILING_KEY_IS(1)) {
+        KERNEL_TASK_TYPE(1, KERNEL_TYPE_MIX_AIC_1_2);
+    } else if (TILING_KEY_IS(2)) {
+        KERNEL_TASK_TYPE(2, KERNEL_TYPE_MIX_AIC_1_2);
+    }
 
     GM_ADDR user = AscendC::GetUserWorkspace(workspace);
 
