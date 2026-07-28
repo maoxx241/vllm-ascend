@@ -15,6 +15,8 @@
 # This file is a part of the vllm-ascend project.
 #
 
+from dataclasses import dataclass
+
 import torch
 import torch_npu
 from vllm.model_executor.layers.activation import (
@@ -24,6 +26,20 @@ from vllm.model_executor.layers.activation import (
     SwigluOAIAndMul,
     SwigluStepAndMul,
 )
+
+
+@dataclass(frozen=True, slots=True)
+class SituActivationConfig:
+    """Runtime parameters for Kimi's SiTU gated activation."""
+
+    beta: float = 1.0
+    linear_beta: float | None = None
+
+    def __post_init__(self) -> None:
+        if self.beta <= 0:
+            raise ValueError(f"SiTU beta must be positive, got {self.beta}.")
+        if self.linear_beta is not None and self.linear_beta <= 0:
+            raise ValueError(f"SiTU linear_beta must be positive, got {self.linear_beta}.")
 
 
 class AscendQuickGELU(QuickGELU):
