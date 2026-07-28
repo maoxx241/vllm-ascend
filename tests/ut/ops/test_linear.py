@@ -196,11 +196,34 @@ class TestColumnParallelOpDispatch(unittest.TestCase):
         self.assertIsNone(self._get_column_op("model.layers.0.mlp.share_expert.gate_up_proj"))
         self.assertIsNone(self._get_column_op("model.layers.0.mlp.shared_expert.gate_up_proj"))
 
-    def test_g_proj_matches_sp_column_path(self):
-        """g_proj (Step3p5 attention gate) is included in SP column prefixes."""
+    def test_step3_g_proj_matches_sp_column_path(self):
+        """Only Step3's g_proj is a sequence-parallel attention gate."""
         self._patches.append(patch("vllm_ascend.ops.linear_op.enable_sp", return_value=True))
         self._patches[-1].start()
-        self.assertIsNotNone(self._get_column_op("model.layers.0.self_attn.g_proj"))
+        model_config = MagicMock()
+        model_config.hf_config.model_type = "step3p5"
+        model_config.hf_text_config.model_type = "step3p5"
+        with patch(
+            "vllm_ascend.ops.linear_op.get_current_vllm_config",
+            return_value=MagicMock(model_config=model_config),
+        ):
+            self.assertIsNotNone(self._get_column_op("model.layers.0.self_attn.g_proj"))
+
+    def test_non_step3_g_proj_does_not_match_sp_column_path(self):
+        self._patches.append(patch("vllm_ascend.ops.linear_op.enable_sp", return_value=True))
+        self._patches[-1].start()
+        for model_type in ("kimi_k3", "deepseek_v4"):
+            model_config = MagicMock()
+            model_config.hf_config.model_type = model_type
+            model_config.hf_text_config.model_type = model_type
+            with (
+                self.subTest(model_type=model_type),
+                patch(
+                    "vllm_ascend.ops.linear_op.get_current_vllm_config",
+                    return_value=MagicMock(model_config=model_config),
+                ),
+            ):
+                self.assertIsNone(self._get_column_op("model.layers.0.self_attn.g_proj"))
 
     def test_multimodal_encoder_prefix_skips_sp_column(self):
         """Multimodal encoder variants should not enter the SP column path."""
@@ -250,14 +273,15 @@ class TestRowParallelOpDispatch(unittest.TestCase):
 
 
 class TestGetParallelOpShareExpert(unittest.TestCase):
-    """Tests for get_parallel_op — share_expert/shared_expert disables TP."""
+    """Tests for independent shared-expert weight placement."""
 
     def setUp(self):
         self.mock_layer = MagicMock()
         self.mock_group = MagicMock()
+        self.mock_group.rank_in_group = 1
+        self.mock_group.world_size = 4
         self._patches = [
             patch("vllm_ascend.ops.linear_op.get_tp_group", return_value=self.mock_group),
-            patch("vllm_ascend.ops.linear_op.shared_expert_dp_enabled", return_value=True),
         ]
         for p in self._patches:
             p.start()
@@ -266,10 +290,14 @@ class TestGetParallelOpShareExpert(unittest.TestCase):
         for p in self._patches:
             p.stop()
 
-    def _call(self, prefix: str):
+    def _call(self, prefix: str, *, shared_expert_dp: bool):
         from vllm_ascend.ops.linear_op import get_parallel_op
 
-        return get_parallel_op(False, prefix, self.mock_layer, False)
+        with patch(
+            "vllm_ascend.ops.linear_op.shared_expert_dp_enabled",
+            return_value=shared_expert_dp,
+        ):
+            return get_parallel_op(False, prefix, self.mock_layer, False)
 
     def test_share_expert_disables_tp(self):
         """share_expert / shared_expert / shared_experts → (None, 0, 1)."""
@@ -278,10 +306,19 @@ class TestGetParallelOpShareExpert(unittest.TestCase):
             "model.layers.0.mlp.shared_expert.gate_up_proj",
             "model.layers.0.mlp.shared_experts.gate_up_proj",
         ):
-            custom_op, tp_rank, tp_size = self._call(prefix)
+            custom_op, tp_rank, tp_size = self._call(prefix, shared_expert_dp=True)
             self.assertIsNone(custom_op)
             self.assertEqual(tp_rank, 0)
             self.assertEqual(tp_size, 1)
+
+    def test_flashcomm_without_shared_expert_dp_keeps_tp_shards(self):
+        custom_op, tp_rank, tp_size = self._call(
+            "model.layers.0.mlp.shared_experts.gate_up_proj",
+            shared_expert_dp=False,
+        )
+        self.assertIsNone(custom_op)
+        self.assertEqual(tp_rank, 1)
+        self.assertEqual(tp_size, 4)
 
 
 if __name__ == "__main__":

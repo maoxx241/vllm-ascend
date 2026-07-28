@@ -45,6 +45,7 @@ import torch
 import torch.distributed as dist
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+from vllm.config import get_current_vllm_config
 from vllm.distributed import (
     split_tensor_along_last_dim,
     tensor_model_parallel_all_reduce,
@@ -452,6 +453,23 @@ def _should_skip_sp_for_multimodal_encoder(prefix: str) -> bool:
     return any(part in prefix for part in _MULTIMODAL_ENCODER_PREFIX_PARTS)
 
 
+_STEP3_GATED_ATTENTION_MODEL_TYPES = frozenset({"step3p5", "step3p5_mtp", "step3p7"})
+
+
+def _uses_step3_gated_attention() -> bool:
+    """Return whether ``g_proj`` is Step3's sequence-parallel attention gate."""
+    try:
+        model_config = get_current_vllm_config().model_config
+    except AssertionError:
+        return False
+
+    model_types = {
+        getattr(getattr(model_config, config_name, None), "model_type", None)
+        for config_name in ("hf_config", "hf_text_config")
+    }
+    return bool(model_types & _STEP3_GATED_ATTENTION_MODEL_TYPES)
+
+
 def _get_column_parallel_op(
     prefix, layer
 ) -> MLPColumnParallelOp | DSV4OProjColumnParallelOp | SequenceColumnParallelOp | ShardedCPColumnParallelOp | None:
@@ -472,11 +490,12 @@ def _get_column_parallel_op(
             "conv1d",  # gated deltanet of Qwen3 Next
             "query_key_value",  # qkv linear of Bailing
             "indexer_proj",  # indexer linear of M3
-            "g_proj",  # attention gate projection of Step3p5
         ]
         for a_prefix in sp_column_prefix:
             if a_prefix in prefix:
                 return SequenceColumnParallelOp(layer)
+        if prefix.rsplit(".", 1)[-1] == "g_proj" and _uses_step3_gated_attention():
+            return SequenceColumnParallelOp(layer)
 
     return None
 
