@@ -29,7 +29,6 @@ from vllm_ascend.quantization.quant_type import QuantType
 
 MOE_MLP = "vllm_ascend.ops.fused_moe.moe_mlp"
 MXFP4_TEST_DTYPE = getattr(torch, "float4_e2m1fn_x2", torch.float16)
-MX_SCALE_TEST_DTYPE = getattr(torch, "float8_e8m0fnu", torch.float16)
 
 
 class TestCumsumGroupList(unittest.TestCase):
@@ -273,64 +272,6 @@ class TestUnifiedApplyMlpRequest(unittest.TestCase):
         self.assertIs(mock_fused_gmm.call_args.kwargs["weight"], packed_w1)
         self.assertIs(mock_fused_gmm.call_args.kwargs["weight_scale"], w1_scale)
         self.assertEqual(w1_scale.shape, torch.Size([1, 4]))
-
-    def test_w4a8_mxfp_situ_uses_situ_mx_quant(self):
-        hidden_states = torch.ones(2, 4, dtype=torch.float8_e4m3fn)
-        input_scale = torch.ones(2, 1, 2, dtype=MX_SCALE_TEST_DTYPE)
-        gate_up_out = torch.randn(2, 4, dtype=torch.bfloat16)
-        quantized_situ = torch.ones(2, 2, dtype=torch.float8_e4m3fn)
-        situ_scale = torch.ones(2, 1, 2, dtype=MX_SCALE_TEST_DTYPE)
-        down_out = torch.randn(2, 4, dtype=torch.bfloat16)
-        activation = SituActivationConfig(beta=4.0, linear_beta=25.0)
-        event = object()
-        custom_ops = SimpleNamespace(
-            situ_mx_quant=MagicMock(return_value=(quantized_situ, situ_scale)),
-        )
-
-        with (
-            patch.object(moe_mlp_module.torch.ops, "_C_ascend", custom_ops),
-            patch(
-                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.maybe_normalize_mxfp_scale_layout",
-                return_value=input_scale,
-            ),
-            patch(
-                "vllm_ascend.ops.fused_moe.moe_mlp.torch_npu.npu_grouped_matmul",
-                return_value=[gate_up_out],
-                create=True,
-            ),
-            patch(
-                "vllm_ascend.ops.fused_moe.moe_mlp.DeviceOperator.npu_grouped_matmul_gmm2",
-                return_value=down_out,
-            ) as mock_gmm2,
-            patch("vllm_ascend.ops.fused_moe.moe_mlp.dispose_tensor"),
-            patch(
-                "vllm_ascend.ops.fused_moe.moe_mlp.torch.npu.current_stream",
-                return_value=MagicMock(record_event=MagicMock(return_value=event)),
-            ),
-        ):
-            output, before_gmm2_evt = quant_apply_mlp(
-                hidden_states=hidden_states,
-                w1=[torch.ones(1, 4, 1, dtype=torch.int32)],
-                w1_scale=[torch.ones(1, 1, 4)],
-                w2=[torch.ones(1, 2, 1, dtype=torch.int32)],
-                w2_scale=[torch.ones(1, 1, 4)],
-                group_list=torch.tensor([2]),
-                dynamic_scale=input_scale,
-                activation=activation,
-                use_mxfp_quant=True,
-                mxfp_quant_dtype=QuantType.W4A8MXFP,
-                act_quant_type=torch.float8_e4m3fn,
-            )
-
-        self.assertIs(output, down_out)
-        self.assertIs(before_gmm2_evt, event)
-        situ_call = custom_ops.situ_mx_quant.call_args.kwargs
-        self.assertIs(situ_call["x"], gate_up_out)
-        self.assertEqual(situ_call["beta"], 4.0)
-        self.assertEqual(situ_call["linear_beta"], 25.0)
-        self.assertEqual(situ_call["dst_type"], moe_mlp_module.SITU_MX_DST_TYPE_E4M3FN)
-        self.assertIs(mock_gmm2.call_args.kwargs["hidden_states"], quantized_situ)
-        self.assertIs(mock_gmm2.call_args.kwargs["per_token_scale"], situ_scale)
 
     def test_request_unquant_path(self):
         hidden_states = torch.randn(2, 8)

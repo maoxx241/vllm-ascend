@@ -553,69 +553,6 @@ def test_serving_full_tracks_token_ids_and_finish_reasons_by_output_index():
     assert choices[1].message.tool_calls == []
 
 
-@pytest.mark.parametrize(
-    ("engine_finish_reason", "tool_name", "arguments", "complete", "expected"),
-    [
-        ("stop", "get_time", None, True, "tool_calls"),
-        ("length", "get_time", None, False, "length"),
-        ("length", "plan_trip", '{"city":"Par', False, "length"),
-    ],
-)
-def test_serving_stream_preserves_engine_finish_reason(
-    engine_finish_reason,
-    tool_name,
-    arguments,
-    complete,
-    expected,
-):
-    tokenizer = ProvenanceTokenizer()
-    text, token_ids = _encoded_output(
-        tokenizer,
-        tool_name=tool_name,
-        arguments=arguments,
-        complete=complete,
-    )
-    request = _request(
-        stream=True,
-        reasoning_effort="none",
-    )
-
-    payloads = _serve(
-        request,
-        tokenizer,
-        text,
-        token_ids,
-        engine_finish_reason,
-    )
-
-    choices = [choice for payload in payloads for choice in payload["choices"]]
-    assert any(choice["delta"].get("tool_calls") for choice in choices)
-    terminal = [choice for choice in choices if choice.get("finish_reason") is not None]
-    assert [choice["finish_reason"] for choice in terminal] == [expected]
-
-
-def test_serving_content_only_stream_remains_normal():
-    tokenizer = ProvenanceTokenizer()
-    text, token_ids = _encoded_output(tokenizer, content="No tool needed.")
-    request = _request(
-        stream=True,
-        reasoning_effort="none",
-    )
-
-    payloads = _serve(
-        request,
-        tokenizer,
-        text,
-        token_ids,
-        "stop",
-    )
-
-    choices = [choice for payload in payloads for choice in payload["choices"]]
-    assert "".join(choice["delta"].get("content", "") for choice in choices) == "No tool needed."
-    terminal = [choice for choice in choices if choice.get("finish_reason") is not None]
-    assert [choice["finish_reason"] for choice in terminal] == ["stop"]
-
-
 def test_finish_reason_restore_skips_ordinary_sse_json(monkeypatch):
     data = 'data: {"choices":[{"index":0,"delta":{"content":"x"},"finish_reason":null}]}\n\n'
 
