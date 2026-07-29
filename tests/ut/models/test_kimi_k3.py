@@ -1,18 +1,27 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
+import pytest
 import torch
 from torch import nn
 
 from vllm_ascend.models import kimi_k3
 from vllm_ascend.models.kimi_k3 import (
     AscendKimiK3ForCausalLM,
+    AscendKimiK3ForConditionalGeneration,
     KimiK3MLP,
     KimiK3MoE,
+    KimiK3TextModel,
+    KimiK3VisionEncoderLayer,
     _move_module_to_device,
 )
 from vllm_ascend.ops.activation import AscendSituAndMul, SituActivationConfig
+from vllm_ascend.transformers_utils.configs.kimi_k3 import (
+    KimiK3Config,
+    KimiK3VisionConfig,
+)
 
 
 def test_kimi_k3_model_declares_checkpoint_packing_contract():
