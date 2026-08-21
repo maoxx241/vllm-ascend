@@ -249,6 +249,50 @@ def test_kimi_text_model_retains_upstream_checkpoint_packing():
     }
 
 
+def test_kimi_mixed_kda_gate_weights_load_into_float_packed_projection(monkeypatch):
+    model = AscendKimiLinearModel.__new__(AscendKimiLinearModel)
+    nn.Module.__init__(model)
+    layer = nn.Module()
+    layer.self_attn = nn.Module()
+    layer.self_attn.in_proj_gfab = nn.Module()
+    layer.self_attn.in_proj_gfab.load_shard_weight = MagicMock()
+    packed_weight = nn.Parameter(torch.empty(6, 4))
+    layer.self_attn.in_proj_gfab.register_parameter("weight", packed_weight)
+    layer.router = nn.Linear(4, 1, bias=False)
+    model.layers = nn.ModuleList([layer])
+
+    remaining = []
+
+    def fake_upstream_load_weights(_self, weights):
+        remaining.extend(weights)
+        return {name for name, *_ in remaining}
+
+    monkeypatch.setattr(
+        kimi_k3.UpstreamKimiLinearModel,
+        "load_weights",
+        fake_upstream_load_weights,
+    )
+    source_weights = [
+        ("layers.0.router.weight", torch.full((1, 4), 0.5)),
+        ("layers.0.self_attn.g_proj.weight", torch.full((1,), 1.0)),
+        ("layers.0.self_attn.f_a_proj.weight", torch.full((1,), 2.0)),
+        ("layers.0.self_attn.b_proj.weight", torch.full((1,), 3.0)),
+        ("layers.0.self_attn.o_proj.weight", torch.full((1,), 4.0)),
+    ]
+
+    loaded = model.load_weights(iter(source_weights))
+
+    weight_loader = layer.self_attn.in_proj_gfab.load_shard_weight
+    assert [call.args[2] for call in weight_loader.call_args_list] == [0, 1, 2]
+    assert [call.args[1].item() for call in weight_loader.call_args_list] == [1.0, 2.0, 3.0]
+    assert remaining == [source_weights[0], source_weights[-1]]
+    assert loaded == {
+        "layers.0.self_attn.in_proj_gfab.weight",
+        "layers.0.router.weight",
+        "layers.0.self_attn.o_proj.weight",
+    }
+
+
 def test_kimi_text_model_layer_factory_accepts_prefix_keyword(monkeypatch):
     config = SimpleNamespace(
         vocab_size=64,
@@ -397,6 +441,38 @@ def _make_k3_dspark_for_embedding_test() -> AscendK3DSparkForCausalLM:
     nn.Module.__init__(model)
     model.model = _DraftTokenEmbedder()
     return model
+
+
+def test_k3_dspark_load_weights_keeps_per_layer_context_kv(monkeypatch):
+    model = AscendK3DSparkForCausalLM.__new__(AscendK3DSparkForCausalLM)
+    nn.Module.__init__(model)
+    source_weights = [
+        (
+            "layers.0.self_attn.kv_a_proj_with_mqa.weight",
+            torch.ones(1, 1),
+        )
+    ]
+    seen_names = []
+
+    class CapturingLoader:
+        def __init__(self, loaded_model, *, skip_substrs):
+            assert loaded_model is model
+            assert skip_substrs == list(model.checkpoint_skip_substrs)
+
+        def load_weights(self, weights, *, mapper):
+            assert mapper is model.hf_to_vllm_mapper
+            seen_names.extend(name for name, _ in weights)
+            return {"model.layers.0.self_attn.fused_qkv_a_proj.weight"}
+
+    monkeypatch.setattr(
+        "vllm_ascend.models.kimi_k3_dspark.AutoWeightsLoader",
+        CapturingLoader,
+    )
+
+    loaded = model.load_weights(iter(source_weights))
+
+    assert seen_names == [source_weights[0][0]]
+    assert loaded == {"model.layers.0.self_attn.fused_qkv_a_proj.weight"}
 
 
 def test_k3_dspark_embed_input_ids_keeps_text_only_path():
