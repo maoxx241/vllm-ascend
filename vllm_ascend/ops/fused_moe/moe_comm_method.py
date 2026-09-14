@@ -74,6 +74,7 @@ class FusedExpertsResult:
     # For dynamic_eplb
     group_list_type: int = 1
     expert_tokens: torch.Tensor | None = None
+    eplb_load_collected: bool = False
 
 
 class MoECommMethod(ABC):
@@ -85,6 +86,7 @@ class MoECommMethod(ABC):
         self.token_dispatcher = self._get_token_dispatcher()
         self.prepare_finalize = self._get_prepare_finalize()
         self.lora_context = None
+        self.eplb_load_stream = torch.npu.Stream() if get_ascend_config().eplb_config.dynamic_eplb else None
 
     def set_lora_context(self, lora_context) -> None:
         self.lora_context = lora_context
@@ -144,12 +146,22 @@ class MoECommMethod(ABC):
             token_dispatch_output=token_dispatch_output,
             moe_config=self.moe_config,
         )
+        layer = fused_experts_input.layer
+        collect_eplb = (
+            self.eplb_load_stream is not None
+            and layer is not None
+            and getattr(layer, "dynamic_eplb", False)
+            and quant_method is not None
+            and mlp_compute_input.lora_context is None
+        )
         if quant_method is None:
             # Legacy path (310P): the comm method overrides ``_apply_mlp`` with
             # its own MLP implementation.
             mlp_output, before_gmm2_evt = self._apply_mlp(mlp_compute_input)
         else:
-            mlp_output, before_gmm2_evt = apply_moe_mlp(mlp_compute_input, quant_method)
+            mlp_output, before_gmm2_evt = apply_moe_mlp(
+                mlp_compute_input, quant_method, eplb_load_stream=self.eplb_load_stream if collect_eplb else None
+            )
 
         before_combine_evt = torch.npu.current_stream().record_event()
         routed_out = self.token_dispatcher.token_combine(
@@ -164,6 +176,7 @@ class MoECommMethod(ABC):
             before_combine_evt=before_combine_evt,
             group_list_type=token_dispatch_output.group_list_type,
             expert_tokens=token_dispatch_output.group_list,
+            eplb_load_collected=collect_eplb,
         )
 
     def _apply_mlp(self, mlp_compute_input: MoEMlpComputeInput) -> torch.Tensor:

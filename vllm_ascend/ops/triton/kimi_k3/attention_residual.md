@@ -24,6 +24,8 @@ output = sum(weight_s * v_s)
 | `proj` | `[1, hidden_size]` | 将归一化 residual 投影为标量分数的线性层。 |
 | `norm` | `[hidden_size]` | RMSNorm 权重及 epsilon。 |
 | `num_valid_blocks` | `int` | `block_residual` 中有效 block 的数量。 |
+| `addend` | `[num_tokens, hidden_size]`，可选 | 与 prefix 相加的 attention 输出。 |
+| `prefix_sum_out` | `[num_tokens, hidden_size]`，可选 | 提供 `addend` 时必填；保存更新后的 prefix，供后续 MLP 残差相加使用。 |
 | 返回值 | `[num_tokens, hidden_size]` | 所有有效 residual stream 的加权和。 |
 
 ## 实现约束
@@ -34,4 +36,8 @@ output = sum(weight_s * v_s)
   `next_power_of_2(B + 1)`，因此 `NB` 始终覆盖 `B` 个 block residual
   加一条 prefix stream。
 - softmax 计算使用 FP32，输出再转换为 `prefix_sum` 的 dtype。
+- 融合加法先舍入到 prefix 的 dtype，再参与 RMSNorm，与独立 BF16 add
+  一致；写入独立的 `prefix_sum_out`，保留 DSpark 已保存的输入 prefix。
+- 93 层、residual block size 12 时，85 个非写块层的 attention 残差加法
+  融入当前 kernel；层尾的 93 个 MLP 残差加法保持不变。
 - 启动 grid 使用设备 vector core 数，每个 program 处理一段连续 token。

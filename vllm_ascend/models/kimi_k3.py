@@ -13,7 +13,7 @@ from copy import copy
 import torch
 import vllm.envs as envs
 from torch import nn
-from vllm.config import CacheConfig, VllmConfig
+from vllm.config import CacheConfig, VllmConfig, get_current_vllm_config
 from vllm.distributed import (
     get_pp_group,
     get_tensor_model_parallel_world_size,
@@ -23,6 +23,7 @@ from vllm.model_executor.layers.fused_moe import FusedMoEFactory
 from vllm.model_executor.layers.fused_moe.router.gate_linear import GateLinear
 from vllm.model_executor.layers.layernorm import RMSNorm
 from vllm.model_executor.layers.linear import (
+    DCPGroupColumnParallelLinear,
     ReplicatedLinear,
 )
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
@@ -95,19 +96,32 @@ def _apply_ascend_attn_res(
     proj: ReplicatedLinear,
     norm: RMSNorm,
     num_valid_blocks: int,
+    addend: torch.Tensor | None = None,
+    prefix_sum_out: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Apply Kimi's canonical learned residual mixture with native ops."""
-    if num_valid_blocks <= 0:
-        return prefix_sum
-
-    if apply_attn_res is not None and prefix_sum.device.type == "npu" and prefix_sum.numel() > 0:
+    if (
+        num_valid_blocks > 0
+        and apply_attn_res is not None
+        and prefix_sum.device.type == "npu"
+        and prefix_sum.numel() > 0
+    ):
         return apply_attn_res(
             prefix_sum,
             block_residual,
             proj,
             norm,
             num_valid_blocks,
+            addend,
+            prefix_sum_out,
         )
+
+    if addend is not None:
+        assert prefix_sum_out is not None
+        torch.add(prefix_sum, addend, out=prefix_sum_out)
+        prefix_sum = prefix_sum_out
+    if num_valid_blocks <= 0:
+        return prefix_sum
 
     values = torch.cat(
         (
@@ -316,6 +330,28 @@ class AscendKimiMLAAttention(UpstreamKimiMLAAttention):
             prefix=prefix,
         )
         attention_layer = self._attention_layer
+        parallel_config = get_current_vllm_config().parallel_config
+        qrep_requested = (
+            envs.VLLM_DCP_Q_REPLICATE if envs.is_set("VLLM_DCP_Q_REPLICATE") else parallel_config.dcp_q_replicate
+        )
+        if (
+            qrep_requested
+            and parallel_config.decode_context_parallel_size > 1
+            and parallel_config.prefill_context_parallel_size == 1
+        ):
+            # Replace the projection before checkpoint loading. Keep its model
+            # attribute and the backend reference on the same weight module.
+            name = "q_b_proj" if q_lora_rank is not None else "q_proj"
+            projection = DCPGroupColumnParallelLinear(
+                q_lora_rank if q_lora_rank is not None else hidden_size,
+                num_heads * (qk_nope_head_dim + qk_rope_head_dim),
+                bias=False,
+                quant_config=quant_config,
+                prefix=f"{prefix}.{name}",
+            )
+            setattr(self, name, projection)
+            attention_layer.impl.q_proj = projection
+            attention_layer.impl.enable_mlapo = False
         if disable_mlapo:
             attention_layer.impl.enable_mlapo = False
         if not use_rope and not non_causal_multi_token_decode:
@@ -370,6 +406,12 @@ class AscendKimiMLAAttention(UpstreamKimiMLAAttention):
     @property
     def kv_cache(self):
         return self._attention_layer.kv_cache
+
+    @kv_cache.setter
+    def kv_cache(self, value):
+        # ModelRunner V2 detaches cache storage through every model module
+        # during shutdown. Forward that assignment to the owning MLA layer.
+        self._attention_layer.kv_cache = value
 
     @property
     def kv_cache_dtype(self):
@@ -545,15 +587,21 @@ class AscendKimiDecoderLayer(UpstreamKimiDecoderLayer):
         if self.use_sequence_parallel:
             hidden_states = sp_reduce_scatter(hidden_states)
 
-        prefix_sum = hidden_states if prefix_sum is None else prefix_sum + hidden_states
         mlp_valid_blocks = self.prev_valid_blocks + (1 if self.is_block_write_layer else 0)
+        addend = hidden_states if prefix_sum is not None else None
+        prefix_sum = hidden_states if prefix_sum is None else prefix_sum
+        # Keep the input prefix intact: DSpark may retain an alias to it.
+        next_prefix_sum = torch.empty_like(prefix_sum) if addend is not None else prefix_sum
         hidden_states = _apply_ascend_attn_res(
             prefix_sum,
             block_residual,
             self.mlp_res_proj,
             self.mlp_res_norm,
             mlp_valid_blocks,
+            addend,
+            next_prefix_sum,
         )
+        prefix_sum = next_prefix_sum
         hidden_states = self.post_attention_layernorm(hidden_states)
         hidden_states = self.mlp(hidden_states)
         hidden_states = prefix_sum + hidden_states
@@ -765,6 +813,10 @@ class AscendKimiLinearModel(UpstreamKimiLinearModel):
             self.output_attn_res_norm,
             attn_res_block_num,
         )
+        # The loop captures layer inputs and excludes end_layer. Capture the
+        # final requested state after materializing the output residual.
+        if self.dspark_aux_capture_materialized and self.end_layer in self.aux_hidden_state_layers:
+            aux_hidden_states.append(hidden_states)
         if self.use_sequence_parallel:
             if aux_hidden_states:
                 hidden_size = hidden_states.shape[-1]

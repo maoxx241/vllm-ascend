@@ -25,6 +25,7 @@ from vllm.compilation import breakable_cudagraph
 from vllm.config import VllmConfig
 from vllm.config.compilation import CompilationMode, CUDAGraphMode
 from vllm.sequence import IntermediateTensors
+from vllm.utils.platform_utils import is_pin_memory_available
 from vllm.v1.core.sched.output import SchedulerOutput
 from vllm.v1.kv_cache_interface import KVCacheConfig
 from vllm.v1.worker.gpu import model_runner as vllm_model_runner
@@ -42,6 +43,7 @@ from vllm.v1.worker.gpu.model_runner import (
     GPUModelRunner,
 )
 
+from vllm_ascend import envs as ascend_envs
 from vllm_ascend.ascend_config import get_ascend_config
 from vllm_ascend.ascend_forward_context import (
     MoECommType,
@@ -58,10 +60,11 @@ from vllm_ascend.core.profiling_chunk_predictor import (
     _start_profiling_chunk_timing,
 )
 from vllm_ascend.ops.rotary_embedding import set_cos_and_sin, update_cos_sin
-from vllm_ascend.utils import lmhead_tp_enable, set_potential_max_tokens, vllm_version_is
-from vllm_ascend.worker.utils import disable_compilation
+from vllm_ascend.utils import is_pd_decode_node, lmhead_tp_enable, set_potential_max_tokens, vllm_version_is
+from vllm_ascend.worker.device_metadata import DeviceMetadataExecutor
+from vllm_ascend.worker.utils import AscendKVBlockZeroer, disable_compilation
 from vllm_ascend.worker.v2.aclgraph_utils import ModelAclGraphManager
-from vllm_ascend.worker.v2.attn_utils import build_attn_state
+from vllm_ascend.worker.v2.attn_utils import build_attn_state, device_metadata_context
 from vllm_ascend.worker.v2.eplb import AscendEPLBController
 from vllm_ascend.worker.v2.input_batch import AscendInputBatch, AscendInputBuffers
 from vllm_ascend.worker.v2.kvpp import KVPPRuntime
@@ -128,9 +131,11 @@ class NPUModelRunner(GPUModelRunner):
             parallel_config,
             device,
             load_collection_phase=(load_collection_phase if parallel_config.enable_eplb else "all"),
+            legacy_config=(self.ascend_config.eplb_config if self.ascend_config.eplb_config.dynamic_eplb else None),
         )
 
         self.update_stream = None
+        self.device_metadata_executor = DeviceMetadataExecutor() if ascend_envs.VLLM_ASCEND_ENABLE_FLASH_MLA else None
         if self.compilation_config.cudagraph_mode.has_full_cudagraphs():
             self.update_stream = torch.npu.Stream()
 
@@ -259,7 +264,7 @@ class NPUModelRunner(GPUModelRunner):
         # Only target-model layers determine whether FIA is in use. This flag
         # is used for adaptive verification handling.
         draft_layer_names: set[str] = getattr(self.speculator, "draft_attn_layer_names", set())
-        self.use_fia = any(
+        self.use_fia = not ascend_envs.VLLM_ASCEND_ENABLE_FLASH_MLA and any(
             (group.backend is AscendAttentionBackend or group.backend is AscendMLABackend)
             and any(layer_name not in draft_layer_names for layer_name in group.layer_names)
             for groups in self.attn_groups
@@ -275,6 +280,19 @@ class NPUModelRunner(GPUModelRunner):
             static_forward_context=self.compilation_config.static_forward_context,
         )
         self.model_state.kvpp_runtime = self.kvpp
+
+    def _init_kv_zero_meta(self) -> None:
+        if not ascend_envs.VLLM_ASCEND_ENABLE_FLASH_MLA:
+            return super()._init_kv_zero_meta()
+        self.kv_block_zeroer = AscendKVBlockZeroer(self.device, pin_memory=is_pin_memory_available())
+        self.kv_block_zeroer.init_meta(
+            attn_groups_iter=(group for groups in self.attn_groups for group in groups),
+            kernel_block_sizes=[[size] for size in self.kernel_block_sizes],
+            cache_dtype=self.cache_config.cache_dtype,
+            runner_only_attn_layers=set(),
+            static_forward_context=self.compilation_config.static_forward_context,
+            page_strided=True,
+        )
 
     @torch.inference_mode()
     def execute_model(
@@ -295,15 +313,17 @@ class NPUModelRunner(GPUModelRunner):
         )
 
         self.model_state.kvpp_is_dummy_run = dummy_run or is_profile
-        output = super().execute_model(
-            scheduler_output,
-            intermediate_tensors=intermediate_tensors,
-            dummy_run=dummy_run,
-            skip_attn_for_dummy_run=skip_attn_for_dummy_run,
-            is_profile=is_profile,
-            context_len=context_len,
-            **({} if vllm_version_is("0.28.0") else {"valid_dummy_state_slots": valid_dummy_state_slots}),
-        )
+        self.eplb._legacy_is_dummy = dummy_run
+        with self.eplb.suppress_legacy(is_profile), device_metadata_context(self.device_metadata_executor):
+            output = super().execute_model(
+                scheduler_output,
+                intermediate_tensors=intermediate_tensors,
+                dummy_run=dummy_run,
+                skip_attn_for_dummy_run=skip_attn_for_dummy_run,
+                is_profile=is_profile,
+                context_len=context_len,
+                **({} if vllm_version_is("0.28.0") else {"valid_dummy_state_slots": valid_dummy_state_slots}),
+            )
         self.model_state.kvpp_is_dummy_run = False
         self.kvpp.complete_forward()
 
@@ -332,6 +352,14 @@ class NPUModelRunner(GPUModelRunner):
                 with disable_compilation(self.get_model()):
                     self._dummy_run(mc2_tokens_capacity, skip_attn=True, skip_eplb=True, is_profile=True)
             super().profile_run()
+
+    def capture_model(self, *, profile_only: bool = False) -> int:
+        with self.eplb.suppress_legacy():
+            return super().capture_model(profile_only=profile_only)
+
+    def shutdown(self) -> None:
+        self.eplb.shutdown_legacy()
+        super().shutdown()
 
     def prepare_inputs(  # type: ignore[misc]
         self,
@@ -532,6 +560,17 @@ class NPUModelRunner(GPUModelRunner):
         )
         seq_lens_cpu_upper_bound = torch.from_numpy(seq_lens_cpu_upper_bound_np)
 
+        is_prefilling_np = batch_req_state.is_prefilling_np
+        if self.use_dcp and is_pd_decode_node(self.vllm_config):
+            # Keep prepare_prefill_inputs above: the final prompt token still
+            # comes from prompt storage. Only attention classifies it as decode.
+            decode_threshold = 1 + (self.speculative_config.num_speculative_tokens if self.speculative_config else 0)
+            prompt_lens_np = self.req_states.prompt_len.np[idx_mapping_np]
+            last_prompt_decode = (num_computed_tokens_np == prompt_lens_np - 1) & (
+                num_scheduled_tokens_np <= decode_threshold
+            )
+            is_prefilling_np = is_prefilling_np & ~last_prompt_decode
+
         prompt_lens = None
         if self.model_config.rswa_window is not None:
             # prompt_lens is only used in R-SWA case.
@@ -558,8 +597,8 @@ class NPUModelRunner(GPUModelRunner):
             num_computed_tokens_np=num_computed_tokens_np,
             prefill_len_np=batch_req_state.prefill_len_np,
             num_computed_prefill_tokens_np=batch_req_state.num_computed_prefill_tokens_np,
-            is_prefilling_np=batch_req_state.is_prefilling_np,
-            has_prefill=batch_req_state.has_prefill,
+            is_prefilling_np=is_prefilling_np,
+            has_prefill=bool(is_prefilling_np.any()),
             **(
                 {"max_seq_len_np": self.req_states.max_seq_len[idx_mapping_np] if self.use_pp else None}
                 if vllm_version_is("0.28.0")
@@ -697,15 +736,16 @@ class NPUModelRunner(GPUModelRunner):
         ``_lmhead_tp_max_num_logits()``; a mismatch hangs). Skipped for
         profiling and non-last PP ranks. Draft-side alignment is not covered.
         """
-        hidden_states, sample_hidden_states = super()._dummy_run(
-            num_tokens,
-            *args,
-            skip_attn=skip_attn,
-            uniform_decode=uniform_decode,
-            skip_eplb=skip_eplb,
-            is_profile=is_profile,
-            **kwargs,
-        )
+        with self.eplb.suppress_legacy(skip_eplb or is_profile):
+            hidden_states, sample_hidden_states = super()._dummy_run(
+                num_tokens,
+                *args,
+                skip_attn=skip_attn,
+                uniform_decode=uniform_decode,
+                skip_eplb=skip_eplb,
+                is_profile=is_profile,
+                **kwargs,
+            )
         if lmhead_tp_enable() and not is_profile and hidden_states is not None:
             dummy_indices = torch.zeros(
                 self._lmhead_tp_max_num_logits(),

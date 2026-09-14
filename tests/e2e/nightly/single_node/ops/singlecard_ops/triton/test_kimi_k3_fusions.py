@@ -95,3 +95,27 @@ def test_kimi_k3_attention_residual_triton_matches_reference(
         rtol=1e-2,
         atol=1e-2,
     )
+
+
+@torch.inference_mode()
+@pytest.mark.parametrize("num_tokens", [1, 4, 16])
+@pytest.mark.parametrize("num_blocks", [1, 8])
+def test_attention_residual_fuses_add_without_mutating_saved_prefix(num_tokens, num_blocks):
+    torch.manual_seed(17)
+    hidden_size = 7168
+    storage = torch.randn(num_tokens + 2, hidden_size * 2, device="npu", dtype=torch.bfloat16)
+    prefix = storage[1:-1, ::2]
+    before = storage.clone()
+    addend = torch.randn_like(storage)[1:-1, ::2]
+    blocks = torch.randn(num_tokens, 8, hidden_size, device="npu", dtype=torch.bfloat16)
+    blocks[:, num_blocks:] = float("nan")
+    projection = SimpleNamespace(weight=torch.randn(1, hidden_size, device="npu", dtype=torch.bfloat16) * 0.02)
+    norm = SimpleNamespace(weight=torch.randn(hidden_size, device="npu", dtype=torch.bfloat16), variance_epsilon=1e-5)
+    expected_prefix = prefix + addend
+    expected = apply_attn_res(expected_prefix, blocks, projection, norm, num_blocks)
+    prefix_out = torch.empty_like(prefix)
+    actual = apply_attn_res(prefix, blocks, projection, norm, num_blocks, addend, prefix_out)
+
+    torch.testing.assert_close(actual.cpu(), expected.cpu(), rtol=0, atol=0)
+    torch.testing.assert_close(prefix_out.cpu(), expected_prefix.cpu(), rtol=0, atol=0)
+    torch.testing.assert_close(storage.cpu(), before.cpu(), rtol=0, atol=0)

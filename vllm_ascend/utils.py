@@ -1070,13 +1070,8 @@ def calculate_dp_buffer_size() -> int:
     return max(dp_buffer_size, _MIN_DP_BUFFER_SIZE)
 
 
-def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = None) -> bool:
-    """True on PD-disaggregated decode nodes with recompute_scheduler_enable.
-
-    After KV recv, RecomputeScheduler sets num_computed_tokens to N-1 so the
-    decode node recomputes the last prompt token before MTP decode. Worker
-    metadata must not treat that step as prefill.
-    """
+def is_pd_decode_node(vllm_config: VllmConfig | None = None) -> bool:
+    """Identify a dedicated KV consumer independently of its scheduler."""
     try:
         if vllm_config is None:
             # No caller-provided config: fall back to the upstream runtime
@@ -1093,11 +1088,14 @@ def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = No
         if vllm_config is None:
             return False
         kv_cfg = vllm_config.kv_transfer_config
-        if kv_cfg is None or not kv_cfg.is_kv_consumer or kv_cfg.is_kv_producer:
-            return False
-        return get_ascend_config().scheduler_config.recompute_scheduler_enable
+        return kv_cfg is not None and kv_cfg.is_kv_consumer and not kv_cfg.is_kv_producer
     except (RuntimeError, AttributeError):
         return False
+
+
+def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = None) -> bool:
+    """True on dedicated KV consumers using the recompute scheduler."""
+    return is_pd_decode_node(vllm_config) and get_ascend_config().scheduler_config.recompute_scheduler_enable
 
 
 def _compute_potential_max_tokens(vllm_config) -> int:
@@ -1227,6 +1225,36 @@ def has_layer_idx(model_instance: torch.nn.Module) -> bool:
     return _HAS_LAYER_IDX
 
 
+def is_kimi_k3_gqa_dspark(vllm_config) -> bool:
+    """Whether Kimi K3 uses the separate Qwen3 GQA DSpark drafter."""
+    spec_config = getattr(vllm_config, "speculative_config", None)
+    if spec_config is None or getattr(spec_config, "method", None) != "dspark":
+        return False
+    target = spec_config.target_model_config or vllm_config.model_config
+    draft = spec_config.draft_model_config
+    if target is None or draft is None:
+        return False
+    target_architectures = {
+        *(getattr(target, "architectures", ()) or ()),
+        *(getattr(target.hf_config, "architectures", ()) or ()),
+    }
+    architecture = getattr(target, "architecture", None)
+    if architecture:
+        target_architectures.add(architecture)
+    draft_architectures = {
+        *(getattr(draft, "architectures", ()) or ()),
+        *(getattr(draft.hf_config, "architectures", ()) or ()),
+    }
+    return (
+        (
+            getattr(target.hf_config, "model_type", None) == "kimi_k3"
+            or any("KimiK3" in architecture for architecture in target_architectures)
+        )
+        and getattr(draft.hf_config, "model_type", None) == "qwen3"
+        and bool(draft_architectures & {"DSparkDraftModel", "Qwen3DSparkModel"})
+    )
+
+
 def refresh_block_size(vllm_config):
     """
     Refresh the block size in cache config.
@@ -1269,6 +1297,9 @@ def refresh_block_size(vllm_config):
     if model_config.is_hybrid:
         # Hybrid attention+mamba models rely on the model-specific sizing
         # logic rather than the generic platform default.
+        return
+
+    if cache_config.user_specified_block_size:
         return
 
     if cache_config.block_size != 128:

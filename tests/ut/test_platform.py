@@ -252,7 +252,24 @@ class TestNPUPlatform(TestBase):
         vllm_config.use_v2_model_runner = True
         vllm_config.additional_config = {"eplb_config": {"dynamic_eplb": True}}
 
-        with self.assertRaisesRegex(ValueError, "legacy fields are not supported: dynamic_eplb"):
+        with self.assertRaisesRegex(ValueError, "requires eplb_policy_type=3"):
+            _validate_eplb_config(vllm_config)
+
+    def test_validate_eplb_config_allows_v2_legacy_flashlb(self):
+        vllm_config = self.mock_vllm_config()
+        vllm_config.use_v2_model_runner = True
+        vllm_config.parallel_config.enable_expert_parallel = True
+        vllm_config.additional_config = {"eplb_config": {"dynamic_eplb": True, "eplb_policy_type": 3}}
+        with patch.dict("os.environ", {"DYNAMIC_EPLB": "true"}, clear=True):
+            _validate_eplb_config(vllm_config)
+        self.assertFalse(vllm_config.parallel_config.enable_eplb)
+
+    def test_validate_eplb_config_rejects_two_planners(self):
+        vllm_config = self.mock_vllm_config()
+        vllm_config.use_v2_model_runner = True
+        vllm_config.parallel_config.enable_eplb = True
+        vllm_config.additional_config = {"eplb_config": {"dynamic_eplb": True, "eplb_policy_type": 3}}
+        with self.assertRaisesRegex(ValueError, "cannot be combined"):
             _validate_eplb_config(vllm_config)
 
     def test_validate_eplb_config_rejects_v1_load_collection_phase(self):

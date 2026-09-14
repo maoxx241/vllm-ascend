@@ -20,6 +20,8 @@ from vllm_ascend.ops.triton.triton_utils import (
 def _apply_attn_res_kernel(
     block_residual_ptr,
     prefix_sum_ptr,
+    addend_ptr,
+    prefix_sum_out_ptr,
     norm_w_ptr,
     proj_w_ptr,
     out_ptr,
@@ -30,6 +32,13 @@ def _apply_attn_res_kernel(
     EPS: tl.constexpr,
     NUM_CORES: tl.constexpr,
     NB: tl.constexpr,
+    FUSE_ADD: tl.constexpr,
+    PREFIX_STRIDE_0: tl.constexpr,
+    PREFIX_STRIDE_1: tl.constexpr,
+    ADDEND_STRIDE_0: tl.constexpr,
+    ADDEND_STRIDE_1: tl.constexpr,
+    PREFIX_OUT_STRIDE_0: tl.constexpr,
+    PREFIX_OUT_STRIDE_1: tl.constexpr,
 ):
     tl.static_assert(NB >= B + 1, "NB must include all block residuals and prefix_sum")
     block_size = (N - 1) // NUM_CORES + 1
@@ -48,12 +57,18 @@ def _apply_attn_res_kernel(
     w = norm_w * proj_w
 
     for tok in range(tok0, tok1):
+        prefix = tl.load(prefix_sum_ptr + tok * PREFIX_STRIDE_0 + cols * PREFIX_STRIDE_1).to(tl.float32)
+        if FUSE_ADD:
+            addend = tl.load(addend_ptr + tok * ADDEND_STRIDE_0 + cols * ADDEND_STRIDE_1).to(tl.float32)
+            # Preserve the intermediate rounding of the original torch.add.
+            prefix = (prefix + addend).to(prefix_sum_ptr.dtype.element_ty).to(tl.float32)
+            tl.store(prefix_sum_out_ptr + tok * PREFIX_OUT_STRIDE_0 + cols * PREFIX_OUT_STRIDE_1, prefix)
         scores = tl.full([NB], -float("inf"), dtype=tl.float32)
         for s in range(B + 1):
             if s < B:
                 v = tl.load(block_residual_ptr + tok * block_residual_stride + s * H + cols).to(tl.float32)
             else:
-                v = tl.load(prefix_sum_ptr + tok * H + cols).to(tl.float32)
+                v = prefix
             ms = tl.sum(v * v) / H
             rstd = tl.rsqrt(ms + EPS)
             k = v * rstd
@@ -68,7 +83,7 @@ def _apply_attn_res_kernel(
             if s < B:
                 v = tl.load(block_residual_ptr + tok * block_residual_stride + s * H + cols).to(tl.float32)
             else:
-                v = tl.load(prefix_sum_ptr + tok * H + cols).to(tl.float32)
+                v = prefix
             w_s = tl.sum(tl.where(s_idx == s, weights, 0.0))
             out += w_s * v
 
@@ -81,8 +96,12 @@ def apply_attn_res(
     proj: torch.nn.Module,
     norm: torch.nn.Module,
     num_valid_blocks: int,
+    addend: torch.Tensor | None = None,
+    prefix_sum_out: torch.Tensor | None = None,
 ) -> torch.Tensor:
-    """Return K3's learned softmax mixture of residual streams."""
+    """Mix residual streams, optionally adding and writing the new prefix."""
+    if addend is not None:
+        assert prefix_sum_out is not None
     num_tokens, hidden_size = prefix_sum.shape
     block_capacity = block_residual.shape[1]
     proj_w = proj.weight.squeeze(0)
@@ -101,6 +120,8 @@ def apply_attn_res(
     _apply_attn_res_kernel[(num_vectorcore,)](
         block_residual,
         prefix_sum,
+        addend if addend is not None else prefix_sum,
+        prefix_sum_out if prefix_sum_out is not None else prefix_sum,
         norm_w,
         proj_w,
         out,
@@ -111,6 +132,13 @@ def apply_attn_res(
         EPS=eps,
         NUM_CORES=num_vectorcore,
         NB=num_streams,
+        FUSE_ADD=addend is not None,
+        PREFIX_STRIDE_0=prefix_sum.stride(0),
+        PREFIX_STRIDE_1=prefix_sum.stride(1),
+        ADDEND_STRIDE_0=addend.stride(0) if addend is not None else 0,
+        ADDEND_STRIDE_1=addend.stride(1) if addend is not None else 0,
+        PREFIX_OUT_STRIDE_0=prefix_sum_out.stride(0) if prefix_sum_out is not None else 0,
+        PREFIX_OUT_STRIDE_1=prefix_sum_out.stride(1) if prefix_sum_out is not None else 0,
         multibuffer=True,
     )
     return out

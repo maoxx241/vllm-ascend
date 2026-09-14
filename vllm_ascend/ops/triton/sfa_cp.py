@@ -8,6 +8,8 @@ from vllm.distributed.parallel_state import GroupCoordinator, _groups
 from vllm.triton_utils import tl, triton
 from vllm.utils.torch_utils import direct_register_custom_op
 
+from vllm_ascend.ops.triton.sfa_dcp_exchange import can_use_raw_dcp_exchange, pack_raw_dcp_output_lse
+from vllm_ascend.ops.triton.sfa_dcp_merge import merge_raw_dcp_output_lse
 from vllm_ascend.ops.triton.triton_utils import get_vectorcore_num, init_device_properties_triton
 
 
@@ -341,6 +343,10 @@ def fused_sfa_dcp_lse_combine(
     Local tensors use [tokens, heads, D/1] layout and may be strided. The local
     contribution is counted once, with FP32 weights shared by all ranks.
     """
+    if recv.dtype == torch.int32:
+        if return_lse:
+            raise TypeError("Returning merged LSE requires an FP32 receive buffer.")
+        return merge_raw_dcp_output_lse(recv, head_dim, scatter_dim, local_output, local_lse)
     # Appended LSE must retain FP32 precision.
     if return_lse and recv.dtype != torch.float32:
         raise TypeError("Returning merged LSE requires an FP32 receive buffer.")
@@ -420,6 +426,22 @@ def sfa_dcp_a2a_fused_combine(
     scatter_size is the All2All group size, not the unified DCP size when
     stacking PCP and DCP. Use 1 when Q heads were not gathered over TP.
     """
+    if can_use_raw_dcp_exchange(
+        sfa_output,
+        softmax_lse,
+        scatter_size,
+        scatter_dim,
+        has_pcp=pcp_group is not None,
+        return_lse=return_lse,
+    ):
+        if scatter_group is None:
+            raise ValueError("SFA output scatter requires an explicit All2All group.")
+        send = pack_raw_dcp_output_lse(sfa_output, softmax_lse)
+        recv = torch.empty_like(send)
+        dist.all_to_all_single(recv, send, group=scatter_group)
+        if defer_combine:
+            return recv
+        return fused_sfa_dcp_lse_combine(recv, sfa_output.shape[-1], scatter_dim)
     send = pack_sfa_dcp_output_lse(
         sfa_output,
         softmax_lse,
@@ -518,10 +540,19 @@ def sfa_dcp_a2a_fused_fake(
     operator. It must only describe the local output shape, dtype, and device;
     the real implementation performs the collective at execution time.
     """
-    del softmax_lse, group_name
+    del group_name
     if defer_combine and return_lse:
         raise ValueError("defer_combine and return_lse are mutually exclusive.")
     if defer_combine:
+        if can_use_raw_dcp_exchange(
+            sfa_output,
+            softmax_lse,
+            dcp_size,
+            scatter_dim,
+            has_pcp=pcp_group_name is not None,
+            return_lse=return_lse,
+        ):
+            return torch.empty((8, 12, sfa_output.shape[0], 257), dtype=torch.int32, device=sfa_output.device)
         rank_count = dcp_size
         if pcp_group_name is not None:
             group_ref = _groups.get(pcp_group_name)
