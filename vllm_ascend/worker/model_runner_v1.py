@@ -3391,6 +3391,10 @@ class NPUModelRunner(GPUModelRunner):
                 :num_reqs_padded
             ]
             is_prefilling = num_computed_tokens_cpu < num_prompt_tokens_cpu
+            if self.dcp_size > 1 and self.dcp_manager.is_pd_decode_node:
+                # KV consumers execute the final prompt token as decode even
+                # when the regular scheduler performed the KV handoff.
+                is_prefilling[:num_reqs] &= ~torch.from_numpy(self.dcp_manager.decode_req_mask)
             is_prefilling[num_reqs:] = False
         seq_lens_cpu = self.optimistic_seq_lens_cpu[:num_reqs_padded]
         if self.use_async_spec_decode:

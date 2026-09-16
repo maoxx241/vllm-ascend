@@ -1070,13 +1070,8 @@ def calculate_dp_buffer_size() -> int:
     return max(dp_buffer_size, _MIN_DP_BUFFER_SIZE)
 
 
-def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = None) -> bool:
-    """True on PD-disaggregated decode nodes with recompute_scheduler_enable.
-
-    After KV recv, RecomputeScheduler sets num_computed_tokens to N-1 so the
-    decode node recomputes the last prompt token before MTP decode. Worker
-    metadata must not treat that step as prefill.
-    """
+def is_pd_decode_node(vllm_config: VllmConfig | None = None) -> bool:
+    """Identify a dedicated KV consumer independently of its scheduler."""
     try:
         if vllm_config is None:
             # No caller-provided config: fall back to the upstream runtime
@@ -1093,11 +1088,14 @@ def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = No
         if vllm_config is None:
             return False
         kv_cfg = vllm_config.kv_transfer_config
-        if kv_cfg is None or not kv_cfg.is_kv_consumer or kv_cfg.is_kv_producer:
-            return False
-        return get_ascend_config().scheduler_config.recompute_scheduler_enable
+        return kv_cfg is not None and kv_cfg.is_kv_consumer and not kv_cfg.is_kv_producer
     except (RuntimeError, AttributeError):
         return False
+
+
+def is_pd_decode_recompute_scheduler_enabled(vllm_config: VllmConfig | None = None) -> bool:
+    """True on dedicated KV consumers using the recompute scheduler."""
+    return is_pd_decode_node(vllm_config) and get_ascend_config().scheduler_config.recompute_scheduler_enable
 
 
 def _compute_potential_max_tokens(vllm_config) -> int:

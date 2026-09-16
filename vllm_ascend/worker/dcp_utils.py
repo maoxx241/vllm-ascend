@@ -28,7 +28,7 @@ from vllm_ascend.attention.context_parallel.common_cp import (
     get_dcp_local_seq_lens,
 )
 from vllm_ascend.spec_decode.utils import correct_optimistic_seq_lens_cpu
-from vllm_ascend.utils import is_pd_decode_recompute_scheduler_enabled
+from vllm_ascend.utils import is_pd_decode_node
 from vllm_ascend.worker.npu_input_batch import NPUInputBatch
 
 if TYPE_CHECKING:
@@ -104,7 +104,7 @@ class DCPManager:
         self.use_sparse = use_sparse
         self.speculative_config = vllm_config.speculative_config
         self.decode_threshold = 1 + (self.speculative_config.num_speculative_tokens if self.speculative_config else 0)
-        self.pd_decode_recompute_scheduler_enabled = is_pd_decode_recompute_scheduler_enabled(vllm_config)
+        self.is_pd_decode_node = is_pd_decode_node(vllm_config)
         self.max_num_tokens = vllm_config.scheduler_config.max_num_batched_tokens
         self.max_num_reqs = max_num_reqs
         self.req_offsets = torch.arange(max_num_reqs, dtype=torch.int64, device=device)
@@ -147,8 +147,10 @@ class DCPManager:
         has_context = num_computed_tokens > 0
         is_below_threshold = num_scheduled_tokens <= decode_threshold
         done_prefilling = num_computed_tokens >= num_prompt_tokens
-        if self.pd_decode_recompute_scheduler_enabled:
-            done_prefilling = done_prefilling | (num_computed_tokens == num_prompt_tokens - 1)
+        if self.is_pd_decode_node:
+            last_prompt_token = num_computed_tokens == num_prompt_tokens - 1
+            done_prefilling = done_prefilling | last_prompt_token
+            has_context = has_context | last_prompt_token
         return has_context & is_below_threshold & done_prefilling
 
     def init_batch_info(

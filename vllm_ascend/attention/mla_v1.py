@@ -1085,13 +1085,13 @@ class AscendMLAImpl(MLAAttentionImpl):
         x = torch_npu.npu_transpose_batchmatmul(x, self.W_UV, perm_x1=(1, 0, 2), perm_y=(1, 0, 2))
         return x.reshape(-1, self.num_heads * self.v_head_dim)
 
+    def _project_query(self, x, *, local_heads=False):
+        q = self.q_proj(x)[0].view(-1, self.num_heads, self.qk_head_dim)
+        return q
+
     # Return `ql_nope`, `q_pe`
     def _q_proj_and_k_up_proj(self, x):
-        q_nope, q_pe = (
-            self.q_proj(x)[0]
-            .view(-1, self.num_heads, self.qk_head_dim)
-            .split([self.qk_nope_head_dim, self.qk_rope_head_dim], dim=-1)
-        )
+        q_nope, q_pe = self._project_query(x).split([self.qk_nope_head_dim, self.qk_rope_head_dim], dim=-1)
 
         # Convert from (B, N, P) to (N, B, P)
         q_nope = q_nope.transpose(0, 1)
@@ -2041,7 +2041,7 @@ class AscendMLAImpl(MLAAttentionImpl):
         num_prefill_kv_tokens = self._get_num_prefill_kv_tokens(attn_metadata)
         prefill_kv_no_split = kv_no_split[num_decode_tokens : num_decode_tokens + num_prefill_kv_tokens]
         prefill_q_c = q_c[num_decode_tokens:num_actual_tokens]
-        prefill_q = self.q_proj(prefill_q_c)[0].view(-1, self.num_heads, self.qk_head_dim)
+        prefill_q = self._project_query(prefill_q_c, local_heads=True)
         prefill_q_pe = prefill_q[..., self.qk_nope_head_dim :]
         prefill_q_nope = prefill_q[..., : self.qk_nope_head_dim]
         cos = attn_metadata.prefill.cos
@@ -2197,6 +2197,7 @@ class AscendMLAImpl(MLAAttentionImpl):
             kv = self.kv_a_proj_with_mqa(x)[0]
         overlap = b.dcp_size > 1 and not b.is_prefill and self.flash_dcp_overlap
         preprocess_overlap = b.dcp_size > 1 and not b.is_prefill and self.flash_dcp_preprocess_overlap
+        q_replicated = getattr(self.q_proj, "qrep_active", False)
         if overlap or preprocess_overlap:
             main_stream = torch.npu.current_stream()
             comm_stream = _dcp_mtp_comm_stream()
@@ -2215,19 +2216,27 @@ class AscendMLAImpl(MLAAttentionImpl):
                 c_kv = self.kv_a_layernorm(c_kv.contiguous()).view(t, 1, 512)
                 if self.use_mla_rope:
                     k_pe = self.rope_single(k_pe, cos, sin)
+                if q_replicated:
+                    # Q no longer needs communication. Hide the entire KV
+                    # preparation/cache write behind its larger projection.
+                    torch_npu.npu_scatter_pa_kv_cache(
+                        key=c_kv.contiguous(),
+                        value=k_pe.contiguous(),
+                        key_cache=kv_cache[..., :512].unsqueeze(2),
+                        value_cache=kv_cache[..., 512:].unsqueeze(2),
+                        slot_mapping=b.slots,
+                        cache_mode="Norm",
+                    )
                 kv_ready = comm_stream.record_event()
             c_kv.record_stream(main_stream)
             k_pe.record_stream(main_stream)
         if b.unabsorbed:
-            q_nope, q_pe = (
-                self.q_proj(q_c)[0]
-                .view(t, self.num_heads, self.qk_head_dim)
-                .split(
-                    [self.qk_nope_head_dim, self.qk_rope_head_dim],
-                    dim=-1,
-                )
+            q_nope, q_pe = self._project_query(q_c).split(
+                [self.qk_nope_head_dim, self.qk_rope_head_dim],
+                dim=-1,
             )
-            q_abs = torch.bmm(q_nope.transpose(0, 1), self.W_UK_T).transpose(0, 1)
+            k_up = self.dcp_W_UK_T if q_replicated else self.W_UK_T
+            q_abs = torch.bmm(q_nope.transpose(0, 1), k_up).transpose(0, 1)
         else:
             q_abs, q_pe = self._q_proj_and_k_up_proj(q_c)
         if not preprocess_overlap:
@@ -2240,7 +2249,13 @@ class AscendMLAImpl(MLAAttentionImpl):
             if not preprocess_overlap:
                 k_pe = self.rope_single(k_pe, cos, sin)
         head_major_query = None
-        if b.dcp_size > 1 and not b.is_prefill and t <= FLASH_DCP_QUERY_PREP_MAX_TOKENS and self.flash_dcp_query_prep:
+        if (
+            not q_replicated
+            and b.dcp_size > 1
+            and not b.is_prefill
+            and t <= FLASH_DCP_QUERY_PREP_MAX_TOKENS
+            and self.flash_dcp_query_prep
+        ):
             head_major_query = prep_query_head_major(q_abs, q_pe)
         if head_major_query is None:
             local_query = torch.cat((q_abs, q_pe), dim=-1)
@@ -2249,7 +2264,15 @@ class AscendMLAImpl(MLAAttentionImpl):
             # small local copy and avoid restoring the full gathered query
             # inside GroupCoordinator before copying into the stable buffer.
             local_query = head_major_query.permute(1, 0, 2).contiguous()
-        if preprocess_overlap:
+        if q_replicated:
+            b.query.copy_(local_query)
+            local_query = self.q_proj._local_view(local_query)
+            if b.unabsorbed:
+                q_nope = self.q_proj._local_view(q_nope)
+                q_pe = self.q_proj._local_view(q_pe)
+            if preprocess_overlap:
+                main_stream.wait_event(kv_ready)
+        elif preprocess_overlap:
             query_ready = main_stream.record_event()
             local_query.record_stream(comm_stream)
             if head_major_query is not None:
@@ -2270,16 +2293,17 @@ class AscendMLAImpl(MLAAttentionImpl):
             else:
                 b.query.copy_(self._dcp_all_gather(local_query, 1) if b.dcp_size > 1 else local_query)
 
-        torch_npu.npu_scatter_pa_kv_cache(
-            key=c_kv.contiguous(),
-            value=k_pe.contiguous(),
-            key_cache=kv_cache[..., :512].unsqueeze(2),
-            value_cache=kv_cache[..., 512:].unsqueeze(2),
-            slot_mapping=b.slots,
-            cache_mode="Norm",
-        )
+        if not (q_replicated and preprocess_overlap):
+            torch_npu.npu_scatter_pa_kv_cache(
+                key=c_kv.contiguous(),
+                value=k_pe.contiguous(),
+                key_cache=kv_cache[..., :512].unsqueeze(2),
+                value_cache=kv_cache[..., 512:].unsqueeze(2),
+                slot_mapping=b.slots,
+                cache_mode="Norm",
+            )
         notify_kv_cache_written(layer_name)
-        if preprocess_overlap:
+        if preprocess_overlap and not q_replicated:
             main_stream.wait_event(query_gathered)
         mask_mode = 3 if meta.causal and not b.split_kv and b.dcp_size == 1 else 0
         needs_merge = b.dcp_size > 1 or b.split_kv

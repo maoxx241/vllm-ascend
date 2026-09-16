@@ -60,7 +60,7 @@ from vllm_ascend.core.profiling_chunk_predictor import (
     _start_profiling_chunk_timing,
 )
 from vllm_ascend.ops.rotary_embedding import set_cos_and_sin, update_cos_sin
-from vllm_ascend.utils import lmhead_tp_enable, set_potential_max_tokens, vllm_version_is
+from vllm_ascend.utils import is_pd_decode_node, lmhead_tp_enable, set_potential_max_tokens, vllm_version_is
 from vllm_ascend.worker.device_metadata import DeviceMetadataExecutor
 from vllm_ascend.worker.utils import AscendKVBlockZeroer, disable_compilation
 from vllm_ascend.worker.v2.aclgraph_utils import ModelAclGraphManager
@@ -560,6 +560,17 @@ class NPUModelRunner(GPUModelRunner):
         )
         seq_lens_cpu_upper_bound = torch.from_numpy(seq_lens_cpu_upper_bound_np)
 
+        is_prefilling_np = batch_req_state.is_prefilling_np
+        if self.use_dcp and is_pd_decode_node(self.vllm_config):
+            # Keep prepare_prefill_inputs above: the final prompt token still
+            # comes from prompt storage. Only attention classifies it as decode.
+            decode_threshold = 1 + (self.speculative_config.num_speculative_tokens if self.speculative_config else 0)
+            prompt_lens_np = self.req_states.prompt_len.np[idx_mapping_np]
+            last_prompt_decode = (num_computed_tokens_np == prompt_lens_np - 1) & (
+                num_scheduled_tokens_np <= decode_threshold
+            )
+            is_prefilling_np = is_prefilling_np & ~last_prompt_decode
+
         prompt_lens = None
         if self.model_config.rswa_window is not None:
             # prompt_lens is only used in R-SWA case.
@@ -586,8 +597,8 @@ class NPUModelRunner(GPUModelRunner):
             num_computed_tokens_np=num_computed_tokens_np,
             prefill_len_np=batch_req_state.prefill_len_np,
             num_computed_prefill_tokens_np=batch_req_state.num_computed_prefill_tokens_np,
-            is_prefilling_np=batch_req_state.is_prefilling_np,
-            has_prefill=batch_req_state.has_prefill,
+            is_prefilling_np=is_prefilling_np,
+            has_prefill=bool(is_prefilling_np.any()),
             **(
                 {"max_seq_len_np": self.req_states.max_seq_len[idx_mapping_np] if self.use_pp else None}
                 if vllm_version_is("0.28.0")
