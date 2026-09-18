@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import time
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, fields
 from typing import cast
 
@@ -107,6 +108,39 @@ class RecomputeSchedulerOutput(SchedulerOutput):
 
 class RecomputeScheduler(Scheduler):
     running: list[Request]
+
+    def _update_requests_with_invalid_blocks(
+        self,
+        requests: Iterable[Request],
+        invalid_block_ids: set[int],
+        num_scheduled_tokens: dict[str, int],
+        evict_blocks: bool = True,
+    ) -> tuple[set[str], int, set[int]]:
+        if self.recompute_kv_load_failures:
+            return super()._update_requests_with_invalid_blocks(
+                requests, invalid_block_ids, num_scheduled_tokens, evict_blocks
+            )
+
+        # The fail policy terminates the request; it does not need to map a
+        # failed block to a token offset across heterogeneous cache groups.
+        affected_req_ids: set[str] = set()
+        total_affected_tokens = 0
+        blocks_to_evict: set[int] = set()
+        for request in requests:
+            req_id = request.request_id
+            grouped_block_ids = self.kv_cache_manager.get_block_ids(req_id)
+            if not any(
+                block_id in invalid_block_ids for group_block_ids in grouped_block_ids for block_id in group_block_ids
+            ):
+                continue
+            affected_req_ids.add(req_id)
+            total_affected_tokens += request.num_computed_tokens - num_scheduled_tokens.get(req_id, 0)
+            if evict_blocks:
+                # Do not cache any part of a failed request, including groups
+                # whose transfers completed before another group failed.
+                for group_block_ids in grouped_block_ids:
+                    blocks_to_evict.update(group_block_ids)
+        return affected_req_ids, total_affected_tokens, blocks_to_evict
 
     def _get_computed_blocks_for_connector(self, request: Request) -> tuple[KVCacheBlocks, int, int, bool]:
         kv_cache_manager = self.kv_cache_manager
