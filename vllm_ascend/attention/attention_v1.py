@@ -602,8 +602,14 @@ class AscendAttentionMetadataBuilder(AttentionMetadataBuilder[AscendMetadata]):
     ) -> AscendMetadata:
         if envs.VLLM_ASCEND_ENABLE_FLASH_MLA:
             common = common_attn_metadata
+            num_decodes, num_prefills, num_decode_tokens, _ = self._split_decodes_and_prefills(common)
             return self.metadata_cls(
                 num_actual_tokens=common.num_actual_tokens,
+                # MoE selection also reads draft attention metadata on the last
+                # PP stage. Preserve the same batch classification as FIA.
+                num_decodes=num_decodes,
+                num_prefills=num_prefills,
+                num_decode_tokens=num_decode_tokens,
                 seq_lens=common.seq_lens,
                 query_start_loc=common.query_start_loc,
                 block_tables=common.block_table_tensor,
