@@ -21,7 +21,7 @@ import json
 import os
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
-from pydantic import ConfigDict, TypeAdapter, model_validator
+from pydantic import ConfigDict, Field, TypeAdapter, model_validator
 from pydantic_core import ArgsKwargs
 from vllm.logger import logger
 from vllm.utils.math_utils import cdiv
@@ -325,6 +325,7 @@ class AscendConfig:
             "mix_placement": false,
             "pa_shape_list": [],
             "mega_moe_max_tokens": 65536,
+            "chunked_prefill_workspace_max_tokens": 131072,
             "ascend_log_path": "~/ascend/log/vllm_ascend",
             "enable_fused_mc2": 0,
             "enable_mlapo": true,
@@ -471,6 +472,9 @@ class AscendConfig:
     # degradation. Do not set it too large because workspace memory scales
     # linearly with this value. Default 65536.
     mega_moe_max_tokens: int = 65536
+    # Token cap in the MLA/SFA chunked-prefill workspace sizing heuristic.
+    # The batch minimum can exceed this cap; this is not a byte allocation.
+    chunked_prefill_workspace_max_tokens: int = Field(default=128 * 1024, gt=0, strict=True)
     ascend_log_path: str = dataclasses.field(
         default_factory=lambda: os.path.join(os.path.expanduser("~"), "ascend", "log", "vllm_ascend")
     )

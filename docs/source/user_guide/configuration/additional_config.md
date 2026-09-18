@@ -42,6 +42,35 @@ from vllm import LLM
 LLM(model="Qwen/Qwen3-8B", additional_config={"config_key":"config_value"})
 ```
 
+### Chunked-prefill workspace token capacity
+
+`chunked_prefill_workspace_max_tokens` controls the token cap used by the
+MLA/SFA chunked-prefill workspace sizing helper. It defaults to `131072`
+(128 Ki tokens). Supply a positive JSON integer; zero, negative values,
+booleans, strings, and fractional values are rejected.
+
+To use the same sizing as replacing the previous `128 * 1024` constant with
+`512 * 1024`, add this key to your existing additional configuration:
+
+```bash
+--additional-config '{"chunked_prefill_workspace_max_tokens":524288}'
+```
+
+This configures a token count, not bytes or an exact allocation. The existing
+sizing rule remains:
+
+```text
+max(min(max(8 * max_model_len, 4 * max_num_seqs * block_size),
+        chunked_prefill_workspace_max_tokens),
+    max_num_seqs * block_size)
+```
+
+The per-batch minimum takes precedence and can exceed the configured cap.
+A short-context workload can allocate less than the cap. Increasing the cap
+can increase temporary NPU memory consumption and reduce memory available to
+the KV cache; it does not change `max_model_len` or `max_num_batched_tokens`.
+It only affects attention paths that use this sizing helper.
+
 ### Configuration options
 
 The following table lists additional configuration options available in vLLM Ascend:
@@ -54,6 +83,7 @@ The following table lists additional configuration options available in vLLM Asc
 | `eplb_config`                       | dict | `{}`    | Runner-specific EPLB extensions. See [Expert Parallelism Load Balancer](../feature_guide/expert_parallelism_load_balancer.md). |
 | `scheduler_config`                  | dict | `{}`    | Configuration options for Ascend scheduler extensions, including balance scheduling, recompute scheduling, DyntraLB, ShortRequestFirst, and dynamic chunked pipeline parallel. |
 | `refresh`                           | bool | `false` | Whether to refresh global Ascend configuration content. This is usually used by rlhf or ut/e2e test case. |
+| `chunked_prefill_workspace_max_tokens` | int | `131072` | Positive integer token cap for MLA/SFA chunked-prefill workspace sizing. The per-batch minimum still applies; see the sizing rule above. |
 | `dump_config`                       | dict | `None`  | Inline msprobe dump configuration. vLLM-Ascend will materialize it to a temporary JSON file and pass that file to the debugger. |
 | `dump_config_path`                  | str  | `None`  | Configuration file path for msprobe dump (compatible legacy option).                                      |
 | `enable_shared_expert_dp`           | bool | `False` | Replicate shared-expert weights across TP ranks and run the shared expert with data parallelism. This option is independent of upstream MoE sequence parallelism; either feature or both can be enabled. It improves performance but consumes more memory. |
