@@ -33,6 +33,7 @@ from vllm.config.utils import Range
 from vllm.logger import logger
 
 from vllm_ascend.ascend_config import AscendCompilationConfig, get_ascend_config
+from vllm_ascend.compilation.static_kernel_cpu import configure_static_kernel_cpu
 from vllm_ascend.utils import COMPILATION_PASS_KEY
 
 
@@ -165,6 +166,8 @@ def npugraph_ex_compile(
     try:
         import npugraph_ex as nge
 
+        if ascend_compilation_config.enable_static_kernel:
+            configure_static_kernel_cpu(nge)
         cache_path = os.path.join(cache_dir, key) if (cache_dir and key) else None
         torch.npu.set_compile_mode(jit_compile=False)
         config = nge.CompilerConfig()
@@ -216,6 +219,8 @@ def npugraph_ex_compile(
     except ImportError:
         import torchair
 
+        if ascend_compilation_config.enable_static_kernel:
+            configure_static_kernel_cpu(torchair)
         torch.npu.set_compile_mode(jit_compile=False)
         config = torchair.CompilerConfig()
         _configure_backend(config, ascend_compilation_config, vllm_config)

@@ -105,12 +105,16 @@ set_directory_properties(PROPERTIES
 # Suppress warnings from catlass/tla third-party headers for CANN kernel compilation
 set(VLLM_ASCEND_CANN_COMPAT_HEADER "${OPS_TRANSFORMER_DIR}/common/include/cann_compat.h")
 list(APPEND OPS_COMPILE_OPTIONS -Wno-ignored-attributes)
-list(APPEND OPS_COMPILE_OPTIONS -include${VLLM_ASCEND_CANN_COMPAT_HEADER})
+# Generated adapters already search their package-relative ascendc/common directory.
+# Do not bake the build machine's source directory into runtime compiler options.
+list(APPEND OPS_COMPILE_OPTIONS -includecann_compat.h)
 add_compile_options(
     $<$<COMPILE_LANGUAGE:CXX>:-include${VLLM_ASCEND_CANN_COMPAT_HEADER}>
 )
 
 include(cmake/config.cmake)
+configure_file(${VLLM_ASCEND_CANN_COMPAT_HEADER}
+        ${ASCEND_IMPL_OUT_DIR}/ascendc/common/cann_compat.h COPYONLY)
 include(cmake/func.cmake)
 include(cmake/third_party/json.cmake)
 if (ENABLE_TEST)
@@ -549,6 +553,9 @@ if (BUILD_OPS_RTY_KERNEL)
     endforeach ()
 
     install(DIRECTORY ${OPS_ADV_UTILS_KERNEL_INC}/
+            DESTINATION ${IMPL_INSTALL_DIR}/ascendc/common
+    )
+    install(FILES ${VLLM_ASCEND_CANN_COMPAT_HEADER}
             DESTINATION ${IMPL_INSTALL_DIR}/ascendc/common
     )
 
