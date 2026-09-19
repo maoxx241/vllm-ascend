@@ -1006,6 +1006,16 @@ class AscendKimiK3MultiModalProjector(KimiK25MultiModalProjector):
         return hidden_states
 
 
+def _get_kimi_k3_vision_config(config):
+    """Keep K3 position interpolation aligned with its reference model."""
+    vision_config = copy(config)
+    # The released K3 reference constructor leaves the interpolation mode at
+    # MoonVision3dPatchEmbed's bicubic default. Its config carries a bilinear
+    # field that the reference model never consumes.
+    vision_config.pos_emb_interpolation_mode = "bicubic"
+    return vision_config
+
+
 @MULTIMODAL_REGISTRY.register_processor(
     KimiK3MultiModalProcessor,
     info=KimiK3ProcessingInfo,
@@ -1022,8 +1032,9 @@ class AscendKimiK3ForConditionalGeneration(UpstreamKimiK3ForConditionalGeneratio
         multimodal_config = model_config.multimodal_config
         assert multimodal_config is not None
 
+        vision_config = _get_kimi_k3_vision_config(self.config.vision_config)
         self.use_data_parallel = is_vit_use_data_parallel(
-            self.config.vision_config.num_attention_heads,
+            vision_config.num_attention_heads,
         )
         self.hidden_size = self.config.text_config.hidden_size
         self.device = current_platform.current_device()
@@ -1031,7 +1042,7 @@ class AscendKimiK3ForConditionalGeneration(UpstreamKimiK3ForConditionalGeneratio
 
         with self._mark_tower_model(vllm_config, "image"):
             self.vision_tower = MoonViT3dPretrainedModel(
-                self.config.vision_config,
+                vision_config,
                 quant_config=vision_quant_config,
                 prefix=maybe_prefix(prefix, "vision_tower"),
             )
@@ -1044,7 +1055,7 @@ class AscendKimiK3ForConditionalGeneration(UpstreamKimiK3ForConditionalGeneratio
                 )
 
             self.mm_projector = AscendKimiK3MultiModalProjector(
-                self.config.vision_config,
+                vision_config,
                 use_data_parallel=self.use_data_parallel,
                 quant_config=vision_quant_config,
                 prefix=maybe_prefix(prefix, "mm_projector"),

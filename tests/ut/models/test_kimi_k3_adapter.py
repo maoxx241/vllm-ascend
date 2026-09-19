@@ -546,6 +546,16 @@ def test_projector_applies_optional_modelslim_rotation():
         torch.testing.assert_close(projector(image_features), image_features)
 
 
+def test_kimi_k3_vision_config_uses_reference_bicubic_interpolation():
+    config = SimpleNamespace(pos_emb_interpolation_mode="bilinear")
+
+    vision_config = kimi_k3._get_kimi_k3_vision_config(config)
+
+    assert vision_config is not config
+    assert config.pos_emb_interpolation_mode == "bilinear"
+    assert vision_config.pos_emb_interpolation_mode == "bicubic"
+
+
 def test_k3_dspark_load_weights_rotates_projection_and_target_boundaries(tmp_path):
     model = AscendK3DSparkForCausalLM.__new__(AscendK3DSparkForCausalLM)
     nn.Module.__init__(model)

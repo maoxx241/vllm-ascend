@@ -22,6 +22,7 @@ import torch
 from vllm.model_executor.layers.rotary_embedding import RotaryEmbedding, YaRNScalingRotaryEmbedding
 
 from vllm_ascend.ops.rotary_embedding import (
+    AscendApplyRotaryEmb,
     AscendRotaryEmbedding,
     AscendYaRNRotaryEmbedding,
     rope_forward_oot,
@@ -34,6 +35,42 @@ BASE = 10000.0
 DTYPE = torch.bfloat16
 SEQ_LEN = 4
 NUM_HEADS = 2
+
+
+@pytest.mark.parametrize(
+    ("is_neox_style", "expected_cos", "expected_mode"),
+    [
+        (
+            True,
+            torch.tensor([[1.0, 2.0, 1.0, 2.0], [3.0, 4.0, 3.0, 4.0]]),
+            "half",
+        ),
+        (
+            False,
+            torch.tensor([[1.0, 1.0, 2.0, 2.0], [3.0, 3.0, 4.0, 4.0]]),
+            "interleave",
+        ),
+    ],
+)
+def test_apply_rotary_emb_preserves_rotation_layout(is_neox_style, expected_cos, expected_mode):
+    emb = AscendApplyRotaryEmb.__new__(AscendApplyRotaryEmb)
+    torch.nn.Module.__init__(emb)
+    emb.is_neox_style = is_neox_style
+    emb.enable_fp32_compute = False
+    x = torch.arange(8, dtype=torch.float32).reshape(2, 1, 4)
+    cos = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
+    sin = torch.tensor([[5.0, 6.0], [7.0, 8.0]])
+
+    with patch(
+        "torch_npu.npu_rotary_mul",
+        side_effect=lambda value, *_args, **_kwargs: value,
+    ) as rotary_mul:
+        output = emb.forward_oot(x, cos, sin)
+
+    call = rotary_mul.call_args
+    torch.testing.assert_close(call.args[1][0, :, 0], expected_cos)
+    assert call.kwargs["rotary_mode"] == expected_mode
+    torch.testing.assert_close(output, x)
 
 
 def _make_tensors(seq_len=SEQ_LEN, num_heads=NUM_HEADS, head_size=HEAD_SIZE):

@@ -637,17 +637,24 @@ class AscendApplyRotaryEmb(ApplyRotaryEmb):
         if rotary_dim > head_dim:
             raise ValueError(f"rotary_dim ({rotary_dim}) must not exceed head_dim ({head_dim})")
 
-        # cos, sin: [seq_len, rotary_dim // 2]
-        cos = torch.cat((cos, cos), dim=-1)
-        sin = torch.cat((sin, sin), dim=-1)
+        # Expand the half-width frequency table in the layout expected by the
+        # selected rotation convention.
+        if self.is_neox_style:
+            cos = torch.cat((cos, cos), dim=-1)
+            sin = torch.cat((sin, sin), dim=-1)
+            rotary_mode = "half"
+        else:
+            cos = torch.repeat_interleave(cos, 2, dim=-1)
+            sin = torch.repeat_interleave(sin, 2, dim=-1)
+            rotary_mode = "interleave"
         # cos, sin: [1, seq_len, 1, rotary_dim]
         cos = cos.reshape(1, -1, 1, rotary_dim)
         sin = sin.reshape(1, -1, 1, rotary_dim)
 
         if rotary_dim == head_dim:
-            output = torch_npu.npu_rotary_mul(x, cos, sin)
+            output = torch_npu.npu_rotary_mul(x, cos, sin, rotary_mode=rotary_mode)
         else:
-            x_rot = torch_npu.npu_rotary_mul(x[..., :rotary_dim], cos, sin)
+            x_rot = torch_npu.npu_rotary_mul(x[..., :rotary_dim], cos, sin, rotary_mode=rotary_mode)
             output = torch.cat((x_rot, x[..., rotary_dim:]), dim=-1)
 
         output = self._post_process(output, origin_shape, origin_dtype)
